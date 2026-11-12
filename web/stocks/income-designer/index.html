@@ -310,12 +310,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
 .simrow .snm .mk{font-size:10px;font-weight:600;padding:1px 6px;border-radius:6px;margin-left:6px;background:var(--inset);color:var(--muted);}
 .mk-kr,.mk-us{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;vertical-align:middle;}
-.mk-kr{background:#EEF2FF;color:#4F46E5;}
+.mk-kr{background:var(--primary-bg);color:var(--primary);}
 .mk-us{background:#FEF3C7;color:#92400E;}
 .simrow .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .simrow .qty input{width:88px;border:1px solid var(--hair);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;}
 .simrow .qty span{font-size:12px;color:var(--muted);}
-.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:#4F46E5;}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
+.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:var(--primary);}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
 .simrow .sx{width:18px;text-align:center;color:#C0C4CA;cursor:pointer;font-size:16px;flex-shrink:0;}.simrow .sx:hover{color:var(--up);}
 .sim__add{display:flex;gap:8px;padding:14px 20px;background:var(--soft);border-bottom:1px solid var(--hair);align-items:flex-start;}
 .combo{position:relative;flex:1;min-width:0;}
@@ -329,19 +329,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .combo__item .ci-nm{flex:1;font-weight:500;min-width:0;}
 .combo__item .ci-nm small{color:var(--muted);font-weight:400;margin-left:5px;font-size:11px;}
 .combo__item .ci-mk{font-size:9px;font-weight:600;padding:1px 5px;border-radius:5px;background:var(--inset);color:var(--muted);}
-.combo__item .ci-y{font-size:12px;font-weight:600;color:#4F46E5;}
+.combo__item .ci-y{font-size:12px;font-weight:600;color:var(--primary);}
 .combo__none{padding:12px;font-size:12px;color:var(--muted);text-align:center;}
 .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .qty input{width:78px;border:1px solid var(--hair);border-radius:6px;padding:8px 9px;font-size:13px;font-family:inherit;text-align:right;}
 .qty span{font-size:13px;color:var(--muted);font-weight:500;}
-.sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:#4F46E5;color:#fff;cursor:pointer;white-space:nowrap;}
+.sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:var(--primary);color:#fff;cursor:pointer;white-space:nowrap;}
 .sim__target{display:flex;flex-direction:column;gap:10px;padding:14px 20px;font-size:14px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--hair);background:var(--canvas);}
 .sim__target-row{display:flex;align-items:center;gap:8px;}
 .sim__target input{width:84px;border:1px solid var(--hair);border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
 .sim__presets{display:flex;gap:6px;flex-wrap:wrap;}
 .sim__presets a{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;transition:all .15s;}
-.sim__presets a:hover{border-color:#4F46E5;color:#4F46E5;}
-.sim__presets a.on{background:#4F46E5;border-color:#4F46E5;color:#fff;}
+.sim__presets a:hover{border-color:var(--primary);color:var(--primary);}
+.sim__presets a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
 .sim__out{padding:18px 20px;}
 .sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
 .sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
@@ -349,8 +349,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sim-kpi .k .v{font-size:20px;font-weight:600;}
 /* 리포트 카드 */
 .sim-report-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:0 2px 8px;}
-.gen-report-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:10px;padding:13px;font-size:13px;font-weight:700;color:#4F46E5;cursor:pointer;font-family:inherit;transition:background .12s;}
-.gen-report-btn:hover{background:#E0E7FF;}
+.gen-report-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--primary-bg);border:1px solid #CFE3FF;border-radius:10px;padding:13px;font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;font-family:inherit;transition:background .12s;}
+.gen-report-btn:hover{background:#DCEBFF;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .pa-grid{display:flex;flex-direction:column;gap:0;}
 .pa-row{display:flex;align-items:baseline;gap:8px;padding:7px 0;border-bottom:1px solid var(--hair);}
@@ -383,7 +383,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .rc-body .rc-flow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 2px;margin-bottom:2px;}
 .rc-body .rc-from{color:var(--muted);}
 .rc-body .rc-arr{color:#00ae1a;font-weight:700;margin:0 4px;font-size:15px;}
-.rc-body .rc-to{color:#4F46E5;font-weight:700;}
+.rc-body .rc-to{color:var(--primary);font-weight:700;}
 .rc-body .rc-dest{display:inline-flex;align-items:baseline;flex-shrink:0;}
 .rc-body .rc-num{font-variant-numeric:tabular-nums;}
 .sim-out-row{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
@@ -396,21 +396,21 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .dl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
 .dl-item i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .dl-item b{margin-left:auto;color:var(--ink);font-weight:600;}
-.hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
+.hbdg{font-size:11px;font-weight:700;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
 .hbdg.ok{background:#E8F7EE;color:#12A150;}
 .hbdg.warn{background:#FEF3C7;color:#B7791F;}
 .hbdg.bad{background:#FFF0E6;color:#D9480F;}
 .hbdg.na{background:#F1F3F5;color:#868E96;}
 /* 사이드바 인컴 ETF 랭킹 행 */
 .irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
-.irow:last-child{border-bottom:none;}.irow:hover{background:#EEF2FF;}
+.irow:last-child{border-bottom:none;}.irow:hover{background:var(--primary-bg);}
 .irow .it{display:flex;align-items:center;gap:8px;}
-.irow .it .rk{flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#4F46E5;text-align:center;}
-.irow .it .rk.top{color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;}
+.irow .it .rk{flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:var(--primary);text-align:center;}
+.irow .it .rk.top{color:#fff;background:var(--primary);border-radius:5px;line-height:18px;}
 .irow .it b{flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;}
 .irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
-.irow .imx .yv{font-size:15px;font-weight:600;color:#4F46E5;}
+.irow .imx .yv{font-size:15px;font-weight:600;color:var(--primary);}
 /* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
 .irow .it .rk{position:relative;display:flex;align-items:center;justify-content:center;height:18px;}
 .irow .rk-n,.irow .rk-p{transition:opacity .15s;}
@@ -437,22 +437,22 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .anno-dot{flex-shrink:0;width:8px;height:8px;border-radius:2px;margin-top:4px;}
 .anno-item b{color:var(--ink);}
 .income-modal.wide{max-width:min(640px,calc(100vw - 40px));}
-.income-modal .iall-h-count{font-size:13px;font-weight:600;color:#4F46E5;margin-left:4px;}
+.income-modal .iall-h-count{font-size:13px;font-weight:600;color:var(--primary);margin-left:4px;}
 .income-modal .iall-controls{display:flex;align-items:center;gap:12px;padding:10px 0 8px;border-bottom:1px solid var(--hair);margin-bottom:0;}
 .income-modal .iall-cc-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;margin-left:auto;}
 .income-modal .iall-list{display:flex;flex-direction:column;margin:0 -28px;}
 /* 모달 전용 2-column 행 */
 .iall-row{display:flex;align-items:stretch;padding:14px 28px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);cursor:pointer;}
 .iall-row:last-child{border-bottom:none;}
-.iall-row:hover{background:#EEF2FF;}
+.iall-row:hover{background:var(--primary-bg);}
 .iall-lft{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
 .iall-lft .it{display:flex;align-items:center;gap:8px;}
-.iall-lft .it .rk{flex-shrink:0;width:18px;font-size:12px;font-weight:700;color:#4F46E5;text-align:center;}
-.iall-lft .it .rk.top{color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;}
+.iall-lft .it .rk{flex-shrink:0;width:18px;font-size:12px;font-weight:700;color:var(--primary);text-align:center;}
+.iall-lft .it .rk.top{color:#fff;background:var(--primary);border-radius:5px;line-height:18px;}
 .iall-lft .it b{flex:1;font-size:13px;font-weight:600;min-width:0;line-height:1.3;}
 .iall-lft .imeta{font-size:11px;color:var(--muted);}
 .iall-lft .iall-nums{font-size:11px;color:var(--muted);display:flex;align-items:baseline;gap:5px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;}
-.iall-lft .iall-nums .yv{font-size:13px;font-weight:700;color:#4F46E5;flex-shrink:0;}
+.iall-lft .iall-nums .yv{font-size:13px;font-weight:700;color:var(--primary);flex-shrink:0;}
 .iall-rgt{width:90px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;padding-left:10px;border-left:1px solid var(--hair);margin-left:10px;}
 .iall-price{font-size:15px;font-weight:700;line-height:1;}
 .iall-price.up{color:#E03131;}
@@ -602,12 +602,13 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 #income-board{--line:var(--hair);--faint:#9AA1AC;--upb:#E86464;--dnb:#5D97F1;--dist:#C9D2DE;}
 html.dark #income-board{--faint:#6F747B;--dist:#4A515C;--upb:#C95A5A;--dnb:#4F86D9;}
 #income-board .bh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:6px 0 14px}
-#income-board .bh h1{font-size:22px;letter-spacing:-.4px;margin:0 0 6px;color:var(--ink)}
+#income-board .bh h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0 0 6px;color:var(--ink)}#income-board .bh h1 .a{color:var(--primary)}
 #income-board .bh p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.65;max-width:620px}
 #income-board .bh h1 .bq{vertical-align:middle;margin-left:4px;width:22px;height:22px;border-radius:50%;border:0;background:var(--inset);color:var(--muted);font:inherit;font-size:12px;font-weight:800;cursor:pointer}
 #income-board .bh h1 .bq:hover{background:var(--ink);color:var(--canvas)}
 #income-board .bh .asof{font-size:11px;color:#9CA3AF;white-space:nowrap}
-#income-board .calc-btn{border:1px solid var(--line);background:var(--canvas);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);white-space:nowrap}
+#income-board .calc-btn,#income-board .btn.pri{border:0;background:var(--ink);color:#fff;border-radius:10px;padding:9px 22px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+html.dark #income-board .calc-btn,html.dark #income-board .btn.pri{background:#F3F5F7;color:#13151A}
 #income-board .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 #income-board .chip{background:var(--canvas);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
 #income-board .chip.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
@@ -620,7 +621,14 @@ html.dark #income-board{--faint:#6F747B;--dist:#4A515C;--upb:#C95A5A;--dnb:#4F86
 #income-board .seg{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px}
 #income-board .seg button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 10px;border-radius:8px;cursor:pointer}
 #income-board .seg button.on{background:var(--canvas);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
-#income-board .card{background:var(--canvas);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+#income-board .card{background:var(--canvas);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--s1)}
+#income-board .bk-h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--line)}
+#income-board .bk-t{font-size:15px;font-weight:800;color:#0F172A;display:inline-flex;align-items:center;gap:8px}
+#income-board .bk-t::before{content:'';flex:none;width:3px;height:13px;background:var(--primary);border-radius:2px}
+#income-board .bk-t .ic{font-size:15px;line-height:1}
+#income-board .bk-s{font-size:11px;color:var(--muted)}
+html.dark #income-board .bk-t{color:var(--ink)}
+
 #income-board .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:10px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
 #income-board .legend i{display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle}
 #income-board .fhd,#income-board .fr{display:grid;grid-template-columns:minmax(0,1.5fr) 64px 64px minmax(0,1.5fr) 80px;gap:12px;align-items:center}
@@ -634,9 +642,9 @@ html.dark #income-board{--faint:#6F747B;--dist:#4A515C;--upb:#C95A5A;--dnb:#4F86
 #income-board .tag{font-size:10.5px;font-weight:700;color:var(--muted);background:var(--inset);border-radius:5px;padding:1px 6px}
 #income-board .fr .yl{text-align:right;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
 #income-board .fr .yl span{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
-#income-board .fr .fh{justify-self:center;font-size:11px}
+#income-board .fr .fh{justify-self:center}
 #income-board .fr .fhm{display:none}
-#income-board .fr .tot{text-align:right;font-variant-numeric:tabular-nums}#income-board .fr .tot b{display:block;font-size:14.5px}#income-board .fr .tot span{font-size:11px;color:var(--muted)}
+#income-board .fr .tot{text-align:right;font-variant-numeric:tabular-nums}#income-board .fr .tot b{display:block;font-size:14.5px;font-weight:800}#income-board .fr .tot span{font-size:11px;color:var(--muted)}
 #income-board .chev{position:absolute;right:14px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--faint);transition:transform .15s,background .15s,color .15s}
 #income-board .chev svg{width:12px;height:12px}
 #income-board .fr:hover .chev{background:var(--inset);color:var(--ink)}#income-board .fr.open .chev{transform:rotate(90deg);color:var(--ink)}
@@ -673,17 +681,15 @@ html.dark #income-board{--faint:#6F747B;--dist:#4A515C;--upb:#C95A5A;--dnb:#4F86
 #income-board .ptip{position:absolute;z-index:4;background:#13151A;color:#fff;border-radius:8px;padding:6px 9px;font-size:11.5px;line-height:1.5;white-space:nowrap;pointer-events:none;display:none;transform:translate(-50%,calc(-100% - 10px))}
 #income-board .ptip b{font-weight:800}#income-board .ptip .u{color:#FF8A8F}#income-board .ptip .d{color:#8DB8FF}#income-board .ptip .g{color:#B8C0CC}
 #income-board .act{margin-top:12px;display:flex;gap:8px;align-items:center}
-#income-board .btn{border:1px solid var(--line);background:var(--canvas);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
-#income-board .btn.pri{background:#13151A;color:#fff;border-color:#13151A}
+#income-board .btn{border:1px solid var(--line);background:var(--canvas);border-radius:10px;padding:9px 16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
 #income-board .note{font-size:12px;color:var(--muted);line-height:1.65;margin-top:12px}
-#income-board .calc{margin-top:18px;background:var(--canvas);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+#income-board .calc{margin-top:18px;background:var(--canvas);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px}
 #income-board .calc b{font-size:14.5px;color:var(--ink)}#income-board .calc p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}#income-board .calc .sp{flex:1}
 #income-board .calc .cnt{font-size:12px;font-weight:800;background:var(--primary-bg);color:var(--primary);border-radius:999px;padding:2px 8px;margin-left:6px}
 #income-board .empty{padding:18px 16px;font-size:13px;color:var(--muted)}
 html.dark .hbdg.ok{background:rgba(18,161,80,.18);color:#3DD17A;}html.dark .hbdg.warn{background:rgba(224,178,82,.16);color:#E0B252;}html.dark .hbdg.bad{background:rgba(217,72,15,.18);color:#FF8A5B;}html.dark .hbdg.na{background:#2A2B2D;color:#888B90;}
 html.dark #income-board .dbar>div>i{background:#4A515C}html.dark #income-board .dbar>div.r>i{background:#8A97AB}
 html.dark #income-board .chip.ok .v{color:#3DD17A}html.dark #income-board .chip.warn .v{color:#E0B252}html.dark #income-board .chip.bad .v{color:#FF8A5B}
-html.dark #income-board .btn.pri{background:#F3F5F7;color:#13151A;border-color:#F3F5F7}
 @media(max-width:720px){
  #income-board .bh{flex-direction:column}
  #income-board .bh>div:last-child{align-items:flex-start!important}
@@ -723,8 +729,8 @@ body.cm-open{overflow:hidden}
   <!-- ===== 건전성 보드(기본 화면, 2026-11-12) ===== -->
   <div id="income-board">
     <div class="bh">
-      <div><h1>🪙 월배당 ETF, 지금 건전한 곳은 <button class="bq" onclick="openIncomeModal()" aria-label="건전성이 뭔가요?" title="건전성이 뭔가요?">?</button></h1>
-      <p>분배율이 높다고 좋은 ETF는 아니에요. 분배금 일부가 원금에서 나오면 가격이 깎여요. 1년 동안 받은 분배금과 가격 변화를 함께 보고, 펼치면 기초 지수와 비교해요.</p></div>
+      <div><h1>월배당 <span class="a">건전성</span> <button class="bq" onclick="openIncomeModal()" aria-label="건전성이 뭔가요?" title="건전성이 뭔가요?">?</button></h1>
+      <p>분배율이 높다고 좋은 ETF는 아니에요. 분배금 일부가 원금에서 나오면 가격이 깎여요. 월배당 ETF가 지금 원금을 지키고 있는지 1년 동안 받은 분배금과 가격 변화로 보고, 펼치면 기초 지수와 비교해요.</p></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;"><span class="asof" id="board-asof"></span><button class="calc-btn" onclick="showCalc()">내 월 인컴 계산기 →</button></div>
     </div>
     <div id="board-root"><div class="empty">ETF 데이터를 불러오는 중이에요.</div></div>
@@ -748,19 +754,19 @@ body.cm-open{overflow:hidden}
         <div class="anno-row">
           <div class="irow" style="padding:12px 14px;border-radius:10px;border:1px solid var(--hair);background:var(--canvas);pointer-events:none;">
             <div class="it" style="display:flex;align-items:center;gap:8px;">
-              <span class="rk top" style="flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;text-align:center;">1</span>
+              <span class="rk top" style="flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#fff;background:var(--primary);border-radius:5px;line-height:18px;text-align:center;">1</span>
               <b style="flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;">KODEX 200타겟위클리커버드콜</b>
               <span id="anno-badge" class="hbdg ok" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;background:#ecfeea;color:#00ae1a;white-space:nowrap;">건전</span>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;"><span class="mk-kr" style="display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;background:#EEF2FF;color:#4F46E5;">KR</span>498400 · 순자산 <span id="anno-aum">—</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;"><span class="mk-kr" style="display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;background:var(--primary-bg);color:var(--primary);">KR</span>498400 · 순자산 <span id="anno-aum">—</span></div>
             <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);">
-              <span id="anno-y" style="font-size:15px;font-weight:600;color:#4F46E5;">—</span> 분배 · 총수익 <b id="anno-r" style="color:var(--ink)">—</b> · <span id="anno-p">가격 —</span>
+              <span id="anno-y" style="font-size:15px;font-weight:600;color:var(--primary);">—</span> 분배 · 총수익 <b id="anno-r" style="color:var(--ink)">—</b> · <span id="anno-p">가격 —</span>
             </div>
           </div>
         </div>
         <div class="anno-labels">
           <div class="anno-item">
-            <span class="anno-dot" style="background:#4F46E5;"></span>
+            <span class="anno-dot" style="background:var(--primary);"></span>
             <div><b>분배율</b><br>최근 12개월 정기 분배금 ÷ 현재가. 내가 받는 배당 비율이에요(미국 ETF의 1회성 특별분배는 빼요).</div>
           </div>
           <div class="anno-item">
@@ -973,14 +979,14 @@ function openAddSheet(code){
     :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
   const hcBg={ok:'background:#DCFCE7;color:#15803D',warn:'background:#FEF3C7;color:#92400E',bad:'background:#FEE2E2;color:#B91C1C',na:'background:#F3F4F6;color:#6B7280'};
   const alreadyNote=alreadyQty!=null
-    ?`<div style="font-size:11px;color:#4F46E5;background:#EEF2FF;border-radius:6px;padding:7px 10px;margin-bottom:10px;">이미 ${alreadyQty}주 담겨 있어요. 수량을 변경할까요?</div>`
+    ?`<div style="font-size:11px;color:var(--primary);background:var(--primary-bg);border-radius:6px;padding:7px 10px;margin-bottom:10px;">이미 ${alreadyQty}주 담겨 있어요. 수량을 변경할까요?</div>`
     :'';
   document.getElementById('add-sheet-body').innerHTML=`
     <div style="font-size:15px;font-weight:700;line-height:1.35;margin-bottom:4px;word-break:keep-all;">${d.name}</div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">${metaTxt}</div>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <div style="flex:1;background:#EEF2FF;border-radius:8px;padding:8px;text-align:center;">
-        <div style="font-size:15px;font-weight:700;color:#4F46E5;">${d.y}%</div>
+      <div style="flex:1;background:var(--primary-bg);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:15px;font-weight:700;color:var(--primary);">${d.y}%</div>
         <div style="font-size:10px;color:var(--muted);margin-top:2px;">연 분배율</div>
       </div>
       <div style="flex:1;background:#F8F9FA;border-radius:8px;padding:8px;text-align:center;">
@@ -996,14 +1002,14 @@ function openAddSheet(code){
     <div style="font-size:12px;font-weight:600;margin-bottom:6px;">몇 주 담을까요?</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
       <input id="add-sheet-qty" type="number" min="1" step="1" value="100"
-        style="flex:1;border:1.5px solid #4F46E5;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:700;text-align:right;outline:none;font-family:inherit;"
+        style="flex:1;border:1.5px solid var(--primary);border-radius:8px;padding:10px 12px;font-size:18px;font-weight:700;text-align:right;outline:none;font-family:inherit;"
         oninput="document.getElementById('add-sheet-confirm').disabled=!(+this.value>=1)">
       <span style="font-size:13px;color:var(--muted);">주</span>
     </div>
     <div style="display:flex;gap:8px;">
       <button onclick="closeAddSheet()" style="flex:1;background:#F3F4F6;color:#6B7280;border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">취소</button>
       <button id="add-sheet-confirm" onclick="confirmAddSheet('${code}')"
-        style="flex:2;background:#4F46E5;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">시뮬레이터에 추가</button>
+        style="flex:2;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">시뮬레이터에 추가</button>
     </div>
   `;
   const overlay=document.getElementById('add-sheet-overlay');
@@ -1058,7 +1064,7 @@ function addFromRanking(code,qty=100){
   const rows=document.querySelectorAll('#sim-rows .simrow');
   const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
   if(el){
-    el.style.transition='background .4s';el.style.background='#EEF2FF';
+    el.style.transition='background .4s';el.style.background='var(--primary-bg)';
     setTimeout(()=>el.style.background='',700);
     el.scrollIntoView({block:'nearest'});
     const inp=el.querySelector('.qty input');
@@ -1109,7 +1115,7 @@ function simAdd(){
     if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
   }
 }
-const DONUT_COLORS=['#4F46E5','#2775ED','#10B981','#8B5CF6','#D97706','#EF4444','#EC4899','#6366F1','#F59E0B'];
+const DONUT_COLORS=['#006EFF','#10B981','#F59E0B','#8B5CF6','#64748B','#14B8A6','#EC4899','#D97706','#94A3B8'];   // 첫 색 = 사이트 파랑(2026-11-12, 예전 보라)
 const GAP_COLOR='#E5E7EB';
 
 function buildDonut(segs, monthly){
@@ -1186,7 +1192,7 @@ function simOut(){
       <div class="sim-kpi">
         <div class="k"><div class="l">현재 월 인컴(세후)</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
         <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
-        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'var(--ink)':'#4F46E5'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'var(--ink)':'var(--primary)'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
       </div>
       <div class="donut-legend">${legend}</div>
       ${slices.length?`<div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">세후 = 국내 15.4%·미국 15%(현지 원천징수)를 뺀 수령액 · 세전 월 ${(totalGross/12).toFixed(0)}만원${slices.some(s=>s.d.mk==='US')&&USDKRW?` · 기준 환율 <b style="color:var(--ink)">${USDKRW.toLocaleString()}원/$</b>`:''}</div>`:''}
@@ -1233,7 +1239,7 @@ function simOut(){
         <div class="rc-body">
           <div class="rc-flow">
             <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
-            <span class="rc-dest"><span class="rc-arr" style="color:var(--muted)">↔</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
+            <span class="rc-dest"><span class="rc-arr" style="color:var(--muted)">↔</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:var(--primary)">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
           </div>
           <ul class="rc-bullets" style="margin-top:10px"><li>같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b>이면 월 세후 인컴은 <b class="rc-num">${curM.toFixed(1)}만원</b>과 <b class="rc-num">${altM.toFixed(1)}만원</b>이에요.</li><li>비교 대상은 '건전' 판정 ETF 중 분배율이 가장 높은 것이에요. 비교용 정보이고 매매 권유가 아니에요.</li></ul>
         </div>
@@ -1261,7 +1267,7 @@ function genReport(){
   simOut();
   const slot=document.getElementById('sim-report-slot');
   if(!slot) return;
-  slot.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:20px;color:#4F46E5;font-size:13px;font-weight:600;">
+  slot.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:20px;color:var(--primary);font-size:13px;font-weight:600;">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;flex-shrink:0;"><path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg>
     리포트 생성 중…
   </div>`;
@@ -1322,7 +1328,7 @@ function boardRender(){
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="fd" id="bfd${i}"></div>`}).join('');
   document.getElementById('board-root').innerHTML=`<div class="sum">${chip('all','전체',base.length)}${chip('ok','건전 · 원금 지킴',c.ok)}${chip('warn','주의 · 조금 깎임',c.warn)}${chip('bad','원금성 · 많이 깎임',c.bad)}</div>
    <div class="flt"><div class="seg">${seg('cat','all','전체')}${seg('cat','cc','커버드콜')}${seg('cat','div','배당주')}${seg('cat','bond','채권·금리')}</div><span class="sp"></span><div class="seg">${seg('sort','h','건전성순')}${seg('sort','y','분배율순')}${seg('sort','t','총수익순')}</div></div>
-   <div class="card"><div class="legend"><span><i style="background:var(--dist)"></i>받은 분배금</span><span><i style="background:var(--upb)"></i>가격 상승</span><span><i style="background:repeating-linear-gradient(135deg,var(--dnb) 0 3px,#9DBEF5 3px 6px)"></i>가격 하락(깎인 돈)</span><span><i style="background:var(--ink);width:3px"></i>1년 총수익</span></div>
+   <div class="card"><div class="bk-h"><span class="bk-t"><span class="ic">📊</span>월배당 ETF</span><span class="bk-s">${L.length}개 · 1년 기준</span></div><div class="legend"><span><i style="background:var(--dist)"></i>받은 분배금</span><span><i style="background:var(--upb)"></i>가격 상승</span><span><i style="background:repeating-linear-gradient(135deg,var(--dnb) 0 3px,#9DBEF5 3px 6px)"></i>가격 하락(깎인 돈)</span><span><i style="background:var(--ink);width:3px"></i>1년 총수익</span></div>
    <div class="fhd"><span>ETF</span><span>분배율</span><span>건전성</span><span>받은 돈 vs 깎인 돈 (1년)</span><span>1년 총수익</span></div>${rows||'<div class="empty">해당하는 ETF가 없어요.</div>'}</div>
    ${na?`<p class="note">상장 1년 미만이라 판정을 보류한 ${na}개는 목록에서 뺐어요.</p>`:''}
    <div class="calc"><div><b>내 월 인컴 계산기<span class="cnt" id="board-cnt">${simHoldings.length}개 담김</span></b><p>담은 ETF로 세후 월 분배금과 금융소득종합과세 여부를 계산해요.</p></div><span class="sp"></span><button class="btn pri" onclick="showCalc()">계산기 열기 →</button></div>`;
