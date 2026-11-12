@@ -71,6 +71,13 @@
   .nqp-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
   .nqp-links a{font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;border:1px solid var(--hairline);border-radius:10px;padding:9px 14px;background:var(--canvas)}
   .nqp-links a:hover{border-color:var(--primary);color:var(--primary)}
+  /* 게이지 말풍선 — 짚은 구간의 뜻과 과거 통계(2026-11-12) */
+  .nqg{cursor:help;outline:none}
+  .nqg .nq-track{transition:filter .12s}
+  .nqg:hover .nq-track{filter:saturate(1.15)}
+  .nqg-tip{top:36px;white-space:normal;width:max-content;max-width:min(300px,86vw)}
+  .nqg-tip b{margin-bottom:3px}
+  .nqg-tip b.gold{color:#fcd34d} .nqg-tip b.up{color:#fca5a5}
   @media(max-width:560px){.nqp-plot{height:190px;padding-left:40px}.nqp-ax{width:34px}.nqp-yrs{margin-left:40px}.nqp-peak{display:none}}
 </style>
 {% endblock %}
@@ -95,7 +102,13 @@
           {% if nq.streak %}<span class="nq-streak">{{ nq.caution|int }}% 위 <b>{{ nq.streak }}개월째</b></span>{% endif %}
         </div>
       </div>
-      <div class="nq-gauge">
+      {# 막대를 짚으면 그 구간(정상·주의·경고)의 뜻과 과거 통계를 말풍선으로 보인다(2026-11-12 사용자 요청). 숫자는 백테스트 파일 그대로다. #}
+      {% set gap_left = nq.caution - nq.gap %}
+      <div class="nq-gauge nqg" tabindex="0" aria-label="게이지 구간 설명 보기">
+        <template data-zone="ok"><b>✓ 정상 · {{ nq.caution|int }}% 미만</b>60개월선과의 거리가 평소 범위예요.<br><span class="k">지금</span> <span class="v">{{ '%+.1f'|format(nq.gap) }}%</span>{% if gap_left > 0 %} · 주의까지 <span class="v">{{ '%.1f'|format(gap_left) }}%p</span>{% endif %}</template>
+        <template data-zone="caution"><b class="gold">⚠️ 주의 · {{ nq.caution|int }}~{{ nq.warn|int }}%</b>지수가 5년 평균보다 꽤 높이 올라와 있어요.<br>과거 이 구간 뒤 12개월 평균 <span class="v">{{ '%+.1f'|format(b.caution_band.fwd12_avg_pct) }}%</span>(전체 {{ '%+.1f'|format(b.all_fwd12_avg_pct) }}%)<br><span class="k">사례 {{ b.caution_band.fwd12_n }}개월뿐이라 참고만 해요.</span></template>
+        <template data-zone="warn"><b class="up">🚨 경고 · {{ nq.warn|int }}% 이상</b>과열 구간이에요. 과거 이 구간 뒤 12개월 안에<br>−20% 넘게 빠진 경우가 <span class="up">{{ '%.0f'|format(b.warn.dd20_pct) }}%</span>였어요(전체 {{ '%.0f'|format(b.all_dd20_pct) }}%).{% if b.warn.periods %}<br><span class="k">그런 달은 {{ b.warn.periods | join('년과 ') }}년에 몰려 있어요.</span>{% endif %}</template>
+        <div class="nqp-tip nqg-tip" role="status" hidden></div>
         <div class="nq-track"><i class="seg ok" style="width:{{ nq.caution|int }}%"></i><i class="seg caution" style="width:{{ (nq.warn - nq.caution)|int }}%"></i><i class="seg warn" style="width:{{ (100 - nq.warn)|int }}%"></i></div>
         <div class="nq-pin" style="left:{{ '%.1f'|format(nq.pin) }}%"><b>{{ '%.1f'|format(nq.gap) }}%</b></div>
         <div class="nq-ticks"><span style="left:0">0</span><span style="left:{{ nq.caution|int }}%">{{ nq.caution|int }}</span><span style="left:{{ nq.warn|int }}%">{{ nq.warn|int }}</span><span style="left:100%">100+</span></div>
@@ -214,6 +227,34 @@
     box.addEventListener('pointerdown', at);
     box.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hide(); });   // 손가락은 다음 터치까지 남긴다
   });
+})();
+
+/* 게이지 막대를 짚으면 그 자리 구간(정상·주의·경고)의 설명을 띄운다(2026-11-12). 막대는 0~100% 눈금이다. */
+(function () {
+  var g = document.querySelector('.nqg');
+  if (!g) return;
+  var C = {{ nq.caution }}, W = {{ nq.warn }};
+  var tip = g.querySelector('.nqg-tip'), track = g.querySelector('.nq-track');
+  function zoneAt(pct) { return pct >= W ? 'warn' : pct >= C ? 'caution' : 'ok'; }
+  function show(pct) {
+    var t = g.querySelector('template[data-zone="' + zoneAt(pct) + '"]');
+    if (!t) return;
+    tip.innerHTML = t.innerHTML;
+    tip.hidden = false;
+    var tx = pct < 18 ? '0%' : pct > 82 ? '-100%' : '-50%';
+    tip.style.left = pct + '%';
+    tip.style.transform = 'translateX(' + tx + ')';
+  }
+  function at(e) {
+    var r = track.getBoundingClientRect();
+    show(Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)));
+  }
+  g.addEventListener('pointermove', at);
+  g.addEventListener('pointerdown', at);
+  g.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') tip.hidden = true; });
+  g.addEventListener('focus', function () { show(Math.min(100, Math.max(0, {{ nq.gap }}))); });
+  g.addEventListener('blur', function () { tip.hidden = true; });
+  document.addEventListener('pointerdown', function (e) { if (!g.contains(e.target)) tip.hidden = true; });   // 손가락은 다른 곳을 누르면 닫는다
 })();
 </script>
 {% endblock %}
