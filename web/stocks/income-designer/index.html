@@ -749,7 +749,7 @@ html.dark #income-board .btn.pri{background:#F3F5F7;color:#13151A;border-color:#
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
       <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 월배당 ETF 계산기 <span style="display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;margin-left:2px;">BETA</span></h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 아래(PC는 오른쪽) 랭킹에서 담을 수 있어요.</div></div>
       <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-        <span id="data-updated-at" style="font-size:11px;color:#9CA3AF;">데이터 매주 월요일 갱신</span>
+        <span id="data-updated-at" style="font-size:11px;color:#9CA3AF;">데이터 평일 매일 갱신</span>
       </div>
     </div>
 
@@ -883,7 +883,7 @@ html.dark #income-board .btn.pri{background:#F3F5F7;color:#13151A;border-color:#
       </div>
     </div>
     <!-- 정직 배너 -->
-    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 1년 가격 변화로 판정해요.<br>분배율·총수익·순자산은 매주 월요일 자동 갱신되는 실측값이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 1년 가격 변화가 없어 건전성 판정에서 제외돼요.<br>미국 ETF 가격은 원화 환산(갱신 시점 환율 기준)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
+    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 1년 가격 변화로 판정해요.<br>분배율·총수익·순자산은 평일 매일 17시쯤 자동 갱신되는 실측값이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 1년 가격 변화가 없어 건전성 판정에서 제외돼요.<br>미국 ETF 가격은 원화 환산(갱신 시점 환율 기준)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
 
   </div>
 
@@ -1373,7 +1373,7 @@ function copyPrompt(){
 }
 function toggleRc(head){head.closest('.rc').classList.toggle('open');}
 /* ===== 건전성 보드 (2026-11-12) — 숫자는 전부 income_etfs.json에서 온다. 여기서는 그리기만 한다 ===== */
-let BOARD=[],BOARD_ASOF=null;
+let BOARD=[];
 const BST={cat:'cc',sort:'h',h:'all'};
 const BHL={ok:'건전',warn:'주의',bad:'원금성'},BHR={ok:0,warn:1,bad:2};
 const bfmt=(v,d=1)=>{if(v==null)return '—';const r=+v.toFixed(d);return r===0?(0).toFixed(d)+'%':(r>0?'+':'')+r.toFixed(d)+'%'};
@@ -1385,9 +1385,10 @@ function boardInit(data){
   const one=(e,mk)=>({code:e.code,name:e.name,mk,y:e.yield_ttm,p:e.price_1y,r:e.return_1y,p3m:e.price_3m,cat:e.category||'div',
     spark:e.spark,dm:e.dist_months||[],dtrend:e.dist_trend,bench:e.bench,price:mk==='US'?e.price_usd:e.price});
   BOARD=[...(data.etfs||[]).map(e=>one(e,'KR')),...(data.us_etfs||[]).map(e=>one(e,'US'))].map(e=>({...e,h:bHealth(e)}));
-  BOARD_ASOF=data.generated_at?new Date(data.generated_at):null;
-  const a=document.getElementById('board-asof');
-  if(a&&BOARD_ASOF)a.textContent=`데이터 ${BOARD_ASOF.getFullYear()}.${String(BOARD_ASOF.getMonth()+1).padStart(2,'0')}.${String(BOARD_ASOF.getDate()).padStart(2,'0')} 기준`;
+  const a=document.getElementById('board-asof'),md=d=>d?`${+d.slice(5,7)}/${+d.slice(8,10)}`:null,as=data.asof||{};
+  // 시장별 종가 기준일 — 평일 17시쯤 갱신하고, 국내는 네이버 수익률 기준일(전 거래일)에 맞춘다
+  const parts=[as.kr&&`국내 ${md(as.kr)}`,as.us&&`미국 ${md(as.us)}`].filter(Boolean);
+  if(a)a.textContent=parts.length?`${parts.join(' · ')} 종가 기준 · 평일 매일 갱신`:'평일 매일 갱신';
   boardRender();
 }
 const distOf=e=>e.r-e.p;   // 막대의 분배금 몫 = 총수익 − 가격 변화

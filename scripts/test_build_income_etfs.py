@@ -159,6 +159,9 @@ def test_price_change_and_spark():
     sp = m.weekly_spark([(f"2026-01-{i:02d}", float(i)) for i in range(1, 13)], today)
     assert sp["d"][0] == "2026-01-01" and sp["d"][-1] == "2026-01-12"   # 마지막 날은 꼭 들어간다
     assert len(sp["d"]) == len(sp["p"]) == 4                            # 1, 6, 11, 12일
+    # 첫 점은 마지막 봉 기준 1년 전 이하 마지막 종가 — 곡선 끝 '1년 전보다'가 1년 가격 변화와 같아진다
+    sp = m.weekly_spark([("2025-11-10", 100.0), ("2025-11-12", 105.0), ("2026-11-11", 120.0)])
+    assert sp["d"][0] == "2025-11-10" and sp["p"][-1] / sp["p"][0] == 1.2
 
 
 def test_monthly_dist_excludes_current_month():
@@ -186,3 +189,12 @@ def test_kr_bench_key():
     assert m.kr_bench_key("KEDI 팔란티어커버드콜OTM 채권혼합지수(NTR)") is None
     assert m.kr_bench_key("Dow Jones U.S. Dividend 100 10% Premium Covered Call Index(Total Return)") == "usdiv"
     assert m.kr_bench_key(None) is None
+
+
+def test_perf_ref_date_and_trim():
+    # 2026-11-12 확인: 네이버 수익률 기준일은 장 마감 뒤에도 전 거래일이다 — 곡선을 그날까지만 쓴다
+    assert m.perf_ref_date("2026.11.11") == "2026-11-11"
+    assert m.perf_ref_date("") is None and m.perf_ref_date(None) is None and m.perf_ref_date("2026-11-11") is None
+    rows = [("2026-11-10", 1.0), ("2026-11-11", 2.0), ("2026-11-12", 3.0)]
+    assert m.trim_to(rows, "2026-11-11") == rows[:2]
+    assert m.trim_to(rows, None) == rows

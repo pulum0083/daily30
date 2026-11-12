@@ -216,10 +216,30 @@ def price_change(rows, today, days):
     return round((rows[-1][1] / p0 - 1) * 100, 2)
 
 
-def weekly_spark(rows, today):
-    """최근 1년 종가를 5거래일마다 한 점으로(마지막 날은 꼭 넣는다). {'d': 날짜들, 'p': 종가들}."""
-    cut = (today - timedelta(days=365)).isoformat()
-    yr = [(d, c) for d, c in rows if d > cut]
+def perf_ref_date(s):
+    """네이버 returnPerformanceReferenceDate 'YYYY.MM.DD' → 'YYYY-MM-DD'. 형식이 다르면 None."""
+    m = re.fullmatch(r"(\d{4})\.(\d{2})\.(\d{2})", str(s or "").strip())
+    return f"{m.group(1)}-{m.group(2)}-{m.group(3)}" if m else None
+
+
+def trim_to(rows, ref):
+    """기준일(ref)보다 늦은 봉을 뺀다. 네이버 1년·3개월 수익률은 전 거래일 기준이라, 곡선도 같은 날에서 끝나게 맞춘다.
+    ref가 없으면 그대로 둔다."""
+    return [r for r in rows if r[0] <= ref] if ref else rows
+
+
+def weekly_spark(rows, today=None):
+    """최근 1년 종가를 5거래일마다 한 점으로. {'d': 날짜들, 'p': 종가들}.
+
+    첫 점은 '마지막 봉 날짜의 1년 전' 이하 마지막 종가(1년 수익률의 기준점)라서, 곡선 끝의 '1년 전보다'가
+    목록의 1년 가격 변화와 같은 기준이 된다. 마지막 봉은 꼭 넣는다. today는 하위호환용(쓰지 않는다).
+    """
+    if len(rows) < 2:
+        return None
+    end = date.fromisoformat(rows[-1][0])
+    cut = (end - timedelta(days=365)).isoformat()
+    base = [r for r in rows if r[0] <= cut]
+    yr = ([base[-1]] if base else []) + [r for r in rows if r[0] > cut]
     if len(yr) < 2:
         return None
     pts = yr[::5]
@@ -477,11 +497,20 @@ def build_us(usd_krw, sleep=0.5):
                         return_1y = round((p1 - p0 + float(recent.sum())) / p0 * 100, 2)
                         price_1y = round((p1 / p0 - 1) * 100, 2)
 
-            health, erosion = classify_health(yield_ttm, price_1y)
-            price_krw = round(float(price_usd) * usd_krw) if usd_krw else None
             today = datetime.now(KST).date()
             rows = [(ix.strftime("%Y-%m-%d"), float(c)) for ix, c in hist["Close"].items() if math.isfinite(float(c))]
             dlist = [(ix.strftime("%Y-%m-%d"), float(a)) for ix, a in divs.items() if math.isfinite(float(a))]
+            # 1년 기준점을 '마지막 종가 날짜의 1년 전'으로 다시 잡는다 — 곡선(weekly_spark)과 같은 기준이 된다
+            if rows:
+                end = date.fromisoformat(rows[-1][0])
+                p0 = _ago(rows, end, 365)
+                if p0:
+                    base_d = max(d for d, c in rows if d <= (end - timedelta(days=365)).isoformat())
+                    got = sum(a for d, a in dlist if base_d < d <= rows[-1][0])
+                    price_1y = round((rows[-1][1] / p0 - 1) * 100, 2)
+                    return_1y = round((rows[-1][1] - p0 + got) / p0 * 100, 2)
+            health, erosion = classify_health(yield_ttm, price_1y)
+            price_krw = round(float(price_usd) * usd_krw) if usd_krw else None
             bench = None
             if ticker in US_BENCH:
                 bt = us_total_1y(yf, US_BENCH[ticker][0], bench_cache)
@@ -507,6 +536,7 @@ def build_us(usd_krw, sleep=0.5):
                 "dist_months": monthly_dist(dlist, today, float(price_usd)),
                 "dist_trend": dist_trend(dlist, today),
                 "bench": bench,
+                "asof": rows[-1][0] if rows else None,
             })
             r_str = f"{return_1y}%" if return_1y is not None else "—"
             print(f"  ok   {ticker:6s} {name[:32]:34s} 분배 {yield_ttm}% · 총수익 {r_str} · ${aum_b}B")
@@ -543,7 +573,8 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
         health, erosion = classify_health(y, p1y)
         r1y = total_from_price(p1y, y)
         is_cc = "커버드콜" in name
-        rows = fetch_kr_daily(code, today)
+        ref = perf_ref_date(a.get("returnPerformanceReferenceDate"))
+        rows = trim_to(fetch_kr_daily(code, today), ref)
         dlist = fetch_yahoo_divs(f"{code}.KS", today)
         bk = kr_bench_key(a.get("etfBaseIndex")) if category(name, is_cc) == "cc" else None
         etfs.append({
@@ -569,6 +600,7 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
             "dist_months": monthly_dist(dlist, today, price),
             "dist_trend": dist_trend(dlist, today),
             "base_index": a.get("etfBaseIndex"),
+            "asof": ref or (rows[-1][0] if rows else None),
             "bench": kr_bench.get(bk) if bk else None,
         })
         time.sleep(sleep)
@@ -585,8 +617,13 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
             print("  환율 조회 실패 — price_krw=null")
         us_etfs = build_us(usd_krw)
 
+    def mode(xs):
+        xs = [x for x in xs if x]
+        return max(set(xs), key=xs.count) if xs else None
+
     return {
         "generated_at": datetime.now(KST).isoformat(timespec="seconds"),
+        "asof": {"kr": mode([e.get("asof") for e in etfs]), "us": mode([e.get("asof") for e in us_etfs])},
         "usd_krw": usd_krw,
         "aum_floor_eok": aum_floor_eok,
         "coverage": {
