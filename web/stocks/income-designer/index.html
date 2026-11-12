@@ -657,22 +657,24 @@ html.dark #income-board .bk-t{color:var(--ink)}
 #income-board .up{color:var(--up)}#income-board .dn{color:var(--dn)}#income-board .mu{color:var(--faint)}
 #income-board .fd{display:none;padding:6px 16px 18px;border-bottom:1px solid var(--line);background:var(--soft)}#income-board .fd.on{display:block}
 #income-board .fv{font-size:14px;font-weight:600;line-height:1.6;color:var(--ink);margin:4px 0 12px}#income-board .fv b{font-weight:800}
-#income-board .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+#income-board .grid3{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#income-board .pane.wide{grid-column:1/-1}
+#income-board .pane .ph{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}#income-board .pane .ph h4{margin:0}
+#income-board .pane .ph .pc{display:flex;gap:12px;font-size:11.5px;color:var(--muted)}#income-board .pane .ph .pc b{font-size:13px;margin-left:4px;font-variant-numeric:tabular-nums}
+#income-board .sd{display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint);margin-top:4px}
 #income-board .pane{background:var(--canvas);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 #income-board .pane h4{margin:0 0 8px;font-size:12px;color:var(--muted);font-weight:700}
 #income-board .pane p.pn{font-size:12.5px;margin:8px 0 0;line-height:1.55;color:var(--ink)}
-#income-board .cmp{display:grid;grid-template-columns:70px 1fr 56px;gap:10px;align-items:center;padding:6px 0}
-#income-board .cmp .nm{font-size:12px;font-weight:600;color:var(--ink)}#income-board .cmp.bench .nm{color:var(--muted)}
+#income-board .cmp{display:grid;grid-template-columns:96px 1fr 56px;gap:10px;align-items:center;padding:6px 0}
+#income-board .cmp .nm{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#income-board .cmp.bench .nm{color:var(--muted)}
 #income-board .cmp .tr{position:relative;height:18px;background:var(--inset);border-radius:4px}
 #income-board .cmp .tr .b{position:absolute;top:3px;height:12px;border-radius:3px}
 #income-board .cmp .tr .bm{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
 #income-board .cmp .tr .z{position:absolute;top:0;bottom:0;width:1px;background:#94A3B8}
 #income-board .cmp .v{text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
-#income-board .spk{position:relative;cursor:crosshair}#income-board .spk svg{display:block;width:100%;height:90px}
+#income-board .spk{position:relative;cursor:crosshair}#income-board .spk svg{display:block;width:100%;height:130px}
 #income-board .spk .gl{position:absolute;top:0;bottom:0;width:1px;background:#94A3B8;display:none;pointer-events:none}
 #income-board .spk .gd{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--canvas);border:2px solid var(--ink);display:none;pointer-events:none}
-#income-board .per{display:flex;gap:6px;margin-top:10px}#income-board .per div{flex:1;background:var(--inset);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--muted)}
-#income-board .per b{display:block;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
 #income-board .dbar{position:relative;display:flex;gap:4px;align-items:flex-end;height:90px}
 #income-board .dbar>div[data-m]{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:default}
 #income-board .dbar>div>i{width:100%;background:#B9C3D1;border-radius:2px 2px 0 0}#income-board .dbar>div.r>i{background:#6B7A90}
@@ -682,7 +684,7 @@ html.dark #income-board .bk-t{color:var(--ink)}
 #income-board .ptip b{font-weight:800}#income-board .ptip .u{color:#FF8A8F}#income-board .ptip .d{color:#8DB8FF}#income-board .ptip .g{color:#B8C0CC}
 #income-board .act{margin-top:12px;display:flex;gap:8px;align-items:center}
 #income-board .btn{border:1px solid var(--line);background:var(--canvas);border-radius:10px;padding:9px 16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
-#income-board .note{font-size:12px;color:var(--muted);line-height:1.65;margin-top:12px}
+#income-board .note{font-size:12px;color:var(--muted);line-height:1.65;margin-top:12px;background:none;padding:0}
 #income-board .calc{margin-top:18px;background:var(--canvas);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px}
 #income-board .calc b{font-size:14.5px;color:var(--ink)}#income-board .calc p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}#income-board .calc .sp{flex:1}
 #income-board .calc .cnt{font-size:12px;font-weight:800;background:var(--primary-bg);color:var(--primary);border-radius:999px;padding:2px 8px;margin-left:6px}
@@ -1349,14 +1351,16 @@ function bBenchPane(e){if(!e.bench||e.bench.total_1y==null)return `<div class="p
    <p class="pn">${g>=0?`지수보다 <b class="up">${g.toFixed(1)}%p</b> 나았어요.`:`지수보다 <b class="dn">${(-g).toFixed(1)}%p</b> 뒤처졌어요.`}</p></div>`}
 function bSpark(e){const sp=e.spark;if(!sp||!sp.p||sp.p.length<2)return '<p class="pn mu">가격 기록이 짧아요.</p>';const s=sp.p,mn=Math.min(...s),mx=Math.max(...s),r=mx-mn||1;
   const pts=s.map((v,i)=>`${(i/(s.length-1)*300).toFixed(1)},${(84-(v-mn)/r*78).toFixed(1)}`).join(' '),y0=(84-(s[0]-mn)/r*78).toFixed(1);
-  return `<div class="spk" data-bc="${e.code}"><svg viewBox="0 0 300 90" preserveAspectRatio="none"><line x1="0" x2="300" y1="${y0}" y2="${y0}" stroke="#C7CDD6" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><polyline points="${pts}" fill="none" stroke="${s[s.length-1]>=s[0]?'var(--up)':'var(--dn)'}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="gl"></div><div class="gd"></div><div class="ptip"></div></div>`}
+  return `<div class="spk" data-bc="${e.code}"><svg viewBox="0 0 300 90" preserveAspectRatio="none"><line x1="0" x2="300" y1="${y0}" y2="${y0}" stroke="#C7CDD6" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><polyline points="${pts}" fill="none" stroke="${s[s.length-1]>=s[0]?'var(--up)':'var(--dn)'}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="gl"></div><div class="gd"></div><div class="ptip"></div></div><div class="sd"><span>${e.spark.d[0].replace(/-/g,'.')}</span><span>${e.spark.d[e.spark.d.length-1].replace(/-/g,'.')}</span></div>`}
 const bmoney=(e,v)=>e.mk==='US'?'$'+v.toFixed(2):Math.round(v).toLocaleString('ko-KR')+'원';
 function bDbar(e){if(!e.dm.length||!e.dm.some(m=>m.n))return '<p class="pn mu">분배 이력을 찾지 못했어요.</p>';
   const mx=Math.max(...e.dm.map(m=>m.pct||0),0.001);
   return `<div class="dbar" data-bc="${e.code}">${e.dm.map((m,i)=>`<div class="${i>=9?'r':''}" data-m="${i}"><i style="height:${Math.max(1,(m.pct||0)/mx*72)}px"></i><span>${+m.m.slice(5)}</span></div>`).join('')}<div class="ptip"></div></div>`}
 function bDetail(e){const added=simHoldings.some(h=>h.code===e.code),can=!!UNIV[e.code];
-  return `<p class="fv">${bVerdict(e)}</p><div class="grid3">${bBenchPane(e)}
-   <div class="pane"><h4>1년 가격 · 점선은 1년 전</h4>${bSpark(e)}<div class="per"><div>3개월<b class="${bcls(e.p3m)}">${bfmt(e.p3m)}</b></div><div>1년<b class="${bcls(e.p)}">${bfmt(e.p)}</b></div></div></div>
+  // 가격 곡선이 가장 많은 걸 보여주므로 전체 폭으로 맨 위에, 그 아래 기초 지수 비교 · 월별 분배를 두 칸으로(2026-11-12 가독성 점검)
+  return `<p class="fv">${bVerdict(e)}</p><div class="grid3">
+   <div class="pane wide"><div class="ph"><h4>1년 가격 · 점선은 1년 전</h4><div class="pc"><span>3개월<b class="${bcls(e.p3m)}">${bfmt(e.p3m)}</b></span><span>1년<b class="${bcls(e.p)}">${bfmt(e.p)}</b></span></div></div>${bSpark(e)}</div>
+   ${bBenchPane(e)}
    <div class="pane"><h4>월별 분배율 · 진한 막대가 최근 3개월</h4>${bDbar(e)}${e.dtrend!=null?`<p class="pn mu">최근 3회 분배금은 1년 전보다 ${bfmt(e.dtrend)}</p>`:''}</div></div>
    ${can?`<div class="act"><button class="btn" data-badd="${e.code}">${added?'✓ 계산기에 담김 · 수량 바꾸기':'+ 계산기에 담기'}</button></div>`:''}`}
 document.addEventListener('click',ev=>{
