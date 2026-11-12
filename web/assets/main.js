@@ -1588,7 +1588,7 @@
     if (!document.head || !document.querySelectorAll) return;   // DOM 없는 환경(테스트)에서는 하지 않는다
     if (!document.getElementById('gnb-new-style')) {
       var st = document.createElement('style'); st.id = 'gnb-new-style';
-      st.textContent = '.gnb__subs .gnb__sub{position:relative}.gnb__new{position:absolute;top:3px;right:-3px;width:6px;height:6px;border-radius:50%;background:#F33942;pointer-events:none}';
+      st.textContent = '.gnb__subs .gnb__sub{position:relative}.gnb__new{position:absolute;top:4px;right:-2px;width:4px;height:4px;border-radius:50%;background:#F33942;pointer-events:none}';
       document.head.appendChild(st);
     }
     Object.keys(NEW).forEach(function (p) {
