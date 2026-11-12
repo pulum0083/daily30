@@ -6,13 +6,38 @@
 """
 from __future__ import annotations
 
+import json
 import math
 from datetime import date, timedelta
+from pathlib import Path
 
 import kospi_check as kc
 
 W, H = 1000, 300
 DOW = "월화수목금토일"
+EVENTS_PATH = Path(__file__).resolve().parent / "config" / "market_events.json"
+
+
+def market_events(market: str, months: list) -> list:
+    """장기 지표 그래프에 찍을 큰 시장 사건(scripts/config/market_events.json, 2026-11-12).
+
+    months = 그래프의 월(YYYY-MM) 목록(오래된 → 최근). 그 안에 있는 사건만, 가로 위치(%)와 함께 돌려준다.
+    날짜와 짧은 이름만 쓴다(그래프에 숫자를 지어 붙이지 않는다). 파일이 없거나 깨졌으면 빈 목록.
+    나스닥 체크·코스피 체크 두 페이지가 같이 쓴다."""
+    try:
+        evs = json.loads(EVENTS_PATH.read_text(encoding="utf-8")).get(market) or []
+    except Exception:
+        return []
+    out = []
+    for e in evs:
+        m = str(e.get("m") or "")
+        if m not in months or len(months) < 2:
+            continue
+        i = months.index(m)
+        out.append({"n": len(out) + 1, "label": e.get("label", ""), "row": int(e.get("row") or 0),
+                    "pos": "top" if e.get("pos") == "top" else "bottom",
+                    "left": f"{i / (len(months) - 1) * 100:.2f}%", "when": f"{int(m[:4])}.{int(m[5:7])}"})
+    return out
 
 
 def _pct_top(v, lo, hi) -> str:
@@ -186,6 +211,7 @@ def kospi_context(data: dict) -> dict:
         "year_max": ym, "year_max_s": _signed(ym["gap"]) if ym else "", "above": data.get("above"),
         "months": len(hist), "since": hist[0][0],
         "gap_chart": _kospi_gap_chart(hist, marks),
+        "events": market_events("kospi", [h[0] for h in hist]),
         "level_chart": _log_chart([h[0] for h in hist], [h[2] for h in hist], [h[3] for h in hist]),
         "points": [[h[0], h[1], h[2], h[3]] for h in hist],
         "bucket": _bucket_label(lo, hi), "eps": eps, "nu": nu, "nd": nd, "concl": concl, "table": table,

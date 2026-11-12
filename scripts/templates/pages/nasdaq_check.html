@@ -78,7 +78,16 @@
   .nqg-tip{top:36px;white-space:normal;width:max-content;max-width:min(300px,86vw)}
   .nqg-tip b{margin-bottom:3px}
   .nqg-tip b.gold{color:#fcd34d} .nqg-tip b.up{color:#fca5a5}
-  @media(max-width:560px){.nqp-plot{height:190px;padding-left:40px}.nqp-ax{width:34px}.nqp-yrs{margin-left:40px}.nqp-peak{display:none}}
+  /* 큰 시장 사건 — 세로 점선 + 이름표(2026-11-12). 폰은 번호만 찍고 그래프 아래에 목록 */
+  .nqp-ev{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #94A3B8;opacity:.75;pointer-events:none}
+  .nqp-evl{position:absolute;bottom:4px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#475569;background:var(--canvas);border:1px solid var(--hairline);border-radius:6px;padding:1px 6px;white-space:nowrap;pointer-events:none}
+  .nqp-evl.r1{bottom:26px}
+  .nqp-evl .no{display:none}
+  html.dark .nqp-evl{color:var(--muted)}
+  .nqp-evlist{display:none;margin:8px 0 0 46px;font-size:11.5px;color:var(--muted);line-height:1.7}
+  .nqp-evlist span{white-space:nowrap}
+  @media(max-width:560px){.nqp-plot{height:190px;padding-left:40px}.nqp-ax{width:34px}.nqp-yrs{margin-left:40px}.nqp-peak{display:none}
+    .nqp-evl{padding:0 4px;bottom:4px}.nqp-evl.r1{bottom:4px}.nqp-evl .tx{display:none}.nqp-evl .no{display:inline}.nqp-evlist{display:flex;flex-wrap:wrap;gap:0 10px;margin-left:40px}}
 </style>
 {% endblock %}
 {% block body %}
@@ -132,12 +141,14 @@
           <polyline points="{{ g1.line }}" class="line"/>
         </svg>
         {% for t in g1.th %}<span class="nqp-th {{ t.cls }}" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
+        {% for e in nq.events %}<i class="nqp-ev" style="left:{{ e.left }}"></i><span class="nqp-evl r{{ e.row }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
         <span class="nqp-peak" style="left:{{ g1.peak.left }};top:{{ g1.peak.top }}">최고 {{ g1.peak.label }}</span>
         <i class="nqp-dot" style="left:{{ g1.dot.left }};top:{{ g1.dot.top }}"></i>
         <i class="nqp-cur" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
       </div>
     </div>
     <div class="nqp-yrs">{% for y in g1.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+    {% if nq.events %}<div class="nqp-evlist">{% for e in nq.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
   </section>
 
   <section class="nqp-card">
@@ -150,10 +161,12 @@
           <polyline points="{{ g2.ma }}" class="ma"/>
           <polyline points="{{ g2.high }}" class="line"/>
         </svg>
+        {% for e in nq.events %}<i class="nqp-ev" style="left:{{ e.left }}"></i><span class="nqp-evl r{{ e.row }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
         <i class="nqp-cur" hidden></i><i class="nqp-pt ma" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
       </div>
     </div>
     <div class="nqp-yrs">{% for y in g2.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+    {% if nq.events %}<div class="nqp-evlist">{% for e in nq.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
   </section>
 
   <section class="nqp-sec">

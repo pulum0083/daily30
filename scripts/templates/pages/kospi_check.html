@@ -66,11 +66,13 @@
           <polygon points="{{ g1.area }}" class="area"/>
           <polyline points="{{ g1.line }}" class="line"/>
         </svg>
+        {% for e in kc.events %}<i class="ltp-ev" style="left:{{ e.left }}"></i><span class="ltp-evl r{{ e.row }} {{ e.pos }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
         {% for m in g1.marks %}<i class="ltp-mk {{ 'now' if 'now' in m.cls }}" style="left:{{ m.left }};top:{{ m.top }}"></i><span class="ltp-ml {{ m.cls }}" style="left:{{ m.left }};top:{{ m.top }}">{{ m.label }}</span>{% endfor %}
         <i class="ltp-cur" hidden></i><i class="ltp-pt" hidden></i><div class="ltp-tip" role="status" hidden></div>
       </div>
     </div>
     <div class="ltp-yrs">{% for y in g1.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+    {% if kc.events %}<div class="ltp-evlist">{% for e in kc.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
   </section>
 
   <section class="ltp-card">
@@ -83,11 +85,13 @@
           <polyline points="{{ g2.b }}" class="ma"/>
           <polyline points="{{ g2.a }}" class="line"/>
         </svg>
+        {% for e in kc.events %}<i class="ltp-ev" style="left:{{ e.left }}"></i><span class="ltp-evl r{{ e.row }} {{ e.pos }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
         <i class="ltp-mk now" style="left:{{ g2.now.left }};top:{{ g2.now.top }}"></i>
         <i class="ltp-cur" hidden></i><i class="ltp-pt ma" hidden></i><i class="ltp-pt" hidden></i><div class="ltp-tip" role="status" hidden></div>
       </div>
     </div>
     <div class="ltp-yrs">{% for y in g2.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+    {% if kc.events %}<div class="ltp-evlist">{% for e in kc.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
   </section>
 
   {% if kc.eps %}

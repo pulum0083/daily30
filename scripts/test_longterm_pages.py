@@ -288,3 +288,15 @@ def test_weekly_refreshes_live_pages_only_for_this_week(tmp_path, monkeypatch):
     monkeypatch.setattr(wr, "week_of", lambda today: date(2026, 11, 6))
     monkeypatch.setattr(sys, "argv", ["weekly_report.py"])
     assert wr.main() == 0 and calls == [date(2026, 11, 6)]
+
+
+def test_market_events_only_inside_chart_range():
+    # 장기 지표 그래프의 큰 사건(2026-11-12) — 그래프 기간 안의 달만, 가로 위치와 함께. 번호는 남은 것끼리 1부터
+    import longterm_pages as lp
+    months = [f"{y}-{m:02d}" for y in range(2000, 2021) for m in range(1, 13)]
+    ev = lp.market_events("nasdaq", months)
+    assert [e["when"] for e in ev] == ["2000.3", "2008.9", "2020.3"]   # 2022.3은 기간 밖이라 빠진다
+    assert [e["n"] for e in ev] == [1, 2, 3]
+    assert ev[0]["left"] == f"{2 / (len(months) - 1) * 100:.2f}%"
+    assert all(e["pos"] in ("top", "bottom") for e in ev)
+    assert lp.market_events("nope", months) == []

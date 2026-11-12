@@ -887,6 +887,7 @@ def _nqp_level_chart(hist: list) -> dict:
 def build_nasdaq_page(data: dict, bt: dict, target_date: str) -> dict:
     """/stocks/nasdaq-check/ 상세 페이지 컨텍스트. 숫자는 전부 수집 파일·백테스트 파일 그대로다(§0)."""
     import nasdaq_overheat as nq
+    import longterm_pages as lp
     hist = [h for h in (data.get("history") or [])
             if isinstance(h, dict) and all(isinstance(h.get(k), (int, float)) for k in ("g", "h", "c", "ma"))]
     if len(hist) < 24 or not isinstance(data.get("gap_pct"), (int, float)):
@@ -907,6 +908,7 @@ def build_nasdaq_page(data: dict, bt: dict, target_date: str) -> dict:
             "caution": nq.CAUTION, "warn": nq.WARN, "bt": bt,
             "from_year": hist[0]["m"][:4],
             "gap_chart": _nqp_gap_chart(hist, nq.CAUTION, nq.WARN),
+            "events": lp.market_events("nasdaq", [h["m"] for h in hist]),
             "level_chart": _nqp_level_chart(hist),
             # 짚었을 때 띄울 월별 값 — [월, 이격률, 고점, 종가, 60개월선]
             "points": [[h["m"], h["g"], h["h"], h["c"], h["ma"]] for h in hist],
