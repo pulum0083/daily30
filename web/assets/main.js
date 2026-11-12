@@ -1574,3 +1574,33 @@
     gtag('event','telegram_click',{ link_url: a.getAttribute('href'), page_path: location.pathname });
   }, true);
 })();
+
+/* GNB 새 소식 점(2026-11-12) — 새로 바뀐 메뉴 글자 오른쪽 위에 작은 빨간 점.
+   그 메뉴를 누르거나 그 페이지에 들어가면 브라우저에 '본 버전'을 저장하고 점이 사라진다.
+   버전을 올리면 다시 뜬다. ⚠️ 월배당 페이지(main.js를 싣지 않는다)도 같은 키·버전을 직접 저장한다 —
+   버전을 바꾸면 web/stocks/income-designer/index.html 의 NAV_SEEN 값도 함께 바꿀 것. */
+(function () {
+  var NEW = { '/stocks/income-designer/': '2026-11-12' };   // 메뉴 주소 → 새 소식 버전
+  var KEY = 'ds-nav-seen:';
+  function seen(p) { try { return localStorage.getItem(KEY + p) || ''; } catch (e) { return NEW[p]; } }
+  function mark(p) { try { localStorage.setItem(KEY + p, NEW[p]); } catch (e) {} }
+  function run() {
+    if (!document.head || !document.querySelectorAll) return;   // DOM 없는 환경(테스트)에서는 하지 않는다
+    if (!document.getElementById('gnb-new-style')) {
+      var st = document.createElement('style'); st.id = 'gnb-new-style';
+      st.textContent = '.gnb__subs .gnb__sub{position:relative}.gnb__new{position:absolute;top:3px;right:-3px;width:6px;height:6px;border-radius:50%;background:#F33942;pointer-events:none}';
+      document.head.appendChild(st);
+    }
+    Object.keys(NEW).forEach(function (p) {
+      if (location.pathname.indexOf(p) === 0) { mark(p); return; }
+      if (seen(p) >= NEW[p]) return;
+      document.querySelectorAll('a.gnb__sub[href="' + p + '"]').forEach(function (a) {
+        if (a.querySelector('.gnb__new')) return;
+        var d = document.createElement('span'); d.className = 'gnb__new'; d.setAttribute('aria-label', '새 소식');
+        a.appendChild(d);
+        a.addEventListener('click', function () { mark(p); });
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
