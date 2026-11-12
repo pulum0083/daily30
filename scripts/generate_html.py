@@ -834,19 +834,30 @@ _NQP_W, _NQP_H = 1000, 300        # 상세 페이지 그래프 SVG 좌표 — �
 _NQP_LOG_TICKS = (500, 1000, 2000, 5000, 10000, 20000, 50000)
 
 
-def _nqp_years(hist: list) -> list:
-    """5년마다 연도 눈금(1월 위치)."""
+_NQP_RANGES = (("all", "전체", None), ("10y", "최근 10년", 120), ("5y", "최근 5년", 60))   # 기간 버튼(2026-11-12 사용자 결정)
+_NQP_SUB_LOG_TICKS = (2000, 3000, 5000, 7000, 10000, 15000, 20000, 30000, 50000)   # 짧은 기간은 눈금을 촘촘히
+
+
+def _nqp_years(hist: list, every: int = 5) -> list:
+    """every년마다 연도 눈금(1월 위치)."""
     n = len(hist)
     return [{"y": h["m"][:4], "left": f"{i / (n - 1) * 100:.2f}%"}
-            for i, h in enumerate(hist) if h["m"].endswith("-01") and int(h["m"][:4]) % 5 == 0]
+            for i, h in enumerate(hist) if h["m"].endswith("-01") and int(h["m"][:4]) % every == 0]
 
 
-def _nqp_gap_chart(hist: list, caution: float, warn: float) -> dict:
-    """① 월별 이격률(월봉 고점 ÷ 60개월선 − 1). 주의·경고 구간을 칠하고 0·기준선을 긋는다."""
+def _nqp_gap_chart(hist: list, caution: float, warn: float, full: bool = True, every: int = 5) -> dict:
+    """① 월별 이격률(월봉 고점 ÷ 60개월선 − 1). 주의·경고 구간을 칠하고 0·기준선을 긋는다.
+    full=False(최근 10년·5년)는 그 기간에 맞춰 세로 눈금을 다시 잡는다 — 2000년 +182%에 눌리지 않게."""
     W, H = _NQP_W, _NQP_H
     gs = [h["g"] for h in hist]
-    lo = min(-50.0, math.floor(min(gs) / 50) * 50)
-    hi = max(100.0, math.ceil(max(gs) / 50) * 50)
+    if full:
+        lo = min(-50.0, math.floor(min(gs) / 50) * 50)
+        hi = max(100.0, math.ceil(max(gs) / 50) * 50)
+        step = 50
+    else:
+        lo = min(0.0, math.floor(min(gs) / 20) * 20)
+        hi = max(warn + 10, math.ceil(max(gs) / 20) * 20)
+        step = 20
     Y = lambda v: (hi - v) / (hi - lo) * H
     xs = [i * W / (len(hist) - 1) for i in range(len(hist))]
     line = " ".join(f"{x:.1f},{Y(g):.1f}" for x, g in zip(xs, gs))
@@ -857,17 +868,19 @@ def _nqp_gap_chart(hist: list, caution: float, warn: float) -> dict:
         "area": f"0,{Y(0):.1f} {line} {W},{Y(0):.1f}",
         "y_hi": f"{Y(hi):.1f}", "y_warn": f"{Y(warn):.1f}", "y_caution": f"{Y(caution):.1f}", "y0": f"{Y(0):.1f}",
         "h_warn": f"{Y(warn) - Y(hi):.1f}", "h_caution": f"{Y(caution) - Y(warn):.1f}",
-        "axes": [{"v": f"{int(v)}%", "top": top(v)} for v in range(int(lo), int(hi) + 1, 50)],
+        "axes": [{"v": f"{int(v)}%", "top": top(v)} for v in range(int(lo), int(hi) + 1, step)],
         "th": [{"v": f"{int(caution)} 주의", "top": top(caution), "cls": "caution"},
                {"v": f"{int(warn)} 경고", "top": top(warn), "cls": "warn"}],
         "dot": {"left": "100%", "top": top(gs[-1])},
-        "peak": {"left": f"{xs[pi] / W * 100:.2f}%", "top": top(gs[pi]),
-                 "label": f"{int(hist[pi]['m'][:4])}년 {int(hist[pi]['m'][5:7])}월 {gs[pi]:+.0f}%"},
-        "years": _nqp_years(hist),
+        # 최고점 이름표 — 기간 첫 달·끝 달 근처면 뺀다(최근 5년은 첫 달이 최고라 '최고'가 기간 시작일 뿐이고 이름표가 잘린다)
+        "peak": ({"left": f"{xs[pi] / W * 100:.2f}%", "top": top(gs[pi]),
+                  "label": f"{int(hist[pi]['m'][:4])}년 {int(hist[pi]['m'][5:7])}월 {gs[pi]:+.0f}%"}
+                 if 0.05 <= pi / (len(gs) - 1) <= 0.95 else None),
+        "years": _nqp_years(hist, every),
     }
 
 
-def _nqp_level_chart(hist: list) -> dict:
+def _nqp_level_chart(hist: list, full: bool = True, every: int = 5) -> dict:
     """② 나스닥 월봉 고점과 60개월선 — 1990년 ~400에서 2만 7천대까지라 로그 눈금으로 그린다."""
     W, H = _NQP_W, _NQP_H
     vals = [v for h in hist for v in (h["h"], h["ma"]) if v and v > 0]
@@ -879,9 +892,27 @@ def _nqp_level_chart(hist: list) -> dict:
     pts = lambda key: " ".join(f"{x:.1f},{Y(h[key]):.1f}" for x, h in zip(xs, hist))
     return {
         "w": W, "h": H, "high": pts("h"), "ma": pts("ma"), "llo": round(llo, 6), "lhi": round(lhi, 6),
-        "axes": [{"v": f"{t:,}", "top": f"{Y(t) / H * 100:.2f}%"} for t in _NQP_LOG_TICKS if lo <= t <= hi],
-        "years": _nqp_years(hist),
+        "axes": [{"v": f"{t:,}", "top": f"{Y(t) / H * 100:.2f}%"}
+                 for t in (_NQP_LOG_TICKS if full else _NQP_SUB_LOG_TICKS) if lo <= t <= hi],
+        "years": _nqp_years(hist, every),
     }
+
+
+def _nqp_ranges(hist: list, caution: float, warn: float, lp) -> list:
+    """기간 버튼별 그래프 — 전체·최근 10년·최근 5년(2026-11-12 사용자 결정). 서버가 셋 다 그려 두고
+    버튼은 보이는 것만 바꾼다. off = 그 기간 첫 달의 전체 시계열 위치(짚기 말풍선이 같은 값을 쓴다)."""
+    out = []
+    for key, label, k in _NQP_RANGES:
+        if k and len(hist) <= k:
+            continue
+        h = hist[-k:] if k else hist
+        every = 5 if not k else (2 if k > 60 else 1)
+        out.append({"key": key, "label": label, "off": len(hist) - len(h), "n": len(h),
+                    "span": f"{int(h[0]['m'][:4])}년 {int(h[0]['m'][5:7])}월",
+                    "gap": _nqp_gap_chart(h, caution, warn, full=not k, every=every),
+                    "level": _nqp_level_chart(h, full=not k, every=every),
+                    "events": lp.market_events("nasdaq", [x["m"] for x in h])})
+    return out
 
 
 def build_nasdaq_page(data: dict, bt: dict, target_date: str) -> dict:
@@ -907,9 +938,7 @@ def build_nasdaq_page(data: dict, bt: dict, target_date: str) -> dict:
             "month_label": month_label, "asof": asof, "date": target_date,
             "caution": nq.CAUTION, "warn": nq.WARN, "bt": bt,
             "from_year": hist[0]["m"][:4],
-            "gap_chart": _nqp_gap_chart(hist, nq.CAUTION, nq.WARN),
-            "events": lp.market_events("nasdaq", [h["m"] for h in hist]),
-            "level_chart": _nqp_level_chart(hist),
+            "ranges": _nqp_ranges(hist, nq.CAUTION, nq.WARN, lp),
             # 짚었을 때 띄울 월별 값 — [월, 이격률, 고점, 종가, 60개월선]
             "points": [[h["m"], h["g"], h["h"], h["c"], h["ma"]] for h in hist],
             "brief_url": f"/briefings/{target_date}/us/" if brief.exists() else "",

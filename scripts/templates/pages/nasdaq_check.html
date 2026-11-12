@@ -2,7 +2,7 @@
    숫자는 전부 미국 브리핑 때 수집한 data/nasdaq_overheat.json·백테스트 파일 그대로다(§0·§20).
    그래프 SVG는 가로로 늘려 그리므로 글자·점·짚기 선은 SVG 밖 HTML로 겹친다(브리핑 섹션과 같은 방식). #}
 {% extends "base.html" %}
-{% set g1 = nq.gap_chart %}{% set g2 = nq.level_chart %}{% set b = nq.bt %}
+{% set b = nq.bt %}
 {% block title %}나스닥 체크 — 60개월선 대비 과열도 {{ '%+.1f'|format(nq.gap) }}% | Double-Shot{% endblock %}
 {% block og_title %}나스닥 체크 — 60개월선 대비 과열도 {{ '%+.1f'|format(nq.gap) }}%{% endblock %}
 {% block og_desc %}나스닥 월봉 고점이 60개월(5년) 이동평균선보다 {{ '%.1f'|format(nq.gap) }}% 위예요({{ nq.badge }}). {{ nq.from_year }}년부터의 월별 이격률과 지수·60개월선 그래프, 과거 통계를 함께 봐요.{% endblock %}
@@ -51,7 +51,7 @@
   .nqp-in .line{fill:none;stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
   .nqp-in .ma{fill:none;stroke:var(--primary);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
   .nqp-ax{position:absolute;left:0;width:40px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .nqp-th{position:absolute;left:6px;transform:translateY(-120%);font-size:10px;font-weight:700}
+  .nqp-th{position:absolute;left:6px;transform:translateY(-120%);font-size:10px;font-weight:700;background:var(--canvas);padding:0 3px;border-radius:3px;line-height:1.35}   /* 바탕을 깔아 선이 지나가도 읽힌다 */
   .nqp-th.caution{color:var(--gold);transform:translateY(15%)} .nqp-th.warn{color:var(--up)}   /* 주의는 선 아래, 70은 선 위 — 두 선이 붙어 있어 글자가 겹쳤다 */
   .nqp-dot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--canvas);background:var(--ink);box-shadow:0 0 0 1px var(--ink)}
   .is-ok .nqp-dot{background:#059669;box-shadow:0 0 0 1px #059669}
@@ -78,6 +78,14 @@
   .nqg-tip{top:36px;white-space:normal;width:max-content;max-width:min(300px,86vw)}
   .nqg-tip b{margin-bottom:3px}
   .nqg-tip b.gold{color:#fcd34d} .nqg-tip b.up{color:#fca5a5}
+  /* 기간 버튼 — 전체·최근 10년·최근 5년(2026-11-12 사용자 결정). 두 그래프가 같은 기간으로 함께 바뀐다 */
+  .nqp-seg{display:inline-flex;background:var(--surface-soft);border:1px solid var(--hairline);border-radius:9px;padding:2px;gap:2px}
+  .nqp-seg button{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:none;border:0;border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+  .nqp-seg button:hover{color:var(--ink)}
+  .nqp-seg button[aria-pressed="true"]{background:var(--canvas);color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.12)}
+  html.dark .nqp-seg button[aria-pressed="true"]{background:rgba(255,255,255,.12)}
+  .nqp-card .nqp-leg{margin-bottom:4px}
+  .nqp-span{font-size:11.5px;color:var(--muted);margin-bottom:22px}
   /* 큰 시장 사건 — 세로 점선 + 이름표(2026-11-12). 폰은 번호만 찍고 그래프 아래에 목록 */
   .nqp-ev{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #94A3B8;opacity:.75;pointer-events:none}
   .nqp-evl{position:absolute;bottom:4px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#475569;background:var(--canvas);border:1px solid var(--hairline);border-radius:6px;padding:1px 6px;white-space:nowrap;pointer-events:none}
@@ -86,7 +94,7 @@
   html.dark .nqp-evl{color:var(--muted)}
   .nqp-evlist{display:none;margin:8px 0 0 46px;font-size:11.5px;color:var(--muted);line-height:1.7}
   .nqp-evlist span{white-space:nowrap}
-  @media(max-width:560px){.nqp-plot{height:190px;padding-left:40px}.nqp-ax{width:34px}.nqp-yrs{margin-left:40px}.nqp-peak{display:none}
+  @media(max-width:560px){.nqp-seg button{padding:5px 8px;font-size:11.5px}.nqp-plot{height:190px;padding-left:40px}.nqp-ax{width:34px}.nqp-yrs{margin-left:40px}.nqp-peak{display:none}
     .nqp-evl{padding:0 4px;bottom:4px}.nqp-evl.r1{bottom:4px}.nqp-evl .tx{display:none}.nqp-evl .no{display:inline}.nqp-evlist{display:flex;flex-wrap:wrap;gap:0 10px;margin-left:40px}}
 </style>
 {% endblock %}
@@ -126,12 +134,15 @@
   </div>
 
   <section class="nqp-card is-{{ nq.level }}">
-    <div class="nqp-h"><h2>월별 이격률</h2><small>{{ nq.from_year }}년 1월 ~ {{ nq.month_label }}</small></div>
+    <div class="nqp-h"><h2>월별 이격률</h2><div class="nqp-seg" role="group" aria-label="기간">{% for r in nq.ranges %}<button type="button" data-r="{{ r.key }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ r.label }}</button>{% endfor %}</div></div>
     <div class="nqp-leg"><span><i></i>월봉 고점 ÷ 60개월선 − 1</span><span><i class="zc"></i>주의 {{ nq.caution|int }}~{{ nq.warn|int }}%</span><span><i class="zw"></i>경고 {{ nq.warn|int }}% 이상</span></div>
+    {% for r in nq.ranges %}{% set g1 = r.gap %}
+    <div class="nqp-r" data-r="{{ r.key }}"{% if not loop.first %} hidden{% endif %}>
+    <div class="nqp-span">{{ r.span }} ~ {{ nq.month_label }}</div>
     <div class="nqp-plot">
       {% for a in g1.axes %}<span class="nqp-ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
-      <div class="nqp-in" data-kind="gap" data-lo="{{ g1.lo }}" data-hi="{{ g1.hi }}">
-        <svg viewBox="0 0 {{ g1.w }} {{ g1.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점의 60개월선 대비 이격률, {{ nq.from_year }}년 이후 월별">
+      <div class="nqp-in" data-kind="gap" data-lo="{{ g1.lo }}" data-hi="{{ g1.hi }}" data-off="{{ r.off }}" data-n="{{ r.n }}">
+        <svg viewBox="0 0 {{ g1.w }} {{ g1.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점의 60개월선 대비 이격률, {{ r.span }}부터 월별">
           <rect x="0" y="{{ g1.y_hi }}" width="{{ g1.w }}" height="{{ g1.h_warn }}" class="z-warn"/>
           <rect x="0" y="{{ g1.y_warn }}" width="{{ g1.w }}" height="{{ g1.h_caution }}" class="z-caution"/>
           <line x1="0" x2="{{ g1.w }}" y1="{{ g1.y0 }}" y2="{{ g1.y0 }}" class="zero"/>
@@ -141,32 +152,39 @@
           <polyline points="{{ g1.line }}" class="line"/>
         </svg>
         {% for t in g1.th %}<span class="nqp-th {{ t.cls }}" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
-        {% for e in nq.events %}<i class="nqp-ev" style="left:{{ e.left }}"></i><span class="nqp-evl r{{ e.row }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
-        <span class="nqp-peak" style="left:{{ g1.peak.left }};top:{{ g1.peak.top }}">최고 {{ g1.peak.label }}</span>
+        {% for e in r.events %}<i class="nqp-ev" style="left:{{ e.left }}"></i><span class="nqp-evl r{{ e.row }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
+        {% if g1.peak %}<span class="nqp-peak" style="left:{{ g1.peak.left }};top:{{ g1.peak.top }}">최고 {{ g1.peak.label }}</span>{% endif %}
         <i class="nqp-dot" style="left:{{ g1.dot.left }};top:{{ g1.dot.top }}"></i>
         <i class="nqp-cur" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
       </div>
     </div>
     <div class="nqp-yrs">{% for y in g1.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
-    {% if nq.events %}<div class="nqp-evlist">{% for e in nq.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
+    {% if r.events %}<div class="nqp-evlist">{% for e in r.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
+    </div>
+    {% endfor %}
   </section>
 
   <section class="nqp-card">
-    <div class="nqp-h"><h2>나스닥 월봉 고점과 60개월선</h2><small>로그 눈금</small></div>
+    <div class="nqp-h"><h2>나스닥 월봉 고점과 60개월선</h2><div class="nqp-seg" role="group" aria-label="기간">{% for r in nq.ranges %}<button type="button" data-r="{{ r.key }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ r.label }}</button>{% endfor %}</div></div>
     <div class="nqp-leg"><span><i></i>월봉 고점</span><span><i class="ma"></i>60개월 이동평균(월말 종가)</span></div>
+    {% for r in nq.ranges %}{% set g2 = r.level %}
+    <div class="nqp-r" data-r="{{ r.key }}"{% if not loop.first %} hidden{% endif %}>
+    <div class="nqp-span">로그 눈금 · {{ r.span }} ~ {{ nq.month_label }}</div>
     <div class="nqp-plot">
       {% for a in g2.axes %}<span class="nqp-ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
-      <div class="nqp-in" data-kind="lvl" data-lo="{{ g2.llo }}" data-hi="{{ g2.lhi }}">
-        <svg viewBox="0 0 {{ g2.w }} {{ g2.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점과 60개월 이동평균, {{ nq.from_year }}년 이후 로그 눈금">
+      <div class="nqp-in" data-kind="lvl" data-lo="{{ g2.llo }}" data-hi="{{ g2.lhi }}" data-off="{{ r.off }}" data-n="{{ r.n }}">
+        <svg viewBox="0 0 {{ g2.w }} {{ g2.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점과 60개월 이동평균, {{ r.span }}부터 로그 눈금">
           <polyline points="{{ g2.ma }}" class="ma"/>
           <polyline points="{{ g2.high }}" class="line"/>
         </svg>
-        {% for e in nq.events %}<i class="nqp-ev" style="left:{{ e.left }}"></i><span class="nqp-evl r{{ e.row }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
+        {% for e in r.events %}<i class="nqp-ev" style="left:{{ e.left }}"></i><span class="nqp-evl r{{ e.row }}" style="left:{{ e.left }}"><span class="tx">{{ e.label }}</span><span class="no">{{ e.n }}</span></span>{% endfor %}
         <i class="nqp-cur" hidden></i><i class="nqp-pt ma" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
       </div>
     </div>
     <div class="nqp-yrs">{% for y in g2.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
-    {% if nq.events %}<div class="nqp-evlist">{% for e in nq.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
+    {% if r.events %}<div class="nqp-evlist">{% for e in r.events %}<span>{{ e.n }} {{ e.label }}({{ e.when }})</span>{% endfor %}</div>{% endif %}
+    </div>
+    {% endfor %}
   </section>
 
   <section class="nqp-sec">
@@ -198,8 +216,8 @@
 (function () {
   var el = document.getElementById('nqp-data');
   if (!el) return;
-  var P = JSON.parse(el.textContent), n = P.length;
-  if (n < 2) return;
+  var P = JSON.parse(el.textContent);
+  if (P.length < 2) return;
   var C = {{ nq.caution }}, W = {{ nq.warn }};
   var boxes = [].slice.call(document.querySelectorAll('.nqp-in'));
   function num(v) { return v.toLocaleString('en-US', { maximumFractionDigits: 0 }); }
@@ -209,8 +227,10 @@
     if (box.dataset.kind === 'lvl') v = Math.log10(v);
     return Math.max(0, Math.min(100, (hi - v) / (hi - lo) * 100));
   }
-  function place(box, i) {
-    var p = P[i], x = i / (n - 1) * 100, lvl = box.dataset.kind === 'lvl';
+  function place(box, i) {   // i = 전체 시계열 위치. 상자마다 그 기간의 첫 달(data-off)과 달 수(data-n)로 가로 위치를 낸다
+    var off = +box.dataset.off, n = +box.dataset.n;
+    if (i < off) return;
+    var p = P[i], x = (i - off) / (n - 1) * 100, lvl = box.dataset.kind === 'lvl';
     var pts = box.querySelectorAll('.nqp-pt'), tip = box.querySelector('.nqp-tip'), cur = box.querySelector('.nqp-cur');
     var ys = lvl ? [topPct(box, p[4]), topPct(box, p[2])] : [topPct(box, p[1])];   // 지수 그래프: 60개월선 점, 고점 점
     for (var k = 0; k < pts.length; k++) { pts[k].hidden = false; pts[k].style.left = x + '%'; pts[k].style.top = ys[k] + '%'; }
@@ -225,7 +245,8 @@
     tip.style.left = x + '%'; tip.style.top = y + '%';
     tip.style.transform = 'translate(' + tx + ',' + (below ? '16px' : 'calc(-100% - 14px)') + ')';
   }
-  function show(i) { boxes.forEach(function (b) { place(b, i); }); }
+  function shown(b) { return !b.closest('.nqp-r').hidden; }
+  function show(i) { boxes.forEach(function (b) { if (shown(b)) place(b, i); }); }
   function hide() {
     boxes.forEach(function (b) {
       [].forEach.call(b.querySelectorAll('.nqp-pt,.nqp-tip,.nqp-cur'), function (e) { e.hidden = true; });
@@ -234,11 +255,20 @@
   boxes.forEach(function (box) {
     function at(e) {
       var r = box.getBoundingClientRect();
-      show(Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (n - 1)));
+      show(+box.dataset.off + Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (+box.dataset.n - 1)));
     }
     box.addEventListener('pointermove', at);
     box.addEventListener('pointerdown', at);
     box.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hide(); });   // 손가락은 다음 터치까지 남긴다
+  });
+  // 기간 버튼 — 두 그래프를 같은 기간으로 바꾼다. 보던 말풍선은 지운다(다른 기간의 가로 위치라서)
+  [].forEach.call(document.querySelectorAll('.nqp-seg button'), function (btn) {
+    btn.addEventListener('click', function () {
+      var k = btn.dataset.r;
+      hide();
+      [].forEach.call(document.querySelectorAll('.nqp-r'), function (r) { r.hidden = r.dataset.r !== k; });
+      [].forEach.call(document.querySelectorAll('.nqp-seg button'), function (b) { b.setAttribute('aria-pressed', b.dataset.r === k ? 'true' : 'false'); });
+    });
   });
 })();
 

@@ -183,7 +183,7 @@ def _page(tmp_path, monkeypatch, data, target="2026-10-23"):
 def test_page_written_with_two_charts_and_points(tmp_path, monkeypatch):
     ok, html = _page(tmp_path, monkeypatch, _data())
     assert ok
-    assert html.count('class="nqp-in"') == 2 and 'data-kind="gap"' in html and 'data-kind="lvl"' in html
+    assert html.count('class="nqp-in"') == 6 and 'data-kind="gap"' in html and 'data-kind="lvl"' in html   # 그래프 2개 × 기간 3개
     pts = json.loads(html.split('id="nqp-data">')[1].split("</script>")[0])
     assert len(pts) == 442 and pts[0][0] == "1990-01"
     assert "최고 2000년 3월 +182%" in html and "✓ 정상" in html
@@ -200,3 +200,22 @@ def test_page_skipped_on_date_mismatch_or_no_history(tmp_path, monkeypatch):
 def test_page_in_sitemap_and_gate():
     import verify_publish_gate as vg
     assert any(url.endswith("/stocks/nasdaq-check/") for _, url in vg.expected_pages())
+
+
+def test_page_range_buttons_full_10y_5y(tmp_path, monkeypatch):
+    """기간 버튼(2026-11-12) — 전체·최근 10년·최근 5년을 서버가 다 그려 두고, 첫 화면은 전체다."""
+    ok, html = _page(tmp_path, monkeypatch, _data())
+    assert ok
+    assert html.count('class="nqp-in"') == 6                                   # 그래프 2개 × 기간 3개
+    assert html.count('data-r="all"') == 2 + 2 and html.count('data-r="10y" hidden') == 2   # 버튼 2 + 묶음 2, 10년·5년은 숨김
+    assert 'data-off="0" data-n="442"' in html and 'data-off="322" data-n="120"' in html and 'data-off="382" data-n="60"' in html
+    assert "최고 2000년 3월 +182%" in html                                       # 전체 그래프 최고점 이름표는 그대로
+    pts = json.loads(html.split('id="nqp-data">')[1].split("</script>")[0])
+    assert len(pts) == 442                                                     # 짚기 값은 한 벌만 싣는다
+
+
+def test_sub_range_rescales_axis():
+    hist = [{"m": f"{2016 + (i + 11) // 12}-{(i + 11) % 12 + 1:02d}", "g": 10 + i * 0.5} for i in range(120)]
+    g = gh._nqp_gap_chart(hist, 60, 70, full=False, every=2)
+    assert g["lo"] == 0 and g["hi"] == 80                                      # 2000년 +182%에 눌리지 않는다
+    assert g["peak"] is None                                                   # 최고가 기간 끝 달이면 이름표를 뺀다
