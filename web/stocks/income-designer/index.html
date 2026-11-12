@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot</title>
+<title>월배당 ETF 건전성 — 원금·분배금·계산기 | Double-Shot</title>
 <link rel="canonical" href="https://doubleshot.space/stocks/income-designer/">
-<meta name="description" content="국내·미국 월배당 ETF를 담아 매달 받을 분배금(세후)을 계산해요. 분배율·1년 가격 변화로 원금이 녹는지(건전성)를 보고, 금융소득종합과세 2,000만원 기준도 함께 점검해요.">
+<meta name="description" content="국내·미국 월배당 ETF가 지금 원금을 지키고 있는지 봐요. 1년 동안 받은 분배금과 가격 변화, 기초 지수 대비 성과, 월별 분배 흐름을 실측으로 보여주고, 담은 ETF의 세후 월 분배금도 계산해요.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot">
-<meta property="og:description" content="국내·미국 월배당 ETF를 담아 매달 받을 분배금(세후)을 계산하고 원금 침식·종합과세를 점검해요.">
+<meta property="og:title" content="월배당 ETF 건전성 — 원금·분배금·계산기 | Double-Shot">
+<meta property="og:description" content="월배당 ETF가 원금을 지키며 분배하는지, 받은 분배금과 깎인 가격을 함께 봐요.">
 <meta property="og:url" content="https://doubleshot.space/stocks/income-designer/">
 <link rel="icon" type="image/svg+xml" href="/stocks/income-designer/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -47,9 +47,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
-.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;}.crumb a{color:var(--muted);text-decoration:none;padding:0 2px;}.crumb a:hover{color:var(--primary);}
-.back-btn{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:24px;height:24px;border-radius:7px;background:var(--canvas);border:1px solid var(--hair);color:var(--muted);font-size:14px;cursor:pointer;margin-right:10px;transition:background .12s,color .12s;padding:0;line-height:1;}
-.back-btn:hover{background:var(--inset);color:var(--ink);}
 
 .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:16px;flex-wrap:wrap;}
 .hero h1{font-size:17px;font-weight:800;letter-spacing:-.4px;margin:0;}.hero h1 .a{color:var(--primary);}
@@ -137,9 +134,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .row:last-of-type{border-bottom:none;}.row:hover{background:var(--primary-bg);}
 .rk{width:16px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}.rk.t{color:var(--primary);}
 .nm{width:148px;flex-shrink:0;}.nm b{font-size:13px;font-weight:700;display:block;line-height:1.3;}.nm small{font-size:10px;color:var(--muted);}
-.barwrap{flex:1;height:19px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
 .bar{height:100%;border-radius:5px;}.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
-.barval{position:absolute;right:8px;top:0;height:19px;display:flex;align-items:center;font-size:11px;font-weight:800;}
 .ai{width:72px;text-align:right;flex-shrink:0;}
 .aip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:#fff;}
 .ais{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
@@ -225,12 +220,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .phead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px;flex-wrap:wrap;}
 .phead h1{font-size:17px;font-weight:800;letter-spacing:-.4px;margin:0;display:flex;align-items:center;gap:9px;}.phead h1 .ic{font-size:18px;}
 .phead .psub{font-size:12px;color:var(--muted);margin-top:5px;}
-.rtabs{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px;gap:2px;}
-.rtabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:8px;}.rtabs a.on{background:var(--canvas);color:var(--primary);box-shadow:var(--s1);}
 .fbar{display:flex;align-items:center;gap:9px;margin-bottom:12px;flex-wrap:wrap;}.fbar .lbl{font-size:12px;font-weight:700;color:var(--muted);}
 .fchips{display:flex;flex-wrap:wrap;gap:7px;}.fchips a{font-size:12px;font-weight:600;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;}.fchips a.on{background:var(--primary-bg);border-color:#BFDBFE;color:var(--primary);}
 .tbl{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;box-shadow:var(--s1);}
-.trow{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}.trow:last-child{border-bottom:none;}.trow:hover{background:var(--primary-bg);}
 .tchg{width:68px;text-align:right;flex-shrink:0;font-size:13px;font-weight:800;}
 .pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
 .pager a{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--hair);background:var(--canvas);font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
@@ -418,9 +410,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .dl-item i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .dl-item b{margin-left:auto;color:var(--ink);font-weight:600;}
 .hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
-.hbdg.ok{background:#ecfeea;color:#00ae1a;}
-.hbdg.warn{background:#fff9e3;color:#eb8e02;}
-.hbdg.bad{background:#fff5f7;color:#f33942;}
+.hbdg.ok{background:#E8F7EE;color:#12A150;}
+.hbdg.warn{background:#FEF3C7;color:#B7791F;}
+.hbdg.bad{background:#FFF0E6;color:#D9480F;}
 .hbdg.na{background:#F1F3F5;color:#868E96;}
 /* 사이드바 인컴 ETF 랭킹 행 */
 .irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
@@ -497,7 +489,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
 .ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 .ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.ipanel-legend .dot.ok{background:#00ae1a;}.ipanel-legend .dot.warn{background:#eb8e02;}.ipanel-legend .dot.bad{background:#f33942;}.ipanel-legend .dot.na{background:#ADB5BD;}
+.ipanel-legend .dot.ok{background:#12A150;}.ipanel-legend .dot.warn{background:#B7791F;}.ipanel-legend .dot.bad{background:#D9480F;}.ipanel-legend .dot.na{background:#ADB5BD;}
 .honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
 .honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}
 .honest .tx3{font-size:13px;color:var(--ink);line-height:1.7;}.honest .tx3 b{font-weight:600;color:#c2410c;}
@@ -615,14 +607,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .rc-body .rc-dest{flex-shrink:1;min-width:0;flex-wrap:wrap;display:flex;}
   .rc-body .rc-to{word-break:keep-all;overflow-wrap:break-word;min-width:0;}
 
-  /* 전체보기 테이블: 가격변화 bar 칼럼 숨김 */
-  .iall-bar-col{display:none!important;}
-  /* 대신 모바일에서는 가격변화 텍스트를 메타 줄에 표시 */
-  .iall-mobile-price{display:inline!important;}
 
   /* 전체보기 헤더·정렬 */
   .phead{flex-direction:column;align-items:flex-start;gap:10px;}
-  .rtabs{font-size:11px;}
 }
 /* ETF 추가 모달 — PC에서는 중앙 다이얼로그 */
 @media(min-width:600px){
@@ -643,14 +630,122 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .gnb__theme-toggle:hover{background:rgba(255,255,255,.16);color:#fff;}
 .icon-sun,.icon-moon{display:none;}
 html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
+
+/* ===== 건전성 보드(2026-11-12 — 기본 화면) ===== */
+#income-board{--line:var(--hair);--faint:#9AA1AC;--upb:#E86464;--dnb:#5D97F1;--dist:#C9D2DE;}
+html.dark #income-board{--faint:#6F747B;--dist:#4A515C;--upb:#C95A5A;--dnb:#4F86D9;}
+#income-board .bh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:6px 0 14px}
+#income-board .bh h1{font-size:22px;letter-spacing:-.4px;margin:0 0 6px;color:var(--ink)}
+#income-board .bh p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.65;max-width:620px}
+#income-board .bh .asof{font-size:11px;color:#9CA3AF;white-space:nowrap}
+#income-board .calc-btn{border:1px solid var(--line);background:var(--canvas);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);white-space:nowrap}
+#income-board .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+#income-board .chip{background:var(--canvas);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+#income-board .chip.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+#income-board .chip .k{font-size:12px;color:var(--muted);font-weight:600}
+#income-board .chip .v{font-size:20px;font-weight:800;margin-top:2px}
+#income-board .chip .v small{font-size:12px;color:var(--muted);font-weight:600;margin-left:3px}
+#income-board .chip.ok .v{color:#12A150}#income-board .chip.warn .v{color:#B7791F}#income-board .chip.bad .v{color:#D9480F}
+#income-board .flt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+#income-board .flt .sp{flex:1}
+#income-board .seg{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px}
+#income-board .seg button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 10px;border-radius:8px;cursor:pointer}
+#income-board .seg button.on{background:var(--canvas);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+#income-board .card{background:var(--canvas);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+#income-board .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:10px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
+#income-board .legend i{display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle}
+#income-board .fhd,#income-board .fr{display:grid;grid-template-columns:minmax(0,1.5fr) 64px 64px minmax(0,1.5fr) 80px;gap:12px;align-items:center}
+#income-board .fhd{padding:9px 40px 9px 16px;font-size:11.5px;color:var(--muted);font-weight:600;background:var(--soft);border-bottom:1px solid var(--line)}
+#income-board .fhd span:nth-child(2),#income-board .fhd span:nth-child(5){text-align:right}#income-board .fhd span:nth-child(3){text-align:center}
+#income-board .fr{position:relative;padding:12px 40px 12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+#income-board .fr:hover,#income-board .fr.open{background:var(--soft)}
+#income-board .fr .nm,#income-board .cmp .nm{width:auto;min-width:0}
+#income-board .fr .nm b{display:block;font-size:14px;line-height:1.35;color:var(--ink);word-break:normal;overflow-wrap:anywhere}
+#income-board .tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;align-items:center}
+#income-board .tag{font-size:10.5px;font-weight:700;color:var(--muted);background:var(--inset);border-radius:5px;padding:1px 6px}
+#income-board .fr .yl{text-align:right;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
+#income-board .fr .yl span{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
+#income-board .fr .fh{justify-self:center;font-size:11px}
+#income-board .fr .fhm{display:none}
+#income-board .fr .tot{text-align:right;font-variant-numeric:tabular-nums}#income-board .fr .tot b{display:block;font-size:14.5px}#income-board .fr .tot span{font-size:11px;color:var(--muted)}
+#income-board .chev{position:absolute;right:14px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--faint);transition:transform .15s,background .15s,color .15s}
+#income-board .chev svg{width:12px;height:12px}
+#income-board .fr:hover .chev{background:var(--inset);color:var(--ink)}#income-board .fr.open .chev{transform:rotate(90deg);color:var(--ink)}
+#income-board .trk{position:relative;height:22px}
+#income-board .trk .z{position:absolute;top:-4px;bottom:-4px;width:1px;background:#94A3B8}
+#income-board .trk .s{position:absolute;top:4px;height:14px;border-radius:3px}
+#income-board .trk .dist{background:var(--dist)}#income-board .trk .pu{background:var(--upb)}
+#income-board .trk .pd{background:repeating-linear-gradient(135deg,var(--dnb) 0 4px,#9DBEF5 4px 8px)}
+#income-board .trk .end{position:absolute;top:0;width:2px;height:22px;background:var(--ink)}
+#income-board .up{color:var(--up)}#income-board .dn{color:var(--dn)}#income-board .mu{color:var(--faint)}
+#income-board .fd{display:none;padding:6px 16px 18px;border-bottom:1px solid var(--line);background:var(--soft)}#income-board .fd.on{display:block}
+#income-board .fv{font-size:14px;font-weight:600;line-height:1.6;color:var(--ink);margin:4px 0 12px}#income-board .fv b{font-weight:800}
+#income-board .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+#income-board .pane{background:var(--canvas);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+#income-board .pane h4{margin:0 0 8px;font-size:12px;color:var(--muted);font-weight:700}
+#income-board .pane p.pn{font-size:12.5px;margin:8px 0 0;line-height:1.55;color:var(--ink)}
+#income-board .cmp{display:grid;grid-template-columns:70px 1fr 56px;gap:10px;align-items:center;padding:6px 0}
+#income-board .cmp .nm{font-size:12px;font-weight:600;color:var(--ink)}#income-board .cmp.bench .nm{color:var(--muted)}
+#income-board .cmp .tr{position:relative;height:18px;background:var(--inset);border-radius:4px}
+#income-board .cmp .tr .b{position:absolute;top:3px;height:12px;border-radius:3px}
+#income-board .cmp .tr .bm{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+#income-board .cmp .tr .z{position:absolute;top:0;bottom:0;width:1px;background:#94A3B8}
+#income-board .cmp .v{text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+#income-board .spk{position:relative;cursor:crosshair}#income-board .spk svg{display:block;width:100%;height:90px}
+#income-board .spk .gl{position:absolute;top:0;bottom:0;width:1px;background:#94A3B8;display:none;pointer-events:none}
+#income-board .spk .gd{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--canvas);border:2px solid var(--ink);display:none;pointer-events:none}
+#income-board .per{display:flex;gap:6px;margin-top:10px}#income-board .per div{flex:1;background:var(--inset);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--muted)}
+#income-board .per b{display:block;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+#income-board .dbar{position:relative;display:flex;gap:4px;align-items:flex-end;height:90px}
+#income-board .dbar>div[data-m]{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:default}
+#income-board .dbar>div>i{width:100%;background:#B9C3D1;border-radius:2px 2px 0 0}#income-board .dbar>div.r>i{background:#6B7A90}
+#income-board .dbar>div>span{font-size:9.5px;color:var(--faint);margin-top:3px}
+#income-board .dbar>div.hv>i{filter:brightness(.85)}#income-board .dbar>div.hv>span{color:var(--ink);font-weight:700}
+#income-board .ptip{position:absolute;z-index:4;background:#13151A;color:#fff;border-radius:8px;padding:6px 9px;font-size:11.5px;line-height:1.5;white-space:nowrap;pointer-events:none;display:none;transform:translate(-50%,calc(-100% - 10px))}
+#income-board .ptip b{font-weight:800}#income-board .ptip .u{color:#FF8A8F}#income-board .ptip .d{color:#8DB8FF}#income-board .ptip .g{color:#B8C0CC}
+#income-board .act{margin-top:12px;display:flex;gap:8px;align-items:center}
+#income-board .btn{border:1px solid var(--line);background:var(--canvas);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
+#income-board .btn.pri{background:#13151A;color:#fff;border-color:#13151A}
+#income-board .note{font-size:12px;color:var(--muted);line-height:1.65;margin-top:12px}
+#income-board .calc{margin-top:18px;background:var(--canvas);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+#income-board .calc b{font-size:14.5px;color:var(--ink)}#income-board .calc p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}#income-board .calc .sp{flex:1}
+#income-board .calc .cnt{font-size:12px;font-weight:800;background:var(--primary-bg);color:var(--primary);border-radius:999px;padding:2px 8px;margin-left:6px}
+#income-board .empty{padding:18px 16px;font-size:13px;color:var(--muted)}
+html.dark .hbdg.ok{background:rgba(18,161,80,.18);color:#3DD17A;}html.dark .hbdg.warn{background:rgba(224,178,82,.16);color:#E0B252;}html.dark .hbdg.bad{background:rgba(217,72,15,.18);color:#FF8A5B;}html.dark .hbdg.na{background:#2A2B2D;color:#888B90;}
+html.dark #income-board .dbar>div>i{background:#4A515C}html.dark #income-board .dbar>div.r>i{background:#8A97AB}
+html.dark #income-board .chip.ok .v{color:#3DD17A}html.dark #income-board .chip.warn .v{color:#E0B252}html.dark #income-board .chip.bad .v{color:#FF8A5B}
+html.dark #income-board .btn.pri{background:#F3F5F7;color:#13151A;border-color:#F3F5F7}
+#income .calc-crumb{font-size:12.5px;margin:4px 0 10px}#income .calc-crumb a{color:var(--primary);text-decoration:none;cursor:pointer}
+@media(max-width:720px){
+ #income-board .bh{flex-direction:column}
+ #income-board .sum{grid-template-columns:1fr 1fr}
+ #income-board .fhd{display:none}
+ #income-board .fr{grid-template-columns:minmax(0,1fr) 70px;gap:6px 10px}
+ #income-board .fr .trk{grid-column:1/-1}#income-board .fr .tot{grid-column:2;grid-row:1}
+ #income-board .fr .yl,#income-board .fr .fh{display:none}#income-board .fr .fhm{display:inline-block}
+ #income-board .grid3{grid-template-columns:1fr}
+ #income-board .calc{flex-wrap:wrap}
+}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub on" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
 <div class="wrap">
-  <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
-  <div id="income">
+  <!-- ===== 건전성 보드(기본 화면, 2026-11-12) ===== -->
+  <div id="income-board">
+    <div class="bh">
+      <div><h1>🪙 월배당 ETF, 지금 건전한 곳은</h1>
+      <p>분배율이 높다고 좋은 ETF는 아니에요. 분배금 일부가 원금에서 나오면 가격이 깎여요. 1년 동안 받은 분배금과 가격 변화를 함께 보고, 펼치면 기초 지수와 비교해요.</p></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;"><span class="asof" id="board-asof"></span><button class="calc-btn" onclick="showCalc()">내 월 인컴 계산기 →</button></div>
+    </div>
+    <div id="board-root"><div class="empty">ETF 데이터를 불러오는 중이에요.</div></div>
+    <p class="note">국내 가격·분배율은 네이버, 분배 이력은 야후, 미국은 야후 일봉이에요. 총수익은 1년 가격 변화에 그동안 받은 분배금을 더한 값이에요(재투자 없음). 기초 지수는 같은 지수를 추종하는 같은 시장 상장 ETF로 비교해요(국내는 원화, 미국은 달러). 과거 1년 실측이고 앞으로의 성과나 매수를 권하는 게 아니에요.</p>
+  </div>
+
+  <!-- ===== INCOME (월배당 ETF 계산기 — #calc) ===== -->
+  <div id="income" style="display:none;">
+    <div class="calc-crumb"><a onclick="showBoard()">← 건전성 보드</a></div>
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
       <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 월배당 ETF 계산기 <span style="display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;margin-left:2px;">BETA</span></h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 아래(PC는 오른쪽) 랭킹에서 담을 수 있어요.</div></div>
       <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
@@ -792,40 +887,6 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 
   </div>
 
-  <!-- ===== 월배당 ETF 전체 랭킹 페이지 ===== -->
-  <div id="income-all-page" style="display:none;">
-    <div class="crumb">
-      <button class="back-btn" onclick="closeIncomeAllPage()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      <a href="#" onclick="event.preventDefault();closeIncomeAllPage()">월배당 ETF 계산기</a> › <span style="color:#4F46E5;">월배당 ETF 전체</span>
-    </div>
-    <div class="phead">
-      <div>
-        <h1 style="color:#312E81;"><span class="ic">📊</span> 월배당 ETF 랭킹 <span id="iallp-count" style="font-size:16px;font-weight:600;color:#4F46E5;margin-left:2px;"></span></h1>
-        <div class="psub">순자산 1,000억 이상 월배당 ETF (국내·미국). 종목 클릭 시 시뮬레이터에 추가돼요. <span style="color:var(--muted);">데이터 기준: 매주 월요일 갱신</span></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <div class="rtabs" id="iallp-sort-tabs">
-          <a class="on" onclick="iallPageSort('y',this)">분배율순</a>
-          <a onclick="iallPageSort('health',this)">건전성순</a>
-        </div>
-        <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;margin-left:auto;">
-          <input type="checkbox" id="iallp-cc-exclude" onchange="incomeAllPageRender()" style="accent-color:#4F46E5;width:13px;height:13px;">
-          커버드콜 제외
-        </label>
-      </div>
-    </div>
-    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;overflow:visible;box-shadow:var(--s1);">
-      <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;background:var(--soft);border-bottom:1px solid var(--hair);border-radius:9px 9px 0 0;">
-        <div style="width:26px;"></div>
-        <div style="flex:1;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">종목</div>
-        <div style="width:68px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">분배율</div>
-        <div style="width:68px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">건전성</div>
-        <div class="iall-bar-col" style="width:200px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;padding-right:8px;flex-shrink:0;">가격 변화 (1년)</div>
-      </div>
-      <div id="income-all-page-rows"></div>
-    </div>
-  </div>
-
   <footer class="ds-footer">
     <div class="ds-foot-links">
       <a href="/glossary/">용어 설명</a>
@@ -936,78 +997,20 @@ function incomeRender(){
   const c=document.getElementById('iall-count');if(c)c.textContent=`(${arr.length})`;
 }
 
-/* 전체 랭킹 페이지: 독립 sort + cc 상태 */
-let iAllPageSortKey='y';
-function incomeAllPageRow(d,i){
-  const[hc,hl,e]=incomeHealth(d);
-  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
-  const rk=i+1;
-  const ePct=e!=null?Math.round(e):null;
-  const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
-  const barPct=ePct==null?0:Math.min(Math.abs(ePct)/180*100,100);
-  const barCls=ePct==null?'':ePct>=0?'up':'dn';
-  const metaTxt=d.mk==='US'
-    ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
-    :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조${hc==='na'&&d.divMonths!=null?` · 이력 ${d.divMonths}개월`:''}`;
-  const mobilePriceTxt=ePct!=null?` · <span style="color:${ePct>=0?'#E03131':'#2775ED'}">${ePct>=0?'+':''}${ePct}%</span>`:'';
-  const rkEl=rk<=3
-    ?`<span style="width:22px;height:22px;border-radius:6px;background:#4F46E5;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${rk}</span>`
-    :`<span style="width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);display:inline-block;flex-shrink:0;">${rk}</span>`;
-  return `<a class="trow" onclick="openAddSheet('${d.code}')" style="gap:12px;padding:11px 16px;align-items:flex-start;">
-    ${rkEl}
-    <div style="flex:1;min-width:0;">
-      <div style="font-size:13px;font-weight:600;line-height:1.35;word-break:keep-all;">${d.name}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px;">${metaTxt}<span class="iall-mobile-price" style="display:none;">${mobilePriceTxt}</span></div>
-    </div>
-    <div style="width:68px;text-align:right;font-size:15px;font-weight:700;color:#4F46E5;flex-shrink:0;" class="num">${d.y}%</div>
-    <div style="width:68px;text-align:center;flex-shrink:0;"><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
-    <div class="iall-bar-col" style="width:200px;flex-shrink:0;">
-      <div class="barwrap" style="height:19px;">
-        ${ePct!=null?`<div style="height:100%;border-radius:5px;width:${barPct.toFixed(1)}%;background:${ePct>=0?'#FFBBBB':'#BACFFF'};"></div>`:''}
-        <span class="barval num ${barCls}">${priceTxt}</span>
-      </div>
-    </div>
-  </a>`;
+/* 화면 전환 — 기본은 건전성 보드, 계산기는 #calc. 옛 주소 #all은 보드로 간다(2026-11-12) */
+// GNB 새 소식 점(main.js)은 이 페이지에 들어오면 꺼진다 — 키·버전은 main.js 의 NEW와 같아야 한다
+const NAV_SEEN='2026-11-12';
+try{if((localStorage.getItem('ds-nav-seen:/stocks/income-designer/')||'')<NAV_SEEN)localStorage.setItem('ds-nav-seen:/stocks/income-designer/',NAV_SEEN);}catch(e){}
+function route(){
+  const calc=location.hash==='#calc';
+  document.getElementById('income-board').style.display=calc?'none':'block';
+  document.getElementById('income').style.display=calc?'block':'none';
 }
-function incomeAllPageFiltered(){
-  const excludeCC=document.getElementById('iallp-cc-exclude')?.checked;
-  let arr=[...INCOME_UNIVERSE];
-  if(excludeCC)arr=arr.filter(d=>!d.is_cc);
-  if(iAllPageSortKey==='y')arr.sort((a,b)=>b.y-a.y);
-  else arr.sort((a,b)=>healthScore(b)-healthScore(a));
-  return arr;
-}
-function incomeAllPageRender(){
-  const arr=incomeAllPageFiltered();
-  document.getElementById('income-all-page-rows').innerHTML=arr.map(incomeAllPageRow).join('');
-  document.getElementById('iallp-count').textContent=`${arr.length}개`;
-}
-function iallPageSort(k,el){
-  iAllPageSortKey=k;
-  document.querySelectorAll('#iallp-sort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
-  incomeAllPageRender();
-}
-function openIncomeAllPage(){
-  incomeAllPageRender();
-  document.getElementById('income').style.display='none';
-  document.getElementById('income-all-page').style.display='block';
-  window.scrollTo(0,0);
-  history.pushState({p:'all'},'',location.pathname+'#all');
-}
-function closeIncomeAllPage(){
-  document.getElementById('income-all-page').style.display='none';
-  document.getElementById('income').style.display='block';
-  history.pushState({p:'main'},'',location.pathname);
-}
-window.addEventListener('popstate',()=>{
-  if(location.hash==='#all'){incomeAllPageRender();document.getElementById('income').style.display='none';document.getElementById('income-all-page').style.display='block';}
-  else{document.getElementById('income-all-page').style.display='none';document.getElementById('income').style.display='block';}
-});
-if(location.hash==='#all'){incomeAllPageRender();document.getElementById('income').style.display='none';document.getElementById('income-all-page').style.display='block';}
-function addFromRankingPage(code){
-  addFromRanking(code);
-  closeIncomeAllPage();
-}
+function showCalc(){history.pushState({p:'calc'},'',location.pathname+'#calc');route();window.scrollTo(0,0);}
+function showBoard(){history.pushState({p:'board'},'',location.pathname);route();window.scrollTo(0,0);}
+function openIncomeAllPage(){showBoard();}
+window.addEventListener('popstate',route);
+route();
 function incomeSort(k,el){
   iSortKey=k;
   document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
@@ -1019,7 +1022,7 @@ incomeRender();
 
 /* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
 const SIM_KEY='ds-income-holdings-v1';
-function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}}
+function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}const c=document.getElementById('board-cnt');if(c)c.textContent=simHoldings.length+'개 담김';document.querySelectorAll('#income-board [data-badd]').forEach(b=>{if(simHoldings.some(h=>h.code===b.dataset.badd))b.textContent='✓ 계산기에 담김 · 수량 바꾸기';});}
 function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
 let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
 // 분배금 세율 — 국내 배당소득세 15.4%, 미국은 현지 15% 원천징수(국내 추가 과세 없음 가정).
@@ -1369,6 +1372,105 @@ function copyPrompt(){
   });
 }
 function toggleRc(head){head.closest('.rc').classList.toggle('open');}
+/* ===== 건전성 보드 (2026-11-12) — 숫자는 전부 income_etfs.json에서 온다. 여기서는 그리기만 한다 ===== */
+let BOARD=[],BOARD_ASOF=null;
+const BST={cat:'cc',sort:'h',h:'all'};
+const BHL={ok:'건전',warn:'주의',bad:'원금성'},BHR={ok:0,warn:1,bad:2};
+const bfmt=(v,d=1)=>{if(v==null)return '—';const r=+v.toFixed(d);return r===0?(0).toFixed(d)+'%':(r>0?'+':'')+r.toFixed(d)+'%'};
+const bcls=v=>v==null?'mu':v>0?'up':v<0?'dn':'';
+const besc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const btopic=w=>{const c=w.charCodeAt(w.length-1);if(c>=48&&c<=57)return '은';if(c>=0xAC00&&c<=0xD7A3)return (c-0xAC00)%28?'은':'는';return '는'};
+function bHealth(e){if(e.p==null||e.y==null)return null;return e.p>=0?'ok':e.p>=-e.y/2?'warn':'bad'}
+function boardInit(data){
+  const one=(e,mk)=>({code:e.code,name:e.name,mk,y:e.yield_ttm,p:e.price_1y,r:e.return_1y,p3m:e.price_3m,cat:e.category||'div',
+    spark:e.spark,dm:e.dist_months||[],dtrend:e.dist_trend,bench:e.bench,price:mk==='US'?e.price_usd:e.price});
+  BOARD=[...(data.etfs||[]).map(e=>one(e,'KR')),...(data.us_etfs||[]).map(e=>one(e,'US'))].map(e=>({...e,h:bHealth(e)}));
+  BOARD_ASOF=data.generated_at?new Date(data.generated_at):null;
+  const a=document.getElementById('board-asof');
+  if(a&&BOARD_ASOF)a.textContent=`데이터 ${BOARD_ASOF.getFullYear()}.${String(BOARD_ASOF.getMonth()+1).padStart(2,'0')}.${String(BOARD_ASOF.getDate()).padStart(2,'0')} 기준`;
+  boardRender();
+}
+const distOf=e=>e.r-e.p;   // 막대의 분배금 몫 = 총수익 − 가격 변화
+function boardRender(){
+  const base=BOARD.filter(e=>BST.cat==='all'||e.cat===BST.cat);
+  const c={ok:0,warn:0,bad:0};base.forEach(e=>{if(e.h)c[e.h]++});
+  let L=base.filter(e=>e.h&&e.r!=null&&(BST.h==='all'||e.h===BST.h));
+  const k=BST.sort;
+  L.sort((a,b)=>k==='y'?b.y-a.y:k==='t'?b.r-a.r:(BHR[a.h]-BHR[b.h])||(b.r-a.r));
+  const na=base.filter(e=>!e.h||e.r==null).length;
+  const lo=Math.min(0,...L.map(e=>Math.min(e.p,e.r))),hi=Math.max(1,...L.map(e=>Math.max(distOf(e),e.r)));
+  const X=v=>((v-lo)/(hi-lo)*100).toFixed(2);
+  const chip=(key,lab,v)=>`<button class="chip ${key}${BST.h===key?' on':''}" data-bh="${key}"><div class="k">${lab}</div><div class="v">${v}<small>개</small></div></button>`;
+  const seg=(key,v,l)=>`<button data-bk="${key}" data-bv="${v}" class="${BST[key]===v?'on':''}">${l}</button>`;
+  const rows=L.map(e=>{const i=BOARD.indexOf(e),dist=distOf(e);
+    let segs=`<div class="s dist" style="left:${X(0)}%;width:${(X(dist)-X(0)).toFixed(2)}%"></div>`;
+    if(e.p>=0)segs+=`<div class="s pu" style="left:${X(dist)}%;width:${(X(e.r)-X(dist)).toFixed(2)}%"></div>`;
+    else segs+=`<div class="s pd" style="left:${X(e.r)}%;width:${(X(dist)-X(e.r)).toFixed(2)}%"></div>`;
+    return `<div class="fr" data-bi="${i}" title="눌러서 자세히 보기"><div class="nm"><b>${besc(e.name)}</b><div class="tags"><span class="hbdg fhm ${e.h}">${BHL[e.h]}</span><span class="tag">${e.mk==='KR'?'국내':'미국'}</span><span class="tag">3개월 ${bfmt(e.p3m,0)}</span></div></div>
+      <div class="yl">${e.y.toFixed(1)}%<span>분배율</span></div><span class="hbdg fh ${e.h}">${BHL[e.h]}</span>
+      <div class="trk"><div class="z" style="left:${X(0)}%"></div>${segs}<div class="end" style="left:calc(${X(e.r)}% - 1px)"></div></div>
+      <div class="tot"><b class="${bcls(e.r)}">${bfmt(e.r)}</b><span>가격 ${bfmt(e.p,0)}</span></div>
+      <span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="fd" id="bfd${i}"></div>`}).join('');
+  document.getElementById('board-root').innerHTML=`<div class="sum">${chip('all','전체',base.length)}${chip('ok','건전 · 원금 지킴',c.ok)}${chip('warn','주의 · 조금 깎임',c.warn)}${chip('bad','원금성 · 많이 깎임',c.bad)}</div>
+   <div class="flt"><div class="seg">${seg('cat','all','전체')}${seg('cat','cc','커버드콜')}${seg('cat','div','배당주')}${seg('cat','bond','채권·금리')}</div><span class="sp"></span><div class="seg">${seg('sort','h','건전성순')}${seg('sort','y','분배율순')}${seg('sort','t','총수익순')}</div></div>
+   <div class="card"><div class="legend"><span><i style="background:var(--dist)"></i>받은 분배금</span><span><i style="background:var(--upb)"></i>가격 상승</span><span><i style="background:repeating-linear-gradient(135deg,var(--dnb) 0 3px,#9DBEF5 3px 6px)"></i>가격 하락(깎인 돈)</span><span><i style="background:var(--ink);width:3px"></i>1년 총수익</span></div>
+   <div class="fhd"><span>ETF</span><span>분배율</span><span>건전성</span><span>받은 돈 vs 깎인 돈 (1년)</span><span>1년 총수익</span></div>${rows||'<div class="empty">해당하는 ETF가 없어요.</div>'}</div>
+   ${na?`<p class="note">상장 1년 미만이라 판정을 보류한 ${na}개는 목록에서 뺐어요.</p>`:''}
+   <div class="calc"><div><b>내 월 인컴 계산기<span class="cnt" id="board-cnt">${simHoldings.length}개 담김</span></b><p>담은 ETF로 세후 월 분배금과 금융소득종합과세 여부를 계산해요.</p></div><span class="sp"></span><button class="btn pri" onclick="showCalc()">계산기 열기 →</button></div>`;
+}
+function bVerdict(e){const out=[];
+  out.push(e.h==='ok'?'분배금을 주면서도 원금을 지켰어요.':e.h==='warn'?'분배금 일부가 원금에서 나왔어요.':'분배금 상당 부분이 원금에서 나왔어요.');
+  if(e.p3m!=null&&e.p>=0&&e.p3m<=-5)out.push(`다만 최근 3개월은 <b class="dn">${bfmt(e.p3m)}</b>로 깎이는 중이에요.`);
+  else if(e.p3m!=null&&e.p<0&&e.p3m>=3)out.push(`최근 3개월은 <b class="up">${bfmt(e.p3m)}</b>로 회복 중이에요.`);
+  if(e.dtrend!=null&&e.dtrend<=-10)out.push(`최근 분배금은 1년 전보다 <b class="dn">${bfmt(e.dtrend)}</b> 줄었어요.`);
+  return out.join(' ')}
+function bBenchPane(e){if(!e.bench||e.bench.total_1y==null)return `<div class="pane"><h4>기초 지수 대비</h4><p class="pn mu">같은 지수를 추종하는 비교 대상을 찾지 못했어요.</p></div>`;
+  const bt=e.bench.total_1y,lo=Math.min(0,e.r,bt),hi=Math.max(e.r,bt,1),X=v=>((v-lo)/(hi-lo)*100).toFixed(2);
+  const bar=(v,c)=>`<div class="tr"><div class="z" style="left:${X(0)}%"></div><div class="b" style="left:${X(Math.min(0,v))}%;width:${X(Math.max(0,v))-X(Math.min(0,v))}%;background:${c}"></div><div class="bm" style="left:calc(${X(bt)}% - 1px)"></div></div>`;
+  const g=e.r-bt;
+  return `<div class="pane"><h4>기초 지수를 그냥 들고 있었다면</h4>
+   <div class="cmp"><div class="nm">이 ETF</div>${bar(e.r,e.r>=0?'var(--upb)':'var(--dnb)')}<div class="v ${bcls(e.r)}">${bfmt(e.r)}</div></div>
+   <div class="cmp bench"><div class="nm">${besc(e.bench.name)}</div>${bar(bt,'#B7C0CC')}<div class="v ${bcls(bt)}">${bfmt(bt)}</div></div>
+   <p class="pn">${g>=0?`지수보다 <b class="up">${g.toFixed(1)}%p</b> 나았어요.`:`지수보다 <b class="dn">${(-g).toFixed(1)}%p</b> 뒤처졌어요.`}</p></div>`}
+function bSpark(e){const sp=e.spark;if(!sp||!sp.p||sp.p.length<2)return '<p class="pn mu">가격 기록이 짧아요.</p>';const s=sp.p,mn=Math.min(...s),mx=Math.max(...s),r=mx-mn||1;
+  const pts=s.map((v,i)=>`${(i/(s.length-1)*300).toFixed(1)},${(84-(v-mn)/r*78).toFixed(1)}`).join(' '),y0=(84-(s[0]-mn)/r*78).toFixed(1);
+  return `<div class="spk" data-bc="${e.code}"><svg viewBox="0 0 300 90" preserveAspectRatio="none"><line x1="0" x2="300" y1="${y0}" y2="${y0}" stroke="#C7CDD6" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><polyline points="${pts}" fill="none" stroke="${s[s.length-1]>=s[0]?'var(--up)':'var(--dn)'}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="gl"></div><div class="gd"></div><div class="ptip"></div></div>`}
+const bmoney=(e,v)=>e.mk==='US'?'$'+v.toFixed(2):Math.round(v).toLocaleString('ko-KR')+'원';
+function bDbar(e){if(!e.dm.length||!e.dm.some(m=>m.n))return '<p class="pn mu">분배 이력을 찾지 못했어요.</p>';
+  const mx=Math.max(...e.dm.map(m=>m.pct||0),0.001);
+  return `<div class="dbar" data-bc="${e.code}">${e.dm.map((m,i)=>`<div class="${i>=9?'r':''}" data-m="${i}"><i style="height:${Math.max(1,(m.pct||0)/mx*72)}px"></i><span>${+m.m.slice(5)}</span></div>`).join('')}<div class="ptip"></div></div>`}
+function bDetail(e){const added=simHoldings.some(h=>h.code===e.code),can=!!UNIV[e.code];
+  return `<p class="fv">${bVerdict(e)}</p><div class="grid3">${bBenchPane(e)}
+   <div class="pane"><h4>1년 가격 · 점선은 1년 전</h4>${bSpark(e)}<div class="per"><div>3개월<b class="${bcls(e.p3m)}">${bfmt(e.p3m)}</b></div><div>1년<b class="${bcls(e.p)}">${bfmt(e.p)}</b></div></div></div>
+   <div class="pane"><h4>월별 분배율 · 진한 막대가 최근 3개월</h4>${bDbar(e)}${e.dtrend!=null?`<p class="pn mu">최근 3회 분배금은 1년 전보다 ${bfmt(e.dtrend)}</p>`:''}</div></div>
+   ${can?`<div class="act"><button class="btn" data-badd="${e.code}">${added?'✓ 계산기에 담김 · 수량 바꾸기':'+ 계산기에 담기'}</button></div>`:''}`}
+document.addEventListener('click',ev=>{
+  const root=document.getElementById('income-board');if(!root||!root.contains(ev.target))return;
+  const add=ev.target.closest('[data-badd]');if(add){ev.stopPropagation();openAddSheet(add.dataset.badd);return;}
+  const ch=ev.target.closest('[data-bh]');if(ch){BST.h=BST.h===ch.dataset.bh?'all':ch.dataset.bh;boardRender();return;}
+  const sg=ev.target.closest('[data-bk]');if(sg){BST[sg.dataset.bk]=sg.dataset.bv;boardRender();return;}
+  const r=ev.target.closest('.fr');if(r){const i=+r.dataset.bi,box=document.getElementById('bfd'+i),on=!box.classList.contains('on');
+    box.classList.toggle('on',on);r.classList.toggle('open',on);if(on)box.innerHTML=bDetail(BOARD[i]);}
+});
+document.addEventListener('mousemove',ev=>{
+  const k=ev.target.closest&&ev.target.closest('#income-board .spk');
+  document.querySelectorAll('#income-board .spk.on').forEach(x=>{if(x!==k){x.classList.remove('on');x.querySelectorAll('.gl,.gd,.ptip').forEach(n=>n.style.display='none')}});
+  if(k){const e=BOARD.find(x=>x.code===k.dataset.bc),s=e.spark.p,n=s.length,box=k.getBoundingClientRect();
+    const i=Math.max(0,Math.min(n-1,Math.round((ev.clientX-box.left)/box.width*(n-1))));
+    const mn=Math.min(...s),mx=Math.max(...s),r=mx-mn||1,x=i/(n-1)*100,y=(84-(s[i]-mn)/r*78)/90*100,ch=(s[i]/s[0]-1)*100;
+    k.classList.add('on');const gl=k.querySelector('.gl'),gd=k.querySelector('.gd'),tp=k.querySelector('.ptip'),[yy,mm,dd]=e.spark.d[i].split('-');
+    gl.style.left=x+'%';gl.style.display='block';gd.style.left=x+'%';gd.style.top=y+'%';gd.style.display='block';
+    tp.innerHTML=`<b>${yy}.${+mm}.${+dd}</b> · ${bmoney(e,s[i])}<br><span class="g">1년 전보다</span> <b class="${ch>=0?'u':'d'}">${bfmt(ch)}</b>`;
+    tp.style.left=Math.max(18,Math.min(82,x))+'%';tp.style.top=y+'%';tp.style.display='block'}
+  const c=ev.target.closest&&ev.target.closest('#income-board .dbar > div[data-m]');
+  document.querySelectorAll('#income-board .dbar').forEach(b=>{if(!c||c.parentNode!==b){b.querySelector('.ptip').style.display='none';b.querySelectorAll('.hv').forEach(h=>h.classList.remove('hv'))}});
+  if(c){const bar=c.parentNode,e=BOARD.find(x=>x.code===bar.dataset.bc),m=e.dm[+c.dataset.m],[yy,mo]=m.m.split('-');
+    bar.querySelectorAll('.hv').forEach(h=>h.classList.remove('hv'));c.classList.add('hv');const tp=bar.querySelector('.ptip');
+    tp.innerHTML=m.n?`<b>${yy}년 ${+mo}월</b> · 분배 ${bmoney(e,m.amt)}${m.n>1?` (${m.n}회)`:''}<br><span class="g">지금 가격의</span> <b>${(m.pct||0).toFixed(2)}%</b>`:`<b>${yy}년 ${+mo}월</b> · 분배 없음`;
+    const bx=bar.getBoundingClientRect(),cx=c.getBoundingClientRect(),ih=c.querySelector('i').getBoundingClientRect();
+    tp.style.left=Math.max(18,Math.min(82,(cx.left+cx.width/2-bx.left)/bx.width*100))+'%';tp.style.top=(ih.top-bx.top)+'px';tp.style.display='block'}
+});
+
 fetch('/data/income_etfs.json')
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(data => {
@@ -1385,15 +1487,15 @@ fetch('/data/income_etfs.json')
       const el=document.getElementById('data-updated-at');if(el)el.textContent='데이터 '+s;
     }
     annoFill(UNIV['498400']);
+    boardInit(data);
     incomeRender();
-    incomeAllPageRender();
     simRowsRender();simOut();
   })
   .catch(() => {
     // 불러오지 못하면 빈 화면 대신 안내를 남긴다(2026-10-28)
     const msg='<div style="padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.6;">ETF 데이터를 불러오지 못했어요. 잠시 뒤 새로고침해 주세요.</div>';
     document.getElementById('income-rows').innerHTML=msg;
-    document.getElementById('income-all-page-rows').innerHTML=msg;
+    document.getElementById('board-root').innerHTML=msg;
     document.getElementById('sim-out').innerHTML=msg;
   });
 

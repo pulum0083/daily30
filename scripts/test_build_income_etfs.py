@@ -135,3 +135,54 @@ def test_enough_kr_guard():
     assert enough_kr(68, 68) and enough_kr(40, 68)
     assert not enough_kr(0, 68) and not enough_kr(20, 68)
     assert enough_kr(5, 0) and not enough_kr(0, 0)
+
+
+# ── 2026-11-12 건전성 보드 지표 ──
+from datetime import date as _d
+
+
+def test_category():
+    assert m.category("TIGER 배당커버드콜액티브", True) == "cc"
+    assert m.category("JPMorgan 에쿼티프리미엄 (JEPI)", False) == "cc"
+    assert m.category("NEOS 나스닥100 고인컴 (QQQI)", False) == "cc"
+    assert m.category("KODEX 단기채권", False) == "bond"
+    assert m.category("iShares 우선주·인컴 (PFF)", False) == "bond"
+    assert m.category("TIGER 미국배당다우존스", False) == "div"
+
+
+def test_price_change_and_spark():
+    today = _d(2026, 11, 12)
+    rows = [("2025-11-10", 100.0), ("2026-08-10", 150.0), ("2026-11-11", 120.0)]
+    assert m.price_change(rows, today, 365) == 20.0          # 1년 전 이하 마지막 종가 100 → 120
+    assert m.price_change(rows, today, 91) == -20.0          # 3개월 전 이하 마지막 150 → 120
+    assert m.price_change([("2026-10-01", 1.0)], today, 365) is None   # 그만큼 오래된 기록이 없으면 비운다
+    sp = m.weekly_spark([(f"2026-01-{i:02d}", float(i)) for i in range(1, 13)], today)
+    assert sp["d"][0] == "2026-01-01" and sp["d"][-1] == "2026-01-12"   # 마지막 날은 꼭 들어간다
+    assert len(sp["d"]) == len(sp["p"]) == 4                            # 1, 6, 11, 12일
+
+
+def test_monthly_dist_excludes_current_month():
+    today = _d(2026, 11, 12)
+    divs = [("2025-10-30", 9.0), ("2025-11-13", 100.0), ("2026-09-14", 50.0), ("2026-09-28", 30.0), ("2026-11-05", 77.0)]
+    out = m.monthly_dist(divs, today, 1000)
+    assert [x["m"] for x in out][0] == "2025-11" and out[-1]["m"] == "2026-10"   # 지난달까지 12개월
+    sep = next(x for x in out if x["m"] == "2026-09")
+    assert sep["amt"] == 80.0 and sep["n"] == 2 and sep["pct"] == 8.0
+    assert next(x for x in out if x["m"] == "2026-10")["n"] == 0                 # 분배 없는 달
+    assert all(x["m"] != "2026-11" for x in out)                                 # 이번 달은 아직 안 센다
+
+
+def test_dist_trend():
+    today = _d(2026, 11, 12)
+    divs = [("2025-11-20", 100.0), ("2025-12-20", 100.0), ("2026-09-20", 130.0), ("2026-10-20", 110.0)]
+    assert m.dist_trend(divs, today) == 20.0
+    assert m.dist_trend(divs[:3], today) is None              # 최근이 2회 미만이면 판단하지 않는다
+
+
+def test_kr_bench_key():
+    assert m.kr_bench_key("NASDAQ-100 Daily Covered Call 101 Index(TR)") == "nasdaq"
+    assert m.kr_bench_key("코스피 200 커버드콜 5% OTM 지수(PR 지수)") == "kospi"
+    assert m.kr_bench_key("코스피 200 금융 고배당 TOP 10 타겟 15% 분배 위클리 커버드콜 지수") is None
+    assert m.kr_bench_key("KEDI 팔란티어커버드콜OTM 채권혼합지수(NTR)") is None
+    assert m.kr_bench_key("Dow Jones U.S. Dividend 100 10% Premium Covered Call Index(Total Return)") == "usdiv"
+    assert m.kr_bench_key(None) is None

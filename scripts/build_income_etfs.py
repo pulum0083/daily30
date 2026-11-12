@@ -185,6 +185,109 @@ def enough_kr(new_count, prev_count, ratio=0.5):
     return new_count >= prev_count * ratio
 
 
+
+# ---------- 건전성 보드 지표 (2026-11-12, 네트워크 없음) ----------
+# 화면: /stocks/income-designer/ 기본 화면(건전성 보드). 숫자는 전부 여기서 만든다 — 화면은 계산하지 않는다.
+
+def category(name, is_cc):
+    """'cc'(커버드콜·옵션 인컴) | 'bond'(채권·금리·우선주) | 'div'(배당주)."""
+    n = name or ""
+    if is_cc or "프리미엄" in n or "고인컴" in n:
+        return "cc"
+    if re.search(r"채권|국채|CD|KOFR|금리|우선주|회사채", n):
+        return "bond"
+    return "div"
+
+
+def _ago(rows, today, days):
+    """rows=[(YYYY-MM-DD, 종가)] 오름차순 → today에서 days일 전 이하의 마지막 종가."""
+    cut = (today - timedelta(days=days)).isoformat()
+    past = [c for d, c in rows if d <= cut]
+    return past[-1] if past else None
+
+
+def price_change(rows, today, days):
+    """days일 전 대비 마지막 종가 변화(%). 그만큼 오래된 기록이 없으면 None."""
+    if not rows:
+        return None
+    p0 = _ago(rows, today, days)
+    if not p0:
+        return None
+    return round((rows[-1][1] / p0 - 1) * 100, 2)
+
+
+def weekly_spark(rows, today):
+    """최근 1년 종가를 5거래일마다 한 점으로(마지막 날은 꼭 넣는다). {'d': 날짜들, 'p': 종가들}."""
+    cut = (today - timedelta(days=365)).isoformat()
+    yr = [(d, c) for d, c in rows if d > cut]
+    if len(yr) < 2:
+        return None
+    pts = yr[::5]
+    if pts[-1] != yr[-1]:
+        pts.append(yr[-1])
+    return {"d": [d for d, _ in pts], "p": [round(c, 4) for _, c in pts]}
+
+
+def monthly_dist(divs, today, price):
+    """지난달까지 12개월의 월별 분배. divs=[(YYYY-MM-DD, 금액)]. 이번 달은 아직 지급 전일 수 있어 뺀다.
+
+    [{'m': 'YYYY-MM', 'amt': 그달 합, 'n': 횟수, 'pct': 합 ÷ 지금 가격 × 100}]
+    """
+    out = []
+    ym = today.year * 12 + today.month - 1
+    for k in range(12, 0, -1):
+        y, m = divmod(ym - k, 12)
+        key = f"{y:04d}-{m + 1:02d}"
+        ms = [a for d, a in divs if d[:7] == key]
+        amt = round(sum(ms), 4)
+        out.append({"m": key, "amt": amt, "n": len(ms),
+                    "pct": round(amt / price * 100, 3) if price else None})
+    return out
+
+
+def dist_trend(divs, today):
+    """최근 3개월 분배 평균 ÷ 1년 전 같은 시기(9~12개월 전) 분배 평균 − 1(%). 양쪽 다 2회 이상일 때만."""
+    def window(lo, hi):
+        a = (today - timedelta(days=hi)).isoformat()
+        b = (today - timedelta(days=lo)).isoformat()
+        return [x for d, x in divs if a < d <= b]
+    recent, year_ago = window(0, 92), window(273, 365)
+    if len(recent) < 2 or len(year_ago) < 2:
+        return None
+    r, y = sum(recent) / len(recent), sum(year_ago) / len(year_ago)
+    return round((r / y - 1) * 100, 1) if y else None
+
+
+# 기초 지수 비교 — 같은 지수를 추종하는 같은 시장 상장 ETF가 있을 때만(국내는 원화끼리, 미국은 달러끼리라 환율 영향이 빠진다)
+KR_BENCH = {  # 키 → (비교 ETF 코드, 표시 이름)
+    "nasdaq": ("133690", "나스닥100"), "sp500": ("360750", "S&P500"), "semi": ("381180", "미국 반도체"),
+    "kospi": ("069500", "코스피200"), "krsemi": ("091160", "국내 반도체"), "usdiv": ("458730", "미국 배당다우존스"),
+}
+US_BENCH = {  # 티커 → (비교 티커, 표시 이름)
+    "QYLD": ("QQQ", "나스닥100"), "QYLG": ("QQQ", "나스닥100"), "JEPQ": ("QQQ", "나스닥100"), "QQQI": ("QQQ", "나스닥100"),
+    "XYLD": ("SPY", "S&P500"), "XYLG": ("SPY", "S&P500"), "SPYI": ("SPY", "S&P500"),
+    "RYLD": ("IWM", "러셀2000"), "TLTW": ("TLT", "미국 20년+ 국채"), "HYGW": ("HYG", "하이일드 회사채"),
+}
+
+
+def kr_bench_key(base_index):
+    """네이버 etfBaseIndex(기초 지수 이름) → KR_BENCH 키. 모르면 None(비교하지 않는다)."""
+    b = (base_index or "").replace(" ", "").upper()
+    if "NASDAQ-100" in b or "NASDAQ100" in b:
+        return "nasdaq"
+    if b.startswith("S&P500") or "S&P500COVERED" in b or "S&P50010%" in b:
+        return "sp500"
+    if "USLISTEDSEMICONDUCTOR" in b:
+        return "semi"
+    if "KRX반도체" in b or "FNGUIDE반도체" in b:
+        return "krsemi"
+    if b.startswith("코스피200") and "금융" not in b:
+        return "kospi"
+    if "DIVIDEND100" in b:
+        return "usdiv"
+    return None
+
+
 # ---------- 네트워크 (국내) ----------
 
 def _getj(url, referer, encoding="utf-8"):
@@ -215,6 +318,59 @@ def fetch_analysis(code):
         return None
 
 
+
+def fetch_kr_daily(code, today):
+    """네이버 일봉 [(YYYY-MM-DD, 종가)] 최근 약 13개월. 실패하면 []."""
+    start = (today - timedelta(days=400)).strftime("%Y%m%d") + "0000"
+    end = (today + timedelta(days=1)).strftime("%Y%m%d") + "0000"
+    try:
+        rows = _getj(f"https://api.stock.naver.com/chart/domestic/item/{code}/day?startDateTime={start}&endDateTime={end}",
+                     "https://m.stock.naver.com/")
+    except Exception:
+        return []
+    out = []
+    for r in rows or []:
+        d, c = r.get("localDate"), r.get("closePrice")
+        if d and c:
+            out.append((f"{d[:4]}-{d[4:6]}-{d[6:8]}", float(c)))
+    return sorted(out)
+
+
+def fetch_yahoo_divs(symbol, today):
+    """야후 분배 이력 [(YYYY-MM-DD, 금액)] 최근 약 13개월. 국내 ETF는 '.KS'. 실패하면 [].
+
+    국내 ETF의 '가격'은 야후가 네이버와 크게 달라 쓰지 않는다 — 분배 이력만 쓴다(2026-11-12 대조:
+    분배율 합계는 네이버 TTM과 일치, 1년 가격은 TIGER 배당커버드콜 야후 +10% vs 네이버 +42%).
+    """
+    try:
+        import yfinance as yf
+        dv = yf.Ticker(symbol).dividends
+    except Exception:
+        return []
+    cut = (today - timedelta(days=400)).isoformat()
+    out = []
+    for ts, amt in dv.items():
+        d = ts.strftime("%Y-%m-%d")
+        if d > cut and amt and math.isfinite(float(amt)):
+            out.append((d, float(amt)))
+    return sorted(out)
+
+
+def kr_bench_totals():
+    """국내 비교 ETF의 1년 총수익(가격 변화 + 분배금, 재투자 없음) — 보드의 총수익과 같은 잣대."""
+    out = {}
+    for key, (code, label) in KR_BENCH.items():
+        a = fetch_analysis(code)
+        if not a:
+            continue
+        p1y = return_y1(a.get("returnPerformanceList"))
+        y = (a.get("dividend") or {}).get("dividendYieldTtm") or 0
+        tot = total_from_price(p1y, y)
+        if tot is not None:
+            out[key] = {"name": label, "total_1y": tot}
+    return out
+
+
 # ---------- 네트워크 (미국 — yfinance) ----------
 
 def fetch_usd_krw():
@@ -239,6 +395,28 @@ def fetch_usd_krw():
     return None
 
 
+def us_total_1y(yf, ticker, cache):
+    """미국 비교 ETF의 1년 총수익(실제 종가 기준 가격 변화 + 받은 분배금, 재투자 없음). 실패하면 None."""
+    if ticker in cache:
+        return cache[ticker]
+    val = None
+    try:
+        import pandas as pd
+        t = yf.Ticker(ticker)
+        h = t.history(period="400d", auto_adjust=False)
+        cutoff = pd.Timestamp.now(tz=h.index.tz) - pd.DateOffset(years=1)
+        past = h[h.index <= cutoff]
+        if not past.empty:
+            p0, p1 = float(past["Close"].iloc[-1]), float(h["Close"].iloc[-1])
+            dv = t.dividends
+            got = float(dv[dv.index > cutoff].sum()) if not dv.empty else 0.0
+            val = round((p1 - p0 + got) / p0 * 100, 2)
+    except Exception as e:
+        print(f"  bench {ticker} 실패: {e}")
+    cache[ticker] = val
+    return val
+
+
 def build_us(usd_krw, sleep=0.5):
     """yfinance로 미국 인컴 ETF 수집. 월배당(연 6회+) ETF만 포함."""
     try:
@@ -250,6 +428,7 @@ def build_us(usd_krw, sleep=0.5):
 
     one_year_ago = pd.Timestamp.now(tz="UTC") - pd.DateOffset(years=1)
     etfs = []
+    bench_cache = {}
 
     for ticker, name in US_ETF_NAMES.items():
         try:
@@ -300,6 +479,14 @@ def build_us(usd_krw, sleep=0.5):
 
             health, erosion = classify_health(yield_ttm, price_1y)
             price_krw = round(float(price_usd) * usd_krw) if usd_krw else None
+            today = datetime.now(KST).date()
+            rows = [(ix.strftime("%Y-%m-%d"), float(c)) for ix, c in hist["Close"].items() if math.isfinite(float(c))]
+            dlist = [(ix.strftime("%Y-%m-%d"), float(a)) for ix, a in divs.items() if math.isfinite(float(a))]
+            bench = None
+            if ticker in US_BENCH:
+                bt = us_total_1y(yf, US_BENCH[ticker][0], bench_cache)
+                if bt is not None:
+                    bench = {"name": US_BENCH[ticker][1], "total_1y": bt}
 
             etfs.append({
                 "code": ticker,
@@ -314,6 +501,12 @@ def build_us(usd_krw, sleep=0.5):
                 "health": health,
                 "is_cc": "커버드콜" in name,
                 "low_confidence": False,
+                "category": category(name, "커버드콜" in name),
+                "price_3m": price_change(rows, today, 91),
+                "spark": weekly_spark(rows, today),
+                "dist_months": monthly_dist(dlist, today, float(price_usd)),
+                "dist_trend": dist_trend(dlist, today),
+                "bench": bench,
             })
             r_str = f"{return_1y}%" if return_1y is not None else "—"
             print(f"  ok   {ticker:6s} {name[:32]:34s} 분배 {yield_ttm}% · 총수익 {r_str} · ${aum_b}B")
@@ -333,6 +526,8 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
     cands = [c for c in fetch_universe() if (c[3] or 0) >= aum_floor_eok]
     cands.sort(key=lambda c: -(c[3] or 0))
     etfs = []
+    kr_bench = kr_bench_totals()
+    print(f"  국내 비교 지수 {len(kr_bench)}/{len(KR_BENCH)}개: " + ", ".join(f"{v['name']} {v['total_1y']}%" for v in kr_bench.values()))
     for code, name, price, aum_eok in cands:
         a = fetch_analysis(code)
         if not a:
@@ -347,6 +542,10 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
         p1y = return_y1(a.get("returnPerformanceList"))   # 네이버 Y1은 분배금이 빠진 가격 변화다
         health, erosion = classify_health(y, p1y)
         r1y = total_from_price(p1y, y)
+        is_cc = "커버드콜" in name
+        rows = fetch_kr_daily(code, today)
+        dlist = fetch_yahoo_divs(f"{code}.KS", today)
+        bk = kr_bench_key(a.get("etfBaseIndex")) if category(name, is_cc) == "cc" else None
         etfs.append({
             "code": code,
             "name": name,
@@ -357,12 +556,20 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
             "price_1y": p1y,
             "erosion": erosion,
             "health": health,
-            "is_cc": "커버드콜" in name,
+            "is_cc": is_cc,
             "dividend_months": months,
             "fee": a.get("totalFee"),
             "tax_type": a.get("taxationTypeCode"),
             "listed_date": a.get("listedDate"),
             "low_confidence": is_new_fund(a.get("listedDate"), today),
+            "category": category(name, is_cc),
+            "price_3m": next((p.get("value") for p in a.get("returnPerformanceList") or []
+                              if p.get("periodTypeCode") == "M3" and isinstance(p.get("value"), (int, float))), None),
+            "spark": weekly_spark(rows, today),
+            "dist_months": monthly_dist(dlist, today, price),
+            "dist_trend": dist_trend(dlist, today),
+            "base_index": a.get("etfBaseIndex"),
+            "bench": kr_bench.get(bk) if bk else None,
         })
         time.sleep(sleep)
     etfs.sort(key=lambda e: -(e["yield_ttm"] or 0))
