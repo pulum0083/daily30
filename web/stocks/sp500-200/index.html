@@ -107,7 +107,17 @@
   .ltp th:first-child,.ltp td:first-child{text-align:left}
   .ltp td{padding:7px 4px;border-bottom:1px solid var(--hairline);text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
   .ltp tr.hl td{background:var(--primary-bg);font-weight:700}
-  @media(max-width:560px){.ltp-plot{height:180px;padding-left:38px}.ltp-ax{width:32px}.ltp-yrs{margin-left:38px}.ltp-kpis{grid-template-columns:1fr 1fr}.ltp-ml:not(.now){display:none}}
+  /* 큰 시장 사건 — 세로 점선 + 이름표(2026-11-12, 나스닥 체크와 같은 모양). 폰은 번호만 찍고 그래프 아래 목록 */
+  .ltp-ev{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #94A3B8;opacity:.75;pointer-events:none}
+  .ltp-evl{position:absolute;bottom:4px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#475569;background:var(--canvas);border:1px solid var(--hairline);border-radius:6px;padding:1px 6px;white-space:nowrap;pointer-events:none}
+  .ltp-evl.r1{bottom:26px}
+  .ltp-evl.top{bottom:auto;top:4px}.ltp-evl.top.r1{top:26px}
+  .ltp-evl .no{display:none}
+  html.dark .ltp-evl{color:var(--muted)}
+  .ltp-evlist{display:none;margin:8px 0 0 44px;font-size:11.5px;color:var(--muted);line-height:1.7}
+  .ltp-evlist span{white-space:nowrap}
+  @media(max-width:560px){.ltp-plot{height:180px;padding-left:38px}.ltp-ax{width:32px}.ltp-yrs{margin-left:38px}.ltp-kpis{grid-template-columns:1fr 1fr}.ltp-ml:not(.now){display:none}
+    .ltp-evl{padding:0 4px}.ltp-evl.r1:not(.top){bottom:4px}.ltp-evl.top.r1{top:4px}.ltp-evl .tx{display:none}.ltp-evl .no{display:inline}.ltp-evlist{display:flex;flex-wrap:wrap;gap:0 10px;margin-left:38px}}
 </style>
 <style>
   .spp-hb{display:grid;grid-template-columns:82px 1fr 70px;gap:8px;align-items:center;font-size:12px;margin-top:6px;color:var(--ink)}
