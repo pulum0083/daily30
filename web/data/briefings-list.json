@@ -4,7 +4,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-12/kospi/",
-        "headline": "반도체 쓰나미 2라운드 — SOX +5.7%, 지수선물도 질주",
+        "headline": "VIX 급락이 위험자산 선호를 뒷받침해요.",
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -16,7 +16,8 @@
         "headline": "2차전지·자동차 팔고 전력기기 담고, 코스피 -0.61%",
         "title": "5,342.73",
         "price": "5,342.73",
-        "time": ""
+        "time": "",
+        "chg": -0.61
       },
       "us": {
         "state": "pending",
@@ -27,7 +28,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-11/kospi/",
-        "headline": "급등 다음날, 선물도 식었다",
+        "headline": "전력기기·방산이 몰아친 하루, 오늘은 숨 고르기 차례",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -39,12 +41,14 @@
         "headline": "코스닥 +5.62%, 코스피 +2.6%, 2차전지·반도체 쌍끌이 랠리",
         "title": "5,375.36",
         "price": "5,375.36",
-        "time": ""
+        "time": "",
+        "chg": 2.6
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-11/us/",
         "headline": "CPI 쇼크에 하루 울고, CoreWeave 한마디에 하루 웃고",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -55,7 +59,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-10/kospi/",
-        "headline": "왜 오를까? — 나스닥·반도체 동반 폭등에 베어마켓 랠리 시동",
+        "headline": "목요일 패닉은 끝났다, 간밤 나스닥 +2.74%·SOX +6.85%로 되갚음",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -67,12 +72,14 @@
         "headline": "어제 -0.81%는 잊어라, 코스피 대부분 종목이 들고 일어나 +4.39%",
         "title": "5,239.13",
         "price": "5,239.13",
-        "time": ""
+        "time": "",
+        "chg": 4.39
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-10/us/",
         "headline": "엔비디아만 빠지고 반도체는 웃었다, 폭락 다음날의 기묘한 반등",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -83,7 +90,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-09/kospi/",
-        "headline": "반도체 되돌림 자리 — SOX·DRAM 동반 반등",
+        "headline": "목요일, 금요일… 반도체가 롤러코스터에서 내릴까",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -95,12 +103,14 @@
         "headline": "2차전지 -8.59%, 삼성SDI 두 자릿수 급락에 코스피 5000 턱걸이",
         "title": "5,018.85",
         "price": "5,018.85",
-        "time": ""
+        "time": "",
+        "chg": -0.81
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-09/us/",
         "headline": "황 CEO 스캔들에 엔비디아만 홀로 흔들린다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -111,7 +121,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-06/kospi/",
-        "headline": "선거 충격 2차 폭탄 — 나스닥 -5.52%, SOX -12.25%",
+        "headline": "민주당이 이기니 반도체가 떨었다, SOX -12.25%",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -123,12 +134,14 @@
         "headline": "전력기기 -10%, 반도체 -7%, 코스피 한 달 최대 낙폭",
         "title": "5,059.69",
         "price": "5,059.69",
-        "time": ""
+        "time": "",
+        "chg": -6.02
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-06/us/",
         "headline": "엔비디아, 약세장에 들어가다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -139,7 +152,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-05/kospi/",
-        "headline": "선물은 웃고 반도체는 울고 — 오늘 코스피는 어느 장단?",
+        "headline": "미 지수선물이 간밤 종가보다 더 강하게 뛰고 있어요.",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -151,12 +165,14 @@
         "headline": "AI 규제 공포에 반도체 -9%, 코스피 300포인트 증발",
         "title": "5,383.80",
         "price": "5,383.80",
-        "time": ""
+        "time": "",
+        "chg": -5.28
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-05/us/",
         "headline": "다우는 축포, 반도체는 침묵 — 민주당 압승이 가른 두 세계",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -167,7 +183,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-04/kospi/",
-        "headline": "반도체 되돌림 시동, SOX+2.6%·EWY 급반등",
+        "headline": "간밤 미국 증시가 전날 급락분을 되돌리며 반등했어요.",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -179,12 +196,14 @@
         "headline": "5823에서 5426까지 추락했다가, 코스피는 결국 웃었다",
         "title": "5,683.80",
         "price": "5,683.80",
-        "time": ""
+        "time": "",
+        "chg": 0.62
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-04/us/",
         "headline": "선거 끝나니 돈이 돌아왔다 — 공포지수 뚝, 선물 쑥",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -195,7 +214,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-03/kospi/",
-        "headline": "왜 내릴까? — 빅테크 AI 부담에 반도체 2차 충격",
+        "headline": "미국 빅테크발 AI 투자 수익성 우려가 반도체 전반을 다시 흔들고 있어요.",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -207,12 +227,14 @@
         "headline": "AI 거품 경고에 반도체 와르르, 코스피 -3.59%",
         "title": "5,648.79",
         "price": "5,648.79",
-        "time": ""
+        "time": "",
+        "chg": -3.59
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-03/us/",
         "headline": "반도체가 또 미끄러지자 AI 투자금 조달 걱정이 시장을 덮쳤다",
+        "hit": false,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -223,7 +245,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-02/kospi/",
-        "headline": "긴급 점검: 반도체·빅테크 동반 급락, 갭다운 불가피",
+        "headline": "지금 이 순간도 미 선물이 추가 하락을 가리키고 있어요.",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -235,12 +258,14 @@
         "headline": "美 반도체 패닉은 패스, 기관 1.2조에 코스피 2.24% 급반등",
         "title": "5,859.08",
         "price": "5,859.08",
-        "time": ""
+        "time": "",
+        "chg": 2.24
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-11-02/us/",
         "headline": "어젯밤 추락한 증시, 유가 급락에 반등 시동 걸다",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -251,7 +276,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-30/kospi/",
-        "headline": "구글發 AI 거품론, 반도체도 같이 흔들려요",
+        "headline": "삼성전자는 106조 벌었는데, 시장은 구글만 쳐다봐요",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -263,12 +289,14 @@
         "headline": "사이드카까지 뜬 날, 반도체·자동차가 코스피를 끌어내렸다",
         "title": "5,730.74",
         "price": "5,730.74",
-        "time": ""
+        "time": "",
+        "chg": -3.48
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-30/us/",
         "headline": "인텔이 꺼뜨린 실적 랠리, 아마존까지 끌고 내려갔다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -279,7 +307,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-29/kospi/",
-        "headline": "SK하이닉스 사상 최대 실적, 반도체 랠리 다시 불 붙나",
+        "headline": "SK하이닉스 영업이익 83조, 숫자가 말하는 HBM 슈퍼사이클",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -291,12 +320,14 @@
         "headline": "어제 +6.63% 잔치 끝나자 기관이 4,473억 던졌다, 코스피 -1.24%",
         "title": "5,937.66",
         "price": "5,937.66",
-        "time": ""
+        "time": "",
+        "chg": -1.24
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-29/us/",
         "headline": "구글이 10% 수직낙하 — 과매도인가, 경고음인가",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -307,7 +338,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-28/kospi/",
-        "headline": "앤트로픽發 AI 랠리, 반도체 수출 222%가 쐐기 박다",
+        "headline": "한국 반도체 수출 숫자가 오늘 가장 강력한 펀더멘털 근거예요.",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -319,12 +351,14 @@
         "headline": "SK하이닉스 어닝서프라이즈, 코스피 하루 만에 +6.63%",
         "title": "6,012.44",
         "price": "6,012.44",
-        "time": ""
+        "time": "",
+        "chg": 6.63
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-28/us/",
         "headline": "앤트로픽 상장 D-데이, 메모리가 먼저 웃었다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -335,7 +369,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-27/kospi/",
-        "headline": "반도체 되돌림, SOX +2.82%가 갭업 신호 보내요",
+        "headline": "코스피 5500 붕괴 다음날, 뉴욕은 반도체부터 다시 샀다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -347,12 +382,14 @@
         "headline": "개미만 팔았다, 5,929억 외국인 매수에 코스피 +3.09%",
         "title": "5,638.34",
         "price": "5,638.34",
-        "time": ""
+        "time": "",
+        "chg": 3.09
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-27/us/",
         "headline": "메모리값 바닥 찍었나 — MU·DRAM ETF가 먼저 손 들었다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -363,7 +400,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-26/kospi/",
-        "headline": "메타발 기술주 충격 vs 반도체 수급 반전",
+        "headline": "메타는 울었는데 솔리다임은 웃었다, 오늘의 숙제",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -375,12 +413,14 @@
         "headline": "7개월 최저치인데 기관은 6,047억 사들였다",
         "title": "5,469.47",
         "price": "5,469.47",
-        "time": ""
+        "time": "",
+        "chg": -1.46
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-26/us/",
         "headline": "3거래일 급락 뒤, 선물이 먼저 반등을 선언했다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -391,7 +431,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-23/kospi/",
-        "headline": "긴급 점검: 반도체 쇼크 하루 더, 갭다운 출발 불가피",
+        "headline": "메타發 AI 투자 공포, 간밤 미국 반도체를 또 한번 덮쳤어요",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -403,12 +444,14 @@
         "headline": "장 초반 4% 급락한 코스피, 어떻게 버텼나",
         "title": "5,550.30",
         "price": "5,550.30",
-        "time": ""
+        "time": "",
+        "chg": 0.3
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-23/us/",
         "headline": "AI 랠리가 실적과 연준이라는 이중 시험대 앞에 섰어요",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -419,7 +462,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-22/kospi/",
-        "headline": "반도체 수출 222% 급증 + 美 빅테크 훈풍, 갭상승 자리예요",
+        "headline": "반도체 수출 222% 폭증, 숫자로 증명된 HBM 슈퍼사이클",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -431,12 +475,14 @@
         "headline": "코스피 3.52% 급락 — 무엇이 버텼고 무엇이 무너졌나",
         "title": "5,533.77",
         "price": "5,533.77",
-        "time": ""
+        "time": "",
+        "chg": -3.52
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-22/us/",
         "headline": "빅테크 실적은 엇갈렸는데, 반도체가 먼저 무너지고 있다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -447,7 +493,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-21/kospi/",
-        "headline": "전일 급락 후 되돌림 — 반도체 반등에 선물까지 가세",
+        "headline": "어제의 패닉, 오늘은 반도체 반등에 기대는 하루",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -459,12 +506,14 @@
         "headline": "코스피 +3.29% 급등, 반도체가 다 했다",
         "title": "5,735.66",
         "price": "5,735.66",
-        "time": ""
+        "time": "",
+        "chg": 3.29
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-21/us/",
         "headline": "다우는 웃고 반도체는 울었다 — 돈은 중동 리스크 완화를 타고 안전한 대형주로",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -475,7 +524,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-20/kospi/",
-        "headline": "반도체 되돌림 + HBM 훈풍, 갭상승 자리예요",
+        "headline": "9거래일 만의 반도체 반등, 삼성 HBM 우회로 소식까지 겹쳤어요",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -487,12 +537,14 @@
         "headline": "코스피 3.73% 급락, 무슨 일이 있었던 걸까요?",
         "title": "5,552.74",
         "price": "5,552.74",
-        "time": ""
+        "time": "",
+        "chg": -3.73
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-20/us/",
         "headline": "어젯밤 반도체는 웃었는데, 오늘 새벽 선물은 그 웃음을 되묻고 있다",
+        "hit": false,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -503,7 +555,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-19/kospi/",
-        "headline": "반도체·VIX 동반 경고 — 갭다운 출발 유력",
+        "headline": "지난 금요일 미국이 쏜 경고, 오늘 코스피 개장에 그대로 반영돼요",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -515,12 +568,14 @@
         "headline": "장중 급락 딛고 V자 반등 — 2차전지가 살렸어요",
         "title": "5,768.01",
         "price": "5,768.01",
-        "time": ""
+        "time": "",
+        "chg": 1.76
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-19/us/",
         "headline": "반도체 장비주는 숨 고르고 돌아섰는데, 지수는 '회수 능력' 의심에 발목 잡혔다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -531,7 +586,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-16/kospi/",
-        "headline": "오늘, 어제 폭락 뒤 코스피 반등할까요?",
+        "headline": "어제의 충격은 지나간 뉴스, 오늘은 선물이 말해주는 쪽으로",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -543,12 +599,14 @@
         "headline": "8거래일 만에 반등, 코스피 2% 넘게 뛴 이유는?",
         "title": "5,668.05",
         "price": "5,668.05",
-        "time": ""
+        "time": "",
+        "chg": 2.05
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-16/us/",
         "headline": "금리는 식는데 반도체는 식는다 — 채권시장과 AI칩 시장이 다른 얘기를 하고 있다",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -559,7 +617,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-15/kospi/",
-        "headline": "긴급 점검 — CPI 쇼크에 반도체·나스닥 동반 급락",
+        "headline": "CPI 쇼크 하루 만에 반도체 랠리 브레이크",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -571,12 +630,14 @@
         "headline": "코스피 7.57% 급락, 오늘 증시를 흔든 5가지 신호",
         "title": "5,554.22",
         "price": "5,554.22",
-        "time": ""
+        "time": "",
+        "chg": -7.57
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-15/us/",
         "headline": "AI 랠리의 청구서가 도착했다 — 반도체 급락과 은행 실적 쇼크가 겹쳤다",
+        "hit": false,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -587,7 +648,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-14/kospi/",
-        "headline": "전일 5.46% 급락 다음날, 반등 시도 나올까요",
+        "headline": "패닉셀 다음날, 낙폭과대 반발과 CPI 경계가 동시에 켜졌어요",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -599,12 +661,14 @@
         "headline": "7거래일 연속 외국인 매도, 코스피 6000선 사수 왜?",
         "title": "6,008.81",
         "price": "6,008.81",
-        "time": ""
+        "time": "",
+        "chg": -0.44
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-14/us/",
         "headline": "10년물 5.2%가 가른 승자와 패자 — 금리 급등 속 은행주 희비, CPI가 다음 라운드를 결정한다",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -615,7 +679,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-13/kospi/",
-        "headline": "반도체발 충격 하루 더 — 전일 급락 뒤 숨 고르기",
+        "headline": "어제 반도체 쇼크, 오늘은 되돌림이냐 연장이냐",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -627,12 +692,14 @@
         "headline": "반도체 대형주 패닉셀, 코스피 6000선 붕괴",
         "title": "6,035.35",
         "price": "6,035.35",
-        "time": ""
+        "time": "",
+        "chg": -5.46
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-13/us/",
         "headline": "중국산 메모리가 미국 반도체 밸류체인을 흔든다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -643,7 +710,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-12/kospi/",
-        "headline": "휴장 뒤 첫날, 아시아는 웃었는데 반도체가 발목",
+        "headline": "수출은 역대 최고, 반도체는 숨고르기 — 엇갈린 신호 속 출발",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -655,12 +723,14 @@
         "headline": "코스피 3.65% 급락, 두 달 만에 최저치 — 버틴 요인 있었나요?",
         "title": "6,384.24",
         "price": "6,384.24",
-        "time": ""
+        "time": "",
+        "chg": -3.65
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-12/us/",
         "headline": "어닝시즌의 첫 관문, 월가 은행이 분위기를 정한다",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -680,6 +750,7 @@
         "state": "ready",
         "url": "/briefings/2026-10-09/us/",
         "headline": "오픈AI 충격은 하루 지나 잊혀지고, 유가 후퇴가 다시 위험선호를 깨운다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -690,7 +761,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-08/kospi/",
-        "headline": "반도체 쇼크 하루 더? SK하이닉스 ADR 급락의 그림자",
+        "headline": "삼성전자 실적 발표 전야, 반도체주가 먼저 떨고 있어요",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -702,12 +774,14 @@
         "headline": "삼성전자 호실적에도 차익실현 매물 — 코스피 2.62% 급락",
         "title": "6,625.93",
         "price": "6,625.93",
-        "time": ""
+        "time": "",
+        "chg": -2.62
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-08/us/",
         "headline": "10년물 금리 5.3% 재돌파 — 어닝 랠리에 브레이크 걸렸다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -718,7 +792,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-07/kospi/",
-        "headline": "엔비디아 사상 최고치, 선물도 상승 — 반도체 변수가 관건",
+        "headline": "나스닥은 최고치인데 DRAM은 꺾였다 — 오늘 코스피의 숙제",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -730,12 +805,14 @@
         "headline": "코스피 6,800선 붕괴, 버틴 요인보다 내린 요인이 강했어요",
         "title": "6,803.90",
         "price": "6,803.90",
-        "time": ""
+        "time": "",
+        "chg": -1.98
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-07/us/",
         "headline": "사상 최고치 뒤에서 금리와 유가가 발목을 잡는다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -746,7 +823,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-06/kospi/",
-        "headline": "나스닥 고점 경신 + 수출 사상최대, 갭상승 조건 갖췄다",
+        "headline": "휴장 하루 쉬고 돌아온 코스피, 밀린 호재부터 반영할 시간",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -758,12 +836,14 @@
         "headline": "코스피 7000선 붕괴, 버틴 힘과 내린 힘의 줄다리기",
         "title": "6,941.39",
         "price": "6,941.39",
-        "time": ""
+        "time": "",
+        "chg": -0.89
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-06/us/",
         "headline": "금리가 오르는데 주가도 오른다 — AI가 채권시장을 무시하고 있다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -783,6 +863,7 @@
         "state": "ready",
         "url": "/briefings/2026-10-05/us/",
         "headline": "금리 동결 안도감 속 기술주는 숨 고르기 — VIX 반등이 변동성 경고등을 켰다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -793,7 +874,8 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-10-02/kospi/",
-        "headline": "마이크론發 훈풍, 오늘도 반도체가 끌고 간다",
+        "headline": "수출 역대 최대·마이크론 호실적, 그런데 금리가 발목을 잡을 수도 있어요",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -811,6 +893,7 @@
         "state": "ready",
         "url": "/briefings/2026-10-02/us/",
         "headline": "제퍼슨의 비둘기 발언이 반도체를 끌어올렸고, 이제 고용지표가 바통을 이어받는다",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",

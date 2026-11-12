@@ -418,17 +418,25 @@
     }
     return '<div class="bl-slot"><div class="bl-slot__label">' + lbl + '</div><div class="bl-slot__title">—</div></div>';
   }
-  function _blCell(s, lbl, isCurrent) {
-    s = s || { state: 'empty' };
-    if (s.state === 'ready') {
-      var pill = s.pill_text ? '<span class="bl-pill ' + s.pill_cls + '">' + s.pill_text + '</span>' : '';
-      var titleHtml = s.price ? '<div class="bl-cell__title">' + s.price + '</div>' : '';
-      var inner = '<div class="bl-cell__label">' + lbl + '</div>' + titleHtml + '<div class="bl-cell__bottom">' + pill + '<span class="bl-cell__time">' + s.time + '</span></div>';
-      return isCurrent
-        ? '<div class="bl-cell is-current">' + inner + '</div>'
-        : '<a class="bl-cell is-ready" href="' + s.url + '">' + inner + '</a>';
-    }
-    return '<div class="bl-cell is-empty"><div class="bl-cell__label">' + lbl + '</div><div class="bl-cell__bottom"><span class="bl-cell__empty">미생성</span></div></div>';
+  // 지난 장 한 날(2026-11-12 A안) — 세 브리핑의 헤드라인 + 예측 방향·채점. 정적 템플릿 briefing_list.html과 같은 마크업.
+  function _blEsc(t) { return String(t).replace(/[&<>"]/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function _blDayCard(d, day, cur) {
+    var p = d.split('-');
+    var chg = day.close && typeof day.close.chg === 'number' ? day.close.chg : null;
+    var kc = chg === null ? '' : '<span class="bl-day__kc ' + (chg > 0 ? 'up' : chg < 0 ? 'dn' : '') + '">코스피 ' + (chg > 0 ? '+' : '') + chg.toFixed(2) + '%</span>';
+    var items = BL_TYPES.map(function(t) {
+      var s = day[t];
+      if (!s || s.state !== 'ready') return '';
+      var rs = t === 'close' ? (s.price || '')
+        : (s.pill_text ? '<span class="' + s.pill_cls + '">' + s.pill_text + '</span>' : '') +
+          (s.hit === true ? ' <span class="bl-ok">✓</span>' : s.hit === false ? ' <span class="bl-ng">✗</span>' : '');
+      var inner = '<span class="bl-day__tg">' + BL_LABELS[t] + '</span><span class="bl-day__hl">' + _blEsc(s.headline || '브리핑 보기') +
+        '</span><span class="bl-day__rs">' + rs + '</span>';
+      return cur && cur.date === d && cur.type === t
+        ? '<div class="bl-day__i is-current">' + inner + '</div>'
+        : '<a class="bl-day__i" href="' + s.url + '">' + inner + '</a>';
+    }).join('');
+    return '<div class="bl-day"><div class="bl-day__h"><b>' + (+p[1]) + '월 ' + (+p[2]) + '일</b><span>' + _blDay(d, true) + '</span>' + kc + '</div>' + items + '</div>';
   }
 
   function patchBriefingList() {
@@ -464,14 +472,7 @@
           var p = d.split('-');
           var month = (+p[0]) + '년 ' + (+p[1]) + '월';
           if (month !== prevMonth) { rowsHtml += '<div class="bl-month">' + month + '</div>'; prevMonth = month; }
-          rowsHtml +=
-            '<div class="bl-row"><div class="bl-row__date">' +
-            '<span class="bl-row__num">' + d.slice(5) + '</span>' +
-            '<span class="bl-row__day">' + _blDay(d, false) + '</span></div>' +
-            BL_TYPES.map(function(t) {
-              return _blCell(slots[d][t], BL_LABELS[t], cur && cur.date === d && cur.type === t);
-            }).join('') +
-            '</div>';
+          rowsHtml += _blDayCard(d, slots[d], cur);
         });
 
         var divider = section.querySelector('.bl-divider');

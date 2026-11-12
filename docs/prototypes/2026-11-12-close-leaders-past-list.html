@@ -1,0 +1,157 @@
+<!doctype html>
+<!-- 마감 브리핑 주도주 카드 간격 + 지난 장 목록 표현 시안 (2026-11-12) -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>주도주 카드·지난 장 목록 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--canvas:#fff;--bg:#F7F8FA;--surface:#F7F9FC;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;--hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;--primary:#006EFF;--primary-bg:#E8F4FF;--up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;--ok:#12A150}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Pretendard,system-ui,sans-serif;color:var(--ink);padding:24px 16px 80px}
+h1{font-size:22px;margin:0 0 6px}h2{font-size:18px;margin:48px 0 4px;padding-top:20px;border-top:2px solid var(--hairline)}
+.lead{color:var(--muted);font-size:14px;margin:0 0 18px;line-height:1.6}
+.opt{margin:26px 0 8px;font-size:15px;font-weight:800}.opt small{font-weight:500;color:var(--muted);font-size:13px;margin-left:6px}
+.pair{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.frame{flex:none}.frame .lab{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px;letter-spacing:.04em}
+.pc{width:640px;max-width:100%}.mo{width:360px;max-width:100%}
+.up{color:var(--up)}.dn{color:var(--dn)}.mu{color:var(--muted)}
+.card{background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;overflow:hidden}
+.card__h{display:flex;justify-content:space-between;align-items:baseline;padding:14px 16px 0}
+.card__t{font-size:15px;font-weight:800}.card__s{font-size:12px;color:var(--muted)}
+/* ── 주도주 현재 ── */
+.cur .ld3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 16px 14px}
+.cur .ld{background:var(--surface);border-radius:12px;padding:10px 11px;min-width:0}
+.cur .n{font-size:13px;font-weight:800}.cur .p{font-size:16px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+.cur .c{font-size:13px;font-weight:800}.cur .f{margin-top:7px;padding-top:7px;border-top:1px solid var(--hairline);font-size:11.5px;color:var(--muted)}
+.cur .f b{display:block;font-size:13px}.cur .note{margin:0;padding:0 16px 13px;font-size:11.5px;color:var(--muted)}
+.mo .cur .ld3{gap:6px}.mo .cur .ld{padding:8px}.mo .cur .p{font-size:14px}
+/* ── 주도주 A: 간격 ── */
+.A .ld3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 16px 14px}
+.A .ld{background:var(--surface-inset);border-radius:12px;padding:14px 14px 13px;min-width:0}
+.A .n{font-size:13px;font-weight:700;color:var(--muted)}
+.A .p{font-size:18px;font-weight:800;margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.A .c{font-size:13px;font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums}
+.A .f{margin-top:12px;padding-top:11px;border-top:1px solid #DDE2E9;font-size:11.5px;color:var(--muted)}
+.A .f b{display:block;font-size:13.5px;margin-top:4px;font-variant-numeric:tabular-nums}
+.A .note{margin:0;padding:2px 16px 16px;font-size:12px;color:var(--muted);line-height:1.6}
+.mo .A .ld3{gap:6px;padding:14px 12px 12px}.mo .A .ld{padding:12px 10px 11px}.mo .A .p{font-size:15px;margin-top:6px}
+.mo .A .f{margin-top:10px;padding-top:9px}
+/* ── 주도주 B: 줄 목록 ── */
+.B .rows{padding:6px 16px 4px}
+.B .r{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 0;border-bottom:1px solid var(--hairline)}
+.B .r:last-child{border-bottom:0}
+.B .n{font-size:15px;font-weight:800}.B .px{text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.B .f{font-size:12.5px;color:var(--muted)}.B .f b{font-weight:700;margin-left:4px;font-variant-numeric:tabular-nums}
+.B .c{text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.B .note{margin:0;padding:4px 16px 16px;font-size:12px;color:var(--muted);line-height:1.6}
+/* ── 지난 장 공통 ── */
+.mon{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;padding:16px 0 8px}
+.ok{color:var(--ok);font-weight:800}.ng{color:#9AA1AC;font-weight:800}
+/* 현재 */
+.L0 .row{background:#fff;border:1px solid var(--hairline);border-radius:10px;display:grid;grid-template-columns:90px 1fr 1fr 1fr;min-height:56px;align-items:center}
+.L0 .row+.row{margin-top:4px}.L0 .dt{padding:0 14px}.L0 .dt b{display:block;font-size:15px}.L0 .dt span{font-size:11px;color:var(--muted)}
+.L0 .cell{padding:10px 14px;border-left:1px solid var(--hairline);font-size:11px;color:var(--muted)}.L0 .cell b{display:block;color:var(--ink);font-size:13px}
+.pill{font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;display:inline-block}.pill.up{background:var(--up-bg)}.pill.dn{background:var(--dn-bg)}
+.mo .L0 .row{grid-template-columns:62px 1fr 1fr 1fr}.mo .L0 .dt{padding:0 8px}.mo .L0 .cell{padding:8px 7px}
+/* A: 헤드라인 */
+.LA .day{background:#fff;border:1px solid var(--hairline);border-radius:14px;padding:14px 16px 6px;margin-bottom:10px}
+.LA .dh{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.LA .dh b{font-size:15px}.LA .dh span{font-size:12px;color:var(--muted)}
+.LA .dh .kc.up{color:var(--up)}.LA .dh .kc.dn{color:var(--dn)}.LA .dh .kc{margin-left:auto;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.LA a{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:baseline;padding:9px 0;border-top:1px solid var(--hairline);text-decoration:none;color:inherit}
+.LA a:hover .hl{text-decoration:underline}
+.LA .tg{font-size:11.5px;color:var(--muted);font-weight:600}.LA .hl{font-size:14px;line-height:1.45;font-weight:600}
+.LA .rs{font-size:12px;white-space:nowrap}
+.mo .LA a{grid-template-columns:1fr auto;gap:2px 8px}.mo .LA .tg{grid-column:1/-1}.mo .LA .hl{font-size:13.5px}
+/* B: 압축 표 */
+.LB{background:#fff;border:1px solid var(--hairline);border-radius:14px;overflow:hidden}
+.LB table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.LB th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:11px 14px;background:var(--surface-soft);border-bottom:1px solid var(--hairline)}
+.LB td{padding:12px 14px;border-bottom:1px solid var(--hairline);font-size:13.5px;vertical-align:middle}
+.LB tr:last-child td{border-bottom:0}.LB td.d b{font-size:14px}.LB td.d span{font-size:11.5px;color:var(--muted);margin-left:4px}
+.LB td a{color:inherit;text-decoration:none}.LB td a:hover{text-decoration:underline}
+.LB .kc{font-weight:800}.LB .kp{font-size:11.5px;color:var(--muted);margin-left:5px}
+.LB tr.m td{background:var(--surface-soft);font-size:11px;font-weight:700;color:var(--muted);padding:7px 14px}
+.mo .LB th,.mo .LB td{padding:10px 8px}.mo .LB .kp{display:none}.mo .LB td{font-size:13px}
+/* C: 달력 */
+.LC{background:#fff;border:1px solid var(--hairline);border-radius:14px;padding:14px 14px 10px}
+.LC .wk{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:6px}
+.LC .hd{font-size:11px;color:var(--muted);text-align:center;font-weight:700;padding-bottom:4px}
+.LC .c{border-radius:10px;padding:9px 8px 8px;min-height:84px;background:var(--surface-soft);text-decoration:none;color:inherit;display:block}
+.LC .c.up{background:var(--up-bg)}.LC .c.dn{background:var(--dn-bg)}.LC .c.x{opacity:.35}
+.LC .c .dd{font-size:12px;color:var(--muted);font-weight:700}
+.LC .c .v{font-size:15px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+.LC .c .pr{font-size:11px;margin-top:6px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
+.LC .c.on{outline:2px solid var(--ink)}.LC .leg{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+.LC .sel{margin-top:10px;border-top:1px solid var(--hairline);padding-top:10px;font-size:13px}
+.LC .sel a{display:block;color:inherit;text-decoration:none;padding:4px 0}.LC .sel span{color:var(--muted);font-size:11.5px;margin-right:6px}
+.mo .LC{padding:12px 10px 8px}.mo .LC .c{padding:7px 5px;min-height:74px}.mo .LC .c .v{font-size:13px}.mo .LC .wk{gap:4px}
+</style></head><body>
+<h1>주도주 카드 · 지난 장 목록 시안</h1>
+<p class="lead">2026-11-12 마감 브리핑 실제 값과 최근 10일 발행 기록(<code>briefings-list.json</code>·<code>briefings.json</code>)으로 그렸어요. 마감 등락률은 목록의 전 거래일 마감 지수로 계산했어요. 각 안은 PC(640px)와 폰(360px) 두 폭으로 보여줘요.</p>
+
+<h2>1. 주도주 3종목 마감</h2>
+<div id="leaders"></div>
+
+<h2>2. 지난 장 목록</h2>
+<p class="lead">지금 목록은 각 칸에 ▲▼와 발행 시각만 있어서 무슨 날이었는지 알 수 없어요. 이미 갖고 있는 헤드라인·마감 등락·예측 채점을 쓰면 정보가 생겨요.</p>
+<div id="past"></div>
+
+<script>
+const PAST = [{"d": "2026-10-28", "kospi": {"h": "앤트로픽發 AI 랠리, 반도체 수출 222%가 쐐기 박다", "p": "up", "price": null, "hit": true}, "close": {"h": "SK하이닉스 어닝서프라이즈, 코스피 하루 만에 +6.63%", "p": null, "price": "6,012.44", "hit": null}, "us": {"h": "앤트로픽 상장 D-데이, 메모리가 먼저 웃었다", "p": "up", "price": null, "hit": true}}, {"d": "2026-10-29", "kospi": {"h": "SK하이닉스 사상 최대 실적, 반도체 랠리 다시 불 붙나", "p": "up", "price": null, "hit": true}, "close": {"h": "어제 +6.63% 잔치 끝나자 기관이 4,473억 던졌다, 코스피 -1.24%", "p": null, "price": "5,937.66", "hit": null}, "us": {"h": "구글이 10% 수직낙하 — 과매도인가, 경고음인가", "p": "dn", "price": null, "hit": true}}, {"d": "2026-10-30", "kospi": {"h": "구글發 AI 거품론, 반도체도 같이 흔들려요", "p": "dn", "price": null, "hit": true}, "close": {"h": "사이드카까지 뜬 날, 반도체·자동차가 코스피를 끌어내렸다", "p": null, "price": "5,730.74", "hit": null}, "us": {"h": "인텔이 꺼뜨린 실적 랠리, 아마존까지 끌고 내려갔다", "p": "dn", "price": null, "hit": true}}, {"d": "2026-11-02", "kospi": {"h": "긴급 점검: 반도체·빅테크 동반 급락, 갭다운 불가피", "p": "dn", "price": null, "hit": true}, "close": {"h": "美 반도체 패닉은 패스, 기관 1.2조에 코스피 2.24% 급반등", "p": null, "price": "5,859.08", "hit": null}, "us": {"h": "어젯밤 추락한 증시, 유가 급락에 반등 시동 걸다", "p": "up", "price": null, "hit": false}}, {"d": "2026-11-03", "kospi": {"h": "왜 내릴까? — 빅테크 AI 부담에 반도체 2차 충격", "p": "dn", "price": null, "hit": true}, "close": {"h": "AI 거품 경고에 반도체 와르르, 코스피 -3.59%", "p": null, "price": "5,648.79", "hit": null}, "us": {"h": "반도체가 또 미끄러지자 AI 투자금 조달 걱정이 시장을 덮쳤다", "p": "dn", "price": null, "hit": false}}, {"d": "2026-11-04", "kospi": {"h": "반도체 되돌림 시동, SOX+2.6%·EWY 급반등", "p": "up", "price": null, "hit": true}, "close": {"h": "5823에서 5426까지 추락했다가, 코스피는 결국 웃었다", "p": null, "price": "5,683.80", "hit": null}, "us": {"h": "선거 끝나니 돈이 돌아왔다 — 공포지수 뚝, 선물 쑥", "p": "up", "price": null, "hit": true}}, {"d": "2026-11-05", "kospi": {"h": "선물은 웃고 반도체는 울고 — 오늘 코스피는 어느 장단?", "p": "up", "price": null, "hit": false}, "close": {"h": "AI 규제 공포에 반도체 -9%, 코스피 300포인트 증발", "p": null, "price": "5,383.80", "hit": null}, "us": {"h": "다우는 축포, 반도체는 침묵 — 민주당 압승이 가른 두 세계", "p": "up", "price": null, "hit": false}}, {"d": "2026-11-06", "kospi": {"h": "선거 충격 2차 폭탄 — 나스닥 -5.52%, SOX -12.25%", "p": "dn", "price": null, "hit": true}, "close": {"h": "전력기기 -10%, 반도체 -7%, 코스피 한 달 최대 낙폭", "p": null, "price": "5,059.69", "hit": null}, "us": {"h": "엔비디아, 약세장에 들어가다", "p": "up", "price": null, "hit": true}}, {"d": "2026-11-09", "kospi": {"h": "반도체 되돌림 자리 — SOX·DRAM 동반 반등", "p": "up", "price": null, "hit": false}, "close": {"h": "2차전지 -8.59%, 삼성SDI 두 자릿수 급락에 코스피 5000 턱걸이", "p": null, "price": "5,018.85", "hit": null}, "us": {"h": "황 CEO 스캔들에 엔비디아만 홀로 흔들린다", "p": "up", "price": null, "hit": true}}, {"d": "2026-11-10", "kospi": {"h": "왜 오를까? — 나스닥·반도체 동반 폭등에 베어마켓 랠리 시동", "p": "up", "price": null, "hit": true}, "close": {"h": "어제 -0.81%는 잊어라, 코스피 대부분 종목이 들고 일어나 +4.39%", "p": null, "price": "5,239.13", "hit": null}, "us": {"h": "엔비디아만 빠지고 반도체는 웃었다, 폭락 다음날의 기묘한 반등", "p": "up", "price": null, "hit": false}}, {"d": "2026-11-11", "kospi": {"h": "급등 다음날, 선물도 식었다", "p": "dn", "price": null, "hit": true}, "close": {"h": "코스닥 +5.62%, 코스피 +2.6%, 2차전지·반도체 쌍끌이 랠리", "p": null, "price": "5,375.36", "hit": null}, "us": {"h": "CPI 쇼크에 하루 울고, CoreWeave 한마디에 하루 웃고", "p": "up", "price": null, "hit": true}}];
+const LD=[{n:'삼성전자',p:'208,000',c:'▲ +0.97%',cc:'up',f:'−419.2만주'},{n:'SK하이닉스',p:'1,254,000',c:'▼ −1.80%',cc:'dn',f:'−262.5만주'},{n:'현대차',p:'266,500',c:'▼ −2.20%',cc:'dn',f:'−6.8만주'}];
+const NOTE='외국인 5일 순매수는 11/5~11/11 합계(주)예요. 종목별 수급 집계가 하루 늦어 오늘은 아직 들어 있지 않아요.';
+const head=`<div class="card__h"><span class="card__t">주도주 3종목 마감</span><span class="card__s">정규장 공식 종가</span></div>`;
+function tiles(){return `<div class="ld3">${LD.map(r=>`<div class="ld"><div class="n">${r.n}</div><div class="p">${r.p}</div><div class="c ${r.cc}">${r.c}</div><div class="f">외국인 5일<b class="dn">${r.f}</b></div></div>`).join('')}</div><p class="note">${NOTE}</p>`}
+function rows(){return `<div class="rows">${LD.map(r=>`<div class="r"><div class="n">${r.n}</div><div class="px">${r.p}</div><div class="f">외국인 5일<b class="dn">${r.f}</b></div><div class="c ${r.cc}">${r.c}</div></div>`).join('')}</div><p class="note">${NOTE}</p>`}
+function pair(cls,body){return `<div class="pair"><div class="frame pc"><div class="lab">PC</div><div class="card ${cls}">${head}${body}</div></div><div class="frame mo"><div class="lab">폰</div><div class="card ${cls}">${head}${body}</div></div></div>`}
+document.getElementById('leaders').innerHTML=
+ `<div class="opt">지금</div>`+pair('cur',tiles())+
+ `<div class="opt">A안 · 간격만 넓힘<small>모양은 그대로, 이름→가격→등락→외국인 5일 사이를 띄우고 칸 바탕을 한 단계 진하게</small></div>`+pair('A',tiles())+
+ `<div class="opt">B안 · 종목마다 한 줄<small>세 칸으로 쪼개지 않아 폰에서도 숫자가 좁아지지 않아요</small></div>`+pair('B',rows());
+
+// ── 지난 장 ──
+const DAYS='일월화수목금토';
+const dow=d=>{const[y,m,dd]=d.split('-').map(Number);return new Date(Date.UTC(y,m-1,dd)).getUTCDay()};
+const rowsP=PAST.slice(1).map((r,i)=>{const prev=PAST[i].close&&PAST[i].close.price, cur=r.close&&r.close.price;
+  let kc=null;if(prev&&cur){const a=+prev.replace(/,/g,''),b=+cur.replace(/,/g,'');kc=(b/a-1)*100}return {...r,kc}}).reverse();
+const fmt=v=>v==null?'—':(v>0?'+':'')+v.toFixed(2)+'%';
+const cls=v=>v==null?'mu':v>0?'up':v<0?'dn':'mu';
+const arrow=p=>p==='up'?'▲':p==='dn'?'▼':'';
+const hit=h=>h===true?'<span class="ok">✓ 적중</span>':h===false?'<span class="ng">✗ 빗나감</span>':'<span class="mu">채점 전</span>';
+const hitS=h=>h===true?'<span class="ok">✓</span>':h===false?'<span class="ng">✗</span>':'';
+const url=(d,t)=>`/briefings/${d}/${t}/`;
+function byMonth(f){let pm='',o='';rowsP.forEach(r=>{const m=+r.d.slice(5,7);if(m!==pm){o+=f.month(r.d);pm=m}o+=f.row(r)});return o}
+// 현재
+const L0=()=>`<div class="L0">`+byMonth({month:d=>`<div class="mon">${d.slice(0,4)}년 ${+d.slice(5,7)}월</div>`,row:r=>`<div class="row"><div class="dt"><b>${r.d.slice(5)}</b><span>${DAYS[dow(r.d)]}</span></div>
+ <div class="cell">코스피 예측<b><span class="pill ${r.kospi?.p}">${arrow(r.kospi?.p)}</span></b></div>
+ <div class="cell">코스피 마감<b>${r.close?.price||'—'}</b></div>
+ <div class="cell">미국 시장<b><span class="pill ${r.us?.p}">${arrow(r.us?.p)}</span></b></div></div>`})+`</div>`;
+// A
+const LA=()=>`<div class="LA">`+byMonth({month:d=>`<div class="mon">${d.slice(0,4)}년 ${+d.slice(5,7)}월</div>`,row:r=>`<div class="day"><div class="dh"><b>${+r.d.slice(5,7)}월 ${+r.d.slice(8)}일</b><span>${DAYS[dow(r.d)]}요일</span><span class="kc ${cls(r.kc)}">코스피 ${fmt(r.kc)}</span></div>
+ ${r.kospi?`<a href="${url(r.d,'kospi')}"><span class="tg">코스피 예측</span><span class="hl">${r.kospi.h}</span><span class="rs"><span class="${r.kospi.p}">${arrow(r.kospi.p)}</span> ${hitS(r.kospi.hit)}</span></a>`:''}
+ ${r.close?`<a href="${url(r.d,'close')}"><span class="tg">코스피 마감</span><span class="hl">${r.close.h}</span><span class="rs mu">${r.close.price}</span></a>`:''}
+ ${r.us?`<a href="${url(r.d,'us')}"><span class="tg">미국 시장</span><span class="hl">${r.us.h}</span><span class="rs"><span class="${r.us.p}">${arrow(r.us.p)}</span> ${hitS(r.us.hit)}</span></a>`:''}</div>`})+`</div>`;
+// B
+const LB=()=>`<div class="LB"><table><thead><tr><th>날짜</th><th>코스피 예측</th><th>코스피 마감</th><th>미국 예측</th></tr></thead><tbody>`+
+ byMonth({month:d=>`<tr class="m"><td colspan="4">${d.slice(0,4)}년 ${+d.slice(5,7)}월</td></tr>`,row:r=>`<tr>
+ <td class="d"><b>${r.d.slice(5).replace('-','/')}</b><span>${DAYS[dow(r.d)]}</span></td>
+ <td>${r.kospi?`<a href="${url(r.d,'kospi')}"><span class="${r.kospi.p}">${arrow(r.kospi.p)}</span> ${hitS(r.kospi.hit)}</a>`:'—'}</td>
+ <td>${r.close?`<a href="${url(r.d,'close')}"><span class="kc ${cls(r.kc)}">${fmt(r.kc)}</span><span class="kp">${r.close.price}</span></a>`:'—'}</td>
+ <td>${r.us?`<a href="${url(r.d,'us')}"><span class="${r.us.p}">${arrow(r.us.p)}</span> ${hitS(r.us.hit)}</a>`:'—'}</td></tr>`})+`</tbody></table></div>`;
+// C 달력
+function LC(){const asc=rowsP.slice().reverse();const weeks=[];asc.forEach(r=>{const d=new Date(r.d+'T00:00:00Z');const mon=new Date(d-((dow(r.d)+6)%7)*864e5).toISOString().slice(0,10);
+ let w=weeks.find(x=>x.k===mon);if(!w){w={k:mon,days:{}};weeks.push(w)}w.days[dow(r.d)]=r});
+ let o=`<div class="LC"><div class="wk">${['월','화','수','목','금'].map(x=>`<div class="hd">${x}</div>`).join('')}</div>`;
+ weeks.reverse().forEach(w=>{o+=`<div class="wk">`;for(let i=1;i<=5;i++){const r=w.days[i];if(!r){const dd=new Date(Date.parse(w.k+'T00:00:00Z')+(i-1)*864e5).toISOString().slice(5,10);o+=`<div class="c x" style="visibility:hidden"></div>`;continue}
+  o+=`<a class="c ${cls(r.kc)==='mu'?'':cls(r.kc)}" href="${url(r.d,'close')}" data-d="${r.d}"><div class="dd">${+r.d.slice(5,7)}/${+r.d.slice(8)}</div><div class="v ${cls(r.kc)}">${fmt(r.kc)}</div>
+  <div class="pr"><span>예 <span class="${r.kospi?.p}">${arrow(r.kospi?.p)}</span>${hitS(r.kospi?.hit)}</span><span>美 <span class="${r.us?.p}">${arrow(r.us?.p)}</span>${hitS(r.us?.hit)}</span></div></a>`}o+=`</div>`});
+ const r0=rowsP[0];
+ o+=`<div class="leg">칸 색 = 코스피 마감 등락 · 예 = 코스피 시초가 예측 · 美 = 미국 예측 · ✓ 적중 ✗ 빗나감</div>
+ <div class="sel">${selHtml(r0)}</div></div>`;return o}
+function selHtml(r){return `<b>${+r.d.slice(5,7)}/${+r.d.slice(8)} 브리핑</b><a href="${url(r.d,'kospi')}"><span>코스피 예측</span>${r.kospi?.h||'—'}</a><a href="${url(r.d,'close')}"><span>코스피 마감</span>${r.close?.h||'—'}</a><a href="${url(r.d,'us')}"><span>미국 시장</span>${r.us?.h||'—'}</a>`}
+document.addEventListener('click',e=>{const c=e.target.closest('.LC a.c');if(!c)return;e.preventDefault();const r=rowsP.find(x=>x.d===c.dataset.d);const box=c.closest('.LC');box.querySelectorAll('.c.on').forEach(x=>x.classList.remove('on'));c.classList.add('on');box.querySelector('.sel').innerHTML=selHtml(r)});
+function pairL(f){return `<div class="pair"><div class="frame pc"><div class="lab">PC</div>${f()}</div><div class="frame mo"><div class="lab">폰</div>${f()}</div></div>`}
+document.getElementById('past').innerHTML=
+ `<div class="opt">지금</div>`+pairL(L0)+
+ `<div class="opt">A안 · 헤드라인 목록<small>날짜마다 카드 하나, 세 브리핑의 헤드라인을 그대로 보여주고 오른쪽에 예측 방향·채점</small></div>`+pairL(LA)+
+ `<div class="opt">B안 · 성적 표<small>한 줄 한 날. 예측 방향과 맞았는지, 그날 코스피가 얼마나 움직였는지만</small></div>`+pairL(LB)+
+ `<div class="opt">C안 · 달력<small>주 단위 5칸, 칸 색이 그날 코스피 등락. 칸을 누르면 아래에 그날 헤드라인 세 개(눌러 보세요)</small></div>`+pairL(LC);
+</script></body></html>

@@ -37,19 +37,15 @@
   </div>
   {% endif %}
 
+  {# 지난 장(2026-11-12 A안) — 날짜마다 카드 하나, 세 브리핑의 헤드라인 + 예측 방향·채점. main.js patchBriefingList()와 같은 마크업 #}
   {% for row in past_rows %}
   {% if row.show_month %}<div class="bl-month">{{ row.month_label }}</div>{% endif %}
-  <div class="bl-row">
-    <div class="bl-row__date"><span class="bl-row__num">{{ row.date_short }}</span><span class="bl-row__day">{{ row.day_label }}</span></div>
-    {% for cell in row.cells %}
-    {% if cell.state == 'current' %}
-    <div class="bl-cell is-current"><div class="bl-cell__label">{{ cell.label }}</div><div class="bl-cell__bottom">{% if cell.pill_text %}<span class="bl-pill {{ cell.pill_cls }}">{{ cell.pill_text }}</span>{% endif %}<span class="bl-cell__time">{{ cell.time }}</span></div></div>
-    {% elif cell.state == 'ready' %}
-    <a class="bl-cell is-ready" href="{{ cell.url }}"><div class="bl-cell__label">{{ cell.label }}</div><div class="bl-cell__bottom">{% if cell.pill_text %}<span class="bl-pill {{ cell.pill_cls }}">{{ cell.pill_text }}</span>{% endif %}<span class="bl-cell__time">{{ cell.time }}</span></div></a>
-    {% else %}
-    <div class="bl-cell is-empty"><div class="bl-cell__label">{{ cell.label }}</div><div class="bl-cell__bottom"><span class="bl-cell__empty">미생성</span></div></div>
-    {% endif %}
-    {% endfor %}
+  <div class="bl-day">
+    <div class="bl-day__h"><b>{{ row.date_long }}</b><span>{{ row.day_full }}</span>{% if row.chg is not none %}<span class="bl-day__kc {{ 'up' if row.chg > 0 else ('dn' if row.chg < 0 else '') }}">코스피 {{ '%+.2f' % row.chg }}%</span>{% endif %}</div>
+    {% for cell in row.cells %}{% if cell.state in ('ready', 'current') %}
+    {% set inner %}<span class="bl-day__tg">{{ cell.label }}</span><span class="bl-day__hl">{{ cell.headline or '브리핑 보기' }}</span><span class="bl-day__rs">{% if cell.type == 'close' %}{{ cell.price or '' }}{% else %}{% if cell.pill_text %}<span class="{{ cell.pill_cls }}">{{ cell.pill_text }}</span>{% endif %}{% if cell.hit is true %} <span class="bl-ok">✓</span>{% elif cell.hit is false %} <span class="bl-ng">✗</span>{% endif %}{% endif %}</span>{% endset %}
+    {% if cell.state == 'current' %}<div class="bl-day__i is-current">{{ inner }}</div>{% else %}<a class="bl-day__i" href="{{ cell.url }}">{{ inner }}</a>{% endif %}
+    {% endif %}{% endfor %}
   </div>
   {% endfor %}
 </section>

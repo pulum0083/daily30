@@ -8,7 +8,7 @@
   --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
   --primary:#006EFF;--primary-bg:#E8F4FF;
   --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
-  --gold:#B7791F;--gold-bg:#FEF3C7;
+  --gold:#B7791F;--gold-bg:#FEF3C7;--ok:#12A150;
   --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
   --s2:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
   --r-sm:6px;--r-md:10px;--r-lg:16px;
@@ -19,7 +19,7 @@ html.dark {
   --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
   --primary:#1C82FF;--primary-bg:rgba(28,130,255,.12);
   --up:#F74B53;--up-bg:rgba(247,75,83,.15);--dn:#1C82FF;--dn-bg:rgba(0,110,255,.15);
-  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);
+  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);--ok:#3DD17A;
   --s1:0 1px 4px rgba(0,0,0,.35);--s2:0 4px 12px rgba(0,0,0,.45);
 }
 
@@ -819,6 +819,22 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
 .bl-cell__bottom{display:flex;align-items:center;gap:6px;}
 .bl-cell__time{font-size:11px;color:var(--muted);}
 .bl-cell__empty{font-size:11px;color:var(--muted);}
+/* 지난 장(2026-11-12 A안) — 날짜마다 카드 하나, 세 브리핑 헤드라인 + 예측 방향·채점 */
+.bl-day{background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;padding:14px 16px 6px;margin-bottom:10px;}
+.bl-day__h{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+.bl-day__h b{font-size:15px;letter-spacing:-.3px;}
+.bl-day__h span{font-size:12px;color:var(--muted);}
+.bl-day__h .bl-day__kc{margin-left:auto;font-size:13px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+.bl-day__h .bl-day__kc.up{color:var(--up);}.bl-day__h .bl-day__kc.dn{color:var(--dn);}
+.bl-day__i{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 0;border-top:1px solid var(--hairline);color:inherit;text-decoration:none;}
+a.bl-day__i:hover .bl-day__hl{text-decoration:underline;}
+.bl-day__i.is-current .bl-day__hl{color:var(--primary);}
+.bl-day__tg{font-size:11.5px;font-weight:600;color:var(--muted);}
+.bl-day__hl{font-size:14px;font-weight:600;line-height:1.45;color:var(--ink);}
+.bl-day__rs{font-size:12px;white-space:nowrap;color:var(--muted);font-variant-numeric:tabular-nums;}
+.bl-day__rs .up{color:var(--up);}.bl-day__rs .dn{color:var(--dn);}
+.bl-ok{color:var(--ok);font-weight:800;}.bl-ng{color:#9AA1AC;font-weight:800;}
+@media(max-width:600px){.bl-day__i{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;}.bl-day__tg{grid-column:1/-1;}.bl-day__hl{font-size:13.5px;}}
 
 /* ──────────────────────────────────────────────
    반응형
@@ -1408,14 +1424,16 @@ html.dark .arch-item__dek{color:var(--muted);}
 .vsl-c .v{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);margin:3px 0 2px}
 .vsl-c .y{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .vsl-c .v.up,.ld .up{color:var(--up)}.vsl-c .v.dn,.ld .dn{color:var(--dn)}
-.ld3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 16px 14px}
-.ld{background:var(--surface,#F7F9FC);border-radius:12px;padding:10px 11px;min-width:0}
-.ld .n{font-size:13px;font-weight:800;color:var(--ink)}
-.ld .p{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);margin-top:2px}
-.ld .c{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
-.ld .f{margin-top:7px;padding-top:7px;border-top:1px solid var(--hairline);font-size:11.5px;color:var(--muted)}
-.ld .f b{display:block;font-size:13px;font-variant-numeric:tabular-nums}
-.ld-note{margin:0;padding:0 16px 13px;font-size:11.5px;color:var(--muted)}
+/* 주도주 3종목 마감(2026-11-12 B안) — 종목마다 한 줄: 이름·외국인 5일 | 가격·등락. 마크업은 그대로라 발행본에도 적용된다 */
+.ld3{padding:4px 16px 2px}
+.ld{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n p" "f c";gap:3px 12px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--hairline);min-width:0}
+.ld:last-child{border-bottom:0}
+.ld .n{grid-area:n;font-size:15px;font-weight:800;color:var(--ink)}
+.ld .p{grid-area:p;text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ld .c{grid-area:c;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.ld .f{grid-area:f;font-size:12.5px;color:var(--muted)}
+.ld .f b{margin-left:4px;font-weight:700;font-variant-numeric:tabular-nums}
+.ld-note{margin:0;padding:4px 16px 16px;font-size:12px;line-height:1.6;color:var(--muted)}
 .sec8{margin-bottom:12px}
 .sec8 .rota-row{display:grid;grid-template-columns:70px 1fr 58px;gap:10px;padding:8px 16px}
 .sec8 .bar{position:relative;height:7px;background:var(--hairline);border-radius:4px}
@@ -1424,7 +1442,7 @@ html.dark .arch-item__dek{color:var(--muted);}
 .sec8 .bar .z{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:#94A3B8}
 .sec8 .rota-pct{text-align:right}.sec8 .rota-pct.up{color:var(--up)}.sec8 .rota-pct.dn{color:var(--dn)}
 .sec8 .mv{font-size:10.5px;color:var(--muted);margin-left:3px;font-weight:600}
-@media(max-width:520px){.ld3{gap:6px}.ld{padding:8px}.ld .p{font-size:14px}.vsl-c .v{font-size:15px}}
+@media(max-width:520px){.vsl-c .v{font-size:15px}}
 /* 마감 세 줄 요약(원인·주도·다음, 2026-10-29) — 라벨 칩 + 한 문장 */
 .brief3{list-style:none;margin:0;padding:8px 16px 14px;display:flex;flex-direction:column;gap:9px}
 .brief3 li{display:flex;gap:10px;align-items:baseline;font-size:14px;line-height:1.6;color:var(--ink)}

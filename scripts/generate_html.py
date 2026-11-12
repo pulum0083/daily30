@@ -2120,6 +2120,13 @@ def build_list_context(target_date: str, active_type: str) -> dict:
             base["state"] = "empty"
             return base
         # ready/current 공통 표시
+        if not today_card:
+            # 지난 장 목록(2026-11-12 A안): 헤드라인·예측 채점·마감 등락
+            base["headline"] = _archive_headline(d, btype)
+            if btype == "close":
+                base.update(close_map.get(d) or {})
+            elif match and match.get("is_correct") in (True, False):
+                base["hit"] = bool(match["is_correct"])
         if match:
             direction = match.get("predicted_direction") or match.get("direction", "")
             if btype == "close":
@@ -2139,11 +2146,13 @@ def build_list_context(target_date: str, active_type: str) -> dict:
         return base
 
     types = ["kospi", "close", "us"]
+    close_map = {}
     today_card = {
         "date": today, "day_label": day_label(today, full=True),
         "slots": [cell_for(today, t, True) for t in types],
     }
     past_dates = sorted({b["date"] for b in briefings if b.get("date") and b["date"] != today}, reverse=True)[:20]
+    close_map = _close_changes(past_dates)
     past_rows, prev_month = [], None
     for d in past_dates:
         if not any((BRIEFINGS_DIR / d / t / "index.html").exists() for t in types):
@@ -2157,6 +2166,8 @@ def build_list_context(target_date: str, active_type: str) -> dict:
         month = f"{dt.year}년 {dt.month}월"
         past_rows.append({
             "date": d, "date_short": d[5:], "day_label": day_label(d),
+            "date_long": f"{dt.month}월 {dt.day}일", "day_full": day_label(d, full=True),
+            "chg": (close_map.get(d) or {}).get("chg"),
             "month_label": month, "show_month": month != prev_month,
             "cells": [cell_for(d, t, False) for t in types],
         })
@@ -2391,6 +2402,27 @@ def _parse_close_price(html_path):
         return None
 
 
+def _close_changes(dates) -> dict:
+    """{날짜: {"price": "5,375.36", "chg": 2.6}} — 마감 브리핑 발행본의 코스피 종가와 전 거래일 대비 등락.
+
+    전 거래일 종가는 같은 목록 안의 직전 마감 발행본에서 찾는다. 없으면 chg를 빼고 가격만 둔다(§0).
+    브리핑 하단 목록(정적·JSON)이 같은 계산을 쓴다(§30).
+    """
+    out, prev = {}, None
+    for d in sorted(set(dates)):
+        page = BRIEFINGS_DIR / d / "close" / "index.html"
+        price = _parse_close_price(page) if page.exists() else None
+        if not price:
+            continue
+        val = float(price.replace(",", ""))
+        item = {"price": price}
+        if prev:
+            item["chg"] = round((val / prev - 1) * 100, 2)
+        out[d] = item
+        prev = val
+    return out
+
+
 def _bridge_target_is_today(target_date: str) -> bool:
     """밤사이 브리지 라이브 JSON을 지금 덮어써도 되는 날짜인지 판정한다.
 
@@ -2491,15 +2523,12 @@ def write_briefings_list_json():
 
             if ready:
                 entry = {"state": "ready", "url": f"/briefings/{d}/{btype}/"}
-                # 브리핑 헤드라인(reason_title/market_title) — 스트립에서 실제 타이틀 표시용
-                snap_path = BRIEFINGS_DIR / d / btype / "analysis_snapshot.json"
-                if snap_path.exists():
-                    snap = load_json(snap_path)
-                    # US 브리핑은 reason_title/market_title이 없고 todays_view.view_title(오늘의 관점)이 헤드라인.
-                    headline = (snap.get("reason_title") or snap.get("market_title")
-                                or (snap.get("todays_view") or {}).get("view_title"))
-                    if headline:
-                        entry["headline"] = re.sub(r"<[^>]+>", "", str(headline)).strip()
+                # 브리핑 헤드라인 — 페이지 맨 위·아카이브와 같은 문장(view_title 우선, §84)
+                headline = _archive_headline(d, btype)
+                if headline:
+                    entry["headline"] = re.sub(r"<[^>]+>", "", str(headline)).strip()
+                if btype != "close" and match and match.get("is_correct") in (True, False):
+                    entry["hit"] = bool(match["is_correct"])
                 if btype == "close":
                     price = _parse_close_price(new_path)
                     entry["title"] = price or "마감"
@@ -2519,6 +2548,11 @@ def write_briefings_list_json():
                 entry = {"state": "pending", "scheduled_time": SCHEDULED_TIMES.get(btype, "")}
             day_slots[btype] = entry
         slots[d] = day_slots
+
+    # 마감 등락(전 거래일 마감 발행본 대비) — 지난 장 목록 머리에 쓴다
+    for d, item in _close_changes(all_dates).items():
+        if "chg" in item and slots.get(d, {}).get("close", {}).get("state") == "ready":
+            slots[d]["close"]["chg"] = item["chg"]
 
     out_path = WEB_DIR / "data" / "briefings-list.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)

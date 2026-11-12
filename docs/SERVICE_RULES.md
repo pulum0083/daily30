@@ -314,6 +314,7 @@ python3 scripts/generate_html.py --write-list-only
 - **현재 KST 날짜**를 오늘 카드로 잡는다 (DOM에 박힌 날짜를 쓰지 않는다).
 - 오늘 카드 + 과거 행(최근 10일, ready 1개 이상) 전체를 JSON에서 재구성.
 - 현재 보고 있는 브리핑만 `is-current`로 강조.
+- **지난 장은 날짜마다 카드 하나**(2026-11-12 사용자 결정 A안, 시안 `docs/prototypes/2026-11-12-close-leaders-past-list.html`) — 세 브리핑의 헤드라인(아카이브와 같은 `_archive_headline`, view_title 우선), 코스피 예측·미국 예측의 방향 ▲▼과 채점 ✓✗(`briefings.json` `is_correct`, 채점 전이면 비움), 카드 머리에 그날 코스피 등락(직전 마감 발행본 종가 대비 `_close_changes`, 직전 발행본이 없으면 비움). 정적 템플릿(`briefing_list.html`)과 `main.js _blDayCard()`가 같은 마크업을 쓴다. 예전엔 칸마다 ▲▼와 발행 시각뿐이라 무슨 날이었는지 알 수 없었다.
 - 주말(토·일): 모든 슬롯 `state: 'empty'`(`—`). "생성 예정" 문구 절대 표시 금지.
 
 **`/briefings/` 는 정적 아카이브다 — 리다이렉트하지 않는다 (2026-09-02 변경).**
@@ -2609,7 +2610,7 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - 테스트 `scripts/test_close_brief.py`.
 - **어제와 비교·섹터별 오늘 등락·주도주 3종목 추가(같은 날)** — 시안 `docs/prototypes/2026-10-29-close-briefing-simpler.html`의 D·B·E.
   - **어제와 비교**(마감 스냅샷 카드 안, 코스닥·환율 줄 아래)와 **섹터별 오늘 등락**(사이드바 맨 위, 대표 3종목 평균 막대 + 어제 대비 순위 ▲▼)은 종목 홈 '어제랑 비교' 마감 카드와 **같은 값**이다 — 마감 수집(`fetch_closing_kospi.fetch_vs_close`)이 `https://doubleshot.space/api/intraday?vs=close`를 받아 `vs_close`로 저장한다. 계산은 `api/_vs-close.mjs` 한 곳(§30). 응답이 `status: ok`이고 `today.date`가 오늘일 때만 쓰고, 아니면 비운다. 렌더도 `vs_close.today`가 브리핑 날짜와 같을 때만(§14).
-  - **주도주 3종목 마감**(요약 아래) — 삼성전자·SK하이닉스·현대차의 정규장 공식 종가·등락(`kr_official_closes.official_today`, §48)과 외국인 5일 순매수(주). 종목별 순매매는 오늘 행이 20:00 뒤에도 없어(§75) **오늘을 뺀 직전 5거래일** 합이고, 카드 아래에 기간을 적는다. 공식 종가가 없는 종목은 뺀다.
+  - **주도주 3종목 마감**(요약 아래) — 삼성전자·SK하이닉스·현대차의 정규장 공식 종가·등락(`kr_official_closes.official_today`, §48)과 외국인 5일 순매수(주). 종목별 순매매는 오늘 행이 20:00 뒤에도 없어(§75) **오늘을 뺀 직전 5거래일** 합이고, 카드 아래에 기간을 적는다. 공식 종가가 없는 종목은 뺀다. **종목마다 한 줄**(왼쪽 이름·외국인 5일, 오른쪽 가격·등락)로 쌓는다(2026-11-12 사용자 결정 B안 — 세 칸 타일은 폰에서 숫자가 끼고 위아래가 붙어 보였다). 마크업은 그대로 두고 `style.css`만 바꿔 발행본에도 적용된다.
   - 어제 §75에서 데이터를 고친 '거래대금 급증 종목'과 옛 사이드바 '섹터 로테이션'은 템플릿이 그리지 않는 섹션이었다(예전에 일부러 뺐다). 화면엔 이번에 넣은 섹터 막대만 나온다.
   - 테스트 `scripts/test_close_vs_leaders.py`(10/28 실측 픽스처 `scripts/fixtures/vs_close_20261028.json`).
   - **'어제와 비교' 간격(2026-11-11 사용자 결정 A안)** — 머리줄→문장 8px, 문장→칸 12px, 칸 안 숫자 위아래 3·2px, 칸 배경 `--surface-inset`. 예전엔 4·8px로 문장이 머리줄에 붙어 보였다(`style.css` `.vsl-*`).
