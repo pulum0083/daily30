@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot</title>
 <link rel="canonical" href="https://doubleshot.space/stocks/income-designer/">
-<meta name="description" content="국내·미국 월배당 ETF를 담아 매달 받을 분배금(세후)을 계산해요. 분배율·1년 총수익으로 원금이 녹는지(건전성)를 보고, 금융소득종합과세 2,000만원 기준도 함께 점검해요.">
+<meta name="description" content="국내·미국 월배당 ETF를 담아 매달 받을 분배금(세후)을 계산해요. 분배율·1년 가격 변화로 원금이 녹는지(건전성)를 보고, 금융소득종합과세 2,000만원 기준도 함께 점검해요.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot">
 <meta property="og:description" content="국내·미국 월배당 ETF를 담아 매달 받을 분배금(세후)을 계산하고 원금 침식·종합과세를 점검해요.">
@@ -706,7 +706,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
             <div class="ipanel-cap-row">
               <div style="flex:1;">
                 <span id="icap-y">연 분배율이 높은 순 (국내·미국)</span>
-                <span id="icap-h" style="display:none">분배율 대비 1년 총수익이 높은 순 (국내·미국)</span>
+                <span id="icap-h" style="display:none">1년 가격 변화가 좋은 순 (국내·미국)</span>
               </div>
               <button class="ipanel-qbtn" onclick="openIncomeModal()">?</button>
             </div>
@@ -728,7 +728,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
               <p>분배율이 15%여도, 그 돈이 내 원금에서 나왔다면 실제로 번 게 아니에요. 커버드콜 ETF 일부는 옵션 프리미엄 수익이 부족할 때 원금을 떼어 분배금으로 지급해요.</p>
 
               <h4>Q. 건전성이 뭔가요?</h4>
-              <p><b>건전성 = 총수익 − 분배율</b>이에요. 아래 카드를 보면 바로 이해돼요.</p>
+              <p><b>건전성 = 1년 동안 가격이 얼마나 지켜졌나</b>예요. 분배금을 주고도 가격이 1년 전 이상이면 건전이에요. 아래 카드는 실제 데이터예요.</p>
 
               <!-- 어노테이션 카드 -->
               <div class="anno-card">
@@ -737,30 +737,30 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
                     <div class="it" style="display:flex;align-items:center;gap:8px;">
                       <span class="rk top" style="flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;text-align:center;">1</span>
                       <b style="flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;">KODEX 200타겟위클리커버드콜</b>
-                      <span class="hbdg ok" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;background:#ecfeea;color:#00ae1a;white-space:nowrap;">건전</span>
+                      <span id="anno-badge" class="hbdg ok" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;background:#ecfeea;color:#00ae1a;white-space:nowrap;">건전</span>
                     </div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:2px;"><span class="mk-kr" style="display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;background:#EEF2FF;color:#4F46E5;">KR</span>498400 · 순자산 6.7조</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;"><span class="mk-kr" style="display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;background:#EEF2FF;color:#4F46E5;">KR</span>498400 · 순자산 <span id="anno-aum">—</span></div>
                     <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);">
-                      <span style="font-size:15px;font-weight:600;color:#4F46E5;">11.23%</span> 분배 · 총수익 <b style="color:var(--ink)">+174.81%</b> · <span style="color:#E03131">가격 +164%</span>
+                      <span id="anno-y" style="font-size:15px;font-weight:600;color:#4F46E5;">—</span> 분배 · 총수익 <b id="anno-r" style="color:var(--ink)">—</b> · <span id="anno-p">가격 —</span>
                     </div>
                   </div>
                 </div>
                 <div class="anno-labels">
                   <div class="anno-item">
                     <span class="anno-dot" style="background:#4F46E5;"></span>
-                    <div><b>분배율 11.23%</b><br>최근 12개월 정기 분배금 ÷ 현재가. 내가 받는 배당 비율이에요(미국 ETF의 1회성 특별분배는 빼요).</div>
+                    <div><b>분배율</b><br>최근 12개월 정기 분배금 ÷ 현재가. 내가 받는 배당 비율이에요(미국 ETF의 1회성 특별분배는 빼요).</div>
                   </div>
                   <div class="anno-item">
                     <span class="anno-dot" style="background:#111;"></span>
-                    <div><b>총수익 +174.81%</b><br>분배금 재투자 기준 1년 수익률. 자산이 실제로 얼마나 불었는지예요.</div>
+                    <div><b>총수익</b><br>1년 가격 변화 + 1년 동안 받은 분배금. 실제로 얼마나 벌었는지예요.</div>
                   </div>
                   <div class="anno-item">
                     <span class="anno-dot" style="background:#E03131;"></span>
-                    <div><b>가격 +164%</b><br>총수익 − 분배율 ≈ 가격 변화 추정치. 분배받으면서 ETF 가격도 올랐어요.</div>
+                    <div><b>가격</b><br>1년 전보다 ETF 가격이 얼마나 움직였는지예요. 건전성은 이 값으로 판정해요.</div>
                   </div>
                   <div class="anno-item">
                     <span class="anno-dot" style="background:#00ae1a;border-radius:9999px;"></span>
-                    <div><b>건전 뱃지</b><br>가격이 유지·상승하며 분배해요. 주의는 소폭 침식, 원금성은 분배금에 원금이 섞인 구조예요.</div>
+                    <div><b>건전 뱃지</b><br>가격이 1년 전 이상이에요. 주의는 분배율의 절반까지 내린 경우, 원금성은 그보다 더 내려 분배금에 원금이 섞인 구조예요.</div>
                   </div>
                 </div>
               </div>
@@ -788,7 +788,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
       </div>
     </div>
     <!-- 정직 배너 -->
-    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요.<br>분배율·총수익·순자산은 매주 월요일 자동 갱신되는 실측값이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요.<br>미국 ETF 가격은 원화 환산(갱신 시점 환율 기준)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
+    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 1년 가격 변화로 판정해요.<br>분배율·총수익·순자산은 매주 월요일 자동 갱신되는 실측값이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 1년 가격 변화가 없어 건전성 판정에서 제외돼요.<br>미국 ETF 가격은 원화 환산(갱신 시점 환율 기준)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
 
   </div>
 
@@ -862,6 +862,7 @@ function normKrEtf(e) {
     price: e.price,
     y: e.yield_ttm,
     r: e.return_1y,
+    p: e.price_1y,
     mk: 'KR',
     lc: e.low_confidence,
     is_cc: e.is_cc || false,
@@ -878,6 +879,7 @@ function normUsEtf(e, usdKrw) {
     price: priceKrw,
     y: e.yield_ttm,
     r: e.return_1y,
+    p: e.price_1y,
     mk: 'US',
     lc: e.low_confidence || false,
     is_cc: e.is_cc || false,
@@ -887,11 +889,23 @@ function normUsEtf(e, usdKrw) {
 }
 
 let INCOME_UNIVERSE = [];
+// '건전성이 뭔가요' 예시 카드 — 숫자를 박아두지 않고 실제 데이터로 채운다(예전엔 옛 값 +174.81%가 고정돼 있었다)
+function annoFill(d){
+  const card=document.querySelector('.anno-card');if(!card)return;
+  if(!d||d.p==null){card.style.display='none';return;}
+  const[hc,hl]=incomeHealth(d);const sg=v=>(v>=0?'+':'')+v;
+  document.getElementById('anno-y').textContent=d.y+'%';
+  document.getElementById('anno-r').textContent=d.r!=null?sg(d.r)+'%':'—';
+  const p=document.getElementById('anno-p');p.textContent='가격 '+sg(Math.round(d.p))+'%';p.style.color=d.p>=0?'#E03131':'#2775ED';
+  document.getElementById('anno-aum').textContent=d.aum.toFixed(1)+'조';
+  const b=document.getElementById('anno-badge');b.textContent=hl;b.className='hbdg '+hc;b.removeAttribute('style');
+}
 const UNIV = {};
 let USDKRW = 0;
-function incomeHealth(d){if(d.r==null)return['na','데이터 부족',null];const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+// 건전성 = 1년 가격 변화(d.p). 예전엔 총수익 − 분배율로 쟀는데 국내·미국 원천의 '1년 수익' 뜻이 달라 오판했다(2026-11-12).
+function incomeHealth(d){if(d.p==null)return['na','데이터 부족',null];const e=d.p;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
 
-const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.',na:'상장 1년 미만이라 1년 총수익이 아직 없어요. 건전성을 판정할 수 없어요.'};
+const BADGE_TIPS={ok:'분배금을 주고도 가격이 1년 전보다 높아요. 원금이 지켜졌어요.',warn:'가격이 1년 전보다 조금 내렸어요(분배율의 절반 이내). 분배금 일부가 원금에서 나왔을 수 있어요.',bad:'가격이 분배율의 절반 넘게 내렸어요. 분배금 상당 부분이 원금에서 나온 셈이에요.',na:'상장 1년 미만이라 1년 가격 변화가 아직 없어요. 건전성을 판정할 수 없어요.'};
 function incomeRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
   const rk=i+1,rkCls=rk<=3?'rk top':'rk';
@@ -915,7 +929,7 @@ function incomeFiltered(){
   return arr;
 }
 // 건전성 정렬 스코어: 신생(r:null)은 항상 최하단
-function healthScore(d){return d.r==null?-Infinity:d.r-d.y;}
+function healthScore(d){return d.p==null?-Infinity:d.p;}
 function incomeRender(){
   const arr=incomeFiltered();
   document.getElementById('income-rows').innerHTML=arr.slice(0,12).map(incomeRow).join('');
@@ -1040,7 +1054,7 @@ function openAddSheet(code){
   const[hc,hl]=incomeHealth(d);
   const ex=simHoldings.findIndex(h=>h.code===code);
   const alreadyQty=ex>=0?simHoldings[ex].qty:null;
-  const ePct=d.r!=null?Math.round(d.r-d.y):null;
+  const ePct=d.p!=null?Math.round(d.p):null;
   const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
   const priceColor=ePct==null?'var(--muted)':ePct>=0?'#E03131':'#2775ED';   // 상승 빨강·하락 파랑(사이트 규칙)
   const metaTxt=d.mk==='US'
@@ -1370,6 +1384,7 @@ fetch('/data/income_etfs.json')
       const s=`${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')} 기준`;
       const el=document.getElementById('data-updated-at');if(el)el.textContent='데이터 '+s;
     }
+    annoFill(UNIV['498400']);
     incomeRender();
     incomeAllPageRender();
     simRowsRender();simOut();

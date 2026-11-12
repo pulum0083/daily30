@@ -6,15 +6,15 @@
 국내: 순자산 일정 규모 이상의 '월배당' 배당·커버드콜 ETF (네이버 API)
 미국: 큐레이션 목록 기반 월배당 ETF (yfinance)
 
-핵심 지표 — 가격침식 프록시:
-  erosion = 총수익(Y1) − 분배율(TTM)
-    ≥ 0          : 가격을 지키며 분배 → 건전(ok)
-    ≥ −분배율/2   : 소폭 침식 → 주의(warn)
+핵심 지표 — 1년 가격 변화(price_1y, erosion과 같은 값):
+    ≥ 0          : 분배하면서 가격을 지킴 → 건전(ok)
+    ≥ −분배율/2   : 소폭 깎임 → 주의(warn)
     <  −분배율/2  : 분배금에 원금이 섞임(원금성) → 경고(bad)
+  return_1y = 1년 총수익(가격 변화 + 받은 분배금, 재투자 없음)
 
 데이터 소스:
   국내 - 유니버스/가격/시총 : finance.naver.com/api/sise/etfItemList.nhn (cp949)
-  국내 - 분배율·총수익·과세 : m.stock.naver.com/api/stock/{code}/etfAnalysis
+  국내 - 분배율·1년 가격 변화·과세 : m.stock.naver.com/api/stock/{code}/etfAnalysis (Y1은 가격 변화)
   미국 - 가격·배당·AUM     : yfinance
   환율 - USD/KRW          : yfinance (USDKRW=X)
 
@@ -87,16 +87,34 @@ def return_y1(perf_list):
     return None
 
 
-def classify_health(yield_ttm, return_1y):
-    """가격침식 프록시로 건전성 판정 → ('ok'|'warn'|'bad', erosion). 데이터 부족 시 (None, None)."""
-    if yield_ttm is None or return_1y is None:
+def classify_health(yield_ttm, price_1y):
+    """1년 가격 변화로 원금이 지켜졌는지 판정 → ('ok'|'warn'|'bad', 가격 변화). 데이터 부족 시 (None, None).
+
+    분배금을 받고도 가격이 1년 전 이상이면 원금이 지켜진 것(건전), 분배율의 절반까지 내리면 주의,
+    그보다 더 내리면 분배금 상당 부분이 원금에서 나온 것(원금성)이다.
+
+    2026-11-12 정정: 예전엔 '1년 수익 − 분배율'로 쟀는데 1년 수익의 뜻이 시장마다 달랐다.
+    국내(네이버 Y1)는 분배금이 빠진 가격 변화라 분배율을 한 번 더 빼 실제보다 나쁘게(60개 중 23개 오판),
+    미국은 수정 종가에 분배금을 다시 더해 실제보다 좋게 나왔다. 이제 가격 변화를 직접 받는다.
+    """
+    if yield_ttm is None or price_1y is None:
         return None, None
-    erosion = round(return_1y - yield_ttm, 2)
-    if erosion >= 0:
-        return "ok", erosion
-    if erosion >= -yield_ttm / 2:
-        return "warn", erosion
-    return "bad", erosion
+    p = round(price_1y, 2)
+    if p >= 0:
+        return "ok", p
+    if p >= -yield_ttm / 2:
+        return "warn", p
+    return "bad", p
+
+
+def total_from_price(price_1y, yield_ttm):
+    """국내 1년 총수익(분배금 재투자 없이) = 가격 변화 + 받은 분배금 ÷ 1년 전 가격.
+
+    네이버 분배율(TTM)은 최근 1년 분배금 ÷ 현재가라, 1년 전 가격 기준으로 바꾸면 분배율 × (1 + 가격 변화)다.
+    """
+    if price_1y is None or yield_ttm is None:
+        return None
+    return round(price_1y + yield_ttm * (1 + price_1y / 100), 2)
 
 
 def parse_months(s):
@@ -265,8 +283,10 @@ def build_us(usd_krw, sleep=0.5):
                 print(f"  note {ticker} — 특별분배 {len(special)}회(${sum(special):.3f}) 분배율에서 제외")
 
             # 1년 총수익 = (현재가 - 1년전가 + 배당합) / 1년전가
-            hist = t.history(period="400d")
-            return_1y = None
+            # auto_adjust=False — 기본값(True)은 분배금이 반영된 수정 종가라, 분배금을 다시 더하면 두 번 센다
+            # (2026-11-12 발견: QQQI 1년 총수익이 실제 +8%인데 +22%로 나왔다)
+            hist = t.history(period="400d", auto_adjust=False)
+            return_1y = price_1y = None
             if len(hist) >= 200:
                 tz = hist.index.tz
                 cutoff = pd.Timestamp.now(tz=tz) - pd.DateOffset(years=1)
@@ -276,8 +296,9 @@ def build_us(usd_krw, sleep=0.5):
                     p1 = float(hist["Close"].iloc[-1])
                     if p0 and math.isfinite(p0) and math.isfinite(p1):
                         return_1y = round((p1 - p0 + float(recent.sum())) / p0 * 100, 2)
+                        price_1y = round((p1 / p0 - 1) * 100, 2)
 
-            health, erosion = classify_health(yield_ttm, return_1y)
+            health, erosion = classify_health(yield_ttm, price_1y)
             price_krw = round(float(price_usd) * usd_krw) if usd_krw else None
 
             etfs.append({
@@ -288,6 +309,7 @@ def build_us(usd_krw, sleep=0.5):
                 "price_krw": price_krw,
                 "yield_ttm": yield_ttm,
                 "return_1y": return_1y,
+                "price_1y": price_1y,
                 "erosion": erosion,
                 "health": health,
                 "is_cc": "커버드콜" in name,
@@ -322,8 +344,9 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
         months = parse_months(div.get("dividendMonthThisYear"))
         if not is_monthly(months, a.get("listedDate"), today, was_monthly=code in prev_monthly):
             continue
-        r1y = return_y1(a.get("returnPerformanceList"))
-        health, erosion = classify_health(y, r1y)
+        p1y = return_y1(a.get("returnPerformanceList"))   # 네이버 Y1은 분배금이 빠진 가격 변화다
+        health, erosion = classify_health(y, p1y)
+        r1y = total_from_price(p1y, y)
         etfs.append({
             "code": code,
             "name": name,
@@ -331,6 +354,7 @@ def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
             "price": price,
             "yield_ttm": y,
             "return_1y": r1y,
+            "price_1y": p1y,
             "erosion": erosion,
             "health": health,
             "is_cc": "커버드콜" in name,
@@ -411,7 +435,7 @@ def main():
     print("\n─── 국내 ETF ───")
     for e in result["etfs"]:
         flag = " ⚠신생" if e["low_confidence"] else ""
-        print(f"  {e['health'] or '?':4s} {e['name'][:28]:30s} 분배 {e['yield_ttm']}% · 총수익 {e['return_1y']}% · 침식 {e['erosion']}%{flag}")
+        print(f"  {e['health'] or '?':4s} {e['name'][:28]:30s} 분배 {e['yield_ttm']}% · 총수익 {e['return_1y']}% · 1년 가격 {e['price_1y']}%{flag}")
 
 
 if __name__ == "__main__":

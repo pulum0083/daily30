@@ -53,19 +53,23 @@ def test_sanitize_nonfinite():
 
 
 def test_classify_health():
-    # 원금성: 분배 13.02 vs 총수익 1.85 → 침식 −11.17 < −분배/2(−6.51)
-    assert m.classify_health(13.02, 1.85) == ("bad", -11.17)
-    # 건전: 분배 3.6 vs 총수익 19.1 → 침식 +15.5 ≥ 0
-    assert m.classify_health(3.6, 19.1) == ("ok", 15.5)
-    # 경계 — 침식 정확히 0 → ok
-    assert m.classify_health(10.0, 10.0) == ("ok", 0.0)
-    # 경계 — 침식 = −분배/2 정확히 → warn (포함)
-    assert m.classify_health(10.0, 5.0) == ("warn", -5.0)
-    # 경계 — 침식 살짝 더 음수 → bad
-    assert m.classify_health(10.0, 4.0) == ("bad", -6.0)
-    # 데이터 부족
+    # 1년 가격 변화로 판정한다(2026-11-12 정정)
+    assert m.classify_health(13.02, 1.85) == ("ok", 1.85)      # 가격이 올랐으면 분배율이 높아도 건전
+    assert m.classify_health(10.0, 0.0) == ("ok", 0.0)         # 경계 — 그대로면 건전
+    assert m.classify_health(10.0, -5.0) == ("warn", -5.0)     # 분배율의 절반까지 내림 → 주의
+    assert m.classify_health(10.0, -5.01) == ("bad", -5.01)    # 그보다 더 내림 → 원금성
     assert m.classify_health(None, 5.0) == (None, None)
     assert m.classify_health(10.0, None) == (None, None)
+
+
+def test_kr_health_uses_price_not_price_minus_yield():
+    # 2026-11-12 실사고: ACE 미국반도체데일리타겟커버드콜 — 네이버 Y1(가격 변화) +8.51%, 분배율 35.22%.
+    # 예전엔 8.51 − 35.22 = −26.7%로 '원금성'이라 했지만 실제 가격은 9,661 → 11,135원으로 올랐다.
+    assert m.classify_health(35.22, 8.51)[0] == "ok"
+    # 총수익 = 가격 변화 + 분배금 ÷ 1년 전 가격 = 8.51 + 35.22 × 1.0851
+    assert m.total_from_price(8.51, 35.22) == 46.73
+    assert m.total_from_price(None, 3.0) is None
+    assert m.total_from_price(2.0, None) is None
 
 
 def test_parse_months():
