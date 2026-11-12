@@ -33,7 +33,7 @@ async function fetchBasic() {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=20');   // 60초 폴링 — s-maxage+swr을 주기보다 작게(§68 ④, 2026-11-13)
 
   // 장 마감 후 → basic API 직행
   if (isAfterMarketKST()) {

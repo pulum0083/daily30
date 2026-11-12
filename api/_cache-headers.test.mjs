@@ -21,8 +21,9 @@ import assert from 'node:assert/strict';
 const POLLED = [
   { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 60,  strict: true, req: { query: { codes: '005930', us: '' } } },
   { name: 'market',      mod: './market.mjs',      pollSec: 60,  strict: true, req: { query: {} } },   // 밤사이 미국 60초
-  { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 60,  req: { query: {} } },
-  { name: 'signals',     mod: './signals.mjs',     pollSec: 60,  req: { query: {} } },   // main.js 사이드바가 최단
+  { name: 'kospi-live',  mod: './kospi-live.mjs',  pollSec: 60,  strict: true, req: { query: {} } },   // LIVE 지수 카드 60초
+  { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 60,  strict: true, req: { query: {} } },
+  { name: 'signals',     mod: './signals.mjs',     pollSec: 60,  strict: true, req: { query: {} } },   // main.js 사이드바가 최단
   { name: 'data',        mod: './data.mjs',        pollSec: 300, req: { query: { f: 'briefings-list' } } },
   { name: 'intraday?vs', mod: './intraday.mjs', pollSec: 60, req: { query: { vs: 'intraday' }, headers: {} } },   // vs-yesterday.js 60초
 ];

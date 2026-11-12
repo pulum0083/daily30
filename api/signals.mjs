@@ -58,7 +58,7 @@ async function kospiPct() {
 
 export default async function handler(req, res) {
   // 장중 120초 주기 폴링 — 주기의 절반으로 잡아 신선도 여유를 남긴다.
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=20');   // 60초 폴링 — s-maxage+swr을 주기보다 작게(§68 ④, 2026-11-13)
   try {
     const snap = await loadSnapshot();
     if (!snap || !snap.stocks) return res.status(502).json({ error: 'snapshot unavailable' });

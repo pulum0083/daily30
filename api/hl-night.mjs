@@ -75,7 +75,7 @@ async function getAnchors(syms, closeTs) {
 
 export default async function handler(req, res) {
   // 최단 소비자는 홈 야간 타일(30초). 상세 페이지 야간 추정가는 60초다.
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=20');   // 60초 폴링 — s-maxage+swr을 주기보다 작게(§68 ④, 2026-11-13)
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const r = await fetch(HL, {
