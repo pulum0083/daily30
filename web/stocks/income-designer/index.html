@@ -616,7 +616,11 @@ html.dark #income-board .calc-btn,html.dark #income-board .btn.pri{background:#F
 #income-board .chip .v{font-size:20px;font-weight:800;margin-top:2px}
 #income-board .chip .v small{font-size:12px;color:var(--muted);font-weight:600;margin-left:3px}
 #income-board .chip.ok .v{color:#12A150}#income-board .chip.warn .v{color:#B7791F}#income-board .chip.bad .v{color:#D9480F}
-#income-board .flt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+#income-board .flt{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+/* 정렬은 드롭다운 — 분류 버튼 줄 오른쪽 끝에 둔다(2026-11-12, 폰에서 버튼 두 묶음이 두 줄로 갈라졌다) */
+#income-board .sortsel{appearance:none;-webkit-appearance:none;border:0;background:var(--inset) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2394A3B8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);padding:9px 28px 9px 12px;border-radius:10px;cursor:pointer;flex:none}
+#income-board .sortsel:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+@media(max-width:380px){#income-board .flt{gap:6px}#income-board .flt .seg button{padding:6px 7px;font-size:12px;white-space:nowrap}#income-board .sortsel{font-size:12px;padding:8px 22px 8px 9px;background-position:right 8px center}}
 #income-board .flt .sp{flex:1}
 #income-board .seg{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px}
 #income-board .seg button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 10px;border-radius:8px;cursor:pointer}
@@ -1329,7 +1333,7 @@ function boardRender(){
       <div class="tot"><b class="${bcls(e.r)}">${bfmt(e.r)}</b><span>가격 ${bfmt(e.p,0)}</span></div>
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="fd" id="bfd${i}"></div>`}).join('');
   document.getElementById('board-root').innerHTML=`<div class="sum">${chip('all','전체',base.length)}${chip('ok','건전 · 원금 지킴',c.ok)}${chip('warn','주의 · 조금 깎임',c.warn)}${chip('bad','원금성 · 많이 깎임',c.bad)}</div>
-   <div class="flt"><div class="seg">${seg('cat','all','전체')}${seg('cat','cc','커버드콜')}${seg('cat','div','배당주')}${seg('cat','bond','채권·금리')}</div><span class="sp"></span><div class="seg">${seg('sort','h','건전성순')}${seg('sort','y','분배율순')}${seg('sort','t','총수익순')}</div></div>
+   <div class="flt"><div class="seg">${seg('cat','all','전체')}${seg('cat','cc','커버드콜')}${seg('cat','div','배당주')}${seg('cat','bond','채권·금리')}</div><span class="sp"></span><select class="sortsel" data-bsort aria-label="정렬">${[['h','건전성순'],['y','분배율순'],['t','총수익순']].map(([v,l])=>`<option value="${v}"${BST.sort===v?' selected':''}>${l}</option>`).join('')}</select></div>
    <div class="card"><div class="bk-h"><span class="bk-t"><span class="ic">📊</span>월배당 ETF</span><span class="bk-s">${L.length}개 · 1년 기준</span></div><div class="legend"><span><i style="background:var(--dist)"></i>받은 분배금</span><span><i style="background:var(--upb)"></i>가격 상승</span><span><i style="background:repeating-linear-gradient(135deg,var(--dnb) 0 3px,#9DBEF5 3px 6px)"></i>가격 하락(깎인 돈)</span><span><i style="background:var(--ink);width:3px"></i>1년 총수익</span></div>
    <div class="fhd"><span>ETF</span><span>분배율</span><span>건전성</span><span>받은 돈 vs 깎인 돈 (1년)</span><span>1년 총수익</span></div>${rows||'<div class="empty">해당하는 ETF가 없어요.</div>'}</div>
    ${na?`<p class="note">상장 1년 미만이라 판정을 보류한 ${na}개는 목록에서 뺐어요.</p>`:''}
@@ -1371,6 +1375,7 @@ document.addEventListener('click',ev=>{
   const r=ev.target.closest('.fr');if(r){const i=+r.dataset.bi,box=document.getElementById('bfd'+i),on=!box.classList.contains('on');
     box.classList.toggle('on',on);r.classList.toggle('open',on);if(on)box.innerHTML=bDetail(BOARD[i]);}
 });
+document.addEventListener('change',ev=>{const t=ev.target;if(t.matches&&t.matches('#income-board [data-bsort]')){BST.sort=t.value;boardRender();}});
 document.addEventListener('mousemove',ev=>{
   const k=ev.target.closest&&ev.target.closest('#income-board .spk');
   document.querySelectorAll('#income-board .spk.on').forEach(x=>{if(x!==k){x.classList.remove('on');x.querySelectorAll('.gl,.gd,.ptip').forEach(n=>n.style.display='none')}});
