@@ -1,0 +1,242 @@
+<!doctype html>
+<!-- 월배당 인컴 계산기 개편 시안 — 팝업 창 → 따로 된 페이지 + 목록 아래 요약 줄(2026-11-12) -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>인컴 계산기 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#F7F8FA;--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;--primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--gold:#B7791F;--gold-bg:#FEF3C7;--ok:#059669;--ok-bg:#E7F6EF}
+*{box-sizing:border-box}
+body{margin:0;background:#E9ECF1;font-family:Pretendard,-apple-system,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.page{max-width:1280px;margin:0 auto;padding:28px 20px 60px}
+h1.t{font-size:22px;margin:0 0 6px}
+.lead{font-size:14px;color:#475569;margin:0 0 22px;line-height:1.7}
+.row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.lbl{font-size:13px;font-weight:800;color:#334155;margin:0 0 8px}
+.lbl small{font-weight:500;color:var(--muted);margin-left:6px}
+/* 폰 틀 */
+.phone{width:375px;height:760px;background:var(--bg);border-radius:30px;border:9px solid #111;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(15,23,42,.18)}
+.phone .scr{position:absolute;inset:0;overflow-y:auto}
+.gnb{height:52px;background:#16181A;display:flex;align-items:center;gap:12px;padding:0 14px;color:#fff;font-weight:800;font-size:15px}
+.gnb .m{width:26px;height:26px;border-radius:7px;background:#E03131}
+.gnb span.s{font-size:13px;font-weight:600;color:#9CA3AF}.gnb span.s.on{color:#4ADE80}
+.num{font-variant-numeric:tabular-nums}
+/* 목록(요약) */
+.wrapp{padding:16px 14px 120px}
+.ph1{font-size:20px;font-weight:900;margin:0 0 4px}.ph1 b{color:var(--primary)}
+.pp{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.6}
+.seg{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px}
+.seg i{font-style:normal;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 9px;border-radius:8px}
+.seg i.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.flt{display:flex;align-items:center;gap:8px;margin-bottom:10px}.flt .sp{flex:1}
+.sel{background:var(--inset);border-radius:10px;font-size:12.5px;font-weight:600;padding:8px 26px 8px 11px;position:relative}
+.sel:after{content:"";position:absolute;right:10px;top:50%;width:6px;height:6px;border-right:1.6px solid #94A3B8;border-bottom:1.6px solid #94A3B8;transform:translateY(-70%) rotate(45deg)}
+.card{background:#fff;border:1px solid var(--hair);border-radius:14px;overflow:hidden}
+.er{padding:13px 14px;border-bottom:1px solid var(--hair);display:flex;gap:10px;align-items:center}
+.er:last-child{border:0}
+.er .n{flex:1;font-size:13.5px;font-weight:700;line-height:1.35}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:5px;margin-right:4px}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}.tag.bad{background:var(--up-bg);color:var(--up)}.tag.g{background:var(--inset);color:var(--muted)}
+.er .r{text-align:right;font-size:15px;font-weight:800;color:var(--up)}
+.er .r small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.addb{font-size:12px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:0;border-radius:8px;padding:7px 9px;white-space:nowrap}
+.addb.done{background:var(--inset);color:var(--muted)}
+.toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:#1B2232;color:#fff;font-size:12.5px;padding:8px 13px;border-radius:999px;white-space:nowrap;box-shadow:0 6px 18px rgba(15,23,42,.25)}
+/* 목록 아래 고정 요약 줄 */
+.bar{position:absolute;left:10px;right:10px;bottom:12px;background:#16181A;color:#fff;border-radius:16px;padding:11px 12px 11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 26px rgba(15,23,42,.3)}
+.bar .k{font-size:11.5px;color:#A3ABB8}
+.bar .v{font-size:17px;font-weight:800;letter-spacing:-.2px}.bar .v small{font-size:12px;color:#A3ABB8;font-weight:600;margin-left:4px}
+.bar .pg{height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin-top:6px;overflow:hidden}.bar .pg i{display:block;height:100%;background:#4ADE80;border-radius:2px}
+.bar .go{margin-left:auto;background:#fff;color:var(--ink);font-size:13px;font-weight:800;border-radius:11px;padding:10px 12px;white-space:nowrap}
+/* 계산기 페이지 */
+.crumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:12px 14px 0}
+.crumb .bk{width:24px;height:24px;border-radius:7px;border:1px solid var(--hair);background:#fff;display:grid;place-items:center}
+.ch1{font-size:20px;font-weight:900;margin:8px 14px 2px;letter-spacing:-.3px}
+.cp{font-size:12.5px;color:var(--muted);margin:0 14px 12px}
+.hero{position:sticky;top:0;z-index:3;background:var(--bg);padding:8px 14px 10px}
+.hcard{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:14px 15px 13px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+.hk{font-size:12px;color:var(--muted);font-weight:600}
+.hv{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+.hv b{font-size:30px;font-weight:900;letter-spacing:-.6px}.hv span{font-size:14px;color:var(--muted);font-weight:600}
+.hv em{margin-left:auto;font-style:normal;font-size:13px;font-weight:800;color:var(--ink);background:var(--inset);padding:5px 9px;border-radius:8px;white-space:nowrap}
+.hv em.ok{background:var(--primary-bg);color:var(--primary)}
+.pbar{position:relative;height:10px;border-radius:5px;background:var(--inset);margin:11px 0 6px;overflow:hidden;display:flex}
+.pbar i{display:block;height:100%}
+.pleg{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.sec{margin:14px 14px 0}
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 8px}
+.sh h3{font-size:14.5px;margin:0;font-weight:800}.sh small{font-size:11.5px;color:var(--muted)}
+.hr{background:#fff;border:1px solid var(--hair);border-radius:14px;overflow:hidden}
+.hold{padding:12px 13px;border-bottom:1px solid var(--hair)}
+.hold:last-child{border:0}
+.hold .top{display:flex;align-items:flex-start;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px}
+.hold .nm{flex:1;font-size:13.5px;font-weight:700;line-height:1.4}
+.hold .x{color:#A3ABB8;font-size:16px;line-height:1;padding:2px 2px}
+.hold .bot{display:flex;align-items:center;gap:10px;margin:8px 0 0 16px}
+.qty{display:flex;align-items:center;gap:5px}
+.qty .in{width:84px;height:34px;border:1px solid var(--hair);border-radius:9px;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:14px;font-weight:600;background:#fff}
+.qty span{font-size:12.5px;color:var(--muted)}
+.hold .mo{margin-left:auto;text-align:right}
+.hold .mo b{font-size:16px;font-weight:800;color:var(--primary)}
+.hold .mo small{display:block;font-size:11px;color:var(--muted)}
+.addrow{display:flex;gap:6px;padding:11px 12px;background:var(--soft);border-top:1px solid var(--hair)}
+.addrow .s{flex:1;height:36px;border:1px solid var(--hair);border-radius:9px;background:#fff;font-size:12.5px;color:#9CA3AF;display:flex;align-items:center;padding:0 10px}
+.addrow .b{height:36px;border-radius:9px;background:var(--primary);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;padding:0 13px}
+.goal{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:12px 13px}
+.goal .gl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+.goal .gi{width:70px;height:34px;border:1px solid var(--hair);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14.5px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chips i{font-style:normal;font-size:12.5px;font-weight:700;border:1px solid var(--hair);border-radius:999px;padding:6px 11px;color:#475569;background:#fff}
+.chips i.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.dg{background:#fff;border:1px solid var(--hair);border-radius:14px;overflow:hidden}
+.dgi{padding:12px 13px;border-bottom:1px solid var(--hair);display:flex;gap:10px}
+.dgi:last-child{border:0}
+.dgi .ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;flex:none}
+.dgi .ic.w{background:var(--up-bg)}.dgi .ic.a{background:var(--gold-bg)}.dgi .ic.o{background:var(--ok-bg)}
+.dgi .tt{font-size:13.5px;font-weight:800;margin-bottom:2px}
+.dgi .tt .st{font-size:11px;font-weight:700;margin-left:6px;padding:2px 6px;border-radius:5px}
+.st.red{background:var(--up-bg);color:var(--up)}.st.amber{background:var(--gold-bg);color:var(--gold)}.st.green{background:var(--ok-bg);color:var(--ok)}
+.dgi p{margin:0;font-size:12.5px;line-height:1.6;color:#475569}
+.dgi p b{color:var(--ink)}
+.note{font-size:11px;color:var(--muted);line-height:1.6;margin:12px 16px 24px}
+/* PC */
+.desk{width:880px;background:var(--bg);border-radius:14px;border:1px solid #CBD2DB;overflow:hidden;box-shadow:0 20px 50px rgba(15,23,42,.12)}
+.desk .gnb{height:56px}
+.dwrap{padding:18px 26px 30px}
+.dwrap .crumb,.dwrap .ch1,.dwrap .cp{margin-left:0;margin-right:0;padding-left:0}
+.dcols{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+.dcols .sec{margin:0 0 14px}
+.dside{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+.dside .hv b{font-size:34px}
+.ann{background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.75;color:#713F12;max-width:375px}
+.ann b{color:#422006}
+.ann ol{margin:4px 0 0;padding-left:18px}
+</style></head>
+<body><div class="page">
+<h1 class="t">월배당 인컴 계산기 — 따로 된 페이지 + 목록 아래 요약 줄</h1>
+<p class="lead">지금 담긴 3종목(TIGER 미국30년국채커버드콜액티브(H) 2,000주 · TIGER 미국배당다우존스타겟커버드콜2호 3,000주 · JEPI 200주)과 11/11 종가 데이터로 그렸어요.<br>계산 방식은 지금과 같고, 배치와 보여주는 방식만 바꿨어요. 금액은 모두 <b>세후 · 한 달 기준</b>이에요.</p>
+
+<div class="row">
+  <!-- ① 목록 + 요약 줄 -->
+  <div>
+    <p class="lbl">① 월배당 목록 <small>폰 · 담으면 아래 줄이 바로 바뀌어요</small></p>
+    <div class="phone"><div class="scr">
+      <div class="gnb"><i class="m"></i>Double-Shot <span class="s">브리핑</span><span class="s on">월배당</span></div>
+      <div class="wrapp">
+        <p class="ph1">월배당 <b>건전성</b></p>
+        <p class="pp">분배율이 높다고 좋은 ETF는 아니에요. 분배금 일부가 원금에서 나오면 가격이 깎여요.</p>
+        <div class="flt"><span class="seg"><i>전체</i><i class="on">커버드콜</i><i>배당주</i><i>채권·금리</i></span><span class="sp"></span><span class="sel">건전성순</span></div>
+        <div class="card">
+          <div class="er"><div class="n">TIGER 미국배당다우존스타겟커버드콜2호<br><span class="tag ok">건전</span><span class="tag g">분배 9.98%</span></div><div class="r num">+38.4%<small>1년 총수익</small></div><span class="addb done">✓ 담김</span></div>
+          <div class="er"><div class="n">KODEX 200타겟위클리커버드콜<br><span class="tag ok">건전</span><span class="tag g">분배 21.54%</span></div><div class="r num">+64.2%<small>1년 총수익</small></div><span class="addb">+ 담기</span></div>
+          <div class="er"><div class="n">JPMorgan 에쿼티프리미엄 (JEPI)<br><span class="tag ok">건전</span><span class="tag g">분배 7.84%</span></div><div class="r num">+9.9%<small>1년 총수익</small></div><span class="addb done">✓ 담김</span></div>
+          <div class="er"><div class="n">TIGER 미국30년국채커버드콜액티브(H)<br><span class="tag bad">원금성</span><span class="tag g">분배 13.39%</span></div><div class="r num">+5.7%<small>1년 총수익</small></div><span class="addb done">✓ 담김</span></div>
+          <div class="er"><div class="n">ACE 미국반도체데일리타겟커버드콜(합성)<br><span class="tag ok">건전</span><span class="tag g">분배 34.62%</span></div><div class="r num">+58.7%<small>1년 총수익</small></div><span class="addb">+ 담기</span></div>
+        </div>
+      </div>
+      </div>
+      <div class="toast">JEPI 200주 담았어요 · 월 +8.6만원</div>
+      <div class="bar"><div style="min-width:0;flex:1"><div class="k">🧮 3개 담김 · 세후 월</div><div class="v num">44만원<small>/ 목표 100만</small></div><div class="pg"><i style="width:44%"></i></div></div><span class="go">계산기 →</span></div>
+    </div>
+  </div>
+
+  <!-- ② 계산기 페이지(폰) -->
+  <div>
+    <p class="lbl">② 계산기 페이지 <small>폰 · 맨 위 결과가 스크롤해도 붙어 있어요</small></p>
+    <div class="phone"><div class="scr">
+      <div class="gnb"><i class="m"></i>Double-Shot <span class="s">브리핑</span><span class="s on">월배당</span></div>
+      <div class="crumb"><span class="bk">‹</span>월배당 › 내 월 인컴 계산기</div>
+      <div class="ch1">🧮 내 월 인컴 계산기</div>
+      <p class="cp">담은 ETF로 세후 월 분배금을 계산해요. 브라우저에 자동 저장돼요.</p>
+      <div class="hero"><div class="hcard">
+        <div class="hk">세후 월 인컴</div>
+        <div class="hv num"><b>44만원</b><span>/ 목표 100만원</span><em>56만원 더 필요</em></div>
+        <div class="pbar"><i style="width:12.4%;background:#3B82F6"></i><i style="width:23.3%;background:#10B981"></i><i style="width:8.6%;background:#F59E0B"></i></div>
+        <div class="pleg num"><span>목표의 44%</span><span>세전 월 52만원</span></div>
+      </div></div>
+      <div class="sec">
+        <div class="sh"><h3>담은 ETF</h3><small>3개 · 평가 6,189만원</small></div>
+        <div class="hr">
+          <div class="hold"><div class="top"><i class="dot" style="background:#3B82F6"></i><div class="nm">TIGER 미국30년국채커버드콜액티브(H) <span class="tag bad">원금성</span></div><span class="x">×</span></div>
+            <div class="bot"><div class="qty"><div class="in num">2,000</div><span>주</span></div><div class="mo"><b class="num">월 12.4만</b><small class="num">평가 1,316만 · 분배 13.39%</small></div></div></div>
+          <div class="hold"><div class="top"><i class="dot" style="background:#10B981"></i><div class="nm">TIGER 미국배당다우존스타겟커버드콜2호 <span class="tag ok">건전</span></div><span class="x">×</span></div>
+            <div class="bot"><div class="qty"><div class="in num">3,000</div><span>주</span></div><div class="mo"><b class="num">월 23.3만</b><small class="num">평가 3,317만 · 분배 9.98%</small></div></div></div>
+          <div class="hold"><div class="top"><i class="dot" style="background:#F59E0B"></i><div class="nm">JPMorgan 에쿼티프리미엄 (JEPI) <span class="tag ok">건전</span></div><span class="x">×</span></div>
+            <div class="bot"><div class="qty"><div class="in num">200</div><span>주</span></div><div class="mo"><b class="num">월 8.6만</b><small class="num">평가 1,556만 · 분배 7.84%</small></div></div></div>
+          <div class="addrow"><div class="s">종목 검색 (이름·코드)</div><div class="b">+ 추가</div></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sh"><h3>목표 월 수령액</h3></div>
+        <div class="goal"><div class="gl"><div class="gi num">100</div>만원</div><div class="chips"><i>50만</i><i class="on">100만</i><i>200만</i><i>300만</i><i>500만</i></div></div>
+      </div>
+      <div class="sec">
+        <div class="sh"><h3>진단</h3><small>계산하면 바로 보여요</small></div>
+        <div class="dg">
+          <div class="dgi"><span class="ic w">⚠️</span><div><div class="tt">원금 깎임 주의<span class="st red">1종목</span></div><p><b>TIGER 미국30년국채커버드콜액티브(H)</b>는 분배율 13.39%인데 가격은 1년 동안 <b style="color:var(--dn)">−6.8%</b>예요. 분배금 일부가 원금에서 나왔어요.</p></div></div>
+          <div class="dgi"><span class="ic a">📊</span><div><div class="tt">한 종목 쏠림<span class="st amber">53%</span></div><p>월 인컴의 <b>53%</b>가 TIGER 미국배당다우존스타겟커버드콜2호에서 나와요. 3종목 모두 커버드콜이에요.</p></div></div>
+          <div class="dgi"><span class="ic o">✅</span><div><div class="tt">금융소득종합과세<span class="st green">해당 없음</span></div><p>연 분배금(세전) <b>629만원</b>으로 기준 2,000만원 아래예요.</p></div></div>
+        </div>
+      </div>
+      <p class="note">※ 세후는 국내 15.4%, 미국 15%(현지 원천징수)를 뺀 값이에요. 종합과세 판정은 세전 기준이에요. 환율 1,336.6원/$.</p>
+    </div></div>
+  </div>
+
+  <div class="ann">
+    <b>지금과 달라지는 점</b>
+    <ol>
+      <li>팝업 창 대신 <b>따로 된 페이지</b>(주소가 생겨 뒤로 가기가 자연스러워요)</li>
+      <li>목록 아래 <b>요약 줄</b> — 담을 때마다 월 금액이 바로 바뀌어요</li>
+      <li>결과(월 44만원 · 56만원 더 필요)가 <b>맨 위에 붙어 있어요</b></li>
+      <li>금액은 전부 <b>한 달 기준</b>(종목 줄도 "월 12.4만")</li>
+      <li>원그래프 대신 <b>목표 막대</b>를 종목 색으로 나눠 칠해요</li>
+      <li>진단은 <b>버튼 없이 바로</b> 보여요</li>
+      <li>제목·테두리 겹침, '부족 −56만'의 겹친 표현을 없앴어요</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ③ PC -->
+<p class="lbl" style="margin-top:34px">③ 계산기 페이지 <small>컴퓨터 · 오른쪽 결과가 따라 내려와요</small></p>
+<div class="desk">
+  <div class="gnb"><i class="m"></i>Double-Shot <span class="s">브리핑</span><span class="s on">월배당</span></div>
+  <div class="dwrap">
+    <div class="crumb" style="padding-top:0"><span class="bk">‹</span>월배당 › 내 월 인컴 계산기</div>
+    <div class="ch1" style="margin-top:10px">🧮 내 월 인컴 계산기</div>
+    <p class="cp" style="margin-bottom:16px">담은 ETF로 세후 월 분배금을 계산해요. 브라우저에 자동 저장돼요.</p>
+    <div class="dcols">
+      <div>
+        <div class="sec">
+          <div class="sh"><h3>담은 ETF</h3><small>3개 · 평가 6,189만원</small></div>
+          <div class="hr">
+            <div class="hold"><div class="top"><i class="dot" style="background:#3B82F6"></i><div class="nm">TIGER 미국30년국채커버드콜액티브(H) <span class="tag bad">원금성</span></div><div class="qty"><div class="in num">2,000</div><span>주</span></div><div class="mo" style="min-width:150px;text-align:right"><b class="num" style="font-size:16px;font-weight:800;color:var(--primary)">월 12.4만</b><small class="num" style="display:block;font-size:11px;color:var(--muted)">평가 1,316만 · 분배 13.39%</small></div><span class="x">×</span></div></div>
+            <div class="hold"><div class="top"><i class="dot" style="background:#10B981"></i><div class="nm">TIGER 미국배당다우존스타겟커버드콜2호 <span class="tag ok">건전</span></div><div class="qty"><div class="in num">3,000</div><span>주</span></div><div class="mo" style="min-width:150px;text-align:right"><b class="num" style="font-size:16px;font-weight:800;color:var(--primary)">월 23.3만</b><small class="num" style="display:block;font-size:11px;color:var(--muted)">평가 3,317만 · 분배 9.98%</small></div><span class="x">×</span></div></div>
+            <div class="hold"><div class="top"><i class="dot" style="background:#F59E0B"></i><div class="nm">JPMorgan 에쿼티프리미엄 (JEPI) <span class="tag ok">건전</span></div><div class="qty"><div class="in num">200</div><span>주</span></div><div class="mo" style="min-width:150px;text-align:right"><b class="num" style="font-size:16px;font-weight:800;color:var(--primary)">월 8.6만</b><small class="num" style="display:block;font-size:11px;color:var(--muted)">평가 1,556만 · 분배 7.84%</small></div><span class="x">×</span></div></div>
+            <div class="addrow"><div class="s">종목 검색 (이름·코드) — 순자산 톱20 기본</div><div class="s" style="flex:none;width:90px;justify-content:flex-end;color:var(--ink)">100 주</div><div class="b">+ 추가</div></div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sh"><h3>진단</h3><small>계산하면 바로 보여요</small></div>
+          <div class="dg">
+            <div class="dgi"><span class="ic w">⚠️</span><div><div class="tt">원금 깎임 주의<span class="st red">1종목</span></div><p><b>TIGER 미국30년국채커버드콜액티브(H)</b>는 분배율 13.39%인데 가격은 1년 동안 <b style="color:var(--dn)">−6.8%</b>예요. 분배금 일부가 원금에서 나왔어요.</p></div></div>
+            <div class="dgi"><span class="ic a">📊</span><div><div class="tt">한 종목 쏠림<span class="st amber">53%</span></div><p>월 인컴의 <b>53%</b>가 TIGER 미국배당다우존스타겟커버드콜2호에서 나와요. 3종목 모두 커버드콜이에요.</p></div></div>
+            <div class="dgi"><span class="ic o">✅</span><div><div class="tt">금융소득종합과세<span class="st green">해당 없음</span></div><p>연 분배금(세전) <b>629만원</b>으로 기준 2,000만원 아래예요.</p></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="dside">
+        <div class="hcard">
+          <div class="hk">세후 월 인컴</div>
+          <div class="hv num"><b>44만원</b></div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">목표 100만원 · <b style="color:var(--ink)">56만원 더 필요</b></div>
+          <div class="pbar"><i style="width:12.4%;background:#3B82F6"></i><i style="width:23.3%;background:#10B981"></i><i style="width:8.6%;background:#F59E0B"></i></div>
+          <div class="pleg num"><span>목표의 44%</span><span>세전 월 52만원</span></div>
+        </div>
+        <div class="goal"><div class="gl">목표 월 수령액 <div class="gi num" style="margin-left:auto">100</div>만원</div><div class="chips"><i>50만</i><i class="on">100만</i><i>200만</i><i>300만</i><i>500만</i></div></div>
+        <p class="note" style="margin:0 4px">※ 세후는 국내 15.4%, 미국 15%(현지 원천징수)를 뺀 값이에요. 종합과세 판정은 세전 기준이에요. 환율 1,336.6원/$.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div></body></html>

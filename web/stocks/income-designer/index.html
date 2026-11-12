@@ -301,22 +301,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* ── 월배당 ETF 계산기 (ncai-design-system 토큰 정렬) ── */
 /* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
 /* 인컴 시뮬레이터 (보유 입력 → 계산) */
-.sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
-.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--soft);display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-.sim__h .q{font-size:15px;font-weight:600;color:var(--ink);}
-.sim__h .q small{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px;}
-.sim__h .save-note{font-size:11px;color:#9CA3AF;white-space:nowrap;margin-top:2px;flex-shrink:0;}
-.simrow{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--hair);}
-.simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
-.simrow .snm .mk{font-size:10px;font-weight:600;padding:1px 6px;border-radius:6px;margin-left:6px;background:var(--inset);color:var(--muted);}
 .mk-kr,.mk-us{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;vertical-align:middle;}
 .mk-kr{background:var(--primary-bg);color:var(--primary);}
 .mk-us{background:#FEF3C7;color:#92400E;}
-.simrow .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
-.simrow .qty input{width:88px;border:1px solid var(--hair);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;}
-.simrow .qty span{font-size:12px;color:var(--muted);}
-.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:var(--primary);}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
-.simrow .sx{width:18px;text-align:center;color:#C0C4CA;cursor:pointer;font-size:16px;flex-shrink:0;}.simrow .sx:hover{color:var(--up);}
 .sim__add{display:flex;gap:8px;padding:14px 20px;background:var(--soft);border-bottom:1px solid var(--hair);align-items:flex-start;}
 .combo{position:relative;flex:1;min-width:0;}
 .combo input{width:100%;border:1px solid var(--hair);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;}
@@ -342,16 +329,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sim__presets a{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;transition:all .15s;}
 .sim__presets a:hover{border-color:var(--primary);color:var(--primary);}
 .sim__presets a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
-.sim__out{padding:18px 20px;}
-.sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
-.sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
-.sim-kpi .k .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
-.sim-kpi .k .v{font-size:20px;font-weight:600;}
 /* 리포트 카드 */
-.sim-report-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:0 2px 8px;}
-.gen-report-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--primary-bg);border:1px solid #CFE3FF;border-radius:10px;padding:13px;font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;font-family:inherit;transition:background .12s;}
-.gen-report-btn:hover{background:#DCEBFF;}
-@keyframes spin{to{transform:rotate(360deg);}}
 .pa-grid{display:flex;flex-direction:column;gap:0;}
 .pa-row{display:flex;align-items:baseline;gap:8px;padding:7px 0;border-bottom:1px solid var(--hair);}
 .pa-row:last-child{border-bottom:none;}
@@ -386,16 +364,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .rc-body .rc-to{color:var(--primary);font-weight:700;}
 .rc-body .rc-dest{display:inline-flex;align-items:baseline;flex-shrink:0;}
 .rc-body .rc-num{font-variant-numeric:tabular-nums;}
-.sim-out-row{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
-.donut-wrap{position:relative;flex-shrink:0;}
-.donut-arc{cursor:pointer;transition:opacity .15s;}
-.donut-arc:hover{opacity:.8;}
-.donut-tip{position:fixed;display:none;background:#1a1a1a;color:#fff;font-size:12px;line-height:1.5;padding:8px 12px;border-radius:8px;pointer-events:none;z-index:999;max-width:220px;white-space:nowrap;}
-.donut-tip b{font-weight:600;}
-.donut-legend{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
-.dl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
-.dl-item i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.dl-item b{margin-left:auto;color:var(--ink);font-weight:600;}
 .hbdg{font-size:11px;font-weight:700;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
 .hbdg.ok{background:#E8F7EE;color:#12A150;}
 .hbdg.warn{background:#FEF3C7;color:#B7791F;}
@@ -545,11 +513,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   /* ── 월배당 ETF 계산기 모바일 최적화 ── */
 
-  /* 보유 종목 행: 이름을 첫 줄 전체에, 수량·인컴을 두 번째 줄에 */
-  .simrow{flex-wrap:wrap;padding:8px 14px;gap:4px 8px;}
-  .simrow .snm{width:100%;flex:none;font-size:13px;margin-bottom:2px;}
-  .simrow .sinc{margin-left:auto;width:auto;}
-  .simrow .sinc b{font-size:13px;}
 
   /* 종목 추가 행: 검색 첫 줄 / 수량+버튼 둘째 줄 */
   .sim__add{flex-wrap:wrap;padding:10px 14px;}
@@ -561,16 +524,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .combo__item .ci-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .combo__item .ci-nm small{display:none;}
 
-  /* 시뮬레이터 아웃풋: 도넛 위 → KPI 아래로 세로 배치 */
-  .sim-out-row{flex-direction:column;align-items:stretch;gap:10px;}
-  .donut-wrap{align-self:center;}
-  .sim-kpi{flex-wrap:nowrap;}
-  .sim-kpi .k{min-width:0;flex:1;padding:8px 10px;}
-  .sim-kpi .k .v{font-size:16px;}
 
-  /* 도넛 범례: ETF 이름 말줄임 */
-  .dl-item{min-width:0;max-width:100%;}
-  .dl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
 
   /* 건전 ETF 비교 카드: 긴 ETF 이름 줄바꿈 허용 */
   .rc-body .rc-dest{flex-shrink:1;min-width:0;flex-wrap:wrap;display:flex;}
@@ -691,9 +645,6 @@ html.dark #income-board .bk-t{color:var(--ink)}
 #income-board .act{margin-top:12px;display:flex;gap:8px;align-items:center}
 #income-board .btn{border:1px solid var(--line);background:var(--canvas);border-radius:10px;padding:9px 16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}
 #income-board .note{font-size:12px;color:var(--muted);line-height:1.65;margin-top:12px;background:none;padding:0}
-#income-board .calc{margin-top:18px;background:var(--canvas);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px}
-#income-board .calc b{font-size:14.5px;color:var(--ink)}#income-board .calc p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}#income-board .calc .sp{flex:1}
-#income-board .calc .cnt{font-size:12px;font-weight:800;background:var(--primary-bg);color:var(--primary);border-radius:999px;padding:2px 8px;margin-left:6px}
 #income-board .empty{padding:18px 16px;font-size:13px;color:var(--muted)}
 html.dark .hbdg.ok{background:rgba(18,161,80,.18);color:#3DD17A;}html.dark .hbdg.warn{background:rgba(224,178,82,.16);color:#E0B252;}html.dark .hbdg.bad{background:rgba(217,72,15,.18);color:#FF8A5B;}html.dark .hbdg.na{background:#2A2B2D;color:#888B90;}
 html.dark #income-board .dbar>div>i{background:#4A515C}html.dark #income-board .dbar>div.r>i{background:#8A97AB}
@@ -707,27 +658,86 @@ html.dark #income-board .chip.ok .v{color:#3DD17A}html.dark #income-board .chip.
  #income-board .fr .trk{grid-column:1/-1}#income-board .fr .tot{grid-column:2;grid-row:1}
  #income-board .fr .yl,#income-board .fr .fh{display:none}#income-board .fr .fhm{display:inline-block}
  #income-board .grid3{grid-template-columns:1fr}
- #income-board .calc{flex-wrap:wrap}
 }
 
-/* ===== 계산기 모달(2026-11-12) — 보드 위에 띄운다. 기존 계산기(.sim)를 그대로 옮겨 담는다 ===== */
-#calc-modal{display:none;position:fixed;inset:0;z-index:40;background:rgba(19,21,26,.45);align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
-#calc-modal.on{display:flex}
-#calc-modal .cm{width:100%;max-width:640px;background:var(--bg,#F7F8FA);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:visible}
-html.dark #calc-modal .cm{background:#161719}
-#calc-modal .cm-h{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 14px}
-#calc-modal .cm-h h2{margin:0;font-size:18px;letter-spacing:-.3px;color:var(--ink)}
-#calc-modal .cm-h p{margin:4px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
-#calc-modal .cm-x{margin-left:auto;flex:none;width:32px;height:32px;border-radius:50%;border:0;background:var(--inset);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
-#calc-modal .cm-b{padding:0 16px 16px}
-#calc-modal .cm-b .sim{margin-bottom:12px}
-#calc-modal .cm-note{font-size:11.5px;color:var(--muted);line-height:1.6;margin:0 4px}
-body.cm-open{overflow:hidden}
-@media(max-width:600px){
- #calc-modal{padding:0;align-items:flex-end}
- #calc-modal .cm{max-width:none;border-radius:18px 18px 0 0;max-height:94vh;overflow-y:auto}
- #calc-modal .cm-h{position:sticky;top:0;background:inherit;z-index:2}
+
+/* ===== 계산기 페이지(#calc) — 팝업 창에서 페이지로(2026-11-12 사용자 결정, 시안 docs/prototypes/2026-11-12-income-calc-page.html).
+   폰: 결과 → 담은 ETF → 목표 → 진단 순으로 한 줄, 결과는 스크롤해도 위에 붙는다. 넓은 화면: 오른쪽에 결과·목표가 따라 내려온다 ===== */
+#calc-page[hidden],#income-board[hidden]{display:none}
+.cp-crumb{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cp-crumb a{color:var(--muted);text-decoration:none}.cp-crumb a:hover{color:var(--ink)}
+.cp-back{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:var(--canvas);border:1px solid var(--hair);color:var(--muted);cursor:pointer;padding:0;flex:none}
+.cp-back:hover{border-color:var(--primary);color:var(--primary)}
+.cp-title{font-size:22px;font-weight:900;letter-spacing:-.3px;margin:0 0 4px;color:var(--ink)}
+.cp-desc{font-size:13px;color:var(--muted);margin:0 0 16px}
+.cp-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.cp-main{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:18px;min-width:0}
+.cp-side{grid-column:2;grid-row:1;position:sticky;top:68px;display:flex;flex-direction:column;gap:12px}
+.cp-sh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 2px 8px}
+.cp-sh h2{font-size:15px;font-weight:800;margin:0;color:var(--ink)}.cp-sh small{font-size:12px;color:var(--muted)}
+.cp-card,.cp-hero,.cp-goal{background:var(--canvas);border:1px solid var(--hair);border-radius:14px}
+.cp-card{overflow:visible}
+.cp-hero{padding:14px 16px 13px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+.cp-hero .hk{font-size:12px;font-weight:600;color:var(--muted)}
+.cp-hero .hv{display:flex;align-items:center;gap:8px;margin-top:2px}
+.cp-hero .hv b{font-size:30px;font-weight:900;letter-spacing:-.6px;color:var(--ink)}
+.cp-hero .hv em{margin-left:auto;font-style:normal;font-size:13px;font-weight:800;color:var(--ink);background:var(--inset);padding:5px 9px;border-radius:8px;white-space:nowrap}
+.cp-hero .hv em.ok{background:var(--primary-bg);color:var(--primary)}
+.cp-hero .hs{font-size:12.5px;color:var(--muted);margin-top:2px}.cp-hero .hs b{color:var(--ink)}
+.cp-hero .pbar{height:10px;border-radius:5px;background:var(--inset);margin:10px 0 6px;overflow:hidden;display:flex}
+.cp-hero .pbar i{display:block;height:100%}
+.cp-hero .pleg{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
+.cp-goal{padding:13px 14px;gap:10px;border-bottom:1px solid var(--hair)}
+.cp-note{font-size:11px;color:var(--muted);line-height:1.6;margin:0 4px}
+.cp-sample{font-size:12.5px;color:var(--primary);background:var(--primary-bg);border-radius:10px;padding:9px 12px;margin-bottom:8px;line-height:1.6}
+.cp-sample button{border:0;background:none;color:var(--primary);font:inherit;font-weight:800;text-decoration:underline;cursor:pointer;padding:0;margin-left:2px}
+.cp-empty{padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.6;border-bottom:1px solid var(--hair)}
+.cph{padding:12px 14px;border-bottom:1px solid var(--hair)}
+.cph .top{display:flex;align-items:flex-start;gap:8px}
+.cph .dot{width:9px;height:9px;border-radius:50%;flex:none;margin-top:6px}
+.cph .nm{flex:1;min-width:0;font-size:14px;font-weight:700;line-height:1.45;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+.cph .nm .mk{font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--inset);color:var(--muted);vertical-align:1px}
+.cph .nm .hbdg{font-size:10.5px;padding:2px 7px;vertical-align:1px}
+.cph .sx{border:0;background:none;color:#B0B6BF;font-size:18px;line-height:1;cursor:pointer;padding:2px 2px 0;flex:none}
+.cph .sx:hover{color:var(--up)}
+.cph .bot{display:flex;align-items:center;gap:10px;margin:8px 0 0 17px}
+.cph .qty input{width:92px;border:1px solid var(--hair);border-radius:9px;padding:8px 10px;font-size:14px;font-weight:600;font-family:inherit;text-align:right;background:var(--canvas);color:var(--ink)}
+.cph .qty input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,110,255,.12)}
+.cph .mo{margin-left:auto;text-align:right;min-width:0}
+.cph .mo b{display:block;font-size:16px;font-weight:800;color:var(--primary)}
+.cph .mo small{display:block;font-size:11px;color:var(--muted);white-space:nowrap}
+.cp-card .sim__add{border-bottom:0;border-radius:0 0 14px 14px}
+#calc-page .sim-report .rc-head{cursor:default}
+@media(max-width:720px){
+ .cp-grid{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+ .cp-main,.cp-side{display:contents}
+ .cp-hero{order:1;position:sticky;top:60px;z-index:5}
+ .cp-hold{order:2}.cp-goal{order:3}.cp-diag{order:4}.cp-note{order:5}
+ .cp-title{font-size:20px}
 }
+/* 목록의 + 담기 버튼 */
+#income-board .fhd,#income-board .fr{grid-template-columns:minmax(0,1.5fr) 64px 64px minmax(0,1.5fr) 80px 64px}
+#income-board .badd{font:inherit;font-size:12px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:0;border-radius:8px;padding:7px 0;width:64px;cursor:pointer;white-space:nowrap}
+#income-board .badd:hover{filter:brightness(.97)}
+#income-board .badd.on{background:var(--inset);color:var(--muted)}
+@media(max-width:720px){
+ #income-board .fr{grid-template-columns:minmax(0,1fr) 64px 58px}
+ #income-board .fr .badd{grid-column:3;grid-row:1;width:58px}
+}
+/* 목록 아래 요약 줄 + 담기 알림 */
+#inc-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:0 12px calc(12px + env(safe-area-inset-bottom));pointer-events:none}
+#inc-bar[hidden]{display:none}
+#inc-bar .ib-in{pointer-events:auto;max-width:560px;margin:0 auto;background:#16181A;color:#fff;border-radius:16px;padding:11px 12px 11px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 26px rgba(15,23,42,.3)}
+html.dark #inc-bar .ib-in{background:#2A2C30;border:1px solid rgba(255,255,255,.1)}
+#inc-bar .ib-t{flex:1;min-width:0}
+#inc-bar .k{font-size:11.5px;color:#A3ABB8}
+#inc-bar .v b{font-size:17px;font-weight:800;letter-spacing:-.2px}#inc-bar .v small{font-size:12px;color:#A3ABB8;font-weight:600;margin-left:5px}
+#inc-bar .pg{height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin-top:6px;overflow:hidden}
+#inc-bar .pg i{display:block;height:100%;width:0;background:#4ADE80;border-radius:2px;transition:width .3s}
+#inc-bar button{border:0;background:#fff;color:#13151A;font:inherit;font-size:13px;font-weight:800;border-radius:11px;padding:10px 13px;cursor:pointer;white-space:nowrap}
+body.has-incbar .wrap{padding-bottom:110px}
+#inc-toast{position:fixed;left:50%;bottom:96px;z-index:31;transform:translate(-50%,8px);max-width:calc(100vw - 32px);background:#1B2232;color:#fff;font-size:12.5px;padding:9px 14px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 18px rgba(15,23,42,.25);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+#inc-toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
 </head>
@@ -806,44 +816,54 @@ body.cm-open{overflow:hidden}
     </div>
   </div>
 
-  <!-- ===== 계산기 모달 ===== -->
-  <div id="calc-modal" onclick="if(event.target===this)closeCalc()" role="dialog" aria-modal="true" aria-labelledby="cm-title">
-    <div class="cm">
-      <div class="cm-h"><div><h2 id="cm-title">🧮 내 월 인컴 계산기</h2><p>담은 ETF로 세후 월 분배금과 목표 대비, 금융소득종합과세 여부를 계산해요.</p></div>
-        <button class="cm-x" onclick="closeCalc()" aria-label="닫기">×</button></div>
-      <div class="cm-b" id="cm-body">
-        <div class="sim">
-          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요<small style="display:block;margin-top:3px;">커버드콜·배당주·해외 직상장까지</small></div><span class="save-note">브라우저에 자동 저장돼요</span></div>
-          <div id="sim-rows"></div>
-          <div class="sim__add">
-            <div class="combo">
-              <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱20 기본" autocomplete="off"
-                     onfocus="comboOpen()" oninput="comboFilter()" onkeydown="comboKey(event)" onblur="comboClose()">
-              <div class="combo__list" id="combo-list"></div>
-            </div>
-            <div class="qty"><input id="sim-amt" type="number" value="100"><span>주</span></div>
-            <a onclick="simAdd()">+ 추가</a>
+  <!-- ===== 계산기 페이지(#calc) — 팝업 창에서 페이지로(2026-11-12 사용자 결정). 계산 방식은 그대로다 ===== -->
+  <section id="calc-page" hidden aria-labelledby="cp-title">
+    <div class="cp-crumb"><button class="cp-back" onclick="closeCalc()" aria-label="월배당 목록으로"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span><a href="/stocks/income-designer/" onclick="event.preventDefault();closeCalc()">월배당</a> › 내 월 인컴 계산기</span></div>
+    <h1 class="cp-title" id="cp-title">🧮 내 월 인컴 계산기</h1>
+    <p class="cp-desc">담은 ETF로 세후 월 분배금을 계산해요. 브라우저에 자동 저장돼요.</p>
+    <div class="cp-grid">
+      <div class="cp-side">
+        <div class="cp-hero" id="cp-hero"></div>
+        <div class="cp-goal sim__target">
+          <div class="sim__target-row">
+            <span>목표 월 수령액</span>
+            <input id="sim-target" type="number" inputmode="numeric" value="100" oninput="targetInput()">
+            <span>만원</span>
           </div>
-          <div class="sim__target">
-            <div class="sim__target-row">
-              <span>목표 월 수령액</span>
-              <input id="sim-target" type="number" value="100" oninput="targetInput()">
-              <span>만원</span>
-            </div>
-            <div class="sim__presets" id="target-presets">
-              <a onclick="targetPreset(50)">50만</a>
-              <a onclick="targetPreset(100)" class="on">100만</a>
-              <a onclick="targetPreset(200)">200만</a>
-              <a onclick="targetPreset(300)">300만</a>
-              <a onclick="targetPreset(500)">500만</a>
-            </div>
+          <div class="sim__presets" id="target-presets">
+            <a onclick="targetPreset(50)">50만</a>
+            <a onclick="targetPreset(100)" class="on">100만</a>
+            <a onclick="targetPreset(200)">200만</a>
+            <a onclick="targetPreset(300)">300만</a>
+            <a onclick="targetPreset(500)">500만</a>
           </div>
-          <div class="sim__out" id="sim-out"></div>
         </div>
-        <p class="cm-note">※ 세후 금액은 국내 15.4%, 미국 15%(현지 원천징수)를 뺀 값이에요. 금융소득종합과세 2,000만원 판정은 세전 기준이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않고, 미국 ETF 원화 금액은 갱신 시점 환율 기준이에요. 투자 권유가 아니에요.</p>
+        <p class="cp-note">※ 세후 금액은 국내 15.4%, 미국 15%(현지 원천징수)를 뺀 값이에요. 금융소득종합과세 2,000만원 판정은 세전 기준이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않고, 미국 ETF 원화 금액은 갱신 시점 환율 기준이에요. 투자 권유가 아니에요.</p>
+      </div>
+      <div class="cp-main">
+        <div class="cp-sec cp-hold">
+          <div class="cp-sh"><h2>담은 ETF</h2><small id="cp-hold-sum"></small></div>
+          <div id="cp-sample"></div>
+          <div class="cp-card">
+            <div id="sim-rows"></div>
+            <div class="sim__add">
+              <div class="combo">
+                <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱20 기본" autocomplete="off"
+                       onfocus="comboOpen()" oninput="comboFilter()" onkeydown="comboKey(event)" onblur="comboClose()">
+                <div class="combo__list" id="combo-list"></div>
+              </div>
+              <div class="qty"><input id="sim-amt" type="number" inputmode="numeric" value="100"><span>주</span></div>
+              <a onclick="simAdd()">+ 추가</a>
+            </div>
+          </div>
+        </div>
+        <div class="cp-sec cp-diag">
+          <div class="cp-sh"><h2>진단</h2><small>담은 종목으로 바로 계산해요</small></div>
+          <div id="sim-out"></div>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <footer class="ds-footer">
     <div class="ds-foot-links">
@@ -929,55 +949,67 @@ function incomeHealth(d){if(d.p==null)return['na','데이터 부족',null];const
 // GNB 새 소식 점(main.js)은 이 페이지에 들어오면 꺼진다 — 키·버전은 main.js 의 NEW와 같아야 한다
 const NAV_SEEN='2026-11-12';
 try{if((localStorage.getItem('ds-nav-seen:/stocks/income-designer/')||'')<NAV_SEEN)localStorage.setItem('ds-nav-seen:/stocks/income-designer/',NAV_SEEN);}catch(e){}
-// 계산기는 보드 위 모달이다(#calc). 계산기 카드(.sim)는 모달 안에 그대로 있다 — 계산 로직은 예전 그대로다
+// 계산기는 따로 된 화면이다(#calc, 2026-11-12 — 예전엔 보드 위 팝업 창). 주소가 있어 뒤로 가기로 목록에 돌아온다.
+// 목록 위치는 기억했다가 돌아올 때 되돌린다.
+let boardY=0;
 function route(){
-  const calc=location.hash==='#calc';
-  document.getElementById('calc-modal').classList.toggle('on',calc);
-  document.body.classList.toggle('cm-open',calc);
+  const calc=location.hash==='#calc',page=document.getElementById('calc-page'),board=document.getElementById('income-board');
+  const was=!page.hidden;
+  if(calc&&!was)boardY=window.scrollY;
+  page.hidden=!calc;board.hidden=calc;
   if(calc&&INCOME_UNIVERSE.length){simRowsRender();simOut();}   // 데이터가 오기 전엔 그리지 않는다(로드 뒤 다시 부른다)
+  if(calc&&!was)window.scrollTo(0,0);
+  if(!calc&&was)window.scrollTo(0,boardY);
+  incBar();
 }
 function showCalc(){if(location.hash!=='#calc')history.pushState({p:'calc'},'',location.pathname+'#calc');route();}
 function closeCalc(){if(history.state&&history.state.p==='calc')history.back();else{history.replaceState(null,'',location.pathname);route();}}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('calc-modal').classList.contains('on'))closeCalc();});
 window.addEventListener('popstate',route);
-route();
 
 /* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
 const SIM_KEY='ds-income-holdings-v1';
-function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}const c=document.getElementById('board-cnt');if(c)c.textContent=simHoldings.length+'개 담김';document.querySelectorAll('#income-board [data-badd]').forEach(b=>{if(simHoldings.some(h=>h.code===b.dataset.badd))b.textContent='✓ 계산기에 담김 · 수량 바꾸기';});}
+function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}simIsSample=false;markAdded();}
 function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
-let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
+// 처음 온 사람에겐 예시 3종목을 보여 준다. 예시는 '담은 것'이 아니라서 목록 아래 요약 줄을 띄우지 않고,
+// 목록에서 처음 담으면 예시를 비우고 시작한다(2026-11-12).
+const SAMPLE=[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
+let simHoldings=loadHoldings();let simIsSample=!simHoldings;if(!simHoldings)simHoldings=SAMPLE.map(h=>({...h}));
 // 분배금 세율 — 국내 배당소득세 15.4%, 미국은 현지 15% 원천징수(국내 추가 과세 없음 가정).
 // 예전엔 국내는 세전·미국은 세후를 그대로 더했다(2026-10-28 점검). 수령액(행·월 인컴·목표 비교)은 세후,
 // 금융소득종합과세 판정은 세전으로 계산한다.
 const TAX={KR:0.154,US:0.15};
 function simGross(h){const d=UNIV[h.code];if(!d)return 0;return h.qty*d.price*d.y/100/10000;}   // 만원/년, 세전
 function simIncome(h){const d=UNIV[h.code];if(!d)return 0;return simGross(h)*(1-TAX[d.mk]);}      // 만원/년, 세후
+const won=v=>Math.round(v).toLocaleString('ko-KR');
+// 금액은 전부 한 달 기준이다 — 종목 줄도 월 금액(예전엔 행은 연간, 결과는 월이라 12로 나눠 봐야 했다)
+function simIncHtml(h){const d=UNIV[h.code];return `<b class="num">월 ${(simIncome(h)/12).toFixed(1)}만</b><small class="num">평가 ${won(h.qty*d.price/10000)}만 · 분배 ${d.y}%</small>`;}
+function simColor(i){return DONUT_COLORS[i%DONUT_COLORS.length];}
 function simRowsRender(){
-  document.getElementById('sim-rows').innerHTML=simHoldings.filter(h=>UNIV[h.code]).map((h,i)=>{
-    const d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
-    return `<div class="simrow">
-      <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
-      <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
-      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 세후 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
-      <div class="sx" onclick="simDel(${i})">×</div>
-    </div>`;
+  let k=0;
+  const rows=simHoldings.map((h,i)=>{
+    const d=UNIV[h.code];if(!d)return '';
+    const[hc,hl]=incomeHealth(d);
+    return `<div class="cph"><div class="top"><i class="dot" style="background:${simColor(k++)}"></i><div class="nm">${besc(d.name)} <span class="mk">${d.mk}</span>${hc!=='na'?` <span class="hbdg ${hc}">${hl}</span>`:''}</div><button type="button" class="sx" onclick="simDel(${i})" aria-label="${besc(d.name)} 빼기">×</button></div>
+      <div class="bot"><div class="qty"><input type="number" inputmode="numeric" value="${h.qty}" oninput="simSet(${i},this.value)" aria-label="${besc(d.name)} 수량"><span>주</span></div><div class="mo" id="sinc-${i}">${simIncHtml(h)}</div></div></div>`;
   }).join('');
+  document.getElementById('sim-rows').innerHTML=rows||'<div class="cp-empty">아직 담은 ETF가 없어요. 아래에서 검색하거나, 월배당 목록에서 <b>+ 담기</b>를 눌러 보세요.</div>';
+  document.getElementById('cp-sample').innerHTML=simIsSample&&simHoldings.length?'<div class="cp-sample">예시로 3종목을 넣어 뒀어요. 수량을 바꾸거나 내 종목을 담아 보세요. <button type="button" onclick="simClear()">예시 비우기</button></div>':'';
 }
 function simSet(i,v){
   simHoldings[i].qty=Math.max(0,parseInt(v)||0);saveHoldings();
-  const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
   const el=document.getElementById('sinc-'+i);
-  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 세후 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
+  if(el)el.innerHTML=simIncHtml(simHoldings[i]);
+  document.getElementById('cp-sample').innerHTML='';
   simOut();
 }
 function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
-/* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 */
+function simClear(){simHoldings=[];saveHoldings();simRowsRender();simOut();}
+/* 목록의 '+ 담기' → 수량을 물어 계산기에 담는다 */
 function openAddSheet(code){
   const d=UNIV[code];
   if(!d)return;
   const[hc,hl]=incomeHealth(d);
-  const ex=simHoldings.findIndex(h=>h.code===code);
+  const ex=simIsSample?-1:simHoldings.findIndex(h=>h.code===code);   // 예시 종목은 '담은 것'으로 치지 않는다
   const alreadyQty=ex>=0?simHoldings[ex].qty:null;
   const ePct=d.p!=null?Math.round(d.p):null;
   const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
@@ -1017,7 +1049,7 @@ function openAddSheet(code){
     <div style="display:flex;gap:8px;">
       <button onclick="closeAddSheet()" style="flex:1;background:#F3F4F6;color:#6B7280;border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">취소</button>
       <button id="add-sheet-confirm" onclick="confirmAddSheet('${code}')"
-        style="flex:2;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">시뮬레이터에 추가</button>
+        style="flex:2;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">${alreadyQty!=null?'수량 바꾸기':'계산기에 담기'}</button>
     </div>
   `;
   const overlay=document.getElementById('add-sheet-overlay');
@@ -1066,19 +1098,37 @@ function confirmAddSheet(code){
   closeAddSheet();
 }
 function addFromRanking(code,qty=100){
+  if(simIsSample)simHoldings=[];   // 목록에서 처음 담으면 예시를 비우고 시작한다
   const ex=simHoldings.findIndex(h=>h.code===code);
   if(ex>=0)simHoldings[ex].qty=qty; else simHoldings.push({code,qty});
   saveHoldings();simRowsRender();simOut();
-  const rows=document.querySelectorAll('#sim-rows .simrow');
-  const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
-  if(el){
-    el.style.transition='background .4s';el.style.background='var(--primary-bg)';
-    setTimeout(()=>el.style.background='',700);
-    el.scrollIntoView({block:'nearest'});
-    const inp=el.querySelector('.qty input');
-    if(inp){inp.focus();inp.select();}
-  }
+  const d=UNIV[code],h=simHoldings.find(x=>x.code===code);
+  if(d&&h)incToast(ex>=0?`${d.name} ${qty.toLocaleString()}주로 바꿨어요`:`${d.name} ${qty.toLocaleString()}주 담았어요 · 월 +${(simIncome(h)/12).toFixed(1)}만원`);
 }
+// 목록의 담기 버튼 표시를 지금 담긴 상태에 맞춘다(예시 종목은 담은 것이 아니다)
+function markAdded(){
+  const has=c=>!simIsSample&&simHoldings.some(h=>h.code===c);
+  document.querySelectorAll('#income-board [data-badd]').forEach(b=>{const on=has(b.dataset.badd);
+    if(b.classList.contains('badd')){b.textContent=on?'✓ 담김':'+ 담기';b.classList.toggle('on',on);}
+    else b.textContent=on?'✓ 계산기에 담김 · 수량 바꾸기':'+ 계산기에 담기';});
+  incBar();
+}
+// 목록 아래 요약 줄 — 담은 종목이 있고 목록 화면일 때만
+function incMonthly(){return simHoldings.reduce((t,h)=>t+simIncome(h),0)/12;}
+function incTarget(){return parseInt(document.getElementById('sim-target').value)||0;}
+function incBar(){
+  const bar=document.getElementById('inc-bar');if(!bar)return;
+  const n=simHoldings.filter(h=>UNIV[h.code]).length,show=!simIsSample&&n>0&&location.hash!=='#calc'&&INCOME_UNIVERSE.length>0;
+  bar.hidden=!show;document.body.classList.toggle('has-incbar',show);
+  if(!show)return;
+  const m=incMonthly(),t=incTarget();
+  document.getElementById('ib-k').textContent=`🧮 ${n}개 담김 · 세후 월`;
+  document.getElementById('ib-v').textContent=`${Math.round(m).toLocaleString()}만원`;
+  document.getElementById('ib-g').textContent=t>0?`/ 목표 ${t.toLocaleString()}만`:'';
+  document.getElementById('ib-p').style.width=(t>0?Math.min(100,m/t*100):100).toFixed(1)+'%';
+}
+let incToastT=0;
+function incToast(msg){const el=document.getElementById('inc-toast');if(!el)return;el.textContent=msg;el.classList.add('on');clearTimeout(incToastT);incToastT=setTimeout(()=>el.classList.remove('on'),2200);}
 
 /* 콤보박스: 순자산 톱20 기본 + 이름·코드 검색 */
 let comboSel=null,comboCur=[],comboIdx=-1;
@@ -1118,50 +1168,11 @@ function simAdd(){
     if(ex>=0)simHoldings[ex].qty=qty; else simHoldings.push({code:comboSel,qty});
     comboSel=null;document.getElementById('sim-search').value='';
     saveHoldings();simRowsRender();simOut();
-    const rows=document.querySelectorAll('#sim-rows .simrow');
-    const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
+    const idx=ex>=0?ex:simHoldings.length-1,el=document.getElementById('sinc-'+idx)?.closest('.cph');
     if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
   }
 }
 const DONUT_COLORS=['#006EFF','#10B981','#F59E0B','#8B5CF6','#64748B','#14B8A6','#EC4899','#D97706','#94A3B8'];   // 첫 색 = 사이트 파랑(2026-11-12, 예전 보라)
-const GAP_COLOR='#E5E7EB';
-
-function buildDonut(segs, monthly){
-  const CX=70,CY=70,R=50,W=18,circ=2*Math.PI*R;
-  const gap=segs.length>1?1.5:0;
-  let offset=0;
-  const arcs=segs.map((s,i)=>{
-    const len=Math.max(0,s.pct*circ-gap);
-    const el=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${s.color}" stroke-width="${W}" stroke-linecap="butt" stroke-dasharray="${len.toFixed(2)} ${(circ-len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" class="donut-arc" data-i="${i}" transform="rotate(-90 ${CX} ${CY})"/>`;
-    offset+=s.pct*circ;
-    return el;
-  }).join('');
-  return `<svg class="donut-svg" viewBox="0 0 140 140" width="160" height="160">
-    <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--hair)" stroke-width="${W}"/>
-    ${arcs}
-    <text x="${CX}" y="${CY-5}" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)" font-family="inherit">${monthly.toFixed(0)}</text>
-    <text x="${CX}" y="${CY+12}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="inherit">만원/월</text>
-  </svg>`;
-}
-
-function setupDonutTip(segs){
-  const tip=document.getElementById('donut-tip');
-  if(!tip)return;
-  document.querySelectorAll('.donut-arc').forEach(el=>{
-    el.addEventListener('mousemove',e=>{
-      const i=parseInt(el.dataset.i),s=segs[i];
-      if(!s)return;
-      const pct=(s.pct*100).toFixed(1);
-      tip.innerHTML=s.code
-        ?`<b>${s.name}</b><br>월 인컴 <b>${s.inc.toFixed(1)}만원</b> · ${pct}%`
-        :`<b>${s.name}</b><br>${s.inc.toFixed(1)}만원 더 필요해요`;
-      tip.style.display='block';
-      tip.style.left=(e.clientX+14)+'px';
-      tip.style.top=(e.clientY-10)+'px';
-    });
-    el.addEventListener('mouseleave',()=>{tip.style.display='none';});
-  });
-}
 
 const PRESETS=[50,100,200,300,500];
 function targetPreset(v){
@@ -1186,26 +1197,19 @@ function simOut(){
   });
   const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
 
-  // 도넛 세그먼트 구성
-  const total=Math.max(monthly,target,0.01);
-  const segs=slices.map((s,i)=>({name:s.name,code:s.code,inc:s.inc/12,pct:s.inc/12/total,color:DONUT_COLORS[i%DONUT_COLORS.length]}));
-  if(gap>0)segs.push({name:'목표까지 부족',code:'',inc:gap,pct:gap/total,color:GAP_COLOR});
-
-  const donut=simHoldings.length?buildDonut(segs,monthly):'';
-  const legend=segs.filter(s=>s.code).map(s=>`<span class="dl-item"><i style="background:${s.color}"></i><span class="dl-name">${s.name}</span><b class="num">${s.inc.toFixed(0)}만</b></span>`).join('');
-
-  let html=`<div class="sim-out-row">
-    ${donut?`<div class="donut-wrap">${donut}<div id="donut-tip" class="donut-tip"></div></div>`:''}
-    <div style="flex:1;min-width:0;">
-      <div class="sim-kpi">
-        <div class="k"><div class="l">현재 월 인컴(세후)</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
-        <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
-        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'var(--ink)':'var(--primary)'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
-      </div>
-      <div class="donut-legend">${legend}</div>
-      ${slices.length?`<div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">세후 = 국내 15.4%·미국 15%(현지 원천징수)를 뺀 수령액 · 세전 월 ${(totalGross/12).toFixed(0)}만원${slices.some(s=>s.d.mk==='US')&&USDKRW?` · 기준 환율 <b style="color:var(--ink)">${USDKRW.toLocaleString()}원/$</b>`:''}</div>`:''}
-    </div>
-  </div>`;
+  // 맨 위 결과 — 세후 월 인컴, 목표까지 남은 금액, 종목 색으로 나눠 칠한 목표 막대(예전 도넛·KPI 세 칸을 대신한다)
+  const scale=Math.max(target,monthly,0.01);
+  const bars=slices.map((s,i)=>`<i style="width:${(s.inc/12/scale*100).toFixed(2)}%;background:${simColor(i)}" title="${besc(s.name)} 월 ${(s.inc/12).toFixed(1)}만원"></i>`).join('');
+  const gapTxt=target<=0?'':gap>0.05?`<em>${won(gap)}만원 더 필요</em>`:`<em class="ok">목표 달성${gap<-0.5?` · ${won(-gap)}만원 여유`:''}</em>`;
+  const usd=slices.some(s=>s.d.mk==='US')&&USDKRW?` · 환율 ${USDKRW.toLocaleString()}원/$`:'';
+  document.getElementById('cp-hero').innerHTML=`<div class="hk">세후 월 인컴</div>
+    <div class="hv"><b class="num">${won(monthly)}만원</b>${gapTxt}</div>
+    <div class="hs num">${target>0?`목표 ${won(target)}만원의 <b>${Math.round(monthly/target*100)}%</b>`:'목표를 정하면 남은 금액을 보여 줘요'}</div>
+    <div class="pbar">${bars}</div>
+    <div class="pleg num"><span>세전 월 ${won(totalGross/12)}만원</span><span>${usd.replace(' · ','')}</span></div>`;
+  const totVal=slices.reduce((t,s)=>t+s.val,0);
+  document.getElementById('cp-hold-sum').textContent=slices.length?`${slices.length}개 · 평가 ${won(totVal)}만원`:'';
+  incBar();
 
   // 리포트 카드 조립
   const cards=[];
@@ -1232,7 +1236,7 @@ function simOut(){
       `<div class="pa-row"><span class="pa-label">국내·해외</span><span class="pa-val">KR <b class="rc-num">${krPct.toFixed(0)}%</b> · US <b class="rc-num">${usPct.toFixed(0)}%</b>${usPct>0?' (미국분 15% 원천징수)':''}</span></div>`,
       `<div class="pa-row"><span class="pa-label">건전성</span><span class="pa-val">${parts.join(' · ')} · 평균 분배 <b class="rc-num">${avgY.toFixed(1)}%</b></span></div>`,
     ].join('');
-    cards.push(`<div class="rc"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${warn?'⚠️':'📊'}</span><span class="rct">포트 구성 분석</span><span class="rcb ${warn?'amber':'blue'}">${slices.length}종목</span><span class="rc-chev">▾</span></div><div class="rc-body"><div class="pa-grid">${rows}</div></div></div>`);
+    cards.push(`<div class="rc open"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${warn?'⚠️':'📊'}</span><span class="rct">포트 구성 분석</span><span class="rcb ${warn?'amber':'blue'}">${slices.length}종목</span><span class="rc-chev">▾</span></div><div class="rc-body"><div class="pa-grid">${rows}</div></div></div>`);
   }
   // 원금성 종목을 같은 금액의 '건전' ETF와 나란히 놓는 비교 정보만 보인다(2026-10-28) —
   // 예전엔 '갈아타기 제안' 카드에 특정 상품 추가·기존 종목 제거 버튼이 있어 매매 권유로 읽혔다.
@@ -1255,7 +1259,7 @@ function simOut(){
     }
   }
   const taxWarn=totalGross>=2000;   // 종합과세는 세전 금융소득 기준
-  cards.push(`<div class="rc">
+  cards.push(`<div class="rc open">
     <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'amber':'green'}">${taxWarn?'검토 필요':'여유'}</span><span class="rc-chev">▾</span></div>
     <div class="rc-body"><ul class="rc-bullets">${taxWarn
       ?`<li>이 조합의 연 분배금(세전)만 <b class="rc-num">${totalGross.toFixed(0)}만원</b>으로 종합과세 기준 <b>2,000만원</b>을 넘어요.</li><li>예금이자·다른 배당까지 합치면 실제 합산액은 더 커질 수 있어요.</li>`
@@ -1264,25 +1268,9 @@ function simOut(){
     </div>
   </div>`);
 
-  // 리포트 HTML은 만들어 두되, 버튼 클릭 시 genReport()가 노출 (기본은 생성 버튼만)
-  window._simReportHtml=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
-  html+=`<div id="sim-report-slot">${simHoldings.length?`<button class="gen-report-btn" onclick="genReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>진단 리포트 생성하기</button>`:''}</div>`;
-
-  document.getElementById('sim-out').innerHTML=html;
-  if(simHoldings.length)setupDonutTip(segs);
-}
-function genReport(){
-  simOut();
-  const slot=document.getElementById('sim-report-slot');
-  if(!slot) return;
-  slot.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:20px;color:var(--primary);font-size:13px;font-weight:600;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;flex-shrink:0;"><path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg>
-    리포트 생성 중…
-  </div>`;
-  setTimeout(()=>{
-    const slot2=document.getElementById('sim-report-slot');
-    if(slot2) slot2.innerHTML=window._simReportHtml||'';
-  },1000);
+  // 진단은 버튼 없이 바로 보인다 — 계산만 하면 나오는 내용이라(2026-11-12, 예전엔 '생성' 버튼 + 1초 대기)
+  document.querySelector('#calc-page .cp-diag').hidden=!slices.length;
+  document.getElementById('sim-out').innerHTML=slices.length?`<div class="sim-report">${cards.join('')}</div>`:'';
 }
 function openIncomeModal(){document.getElementById('income-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
 function closeIncomeModal(){document.getElementById('income-modal-bg').classList.remove('open');document.body.style.overflow='';}
@@ -1333,13 +1321,13 @@ function boardRender(){
       <div class="yl">${e.y.toFixed(1)}%<span>분배율</span></div><span class="hbdg fh ${e.h}">${BHL[e.h]}</span>
       <div class="trk"><div class="z" style="left:${X(0)}%"></div>${segs}<div class="end" style="left:calc(${X(e.r)}% - 1px)"></div></div>
       <div class="tot"><b class="${bcls(e.r)}">${bfmt(e.r)}</b><span>가격 ${bfmt(e.p,0)}</span></div>
+      ${UNIV[e.code]?(on=>`<button type="button" class="badd${on?' on':''}" data-badd="${e.code}">${on?'✓ 담김':'+ 담기'}</button>`)(!simIsSample&&simHoldings.some(h=>h.code===e.code)):'<span></span>'}
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="fd" id="bfd${i}"></div>`}).join('');
   document.getElementById('board-root').innerHTML=`<div class="sum">${chip('all','전체',base.length)}${chip('ok','건전 · 원금 지킴',c.ok)}${chip('warn','주의 · 조금 깎임',c.warn)}${chip('bad','원금성 · 많이 깎임',c.bad)}</div>
    <div class="flt"><div class="seg">${seg('cat','all','전체')}${seg('cat','cc','커버드콜')}${seg('cat','div','배당주')}${seg('cat','bond','채권·금리')}</div><span class="sp"></span><div class="seg sortseg">${seg('sort','h','건전성순')}${seg('sort','y','분배율순')}${seg('sort','t','총수익순')}</div><select class="sortsel" data-bsort aria-label="정렬">${[['h','건전성순'],['y','분배율순'],['t','총수익순']].map(([v,l])=>`<option value="${v}"${BST.sort===v?' selected':''}>${l}</option>`).join('')}</select></div>
    <div class="card"><div class="bk-h"><span class="bk-t"><span class="ic">📊</span>월배당 ETF</span><span class="bk-s">${L.length}개 · 1년 기준</span></div><div class="legend"><span><i style="background:var(--dist)"></i>받은 분배금</span><span><i style="background:var(--upb)"></i>가격 상승</span><span><i style="background:repeating-linear-gradient(135deg,var(--dnb) 0 3px,#9DBEF5 3px 6px)"></i>가격 하락(깎인 돈)</span><span><i style="background:var(--ink);width:3px"></i>1년 총수익</span></div>
-   <div class="fhd"><span>ETF</span><span>분배율</span><span>건전성</span><span>받은 돈 vs 깎인 돈 (1년)</span><span>1년 총수익</span></div>${rows||'<div class="empty">해당하는 ETF가 없어요.</div>'}</div>
-   ${na?`<p class="note">상장 1년 미만이라 판정을 보류한 ${na}개는 목록에서 뺐어요.</p>`:''}
-   <div class="calc"><div><b>내 월 인컴 계산기<span class="cnt" id="board-cnt">${simHoldings.length}개 담김</span></b><p>담은 ETF로 세후 월 분배금과 금융소득종합과세 여부를 계산해요.</p></div><span class="sp"></span><button class="btn pri" onclick="showCalc()">계산기 열기 →</button></div>`;
+   <div class="fhd"><span>ETF</span><span>분배율</span><span>건전성</span><span>받은 돈 vs 깎인 돈 (1년)</span><span>1년 총수익</span><span></span></div>${rows||'<div class="empty">해당하는 ETF가 없어요.</div>'}</div>
+   ${na?`<p class="note">상장 1년 미만이라 판정을 보류한 ${na}개는 목록에서 뺐어요.</p>`:''}`;
 }
 function bVerdict(e){const out=[];
   out.push(e.h==='ok'?'분배금을 주면서도 원금을 지켰어요.':e.h==='warn'?'분배금 일부가 원금에서 나왔어요.':'분배금 상당 부분이 원금에서 나왔어요.');
@@ -1362,7 +1350,7 @@ const bmoney=(e,v)=>e.mk==='US'?'$'+v.toFixed(2):Math.round(v).toLocaleString('k
 function bDbar(e){if(!e.dm.length||!e.dm.some(m=>m.n))return '<p class="pn mu">분배 이력을 찾지 못했어요.</p>';
   const mx=Math.max(...e.dm.map(m=>m.pct||0),0.001);
   return `<div class="dbar" data-bc="${e.code}">${e.dm.map((m,i)=>`<div class="${i>=9?'r':''}" data-m="${i}"><i style="height:${Math.max(1,(m.pct||0)/mx*72)}px"></i><span>${+m.m.slice(5)}</span></div>`).join('')}<div class="ptip"></div></div>`}
-function bDetail(e){const added=simHoldings.some(h=>h.code===e.code),can=!!UNIV[e.code];
+function bDetail(e){const added=!simIsSample&&simHoldings.some(h=>h.code===e.code),can=!!UNIV[e.code];
   // 가격 곡선이 가장 많은 걸 보여주므로 전체 폭으로 맨 위에, 그 아래 기초 지수 비교 · 월별 분배를 두 칸으로(2026-11-12 가독성 점검)
   return `<p class="fv">${bVerdict(e)}</p><div class="grid3">
    <div class="pane wide"><div class="ph"><h4>1년 가격 · 점선은 1년 전</h4><div class="pc"><span>3개월<b class="${bcls(e.p3m)}">${bfmt(e.p3m)}</b></span><span>1년<b class="${bcls(e.p)}">${bfmt(e.p)}</b></span></div></div>${bSpark(e)}</div>
@@ -1397,6 +1385,7 @@ document.addEventListener('mousemove',ev=>{
     tp.style.left=Math.max(18,Math.min(82,(cx.left+cx.width/2-bx.left)/bx.width*100))+'%';tp.style.top=(ih.top-bx.top)+'px';tp.style.display='block'}
 });
 
+route();
 fetch('/data/income_etfs.json')
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(data => {
@@ -1409,19 +1398,21 @@ fetch('/data/income_etfs.json')
     INCOME_UNIVERSE.forEach(d => UNIV[d.code] = d);
     annoFill(UNIV['498400']);
     boardInit(data);
-    if(location.hash==='#calc')route();
-    simRowsRender();simOut();
+    simRowsRender();simOut();route();
   })
   .catch(() => {
     // 불러오지 못하면 빈 화면 대신 안내를 남긴다(2026-10-28)
     const msg='<div style="padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.6;">ETF 데이터를 불러오지 못했어요. 잠시 뒤 새로고침해 주세요.</div>';
     document.getElementById('board-root').innerHTML=msg;
-    document.getElementById('sim-out').innerHTML=msg;
+    document.getElementById('sim-rows').innerHTML=msg;
   });
 
 
 
 </script>
+<!-- ===== 목록 아래 요약 줄(담은 종목이 있을 때) + 담기 알림 — 2026-11-12 ===== -->
+<div id="inc-bar" hidden><div class="ib-in"><div class="ib-t"><div class="k" id="ib-k"></div><div class="v"><b class="num" id="ib-v"></b><small id="ib-g"></small></div><div class="pg"><i id="ib-p"></i></div></div><button type="button" onclick="showCalc()">계산기 →</button></div></div>
+<div id="inc-toast" role="status" aria-live="polite"></div>
 <!-- ===== ETF 추가 모달/바텀시트 ===== -->
 <div id="add-sheet-overlay" onclick="closeAddSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299;"></div>
 <div id="add-sheet" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;z-index:300;transform:translateY(100%);transition:transform .25s ease-out;padding:0 0 env(safe-area-inset-bottom);">
