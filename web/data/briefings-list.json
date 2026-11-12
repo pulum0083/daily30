@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-13": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-13/kospi/",
+        "headline": "미국 대형 기술주가 일제히 숨 고르기에 들어갔어요.",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-12": {
       "kospi": {
         "state": "ready",
@@ -841,8 +860,7 @@
         "headline": "코스피 7000선 붕괴, 버틴 힘과 내린 힘의 줄다리기",
         "title": "6,941.39",
         "price": "6,941.39",
-        "time": "",
-        "chg": -0.89
+        "time": ""
       },
       "us": {
         "state": "ready",
@@ -868,36 +886,6 @@
         "state": "ready",
         "url": "/briefings/2026-10-05/us/",
         "headline": "금리 동결 안도감 속 기술주는 숨 고르기 — VIX 반등이 변동성 경고등을 켰다",
-        "hit": true,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:16"
-      }
-    },
-    "2026-10-02": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-10-02/kospi/",
-        "headline": "수출 역대 최대·마이크론 호실적, 그런데 금리가 발목을 잡을 수도 있어요",
-        "hit": true,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-02/close/",
-        "headline": "기관 홀로 떠받친 7000선, 속은 괜찮을까요?",
-        "title": "7,003.74",
-        "price": "7,003.74",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-02/us/",
-        "headline": "제퍼슨의 비둘기 발언이 반도체를 끌어올렸고, 이제 고용지표가 바통을 이어받는다",
         "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",

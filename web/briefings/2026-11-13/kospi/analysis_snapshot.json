@@ -1,0 +1,152 @@
+{
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 38,
+    "down_pct": 62,
+    "confidence": 62,
+    "basis": "open"
+  },
+  "reason_title": "VIX 급등·엔비디아 급락, 반도체 되돌림 경계",
+  "todays_view": {
+    "view_title": "미국 대형 기술주가 일제히 숨 고르기에 들어갔어요.",
+    "dek": "수요일 반도체 섹터가 크게 뛴 다음 날인데, 간밤 분위기가 완전히 바뀌었어요. <b>엔비디아</b>가 <b>-4.13%</b> 빠지고 VIX가 다시 튀어 오르며 어제의 흥분을 가라앉히는 흐름이에요.",
+    "recap": [
+      {
+        "text": "외국인이 순매수로 돌아섰어요. 어제 코스피 장에서 외국인은 <b>3,708억원</b> 순매수했지만 기관은 <b>6,896억원</b> 순매도하며 수급이 엇갈렸어요.",
+        "codes": []
+      },
+      {
+        "text": "메리츠금융지주가 급락했어요. 이 종목은 하루 만에 <b>-13.05%</b> 빠지며 금융 섹터 전체 분위기를 눌렀어요.",
+        "codes": [
+          "138040"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "오늘 밤 10시 30분 미국 Core PPI·PPI 발표가 예정돼 있어요 — 예상치를 웃돌면 금리 부담이 재부각될 수 있어요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "간밤 미 반도체 대형주 급락분이 오늘 개장에서 얼마나 반영될지 지켜보세요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인 순매수 기조가 하루 더 이어질지, 아니면 어제 하루짜리였는지 확인하세요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>미국 대형 기술주가 일제히 숨 고르기에 들어갔어요.</b> 간밤 나스닥이 <b>-0.39%</b>, S&P500이 <b>-0.35%</b> 밀리며 목요일 미국장은 수요일 급등 뒤 되돌림 흐름으로 마감했어요. 이 분위기가 코스피 개장에도 그대로 이어질 가능성이 커요.",
+      "codes": []
+    },
+    {
+      "text": "<b>VIX가 하루 만에 급등하며 경계 신호를 보냈어요.</b> VIX가 <b>+6.92%</b> 오르며 전날의 안도 랠리(-10.12%)를 상당 부분 되돌렸어요. 리스크 선호가 다시 꺾이는 신호라 코스피 개장 상단을 제한할 수 있어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>EWY와 DRAM ETF가 동반 약세를 보였어요.</b> EWY가 <b>-1.64%</b>, DRAM ETF가 <b>-2.26%</b> 빠지며 외국인 자금이 한국 반도체 쪽에서 다소 발을 뺀 모습이에요. 다만 전일 국내 수급에서는 외국인이 되레 순매수였던 만큼 오늘 개장 반응은 지켜볼 필요가 있어요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-13T07:28:01.389548+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-13T07:26:46.801220+09:00",
+    "briefing_date": "2026-11-13",
+    "us_session_date": "2026-11-12",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "코어위브 실적 쇼크가 가른 반도체 희비",
+        "sides": [
+          {
+            "side": "up",
+            "label": "메모리·AI 가속기",
+            "marks": [
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -1.59
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": 5.86
+              },
+              {
+                "ticker": "CRWV",
+                "name": "CRWV",
+                "pct": -6.86
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "메모리·AI 가속기는 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "VIX 반등과 10년물 금리 5% 돌파, 랠리에 제동 거는 신호",
+        "sides": [
+          {
+            "side": "down",
+            "label": "고밸류 성장주",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -4.34
+              },
+              {
+                "ticker": "MSFT",
+                "name": "MSFT",
+                "pct": 0.36
+              },
+              {
+                "ticker": "META",
+                "name": "META",
+                "pct": -0.82
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "고밸류 성장주는 <b>엇갈렸어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-13",
+    "generated_at": "2026-11-13T07:26:47.905039+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": []
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-12",
+    "direction": "상승 우위",
+    "ok": true,
+    "open_pct": 0.2
+  },
+  "prior_signals": {
+    "sox": -0.54,
+    "nasdaq": -0.39,
+    "nq": -0.25,
+    "ewy_resid": -1.034,
+    "vix": 6.9182
+  },
+  "prev_supply": {
+    "date": "20261112",
+    "individual": -2054,
+    "institution": -6896,
+    "foreign": 3708
+  }
+}
