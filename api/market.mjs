@@ -128,7 +128,8 @@ async function fetchInvestor() {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  // 60초 폴링(밤사이 미국·LIVE 지수 카드) — s-maxage+swr을 주기보다 작게(stocks-live와 같은 이유)
+  res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=20');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   const [kosdaq, kospi200, forex, investor, kospiSpark, vix] = await Promise.allSettled([

@@ -19,7 +19,8 @@ import assert from 'node:assert/strict';
 // (운영 규칙 0 · SERVICE_RULES §10 "표기와 스케줄의 1:1 대응").
 // 폴링 주기를 바꾸면 여기도 같이 바꿔야 한다 — 그게 이 테스트의 존재 이유다.
 const POLLED = [
-  { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 60,  req: { query: { codes: '005930', us: '' } } },
+  { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 60,  strict: true, req: { query: { codes: '005930', us: '' } } },
+  { name: 'market',      mod: './market.mjs',      pollSec: 60,  strict: true, req: { query: {} } },   // 밤사이 미국 60초
   { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 60,  req: { query: {} } },
   { name: 'signals',     mod: './signals.mjs',     pollSec: 60,  req: { query: {} } },   // main.js 사이드바가 최단
   { name: 'data',        mod: './data.mjs',        pollSec: 300, req: { query: { f: 'briefings-list' } } },
@@ -55,7 +56,7 @@ async function callHandler(modPath, req) {
   return res;
 }
 
-for (const { name, mod, pollSec, req } of POLLED) {
+for (const { name, mod, pollSec, strict, req } of POLLED) {
   test(`${name}: 엣지 공유 캐시를 설정한다 (no-store 금지)`, async () => {
     const res = await callHandler(mod, req);
     const cc = res.get('cache-control');
@@ -82,5 +83,15 @@ for (const { name, mod, pollSec, req } of POLLED) {
       ttl > 0 && ttl <= pollSec,
       `${name}의 s-maxage(${ttl}s)가 폴링 주기(${pollSec}s)를 초과한다 — 화면 값이 낡는다`,
     );
+  });
+
+  // 엣지는 s-maxage가 지난 뒤에도 stale-while-revalidate 동안 옛 값을 먼저 준다. 그래서 화면 값의 나이는
+  // 최대 s-maxage+swr이고, 이 합이 폴링 주기 이상이면 폴링 두 번에 한 번은 같은 값이 온다
+  // (2026-11-13 밤사이 미국 — '60초 갱신' 표기인데 실제 2분마다 바뀌었다). strict 대상만 검사한다.
+  if (strict) test(`${name}: s-maxage+swr이 폴링 주기(${pollSec}초)보다 작다`, async () => {
+    const cc = (await callHandler(mod, req)).get('cache-control');
+    const ttl = Number(/s-maxage=(\d+)/i.exec(cc)?.[1] ?? 0);
+    const swr = Number(/stale-while-revalidate=(\d+)/i.exec(cc)?.[1] ?? 0);
+    assert.ok(ttl + swr < pollSec, `${name}: s-maxage ${ttl} + swr ${swr} ≥ ${pollSec}초 — 폴링마다 새 값이 오지 않는다: "${cc}"`);
   });
 }
