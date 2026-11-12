@@ -1,0 +1,67 @@
+<!doctype html>
+<!-- Double-Shot 로고 마크 후보 시안 — 상단 바·탭 아이콘·앱 아이콘 크기에서 비교(2026-11-12) -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로고 마크 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+body{margin:0;background:#EEF1F5;font-family:Pretendard,-apple-system,sans-serif;color:#13151A}
+.page{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:22px;margin:0 0 6px}.lead{font-size:14px;color:#475569;margin:0 0 22px;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+.card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 16px 14px}
+.card h2{font-size:15px;margin:0 0 3px}.card h2 span{display:inline-block;font-size:12px;font-weight:800;color:#fff;background:#13151A;border-radius:6px;padding:1px 7px;margin-right:6px}
+.card p{font-size:12.5px;color:#64748B;margin:0 0 12px;line-height:1.6}
+.gnb{height:52px;background:#16181A;border-radius:10px;display:flex;align-items:center;gap:9px;padding:0 14px;margin-bottom:10px}
+.gnb .t{color:#fff;font-weight:800;font-size:17px;letter-spacing:-.2px}.gnb .t b{color:#5AA2FF;font-weight:800}
+.gnb .s{color:#9CA3AF;font-size:13px;font-weight:600;margin-left:10px}
+.row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.tab{background:#DEE1E6;border-radius:9px 9px 0 0;padding:7px 10px;display:flex;align-items:center;gap:7px;font-size:12px;color:#374151;width:150px}
+.tab span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sz{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:#94A3B8}
+.app{border-radius:22%;overflow:hidden;box-shadow:0 4px 10px rgba(15,23,42,.18)}
+.light{background:#F7F8FA;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:9px;margin-top:10px}
+.light .t{font-weight:800;font-size:16px}.light .t b{color:#006EFF}
+svg{display:block}
+.note{margin-top:24px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 16px;font-size:13px;line-height:1.8;color:#713F12}
+</style></head>
+<body><div class="page">
+<h1>Double-Shot 로고 마크 후보</h1>
+<p class="lead">지금 마크(두 개의 캔들)를 포함해 6가지예요. 각 후보를 상단 바(26px), 브라우저 탭(16px), 앱 아이콘(60px), 크게(88px)로 보여 드려요.<br>색은 지금처럼 빨강 타일을 기본으로 두고, 마지막 후보만 파랑으로 바꿔 봤어요.</p>
+<div class="grid" id="grid"></div>
+<div class="note"><b>고르실 때 볼 점</b> — 상단 바와 탭(16px)에서 알아볼 수 있는지가 가장 중요해요. 큰 크기에서만 예쁜 모양은 작게 줄이면 뭉개져요.<br>정하시면 상단 바·파비콘·앱 아이콘(192·512·마스커블)·공유 이미지까지 한 번에 바꿀게요.</div>
+</div>
+<script>
+const RED='<linearGradient id="R" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E03131"/><stop offset="1" stop-color="#FF6A6A"/></linearGradient>';
+const BLUE='<linearGradient id="B" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0057E0"/><stop offset="1" stop-color="#3D8BFF"/></linearGradient>';
+const W='#FFFFFF';
+const C=[
+ {k:'현재',t:'두 개의 캔들 (지금)',d:'오르는 두 캔들. 주식 서비스인 건 바로 보이지만 흔한 모양이고, 16px에서는 꼬리선이 뭉개져요.',bg:'R',
+  g:`<rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="${W}"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="${W}" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="${W}" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="${W}"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="${W}" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="${W}" stroke-width="2" stroke-linecap="round"/>`},
+ {k:'A',t:'더블샷 두 잔',d:'에스프레소 샷 잔 두 개. 오른쪽 잔이 더 차 있어 오르는 막대처럼 읽혀요. 이름(Double-Shot)과 가장 바로 이어져요.',bg:'R',
+  g:`<path d="M6 9.5h9l-1.1 15.5H7.1z" fill="none" stroke="${W}" stroke-width="1.9" stroke-linejoin="round"/><path d="M6.6 18h7.8l-.5 7H7.1z" fill="${W}"/><path d="M17 9.5h9l-1.1 15.5h-6.8z" fill="none" stroke="${W}" stroke-width="1.9" stroke-linejoin="round"/><path d="M17.25 13h8.5l-.85 12h-6.8z" fill="${W}"/>`},
+ {k:'B',t:'커피콩 + 상승선',d:'커피콩의 가운데 홈을 오르는 차트선으로 그렸어요. 커피(더블샷)와 시장을 한 모양에 담았어요.',bg:'R',
+  g:`<ellipse cx="16" cy="16" rx="8.6" ry="11.4" transform="rotate(32 16 16)" fill="${W}"/><path d="M10.6 21.6l3.6-4 2.6 2.1 4.6-7.6" fill="none" stroke="#E64545" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`},
+ {k:'C',t:'두 번의 상승 (겹 화살)',d:'위를 향한 꺾쇠 두 개. 하루 두 번(아침 코스피·밤 미국) 브리핑과 상승을 같이 뜻해요. 가장 단순해서 16px에서도 또렷해요.',bg:'R',
+  g:`<path d="M8.5 16.5L16 9.5l7.5 7" fill="none" stroke="${W}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 24L16 17l7.5 7" fill="none" stroke="${W}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>`},
+ {k:'D',t:'두 점 차트',d:'오르는 선 위에 점 두 개를 찍었어요. 하루 두 번 찍는 시장 스냅숏(두 번의 샷)을 뜻해요.',bg:'R',
+  g:`<path d="M6 22.5l6-5.5 5 3.2 9-10.7" fill="none" stroke="${W}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17" r="3" fill="${W}" stroke="#E64545" stroke-width="1.4"/><circle cx="26" cy="9.5" r="3" fill="${W}" stroke="#F25656" stroke-width="1.4"/>`},
+ {k:'E',t:'아침 · 밤 반달',d:'원 하나를 반은 진하게(아침 코스피), 반은 옅게(밤 미국) 나눴어요. 하루 두 번 나오는 브리핑을 뜻해요.',bg:'R',
+  g:`<path d="M16 6.5a9.5 9.5 0 0 0 0 19z" fill="${W}"/><path d="M16 6.5a9.5 9.5 0 0 1 0 19z" fill="${W}" opacity=".38"/><path d="M11 18.5l2.4-2.4 1.8 1.4" fill="none" stroke="#E64545" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`},
+ {k:'F',t:'겹 화살 · 파랑',d:'C안을 사이트 강조색(파랑)으로 바꿨어요. 상승=빨강이라는 시장 색과 로고 색이 겹치지 않아요.',bg:'B',
+  g:`<path d="M8.5 16.5L16 9.5l7.5 7" fill="none" stroke="${W}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 24L16 17l7.5 7" fill="none" stroke="${W}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>`},
+];
+let uid=0;
+function mark(c,px,rx=8){const id=++uid;const defs=(c.bg==='R'?RED:BLUE).replace(/id="[RB]"/,'id="g'+id+'"');return `<svg width="${px}" height="${px}" viewBox="0 0 32 32"><defs>${defs}</defs><rect width="32" height="32" rx="${rx}" fill="url(#g${id})"/>${c.g}</svg>`}
+document.getElementById('grid').innerHTML=C.map(c=>`<div class="card">
+  <h2><span>${c.k}</span>${c.t}</h2><p>${c.d}</p>
+  <div class="gnb">${mark(c,26,7.5)}<span class="t">Double-<b>Shot</b></span><span class="s">브리핑</span><span class="s" style="margin-left:0;color:#4ADE80">월배당</span></div>
+  <div class="row">
+    <div class="sz"><div class="tab">${mark(c,16,7)}<span>월배당 ETF 건전성</span></div>탭 16px</div>
+    <div class="sz">${mark(c,32,8)}32px</div>
+    <div class="sz"><div class="app">${mark(c,60,0)}</div>앱 60px</div>
+    <div class="sz">${mark(c,88,7)}88px</div>
+  </div>
+  <div class="light">${mark(c,26,7.5)}<span class="t">Double-<b>Shot</b></span></div>
+</div>`).join('');
+</script>
+</body></html>
