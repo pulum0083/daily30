@@ -1,13 +1,22 @@
 {
-  "generated_at": "2026-11-12T11:31:22.881457+09:00",
+  "generated_at": "2026-11-12T12:01:23.012403+09:00",
   "date": "2026-11-12",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 3.52,
-      "surge": 0.4,
+      "changePct": 2.91,
+      "surge": 0.44,
       "events": [
+        {
+          "time": "09:17",
+          "headline": "상승하는 삼성전자·SK하이닉스 주가",
+          "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTFBNVDZHRTl2MjRZS0JKeXpwMmw3blVTdy1wamlCQVNuWEZlS291WG9zSVlfVVFZX19pQ1VKYzBUaU1aYjEzdXJiLXhSYw?oc=5",
+          "source": "뉴스1",
+          "why": "상승하는 삼성전자·SK하이닉스 주가",
+          "tier": "why",
+          "sentiment": "pos"
+        },
         {
           "time": "10:24",
           "headline": "코어위브 재무 리스크 완화에 AI 반도체주 반등, 삼성전자 SK하이닉스에 '훈풍' 예고",
@@ -16,31 +25,22 @@
           "why": "코어위브 재무 리스크 완화에 AI 반도체주 반등, 삼성전자 SK하이닉스에 '훈풍' 예고",
           "tier": "why",
           "sentiment": "pos"
-        },
-        {
-          "time": "10:03",
-          "headline": "미국 반도체 훈풍에 삼성전자 2%대 상승 : 금융",
-          "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTFB4MVNiS1JaNnVuc1JzcTVlT01aV08tNlJoUWdiTmxldHhHYldjUDdNenpwYnJlODFhdkpxZGdmVk5ZTEFRbXhmYnE2MA?oc=5",
-          "source": "재경일보",
-          "why": "미국 반도체 훈풍에 삼성전자 2%대 상승 : 금융",
-          "tier": "why",
-          "sentiment": "pos"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 2.27,
-      "surge": 0.38,
+      "changePct": 1.64,
+      "surge": 0.42,
       "events": [
         {
           "time": "10:24",
           "headline": "코어위브 재무 리스크 완화에 AI 반도체주 반등, 삼성전자 SK하이닉스에 '훈풍' 예고",
           "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFByS2NMbHBrUDNNWGdzR0xiTG0zNDNHZzFTSGxUcHU2RC1tWWdzZy03RmJPVG9lcURjMGNKWmtFUGVoeFhuX2p5ckJrekQxMnFKejBTYXRZaFM5ek1KbDhoUFFpbElRUGp2eFNwdjBsZjJzaFU?oc=5",
           "source": "비즈니스포스트",
-          "why": "코어위브의 재무 리스크 완화 소식에 AI 반도체주인 삼성전자와 SK하이닉스에 긍정적인 영향이 예상된다.",
-          "tier": "why",
+          "why": "코어위브의 재무 리스크 완화 소식에 AI 반도체주인 삼성전자와 SK하이닉스에 긍정적인 영향이 예상된다. (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "pos"
         },
         {
@@ -48,8 +48,8 @@
           "headline": "\"반토막 난 삼전닉스, 3개월 내 반등 확률 90%\"",
           "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTFBza05LUHJqSnh3eFNtenRDVTFfZ1pGWDBYcVFxNXo2eWp6eVI2UUFwbVdrVDU3Szk0bkJUN1ZvZ1o0ZkwyNGlCUklmb0dZTDJmUXhHZHkwZW5hMlBENk43N1R2Vk9ISHVDZXRXTkhpR250aW9XaXVsR1dqbw?oc=5",
           "source": "이데일리TV",
-          "why": "\"반토막 난 삼전닉스, 3개월 내 반등 확률 90%\"",
-          "tier": "why",
+          "why": "\"반토막 난 삼전닉스, 3개월 내 반등 확률 90%\" (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "pos"
         }
       ]
@@ -57,8 +57,8 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -1.28,
-      "surge": 0.33,
+      "changePct": -1.1,
+      "surge": 0.35,
       "events": [
         {
           "time": "10:00",
