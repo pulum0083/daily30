@@ -2553,6 +2553,12 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **브리핑 제목**: `검색어 날짜 | 헤드라인` — `코스피 시초가 예측 10월 27일 | …`·`코스피 마감 시황 …`·`미국 증시 전망 …`. 시초가 기준(§57)이 아닌 옛 예측은 `코스피 방향 예측`. description은 보조 문장(dek), 코스피는 앞에 예측 한 줄. `generate_html.briefing_head()` 하나가 `<title>`·og·twitter·RSS를 모두 만든다. 발행본 188편은 `<head>`의 이 줄만 같은 함수로 바꿨다(본문은 그대로, §33).
 - **RSS**: `/briefings/rss.xml`(최신 30편) — `write_briefings_index()` 끝에서 함께 갱신된다. 네이버 서치어드바이저에 제출해야 효과가 있다(로그인이 필요해 사람이 한다). `<link rel="alternate">`는 base.html과 `/stocks/`에 있다. `/stocks/`에는 네이버 인증 태그도 넣었다(다른 페이지는 base.html에 이미 있었다).
 - **공유 카드**: 브리핑마다 `og.png`(1200×630, `scripts/og_card.py`, Pillow + `scripts/fonts/` Pretendard). 글자는 analysis에 있는 헤드라인·예측 방향·큰 쪽 확률뿐이고 마감 카드엔 수치가 없다(§0). 못 만들면 `write_output`이 og:image 태그를 지운다. 텔레그램 메시지는 링크 미리보기를 끈다(`send_telegram` `is_disabled`, 2026-10-27 사용자 결정 — 텔레그램엔 이미지만 빼는 옵션이 없다). 카드는 카카오톡·X 공유용이다. 발행본에는 카드를 만들지 않았다.
+- **한글 이름·`<h1>`·구조화 데이터(2026-11-13)** — 제목·사이트 이름이 영문 "Double-Shot"뿐이라 "더블샷"으로 찾으면 걸릴 글자가 없었고, 브리핑 페이지엔 `<h1>`과 구조화 데이터가 없었다.
+  · 브리핑 제목 끝에 `| 더블샷`(`BRAND_KO`). RSS 항목 제목엔 붙이지 않는다(채널 제목이 이미 더블샷). og:site_name·기본 제목·공통 푸터·손으로 만든 정적 페이지(소개·용어집·약관 3종·월배당·종목 홈)의 이름은 "더블샷(Double-Shot)".
+  · 홈(`/stocks/`) 제목 "코스피 시초가 예측·미국 증시 전망 | 더블샷(Double-Shot)" + WebSite·Organization JSON-LD(이름 더블샷, 다른 이름 Double-Shot).
+  · 브리핑 헤드라인을 `<h1>`로 — 코스피 `.bx-head`, 미국 `.tv-title`, 마감 `.reason-title-bar`(마감 brief 형식만). 클래스 스타일이 글자 크기·여백을 정해 모양은 같다(`.reason-title-bar`에 `margin:0` 추가, `ASSET_VER` 20261113).
+  · `briefing_jsonld()` — NewsArticle(헤드라인·발행 시각·작성자/발행자 더블샷·공유 카드)과 BreadcrumbList. 발행 시각은 그 날짜의 값만 쓴다 — 스냅샷 `generated_at`이 1순위, 없으면 그 날짜 자정 KST(재생성 때 낡은 시장 데이터 시각이 들어가지 않게). 숫자는 넣지 않는다. 공유 카드를 못 만들면 `strip_og_image`가 JSON-LD의 image도 지운다.
+  · **새 발행분부터 적용한다.** 이미 발행된 브리핑은 다시 만들지 않는다(§33).
 - **구독 입구는 이미 있다** — 세 브리핑 사이드바의 텔레그램 구독 카드(`sections/_sidebar_kospi.html`, 모바일에선 본문 아래)와 GA4 `telegram_click` 이벤트(main.js). 새로 만들지 않았다. 2026-10-29에 종목 시그널 홈(`/stocks/`) 맨 아래(최근 브리핑 다음, `#tg-sub`)에도 같은 문구·링크의 카드를 넣었다 — 스타일은 `stocks-home.css`의 `.tg-sub`(그 페이지는 `style.css`를 싣지 않는다), 클릭 집계는 같은 리스너가 잡는다.
 
 

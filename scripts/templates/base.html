@@ -4,14 +4,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Double-Shot{% endblock %}</title>
+<title>{% block title %}더블샷(Double-Shot){% endblock %}</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
-<link rel="alternate" type="application/rss+xml" title="Double-Shot 브리핑" href="https://doubleshot.space/briefings/rss.xml">
+<link rel="alternate" type="application/rss+xml" title="더블샷 브리핑" href="https://doubleshot.space/briefings/rss.xml">
 {# description은 og_desc 블록을 그대로 재사용 — 두 곳이 어긋나지 않게 한 곳에서만 쓴다 #}
 <meta name="description" content="{{ self.og_desc() }}">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Double-Shot">
+<meta property="og:site_name" content="더블샷(Double-Shot)">
 <meta property="og:locale" content="ko_KR">
 {% if canonical_url %}<meta property="og:url" content="{{ canonical_url }}">{% endif %}
 <meta property="og:title" content="{% block og_title %}Double-Shot — AI 투자 브리핑{% endblock %}">
@@ -56,7 +56,7 @@
     <a href="/legal/terms/">이용약관</a>
     <a href="mailto:pulum0083@gmail.com">문의</a>
   </div>
-  <div class="site-footer__base">© 2026 Double-Shot</div>
+  <div class="site-footer__base">© 2026 더블샷(Double-Shot)</div>
 </footer>
 
 <script src="{{ js_path | default('/assets/main.js?v=20260703') }}"></script>

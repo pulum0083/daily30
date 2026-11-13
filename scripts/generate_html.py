@@ -43,7 +43,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261111b"
+ASSET_VER = "20261113"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 KST = pytz.timezone("Asia/Seoul")
@@ -2211,6 +2211,8 @@ def build_list_context(target_date: str, active_type: str) -> dict:
 # 그날 헤드라인을 뒤에 둔다. 새 발행(render_briefing)과 발행본 일괄 교체(backfill_briefing_heads)가
 # 같은 함수를 쓴다 — 두 곳이 어긋나지 않게.
 SEO_TITLE_PREFIX = {"close": "코스피 마감 시황", "us": "미국 증시 전망"}
+# 검색 결과에 보이는 한글 이름 — 영문 "Double-Shot"만 있으면 "더블샷"으로 찾는 사람에게 걸리지 않는다(2026-11-13).
+BRAND_KO = "더블샷"
 
 
 def _plain_text(s) -> str:
@@ -2233,13 +2235,46 @@ def briefing_head(analysis: dict, btype: str, target_date: str) -> dict:
                                                   analysis.get("market_title"))) if t), "")
     dek = next((t for t in map(_plain_text, (tv.get("dek"), analysis.get("dek"),
                                              analysis.get("sc_summary"))) if t), "")
-    title = f"{prefix} {day} | {headline}" if headline else f"{prefix} {day} — Double-Shot"
+    title = f"{prefix} {day} | {headline} | {BRAND_KO}" if headline else f"{prefix} {day} | {BRAND_KO}"
     parts = []
     if btype == "kospi" and analysis.get("prediction"):
         p = build_prediction(analysis, "KOSPI", "KOSPI 당일 방향 예측", "")
         parts.append(f"{p['pred_title']}: {p['direction']} {p['readout_pct']}% · 신뢰도 {p['confidence']}%")
     parts.append(dek or headline or f"{target_date} {BRIEFING_LABELS[btype]} 브리핑")
-    return {"title": html.escape(title), "description": html.escape(". ".join(parts))}
+    return {"title": html.escape(title), "description": html.escape(". ".join(parts)),
+            "headline": headline, "prefix": f"{prefix} {day}"}
+
+
+def _iso_kst(generated_at: str, target_date: str) -> str:
+    """발행 시각을 시간대가 붙은 ISO로. 못 읽으면 그 날짜 자정 KST."""
+    try:
+        dt = datetime.fromisoformat(str(generated_at).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = KST.localize(dt)
+        return dt.isoformat(timespec="seconds")
+    except Exception:
+        return f"{target_date}T00:00:00+09:00"
+
+
+def briefing_jsonld(head: dict, btype: str, target_date: str, generated_at: str, canonical_url: str) -> list:
+    """브리핑 구조화 데이터 — 기사(NewsArticle)·경로(BreadcrumbList). 숫자는 넣지 않는다(제목·시각·주소만).
+    image는 맨 끝에 둔다 — 공유 카드를 못 만들면 strip_og_image가 이 항목도 지운다."""
+    published = _iso_kst(generated_at, target_date)
+    article = {
+        "@context": "https://schema.org", "@type": "NewsArticle",
+        "headline": (head.get("headline") or head.get("prefix") or "")[:110],
+        "alternativeHeadline": head.get("prefix", ""),
+        "datePublished": published, "dateModified": published,
+        "inLanguage": "ko-KR",
+        "mainEntityOfPage": canonical_url,
+        "author": {"@type": "Organization", "name": BRAND_KO, "alternateName": "Double-Shot", "url": f"{SITE_BASE}/about/"},
+        "publisher": {"@type": "Organization", "name": BRAND_KO, "alternateName": "Double-Shot",
+                      "logo": {"@type": "ImageObject", "url": f"{SITE_BASE}/icons/icon-512.png"}},
+        "image": f"{canonical_url}og.png",
+    }
+    crumb = _breadcrumb([("홈", "/stocks/"), ("브리핑", "/briefings/"),
+                         (head.get("prefix") or BRIEFING_LABELS.get(btype, ""), None)])
+    return [_jsonld(article), _jsonld(crumb)]
 
 
 def render_briefing(internal_type: str, target_date: str, market_data: dict, force: bool = False) -> str:
@@ -2356,6 +2391,10 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
     head = briefing_head(analysis, internal_type, target_date)
     ctx["page_title"] = head["title"]
     ctx["og_description"] = head["description"]
+    # 발행 시각은 그 날짜의 값만 쓴다 — 스냅샷(날짜 고정)이 1순위. 재생성 때 낡은 시장 데이터 시각이 들어가지 않게.
+    published = next((t for t in (analysis.get("generated_at"), generated_at)
+                      if str(t or "")[:10] == target_date), "")
+    ctx["seo_jsonld"] = briefing_jsonld(head, internal_type, target_date, published, canonical_url)
 
     template = env.get_template(config["template"])
     return template.render(**ctx), analysis
@@ -2364,6 +2403,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
 def strip_og_image(html: str) -> str:
     """공유 카드를 못 만든 페이지에서 og:image·twitter:image를 지운다 — 없는 이미지를 가리키지 않게."""
     html = re.sub(r'<meta (?:property="og:image"|name="twitter:image") content="[^"]*">\n?', "", html)
+    html = re.sub(r',"image":"[^"]*og\.png"', "", html)   # 구조화 데이터의 공유 카드 주소도 지운다
     return html.replace('<meta name="twitter:card" content="summary_large_image">',
                         '<meta name="twitter:card" content="summary">')
 
@@ -2759,7 +2799,8 @@ def write_briefings_rss(n: int = RSS_ITEMS) -> bool:
             head = briefing_head(analysis, t, d)
             url = f"{SITE_BASE}/briefings/{d}/{t}/"
             items.append(
-                f"    <item>\n      <title>{head['title']}</title>\n      <link>{url}</link>\n"
+                # 항목 제목엔 사이트 이름을 붙이지 않는다 — 채널 제목이 이미 더블샷이다
+                f"    <item>\n      <title>{head['title'].removesuffix(f' | {BRAND_KO}')}</title>\n      <link>{url}</link>\n"
                 f"      <guid isPermaLink=\"true\">{url}</guid>\n"
                 f"      <pubDate>{_briefing_pub_date(d, t, analysis)}</pubDate>\n"
                 f"      <description>{head['description']}</description>\n    </item>")
@@ -2767,7 +2808,7 @@ def write_briefings_rss(n: int = RSS_ITEMS) -> bool:
         return False
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n'
-           '    <title>Double-Shot AI 투자 브리핑</title>\n'
+           '    <title>더블샷(Double-Shot) AI 투자 브리핑</title>\n'
            f'    <link>{SITE_BASE}/briefings/</link>\n'
            f'    <atom:link href="{SITE_BASE}/briefings/rss.xml" rel="self" type="application/rss+xml"/>\n'
            '    <description>매일 아침 코스피 시초가 예측, 오후 코스피 마감 시황, 저녁 미국 증시 전망 브리핑</description>\n'

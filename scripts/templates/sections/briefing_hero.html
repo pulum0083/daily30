@@ -6,7 +6,7 @@
     <div class="bx-dir"><span class="bx-arrow">{{ dir_arrow }}</span>{{ direction }}</div>
     <div class="bx-prob"><b class="num">{{ hero_prob if hero_prob is not none else readout_pct }}%</b><span>{% if hero_prob_caption %}{{ hero_prob_caption }} · {% endif %}신뢰도 {{ confidence }}%</span></div>
   </div>
-  {% if todays_view and todays_view.view_title %}<h2 class="bx-head">{{ todays_view.view_title }}</h2>{% endif %}
+  {% if todays_view and todays_view.view_title %}<h1 class="bx-head">{{ todays_view.view_title }}</h1>{% endif %}
   {% if todays_view and todays_view.dek %}<p class="bx-dek">{{ todays_view.dek | safe }}</p>{% endif %}
   {% if prior_sig %}
   {# 예측 근거 신호 — 방향을 정하는 prior 입력 실측(2026-10-26). 확률이 어디서 나왔는지 보여준다. #}
