@@ -44,7 +44,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .gnb__subs .gnb__sub{font-size:13px;font-weight:700;color:#8A9099;padding:5px 4px;text-decoration:none;transition:color .12s;}.gnb__sub:hover{color:#C9CCD1;}
 .gnb__sub.on{color:#22C55E;}.gnb__sub.on:hover{color:#4ADE80;}
 .gnb__divider{width:1px;height:16px;background:#2E3035;margin:0 4px;flex-shrink:0;}
-.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;margin-left:8px;}.gnb .sbtn svg{width:13px;height:13px;}
+/* 오른쪽 끝 텔레그램 버튼 — 종목 시그널 홈(stocks-home.css)과 같은 모양. 페이지를 오갈 때 GNB가 바뀌지 않게 맞춘다 */
+.gnb__tg-btn{width:30px;height:30px;border-radius:8px;background:rgba(90,162,255,.14);color:#5AA2FF;display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
+.gnb__tg-btn:hover{background:rgba(90,162,255,.24);color:#8CBFFF;}
+.gnb__tg-btn svg{width:15px;height:15px;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
 .wrap{max-width:880px;margin:0 auto;padding:24px 28px 64px;}   /* 종목 홈(stocks-home.css)과 같은 폭 — 2026-11-12 */
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
@@ -493,7 +496,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .wrap{padding:12px 14px 52px;}
   .gnb__in{padding:0 14px;gap:12px;}
   .gnb a{font-size:12px;}
-  .gnb .sbtn{padding:6px 9px;}
   .hero h1,.phead h1{font-size:15px;}
   .strip{flex-wrap:wrap;overflow-x:visible;row-gap:6px;}
   .strip .m{flex:1 1 40%;}
@@ -750,7 +752,7 @@ body.has-incbar .wrap{padding-bottom:110px}
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="5.5 5.5 21 21" fill="none"><path d="M8.5 16.5L16 9.5l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 24L16 17l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub on" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="5.5 5.5 21 21" fill="none"><path d="M8.5 16.5L16 9.5l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 24L16 17l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub on" href="/stocks/income-designer/">월배당</a></span><span class="right"><a class="gnb__tg-btn" href="https://t.me/dos_signal" target="_blank" rel="noopener" aria-label="브리핑을 텔레그램으로 구독"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></a></span></div></div>
 <div class="wrap">
   <!-- ===== 건전성 보드(기본 화면, 2026-11-12) ===== -->
   <div id="income-board">
@@ -897,7 +899,6 @@ function toggleTheme(){
 }
 
 function go(id){ /* 종목 상세 페이지 미구현 — 추후 연결 */ }
-function openSearch(){ const el=document.getElementById('sim-search'); if(el){el.focus();el.select();window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});} }
 
 /* ── 월배당 ETF 계산기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // income_etfs.json 필드 → INCOME_UNIVERSE 형식 변환
