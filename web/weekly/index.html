@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>주간 장기 리포트 | Double-Shot</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
-<link rel="alternate" type="application/rss+xml" title="Double-Shot 브리핑" href="https://doubleshot.space/briefings/rss.xml">
+<link rel="alternate" type="application/rss+xml" title="더블샷 브리핑" href="https://doubleshot.space/briefings/rss.xml">
 
 <meta name="description" content="매주 토요일, 코스피·미국 지수의 한 주와 코스피 체크·나스닥 체크·S&P 500 200일선 같은 장기 지표가 어떻게 움직였는지 정리해요.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Double-Shot">
+<meta property="og:site_name" content="더블샷(Double-Shot)">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://doubleshot.space/weekly/">
 <meta property="og:title" content="주간 장기 리포트 — Double-Shot">
@@ -26,7 +26,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"주간 장기 리포트","item":"https://doubleshot.space/weekly/"}]}</script>
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=20261108a">
+<link rel="stylesheet" href="/assets/style.css?v=20261113">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0F172A">
@@ -107,7 +107,17 @@
   .ltp th:first-child,.ltp td:first-child{text-align:left}
   .ltp td{padding:7px 4px;border-bottom:1px solid var(--hairline);text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
   .ltp tr.hl td{background:var(--primary-bg);font-weight:700}
-  @media(max-width:560px){.ltp-plot{height:180px;padding-left:38px}.ltp-ax{width:32px}.ltp-yrs{margin-left:38px}.ltp-kpis{grid-template-columns:1fr 1fr}.ltp-ml:not(.now){display:none}}
+  /* 큰 시장 사건 — 세로 점선 + 이름표(2026-11-12, 나스닥 체크와 같은 모양). 폰은 번호만 찍고 그래프 아래 목록 */
+  .ltp-ev{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #94A3B8;opacity:.75;pointer-events:none}
+  .ltp-evl{position:absolute;bottom:4px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#475569;background:var(--canvas);border:1px solid var(--hairline);border-radius:6px;padding:1px 6px;white-space:nowrap;pointer-events:none}
+  .ltp-evl.r1{bottom:26px}
+  .ltp-evl.top{bottom:auto;top:4px}.ltp-evl.top.r1{top:26px}
+  .ltp-evl .no{display:none}
+  html.dark .ltp-evl{color:var(--muted)}
+  .ltp-evlist{display:none;margin:8px 0 0 44px;font-size:11.5px;color:var(--muted);line-height:1.7}
+  .ltp-evlist span{white-space:nowrap}
+  @media(max-width:560px){.ltp-plot{height:180px;padding-left:38px}.ltp-ax{width:32px}.ltp-yrs{margin-left:38px}.ltp-kpis{grid-template-columns:1fr 1fr}.ltp-ml:not(.now){display:none}
+    .ltp-evl{padding:0 4px}.ltp-evl.r1:not(.top){bottom:4px}.ltp-evl.top.r1{top:4px}.ltp-evl .tx{display:none}.ltp-evl .no{display:inline}.ltp-evlist{display:flex;flex-wrap:wrap;gap:0 10px;margin-left:38px}}
 </style>
 <style>
   .wki{display:block;border:1px solid var(--hairline);border-radius:12px;background:var(--canvas);padding:13px 14px;margin-top:10px;text-decoration:none}
@@ -130,7 +140,8 @@
   <div class="ltp-crumb"><span><a href="/stocks/">종목 홈</a> › 주간 장기 리포트</span></div>
   <h1 class="ltp-title">주간 장기 리포트</h1>
   <p class="ltp-lead">매주 토요일 아침, 미국 금요일 장이 끝난 뒤 한 주를 정리해요. 코스피·미국 지수가 요일마다 어떻게 움직였는지, 그리고 <b>코스피 체크·나스닥 체크·S&amp;P 500 200일선</b> 같은 장기 지표가 한 주 사이 어디로 갔는지 봐요.</p>
-  <a class="wki first" href="/weekly/2026-11-06/"><span>11월 첫째 주 · 11/2(월) ~ 11/6(금)</span><b>코스피 한 주 −11.7%, 나스닥은 200일선 아래로</b><p>코스피는 5,731에서 5,060으로 내려왔고, 5년 평균과의 거리는 70.8%에서 49.2%로 좁혀졌어요. 미국에선 나스닥이 200일선 아래로 내려왔어요. 반도체 지수는 200일선보다 13.3% 아래예요.</p></a>
+  <a class="wki first" href="/weekly/2026-11-13/"><span>11월 둘째 주 · 11/9(월) ~ 11/13(금)</span><b>코스피 한 주 +4.6%, 나스닥은 200일선 위로</b><p>코스피는 5,060에서 5,291으로 올라갔고, 5년 평균과의 거리는 49.2%에서 55.8%로 벌어졌어요. 미국에선 나스닥이 200일선 위로 올라왔어요.</p></a>
+  <a class="wki " href="/weekly/2026-11-06/"><span>11월 첫째 주 · 11/2(월) ~ 11/6(금)</span><b>코스피 한 주 −11.7%, 나스닥은 200일선 아래로</b></a>
   <a class="wki " href="/weekly/2026-10-30/"><span>10월 다섯째 주 · 10/26(월) ~ 10/30(금)</span><b>코스피 한 주 +3.3%, 반도체는 200일선 아래로</b></a>
   
   <div class="ltp-links">
@@ -150,10 +161,10 @@
     <a href="/legal/terms/">이용약관</a>
     <a href="mailto:pulum0083@gmail.com">문의</a>
   </div>
-  <div class="site-footer__base">© 2026 Double-Shot</div>
+  <div class="site-footer__base">© 2026 더블샷(Double-Shot)</div>
 </footer>
 
-<script src="/assets/main.js?v=20261108a"></script>
+<script src="/assets/main.js?v=20261113"></script>
 <script>
 window.addEventListener('load', function() {
   if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
