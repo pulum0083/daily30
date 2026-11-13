@@ -63,11 +63,11 @@ test('직전 종가(종목) — 직전 거래일의 15:30 1분봉 currentPrice�
   // 9/15 기준 직전 거래일은 9/14. 일봉은 애프터장 가격(248,500/1,683,000/367,500)을 주지만
   // 15:30 1분봉의 공식 종가(249,000/1,697,000/371,500)만 쓴다.
   const f = fake([
-    [/item\/005930\/minute\?startDateTime=202609141530&endDateTime=202609141530$/,
+    [/item\/005930\/minute\?startDateTime=202609141530&endDateTime=202609141539$/,
       [{ localDateTime: '20260914153000', currentPrice: 249000 }]],
-    [/item\/000660\/minute\?startDateTime=202609141530&endDateTime=202609141530$/,
+    [/item\/000660\/minute\?startDateTime=202609141530&endDateTime=202609141539$/,
       [{ localDateTime: '20260914153000', currentPrice: 1697000 }]],
-    [/item\/005380\/minute\?startDateTime=202609141530&endDateTime=202609141530$/,
+    [/item\/005380\/minute\?startDateTime=202609141530&endDateTime=202609141539$/,
       [{ localDateTime: '20260914153000', currentPrice: 371500 }]],
   ]);
   assert.equal(await prevClose('item', '005930', '20260915', f), 249000);
@@ -84,4 +84,14 @@ test('직전 종가(종목) — 15:30 봉이 없으면 null. 다른 시각 봉�
 test('곡선 — 09:00 기준 경과 분, 5분 샘플, 마지막 점은 항상', () => {
   const bars = [{ t: '0900', v: 100 }, { t: '0903', v: 99 }, { t: '0905', v: 98 }, { t: '0907', v: 97 }, { t: '0910', v: 96 }];
   assert.deepEqual(curve(bars, 100, '0907'), [[0, 0], [5, -2], [7, -3]]);
+});
+
+test('직전 종가(종목) — 종가 단일가가 연장된 날은 15:32 봉이 종가다(2026-11-12 HD현대중공업)', async () => {
+  let u = '';
+  const f = async (url) => { u = url; return [
+    { localDateTime: '20261112153200', currentPrice: 267500 },
+    { localDateTime: '20261112154000', currentPrice: 267000 },
+  ]; };
+  assert.equal(await prevClose('item', '329180', '20261113', f), 267500);
+  assert.match(u, /startDateTime=202611121530&endDateTime=202611121539$/);
 });

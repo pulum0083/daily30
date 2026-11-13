@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { regularFlowRow, buildCloseVs, closeCacheControl } from './_vs-close.mjs';
+import { regularFlowRow, buildCloseVs, closeCacheControl, itemFinal } from './_vs-close.mjs';
 import { round2, prevTradingDay } from './_vs-core.mjs';
 import { withFlow } from './_vs-flow-testkit.mjs';
 // 옛 표(HTML) 픽스처를 새 원천·저장본 응답으로 바꿔 조립에 먹인다(§56).
@@ -48,7 +48,7 @@ function genericJson(url) {
   let m;
   if ((m = url.match(/\/(index|item)\/([A-Za-z0-9]+)\/minute\?startDateTime=(\d{8})(\d{4})&endDateTime=(\d{8})(\d{4})/))) {
     const [, , code, sYmd, sHM, , eHM] = m;
-    if (sHM === '1530' && eHM === '1530') return minute(sYmd, '1530', baseFor(code)); // prevClose(item)
+    if (sHM === '1530' && (eHM === '1530' || eHM === '1539')) return minute(sYmd, '1530', baseFor(code)); // prevClose(item)
     const scale = 1 + (Number(sYmd.slice(6, 8)) % 5) / 100;
     return minute(sYmd, '0905', baseFor(code) * scale);
   }
@@ -259,4 +259,12 @@ test('indexFinal: 15:30 뒤 확정된 지수 종가를 15:30 봉에 얹는다', 
   assert.equal(bars[1].v, 5019.78);                       // 원본은 그대로
   assert.deepEqual(indexFinal([{ t: '1530', v: 1 }]).map((b) => b.v), [1]);   // 15:30 뒤 봉이 없으면 그대로
   assert.deepEqual(indexFinal([{ t: '1500', v: 1 }, { t: '1532', v: 2 }]).map((b) => b.v), [1]);   // 15:30 봉이 없으면 덧붙이지 않는다
+});
+
+test('종목 종가 봉 — 15:30~15:39 사이 첫 봉을 15:30 자리에 둔다(종가 단일가 연장, 2026-11-12)', () => {
+  const bars = [{ t: '1519', v: 266000 }, { t: '1532', v: 267500 }, { t: '1539', v: 1 }];
+  assert.deepEqual(itemFinal(bars).map((b) => [b.t, b.v]), [['1519', 266000], ['1530', 267500]]);
+  const normal = [{ t: '1519', v: 207000 }, { t: '1530', v: 208000 }];
+  assert.deepEqual(itemFinal(normal).map((b) => [b.t, b.v]), [['1519', 207000], ['1530', 208000]]);
+  assert.deepEqual(itemFinal([{ t: '1519', v: 1 }]).map((b) => b.t), ['1519']);   // 종가 봉이 없으면 덧붙이지 않는다
 });

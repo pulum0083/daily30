@@ -14,6 +14,9 @@
 - 일봉 시가·고가·저가도 애프터장이 섞였지만(9/14 저가 1,678,000 / 정규장 1,686,000) 이 행을 읽는 곳이 없어 고치지 않는다.
 - 토스 일봉은 과거 날짜도 공식 종가와 26~29/30일 달랐다(최대 8.27%). 거래소·세션 옵션이 없어 쓰지 않는다.
 - 공식 종가는 네이버 **15:30 1분봉** currentPrice가 준다(야후 종가와 일치). 1분봉은 최근 약 7거래일만 조회된다.
+- 종가 단일가 매매가 연장되면 종가 봉은 15:30이 아니라 15:31~15:39에 찍힌다(2026-11-12 엘앤에프·한미약품·
+  HD현대중공업 — 15:30 봉 없이 15:32 봉 하나, 값은 야후 종가와 같다). 15:40부터는 장후 시간외 종가매매라,
+  **15:30~15:39 사이 첫 봉**을 종가 봉으로 본다(`closing_bar`).
 
 그래서 9/14 이후 봉은 정규장 1분봉의 공식 종가·거래량으로 바꾸고, 그 값을 `data/kr_official_closes.json`에 쌓아
 1분봉 조회 기한이 지난 뒤에도 쓴다. 저장은 마감 잡(build_stocks_snapshot)만 한다(§18 파일 소유권).
@@ -31,11 +34,13 @@ _UA = {"User-Agent": "Mozilla/5.0"}
 DAY_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/day"
            "?startDateTime={start}&endDateTime={end}")
 MINUTE_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/minute"
-              "?startDateTime={d}0900&endDateTime={d}1530")
+              "?startDateTime={d}0900&endDateTime={d}1539")
 CLOSE_BAR_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/minute"
-                 "?startDateTime={d}1530&endDateTime={d}1530")
+                 "?startDateTime={d}1530&endDateTime={d}1539")
 REGULAR_OPEN_HHMM = "0900"
 REGULAR_CLOSE_HHMM = "1530"
+# 종가 단일가가 연장되면 종가 봉이 이 시각까지 밀린다. 15:40부터는 장후 시간외 종가매매다.
+CLOSE_BAR_LAST_HHMM = "1539"
 # KRX 애프터마켓 첫날. 이날부터 네이버 일봉 종가·거래량이 애프터장을 포함한다(9/14 20:12 실측).
 AFTERMARKET_START = "20260914"
 CACHE_PATH = Path(__file__).resolve().parents[1] / "data" / "kr_official_closes.json"
@@ -93,8 +98,17 @@ def save_cache(path=None):
     return True
 
 
+def closing_bar(bars, yyyymmdd):
+    """그날 종가 봉 — 15:30~15:39 사이 첫 봉(종가 단일가가 연장되면 15:30 봉이 없다). 없으면 None."""
+    hits = [b for b in (bars if isinstance(bars, list) else [])
+            if isinstance(b, dict) and b.get("currentPrice")
+            and str(b.get("localDateTime") or "")[:8] == yyyymmdd
+            and REGULAR_CLOSE_HHMM <= str(b.get("localDateTime"))[8:12] <= CLOSE_BAR_LAST_HHMM]
+    return min(hits, key=lambda b: str(b["localDateTime"])) if hits else None
+
+
 def regular_session(code, yyyymmdd, fetch=_get_json):
-    """그날 정규장(09:00~15:30) 1분봉 → {"close": 15:30 공식 종가, "volume": 정규장 거래량}. 종가가 없거나 실패하면 None.
+    """그날 정규장(09:00~종가 봉) 1분봉 → {"close": 공식 종가, "volume": 정규장 거래량}. 종가가 없거나 실패하면 None.
 
     1분봉의 accumulatedTradingVolume은 이름과 달리 봉 하나의 거래량이다(9/14 실측 — 합이 일봉과 맞는다).
     거래량 필드가 하나도 없으면 volume은 None이다.
@@ -104,34 +118,32 @@ def regular_session(code, yyyymmdd, fetch=_get_json):
     except Exception as e:
         print(f"[official_closes] {code} {yyyymmdd} 정규장 1분봉 조회 실패: {e}", file=sys.stderr)
         return None
-    close, volume, seen = None, 0, False
-    for b in bars if isinstance(bars, list) else []:
+    cb = closing_bar(bars, yyyymmdd)
+    if cb is None:
+        return None
+    end = str(cb["localDateTime"])[8:12]
+    volume, seen = 0, False
+    for b in bars:
         if not isinstance(b, dict):
             continue
         ts = str(b.get("localDateTime") or "")
-        if ts[:8] != yyyymmdd or not (REGULAR_OPEN_HHMM <= ts[8:12] <= REGULAR_CLOSE_HHMM):
+        if ts[:8] != yyyymmdd or not (REGULAR_OPEN_HHMM <= ts[8:12] <= end):
             continue
         if b.get("accumulatedTradingVolume") is not None:
             volume += int(b["accumulatedTradingVolume"])
             seen = True
-        if ts[8:12] == REGULAR_CLOSE_HHMM and b.get("currentPrice"):
-            close = float(b["currentPrice"])
-    if close is None:
-        return None
-    return {"close": close, "volume": volume if seen else None}
+    return {"close": float(cb["currentPrice"]), "volume": volume if seen else None}
 
 
 def regular_close(code, yyyymmdd, fetch=_get_json):
-    """그날 정규장 공식 종가(15:30 1분봉 한 개만 조회). 없거나 실패하면 None. 거래량이 필요 없을 때 쓴다."""
+    """그날 정규장 공식 종가(15:30~15:39 1분봉만 조회). 없거나 실패하면 None. 거래량이 필요 없을 때 쓴다."""
     try:
         bars = fetch(CLOSE_BAR_URL.format(code=code, d=yyyymmdd))
     except Exception as e:
         print(f"[official_closes] {code} {yyyymmdd} 15:30 1분봉 조회 실패: {e}", file=sys.stderr)
         return None
-    for b in bars if isinstance(bars, list) else []:
-        if isinstance(b, dict) and str(b.get("localDateTime")) == f"{yyyymmdd}153000" and b.get("currentPrice"):
-            return float(b["currentPrice"])
-    return None
+    cb = closing_bar(bars, yyyymmdd)
+    return float(cb["currentPrice"]) if cb else None
 
 
 def last_closed_session(now=None):

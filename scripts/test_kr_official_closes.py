@@ -217,3 +217,36 @@ def test_existing_cache_file_without_volumes_still_loads(monkeypatch, tmp_path):
     monkeypatch.setattr(koc, "_cache", None)
     monkeypatch.setattr(koc, "_vcache", None)
     assert koc.official_session("000660", "20260914", fetch=lambda url: []) == (1697000.0, None)
+
+
+# 2026-11-12 HD현대중공업 실측 — 종가 단일가가 연장돼 종가 봉이 15:30이 아니라 15:32에 찍혔다
+# (야후 329180.KS 종가 267,500과 같다). 15:30 봉만 찾던 코드는 종가를 못 찾아 그날 봉을 뺐다.
+# 15:40 봉은 장후 시간외 종가매매, 16:00 봉은 애프터장이라 거래량에 들어가면 안 된다.
+BARS_1112_EXTENDED = [
+    {"localDateTime": "20261112090000", "currentPrice": 262000.0, "accumulatedTradingVolume": 1000000},
+    {"localDateTime": "20261112151900", "currentPrice": 266000.0, "accumulatedTradingVolume": 5000},
+    {"localDateTime": "20261112153200", "currentPrice": 267500.0, "accumulatedTradingVolume": 109390},
+    {"localDateTime": "20261112154000", "currentPrice": 267500.0, "accumulatedTradingVolume": 572},
+    {"localDateTime": "20261112160000", "currentPrice": 267500.0, "accumulatedTradingVolume": 20},
+]
+
+
+def test_extended_closing_auction_bar_is_the_official_close():
+    s = koc.regular_session("329180", "20261112", fetch=lambda url: BARS_1112_EXTENDED)
+    assert s == {"close": 267500.0, "volume": 1000000 + 5000 + 109390}
+    assert koc.regular_close("329180", "20261112", fetch=lambda url: BARS_1112_EXTENDED) == 267500.0
+
+
+def test_close_window_requests_reach_past_1530():
+    seen = []
+    koc.regular_session("329180", "20261112", fetch=lambda url: seen.append(url) or [])
+    koc.regular_close("329180", "20261112", fetch=lambda url: seen.append(url) or [])
+    assert all("endDateTime=202611121539" in u for u in seen), seen
+
+
+def test_earliest_close_window_bar_wins_and_after_hours_bar_is_not_a_close():
+    bars = [{"localDateTime": "20261112153000", "currentPrice": 208000.0, "accumulatedTradingVolume": 5},
+            {"localDateTime": "20261112153300", "currentPrice": 207000.0, "accumulatedTradingVolume": 1}]
+    assert koc.regular_close("005930", "20261112", fetch=lambda url: bars) == 208000.0
+    only_after = [{"localDateTime": "20261112154000", "currentPrice": 208000.0}]
+    assert koc.regular_close("005930", "20261112", fetch=lambda url: only_after) is None

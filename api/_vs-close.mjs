@@ -4,6 +4,7 @@ import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
 import { prevTradingDay, relLabel, atOrBefore, pct, round2, judge, TH, verdict } from './_vs-core.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
 import { liveFlowAt, storedFlowAt } from './_vs-flow.mjs';
+import { CLOSE_BAR_TO, isCloseWindow } from './_kr-regular-session.mjs';
 import { heatAxis, flowAxis } from './_vs-axes.mjs';
 import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 
@@ -16,6 +17,16 @@ export function indexFinal(bars, at = CLOSE_AT) {
   const last = all.length ? all[all.length - 1] : null;
   const out = all.filter((b) => b.t <= at).map((b) => ({ ...b }));
   if (last && last.t > at && out.length && out[out.length - 1].t === at) out[out.length - 1].v = last.v;
+  return out;
+}
+
+// 종목 봉에서 15:30~15:39 사이 첫 봉(종가 단일가가 연장되면 15:30 봉이 없고 15:32 등에 찍힌다, 2026-11-12)을
+// 15:30 자리의 종가로 둔다. 그 뒤 봉(15:40 시간외 종가·애프터장)은 버린다.
+export function itemFinal(bars, at = CLOSE_AT) {
+  const all = bars || [];
+  const out = all.filter((b) => b.t < at).map((b) => ({ ...b }));
+  const close = all.find((b) => isCloseWindow(b.t));
+  if (close) out.push({ ...close, t: at });
   return out;
 }
 
@@ -75,8 +86,8 @@ export async function buildCloseVs({ now = Date.now(), fetchJson }) {
   // 지수는 15:30 봉 뒤에 최종 종가가 찍히는 날이 있다(2026-11-09 코스피 15:30 봉 5,019.78 → 15:32 봉 5,018.85 = 공식 종가).
   // 지수엔 애프터장이 없으니 15:35까지 받아 마지막 봉 값을 15:30 봉에 얹는다(indexFinal).
   const load = async (kind, code) => {
-    const to = kind === 'index' ? INDEX_FINAL_UNTIL : at;
-    const fix = kind === 'index' ? (b) => indexFinal(b, at) : (b) => b;
+    const to = kind === 'index' ? INDEX_FINAL_UNTIL : CLOSE_BAR_TO;
+    const fix = kind === 'index' ? (b) => indexFinal(b, at) : (b) => itemFinal(b, at);
     const [bT, bY, pT, pY] = await Promise.all([
       settle(minuteBars(kind, code, T, fetchJson, '0900', to).then(fix), []),
       settle(minuteBars(kind, code, Y, fetchJson, '0900', to).then(fix), []),

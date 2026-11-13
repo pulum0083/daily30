@@ -12,26 +12,39 @@ const toNum = (v) => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); 
 // 1분봉 accumulatedTradingVolume은 이름과 달리 봉 하나의 거래량이라 합이 정규장 거래량이다
 // (9/14 SK하이닉스 09:00~15:30 합 3,742,905 + 애프터장 256,370 ≈ 일봉 4,001,549).
 // 창에 더 이른 날짜의 15:30 봉이 있으면 그 종가가 전일 공식 종가(prevClose)다.
+// 종가 단일가가 연장되면 종가 봉이 15:30이 아니라 15:31~15:39에 찍힌다(2026-11-12 엘앤에프·한미약품·HD현대중공업 —
+// 15:30 봉 없이 15:32 봉 하나, 값은 야후 공식 종가와 같다). 15:40부터는 장후 시간외 종가매매라,
+// 그날 15:30~15:39 사이 첫 봉을 종가 봉으로 본다. 파이썬 kr_official_closes.closing_bar와 같은 규칙이다(§30).
+export const CLOSE_BAR_FROM = '1530';
+export const CLOSE_BAR_TO = '1539';
+export const isCloseWindow = (hm) => hm >= CLOSE_BAR_FROM && hm <= CLOSE_BAR_TO;
+
 export function regularSessionFromBars(bars) {
   const rows = (Array.isArray(bars) ? bars : [])
     .filter((b) => b && typeof b.localDateTime === 'string' && b.localDateTime.length >= 12);
-  const closeBar = [...rows].reverse().find((b) => b.localDateTime.slice(8, 12) === '1530');
-  if (!closeBar) return null;
-  const day = closeBar.localDateTime.slice(0, 8);
+  const closeBars = new Map();   // 날짜 → 그날 종가 봉(15:30~15:39 사이 첫 봉)
+  for (const b of rows) {
+    if (!isCloseWindow(b.localDateTime.slice(8, 12))) continue;
+    const d = b.localDateTime.slice(0, 8), cur = closeBars.get(d);
+    if (!cur || b.localDateTime < cur.localDateTime) closeBars.set(d, b);
+  }
+  const days = [...closeBars.keys()].sort();
+  if (!days.length) return null;
+  const day = days[days.length - 1];
+  const closeBar = closeBars.get(day);
+  const end = closeBar.localDateTime.slice(8, 12);
   const sess = rows.filter((b) => {
     const hm = b.localDateTime.slice(8, 12);
-    return b.localDateTime.slice(0, 8) === day && hm >= '0900' && hm <= '1530';
+    return b.localDateTime.slice(0, 8) === day && hm >= '0900' && hm <= end;
   });
   const highs = sess.map((b) => toNum(b.highPrice)).filter((v) => v != null);
   const lows = sess.map((b) => toNum(b.lowPrice)).filter((v) => v != null);
   const close = toNum(closeBar.currentPrice);
   if (close == null || !highs.length || !lows.length) return null;
   const vols = sess.map((b) => toNum(b.accumulatedTradingVolume)).filter((v) => v != null);
-  const closeBefore = (d) => [...rows].reverse()
-    .find((b) => b.localDateTime.slice(8, 12) === '1530' && b.localDateTime.slice(0, 8) < d);
-  const prevBar = closeBefore(day);
-  // 그 전 세션 15:30 봉 — 주도주 한 줄 목록이 '직전 세션 등락 vs 그 전 세션 등락'을 날짜와 함께 비교한다(§79).
-  const prev2Bar = prevBar ? closeBefore(prevBar.localDateTime.slice(0, 8)) : null;
+  const prevBar = days.length > 1 ? closeBars.get(days[days.length - 2]) : null;
+  // 그 전 세션 종가 봉 — 주도주 한 줄 목록이 '직전 세션 등락 vs 그 전 세션 등락'을 날짜와 함께 비교한다(§79).
+  const prev2Bar = days.length > 2 ? closeBars.get(days[days.length - 3]) : null;
   return {
     date: day, close, open: toNum(sess[0].openPrice), high: Math.max(...highs), low: Math.min(...lows),
     volume: vols.length ? vols.reduce((a, v) => a + v, 0) : null,
@@ -49,7 +62,7 @@ export async function fetchClosedSession(code, now = new Date()) {
   try {
     const start = ymd(new Date(now.getTime() - 7 * 86400000));   // 주말·연휴를 넘겨 직전 거래일까지
     const r = await fetch(
-      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${start}0900&endDateTime=${ymd(now)}1530`,
+      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${start}0900&endDateTime=${ymd(now)}${CLOSE_BAR_TO}`,
       { headers: HDR, signal: AbortSignal.timeout(6000) },
     );
     if (!r.ok) return null;
@@ -99,7 +112,7 @@ export async function fetchLastRegularSession(code, now = new Date()) {
   if (sessionCache.has(code)) return sessionCache.get(code);
   try {
     const r = await fetch(
-      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${prev}1530&endDateTime=${session}1530`,
+      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${prev}1530&endDateTime=${session}${CLOSE_BAR_TO}`,
       { headers: HDR, signal: AbortSignal.timeout(6000) },
     );
     if (!r.ok) return null;

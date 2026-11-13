@@ -38,7 +38,7 @@ function genericJson(url) {
   let m;
   if ((m = url.match(/\/(index|item)\/([A-Za-z0-9]+)\/minute\?startDateTime=(\d{8})(\d{4})&endDateTime=(\d{8})(\d{4})/))) {
     const [, , code, sYmd, sHM, , eHM] = m;
-    if (sHM === '1530' && eHM === '1530') return minute(sYmd, '1530', baseFor(code)); // prevClose(item)
+    if (sHM === '1530' && (eHM === '1530' || eHM === '1539')) return minute(sYmd, '1530', baseFor(code)); // prevClose(item)
     const scale = 1 + (Number(sYmd.slice(6, 8)) % 5) / 100;                           // 일자별로 값이 갈리게
     return minute(sYmd, '0905', baseFor(code) * scale);
   }

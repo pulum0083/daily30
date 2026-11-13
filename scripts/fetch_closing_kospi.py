@@ -47,7 +47,7 @@ STOCKS_UP_URL = f"{M_API}/stocks/up/KOSPI?page=1&pageSize=60"
 QUANT_TOP_URL = f"{M_API}/stocks/quantTop/KOSPI?page=1&pageSize=100"
 STOCK_TREND_URL = M_API + "/stock/{code}/trend?pageSize=20"
 MINUTE_RANGE_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/minute"
-                    "?startDateTime={start}0900&endDateTime={end}1530")
+                    "?startDateTime={start}0900&endDateTime={end}1539")
 
 # 원천 구조가 바뀌어 목록 자체를 못 읽은 수집기 — fetch_closing_data가 모아 관리자에게 알린다.
 _source_failures: list[str] = []
@@ -620,7 +620,7 @@ def regular_session_rows(code: str, rows: list[dict], fetch=_get_json) -> list[d
     by_date: dict[str, list] = {}
     for b in bars if isinstance(bars, list) else []:
         ts = str(b.get("localDateTime", "")) if isinstance(b, dict) else ""
-        if len(ts) >= 12 and "0900" <= ts[8:12] <= "1530":
+        if len(ts) >= 12 and "0900" <= ts[8:12] <= "1539":   # 종가 단일가 연장 봉까지(§48)
             by_date.setdefault(ts[:8], []).append(b)
 
     def served(url):  # kr_official_closes가 부르는 15:30 1분봉 조회를 이미 받은 봉으로 대신한다
