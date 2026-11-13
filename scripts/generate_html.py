@@ -2926,10 +2926,52 @@ def write_stocks_recent_briefings(n: int = 6) -> bool:
     return True
 
 
+# 브리핑 검색 색인 기간(2026-11-13 결정) — 애드센스 '가치가 별로 없는 콘텐츠' 거절(§80) 뒤, 매일 같은 틀의
+# 짧은 자동 생성 페이지가 사이트의 90%를 차지했다. 발행일에서 30일이 지난 브리핑은 noindex로 돌리고
+# sitemap에서도 뺀다. 페이지는 지우지 않는다(§33) — 아카이브·링크로는 계속 열린다.
+BRIEFING_INDEX_DAYS = 30
+ROBOTS_INDEX = '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">'
+ROBOTS_NOINDEX = '<meta name="robots" content="noindex, follow">'
+_ROBOTS_RE = re.compile(r'<meta name="robots" content="[^"]*">')
+
+
+def briefing_indexed(d: str, today: str) -> bool:
+    """발행일 d가 오늘에서 30일 이내면 색인한다."""
+    try:
+        return (date.fromisoformat(today) - date.fromisoformat(d)).days <= BRIEFING_INDEX_DAYS
+    except ValueError:
+        return True
+
+
+def apply_briefing_robots(today: str = None) -> int:
+    """발행된 브리핑의 robots 메타를 색인 기간에 맞춘다. <head>의 그 한 줄만 바꾼다(본문은 그대로, §33·§71).
+    sitemap과 같은 자리(write_sitemap_xml)에서 돌아 두 판정이 어긋나지 않는다. 바꾼 페이지 수를 돌려준다."""
+    today = today or datetime.now(KST).strftime("%Y-%m-%d")
+    changed = 0
+    for page in sorted(BRIEFINGS_DIR.glob("????-??-??/*/index.html")):
+        want = ROBOTS_INDEX if briefing_indexed(page.parent.parent.name, today) else ROBOTS_NOINDEX
+        html = page.read_text(encoding="utf-8")
+        m = _ROBOTS_RE.search(html)
+        if m:
+            if m.group(0) == want:
+                continue
+            new = html[:m.start()] + want + html[m.end():]
+        elif "<head>" in html:
+            new = html.replace("<head>", "<head>\n" + want, 1)   # 7월 초 발행본엔 robots 메타가 없다
+        else:
+            continue
+        page.write_text(new, encoding="utf-8")
+        changed += 1
+    if changed:
+        print(f"[generate_html] 브리핑 robots 갱신 {changed}편 (색인 기간 {BRIEFING_INDEX_DAYS}일)")
+    return changed
+
+
 def write_sitemap_xml():
     """web/sitemap.xml 을 생성한다. generate_html 실행마다 자동 갱신."""
     BASE = "https://doubleshot.space"
     today = datetime.now(KST).strftime("%Y-%m-%d")
+    apply_briefing_robots(today)
 
     # ⚠️ `/` 는 vercel.json에서 `/stocks/`로 301 리다이렉트된다 — sitemap에 넣으면
     #    "리디렉션이 있는 페이지"로 색인에서 제외되고 신호만 흐려진다. 도착지를 직접 등재한다.
@@ -2962,6 +3004,8 @@ def write_sitemap_xml():
 
     type_order = ["kospi", "close", "us"]
     for d in ready_dates:
+        if not briefing_indexed(d, today):     # 30일 지난 브리핑은 noindex — sitemap에도 넣지 않는다
+            continue
         for btype in type_order:
             page = BRIEFINGS_DIR / d / btype / "index.html"
             if page.exists():
