@@ -26,6 +26,8 @@ html.dark{--canvas:#1C1D1F;--soft:#242628;--inset:#2A2B2D;--hair:#3C3E40;--ink:#
   --primary:#3B8BFF;--primary-bg:rgba(59,139,255,.12);--up-bg:rgba(224,49,49,.14);--dn:#4A8FF5;--dn-bg:rgba(39,117,237,.14);
   --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);--s1:0 1px 4px rgba(0,0,0,.35);}
 *{box-sizing:border-box;}html,body{margin:0;}
+/* 데이터가 오기 전엔 페이지가 짧아 스크롤바가 없다가 목록이 그려지면 생겨 GNB가 7.5px 옆으로 밀렸다 — 스크롤바 자리를 처음부터 비워 둔다 */
+html{scrollbar-gutter:stable;}
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
 .num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}a{cursor:pointer;}
 
