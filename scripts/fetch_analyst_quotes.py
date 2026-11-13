@@ -142,7 +142,9 @@ def fetch_analyst_quotes() -> list:
     except ImportError:
         raise RuntimeError("google-genai not installed. Run: pip install google-genai")
 
-    client = genai.Client(api_key=get_gemini_api_key())
+    # google_search는 v1beta만 받는다 — google-genai 3.0부터 기본값이 v1이라 명시한다(2026-11-13)
+    client = genai.Client(api_key=get_gemini_api_key(),
+                          http_options=types.HttpOptions(api_version="v1beta"))
     now_kst = datetime.now(KST)
     prompt = build_prompt(now_kst)
 

@@ -1439,7 +1439,9 @@ def fetch_and_summarize_rss(briefing_type: str) -> dict:
 
     from google import genai
     from google.genai import types
-    client = genai.Client(api_key=get_gemini_api_key())
+    # google_search는 v1beta만 받는다 — google-genai 3.0부터 기본값이 v1이라 명시한다(2026-11-13)
+    client = genai.Client(api_key=get_gemini_api_key(),
+                          http_options=types.HttpOptions(api_version="v1beta"))
     prompt = _RSS_SELECT_PROMPT.format(today=today, max_n=RSS_SELECT_MAX, articles=_articles_prompt_block(articles))
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite", contents=prompt,
@@ -1587,7 +1589,9 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     except ImportError:
         raise RuntimeError("google-genai not installed. Run: pip install google-genai")
 
-    client = genai.Client(api_key=get_gemini_api_key())
+    # google_search는 v1beta만 받는다 — google-genai 3.0부터 기본값이 v1이라 명시한다(2026-11-13)
+    client = genai.Client(api_key=get_gemini_api_key(),
+                          http_options=types.HttpOptions(api_version="v1beta"))
     today_date = datetime.now(KST).date()
     today = today_date.strftime("%Y-%m-%d")
     # 코스피 아침 브리핑만 세션 창을 계산해 주입 (다른 타입은 키를 무시한다)
