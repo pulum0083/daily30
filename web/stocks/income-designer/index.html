@@ -614,6 +614,10 @@ html.dark #income-board .bk-t{color:var(--ink)}
 #income-board .trk .dist{background:var(--dist)}#income-board .trk .pu{background:var(--upb)}
 #income-board .trk .pd{background:repeating-linear-gradient(135deg,var(--dnb) 0 4px,#9DBEF5 4px 8px)}
 #income-board .trk .end{position:absolute;top:0;width:2px;height:22px;background:var(--ink)}
+#income-board .trk .ptip{top:2px}
+#income-board .ptip .ln{display:flex;align-items:center;gap:6px;color:#B8C0CC}#income-board .ptip .ln.hv{color:#fff;font-weight:700}
+#income-board .ptip .ln i{width:9px;height:9px;border-radius:2px;flex:none}
+#income-board .ptip .ln em{font-style:normal;margin-left:auto;padding-left:12px}
 #income-board .up{color:var(--up)}#income-board .dn{color:var(--dn)}#income-board .mu{color:var(--faint)}
 #income-board .fd{display:none;padding:6px 16px 18px;border-bottom:1px solid var(--line);background:var(--soft)}#income-board .fd.on{display:block}
 #income-board .fv{font-size:14px;font-weight:600;line-height:1.6;color:var(--ink);margin:4px 0 12px}#income-board .fv b{font-weight:800}
@@ -1323,7 +1327,7 @@ function boardRender(){
     else segs+=`<div class="s pd" style="left:${X(e.r)}%;width:${(X(dist)-X(e.r)).toFixed(2)}%"></div>`;
     return `<div class="fr" data-bi="${i}" title="눌러서 자세히 보기"><div class="nm"><b>${besc(e.name)}</b><div class="tags"><span class="hbdg fhm ${e.h}">${BHL[e.h]}</span><span class="tag">${e.mk==='KR'?'국내':'미국'}</span><span class="tag">3개월 ${bfmt(e.p3m,0)}</span></div></div>
       <div class="yl">${e.y.toFixed(1)}%<span>분배율</span></div><span class="hbdg fh ${e.h}">${BHL[e.h]}</span>
-      <div class="trk"><div class="z" style="left:${X(0)}%"></div>${segs}<div class="end" style="left:calc(${X(e.r)}% - 1px)"></div></div>
+      <div class="trk" title="" data-bt="${i}"><div class="z" style="left:${X(0)}%"></div>${segs}<div class="end" style="left:calc(${X(e.r)}% - 1px)"></div><div class="ptip"></div></div>
       <div class="tot"><b class="${bcls(e.r)}">${bfmt(e.r)}</b><span>가격 ${bfmt(e.p,0)}</span></div>
       ${UNIV[e.code]?(on=>`<button type="button" class="badd${on?' on':''}" data-badd="${e.code}">${on?'✓ 담김':'+ 담기'}</button>`)(!simIsSample&&simHoldings.some(h=>h.code===e.code)):'<span></span>'}
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="fd" id="bfd${i}"></div>`}).join('');
@@ -1380,6 +1384,16 @@ document.addEventListener('mousemove',ev=>{
     gl.style.left=x+'%';gl.style.display='block';gd.style.left=x+'%';gd.style.top=y+'%';gd.style.display='block';
     tp.innerHTML=`<b>${yy}.${+mm}.${+dd}</b> · ${bmoney(e,s[i])}<br><span class="g">1년 전보다</span> <b class="${ch>=0?'u':'d'}">${bfmt(ch)}</b>`;
     tp.style.left=Math.max(18,Math.min(82,x))+'%';tp.style.top=y+'%';tp.style.display='block'}
+  // 받은 돈 vs 깎인 돈 막대 — 세 값(받은 분배금·가격 변화·1년 총수익)을 함께 보이고, 마우스가 올라간 칸을 진하게
+  const tk=ev.target.closest&&ev.target.closest('#income-board .trk');
+  document.querySelectorAll('#income-board .trk .ptip').forEach(t=>{if(!tk||t.parentNode!==tk)t.style.display='none'});
+  if(tk){const e=BOARD[+tk.dataset.bt],tp=tk.querySelector('.ptip'),seg=ev.target.closest('.s,.end'),bx=tk.getBoundingClientRect();
+    const on=k=>seg&&seg.classList.contains(k)?' hv':'';
+    const ln=(cls,bg,lab,v)=>`<div class="ln${cls}"><i style="background:${bg}"></i>${lab}<em>${bfmt(v)}</em></div>`;
+    tp.innerHTML=ln(on('dist'),'var(--dist)','받은 분배금',distOf(e))
+      +(e.p>=0?ln(on('pu'),'var(--upb)','가격 상승',e.p):ln(on('pd'),'repeating-linear-gradient(135deg,var(--dnb) 0 3px,#9DBEF5 3px 6px)','가격 하락',e.p))
+      +ln(on('end'),'#fff','1년 총수익',e.r);
+    tp.style.left=Math.max(22,Math.min(78,(ev.clientX-bx.left)/bx.width*100))+'%';tp.style.display='block'}
   const c=ev.target.closest&&ev.target.closest('#income-board .dbar > div[data-m]');
   document.querySelectorAll('#income-board .dbar').forEach(b=>{if(!c||c.parentNode!==b){b.querySelector('.ptip').style.display='none';b.querySelectorAll('.hv').forEach(h=>h.classList.remove('hv'))}});
   if(c){const bar=c.parentNode,e=BOARD.find(x=>x.code===bar.dataset.bc),m=e.dm[+c.dataset.m],[yy,mo]=m.m.split('-');
