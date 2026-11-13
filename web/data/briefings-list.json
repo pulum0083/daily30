@@ -11,8 +11,13 @@
         "time": "07:28"
       },
       "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
+        "state": "ready",
+        "url": "/briefings/2026-11-13/close/",
+        "headline": "반도체는 울고 금융은 웃었다, 코스피 5290선 후퇴",
+        "title": "5,290.53",
+        "price": "5,290.53",
+        "time": "",
+        "chg": -0.98
       },
       "us": {
         "state": "pending",
@@ -24,6 +29,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-12/kospi/",
         "headline": "VIX 급락이 위험자산 선호를 뒷받침해요.",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -42,6 +48,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-12/us/",
         "headline": "코어위브가 쏜 축포, 엔비디아만 비껴 맞았다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
