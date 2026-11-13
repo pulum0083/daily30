@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-11-13T12:31:32.690978+09:00",
+  "generated_at": "2026-11-13T13:01:19.734537+09:00",
   "date": "2026-11-13",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 0.12,
-      "surge": 0.35,
+      "changePct": -0.96,
+      "surge": 0.39,
       "events": [
         {
           "time": "10:08",
           "headline": "“삼성전자가 인수한다” 소식에…美 냉각업체 주가 28% ‘불기둥’",
           "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE55cUE0WC1VZlVGY01xZjJzZUlkcVY0Q0otMmpUeDNuVE5DMDZWeEFVSklDSGVtNDJSRGFDeWkwajhMY3k5bE9KLXpMMXh1SUs2dHRJR2MwcWdhaFk?oc=5",
           "source": "에너지경제신문",
-          "why": "삼성전자가 미국 냉각업체를 인수한다는 소식에 해당 업체 주가가 28% 급등했다. (개별 인과 단정 안 함)",
+          "why": "삼성전자의 미국 냉각업체 인수 소식에 해당 업체 주가가 28% 급등했다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
@@ -31,44 +31,35 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -0.88,
-      "surge": 0.4,
+      "changePct": -2.63,
+      "surge": 0.46,
       "events": [
         {
-          "time": "09:19",
-          "headline": "삼성전자·SK하이닉스 동반 강세…엔비디아 급락에도 상승",
-          "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBiVDE5OHRsWGMzclc0UjdTMkMwdUtxTl8xZ0hDM0Fndi1HSEgxb25VYjNlSUtTY1E1V3pfekpFbnl1elRSXzFRcjRraVg4Nmc1dHZRRWNlMFBNNGs?oc=5",
-          "source": "에너지경제신문",
-          "why": "엔비디아 주가 급락에도 불구하고 삼성전자와 SK하이닉스가 동반 강세를 보였다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
+          "time": "11:21",
+          "headline": "엔비디아 주가 하락 \"시작에 불과\" 관측 나와, 삼성전자 SK하이닉스에 영향은 미지수",
+          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE4yQkxlVk5TQkJCM1hWN3pCQW9CMnZfQUI1SXRYeEJ2d0llVlVmZlY1UklJOEFGZU9vRVlwUUZfNkdrOGg3U0J3UkF0aFdUaTB2bmg2Z3J6UHc2c2RTbW00enJVZDBBTk96UGdqN3NFSTg3NTQ?oc=5",
+          "source": "비즈니스포스트",
+          "why": "엔비디아 주가 하락 \"시작에 불과\" 관측 나와, 삼성전자 SK하이닉스에 영향은 미지수",
+          "tier": "why",
+          "sentiment": "neg"
         },
         {
-          "time": "04:40",
-          "headline": "\"반토막 난 삼성전자, 3개월 내 반등 확률 97%\"…'역대급' 분석 나온 결정적 이유",
-          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE0zTWl5MWExUTNRZUdtUVFlbmRjY09LR0hoZEd5NEJWWEtUdU1URFJIMC1YaEhZamxjSjI3QURKY1hMLXc5bzJHSjlhWlh6aUV1aHRjU0Y3SEZQdw?oc=5",
-          "source": "파이낸셜뉴스",
-          "why": "\"반토막 난 삼성전자, 3개월 내 반등 확률 97%\"…'역대급' 분석 나온 결정적 이유 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
+          "time": "07:39",
+          "headline": "삼성전자ㆍSK하이닉스 주가 뒷걸음⋯코스닥도 약세",
+          "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFBWdl81eDFzNkF6VEVvVGdNTVVfbUxENnFsTFFEeldFMTR1WHFlSTBINHpSZVdsbG9MSENkbzRpdkhNMlhJaGUxVTlNblU4bXVOQzZvSw?oc=5",
+          "source": "이투데이",
+          "why": "삼성전자ㆍSK하이닉스 주가 뒷걸음⋯코스닥도 약세",
+          "tier": "why",
+          "sentiment": "neg"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 2.35,
-      "surge": 0.59,
+      "changePct": 1.5,
+      "surge": 0.62,
       "events": [
-        {
-          "time": "10:01",
-          "headline": "현대차 주가, 11월 13일 장중 276,000원 3.56% 상승",
-          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5xMlI1TzZUdlFHT3YyLU1xVDYyZms1d2Q0VzFrTXhPakRWYi1HcUpndlFfSUZHS0VnNDdCY0RyVGJvVExNaEtOaGJuOGFUSlphbVhLOXRuSlVjOVo0LVFmV3dzbG5vT3gwN2RqVnhsTXJNZw?oc=5",
-          "source": "중앙이코노미뉴스",
-          "why": "현대차 주가, 11월 13일 장중 276,000원 3.56% 상승",
-          "tier": "why",
-          "sentiment": "pos"
-        },
         {
           "time": "06:03",
           "headline": "한국 간판주 버리는 외국인… 현대차 26년·삼전 17년 만의 ‘지분 최저치’",
@@ -77,6 +68,15 @@
           "why": "외국인 투자자들이 현대차 지분을 26년 만에 최저치로 줄였다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neg"
+        },
+        {
+          "time": "09:19",
+          "headline": "하나證 “현대차, 2027년 판매 회복·2028년 로보틱스 양산…기업가치 재평가 기대”",
+          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNd3JkN0VxWERteFZqeHd3WVlWc015RWF1UE1kcHVzOTFNM3k4RzNkMVlBZklMc2Jjd1ozUy1jRy02TUR5QTkyR2dURVcwaDl6cTFxd29uTVFtU0NxNVFEOVpYSzdlWjd2cTlMSW1nazFXMm5oZUJGZFk2NGRlYjc1RXdaVWVMMU9t0gGcAUFVX3lxTE5MSC12RWVFckdYcDRTME4yWmMzMFRseFRBUG01X3BRcnZuRTNaQTRiLWFNbVNPVWV5Y0pobllWTkJONjVGcHpVenlDeTFnakE5c2szU2J3TGJ5TjktMkJzVk5zQVR3a095Q3YxNGl6Z0F6UjUxbDdsSEtPTmpudFE1Sm9xWUgzQzQ5MUNzWEhDdFJZMXpZR2hTOTF5Ug?oc=5",
+          "source": "Chosunbiz",
+          "why": "하나證 “현대차, 2027년 판매 회복·2028년 로보틱스 양산…기업가치 재평가 기대” (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     }
