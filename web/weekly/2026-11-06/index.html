@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>주간 장기 리포트 11월 첫째 주 — 코스피 한 주 −11.7%, 나스닥은 200일선 아래로 | Double-Shot</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
-<link rel="alternate" type="application/rss+xml" title="Double-Shot 브리핑" href="https://doubleshot.space/briefings/rss.xml">
+<link rel="alternate" type="application/rss+xml" title="더블샷 브리핑" href="https://doubleshot.space/briefings/rss.xml">
 
 <meta name="description" content="코스피는 5,731에서 5,060으로 내려왔고, 5년 평균과의 거리는 70.8%에서 49.2%로 좁혀졌어요. 미국에선 나스닥이 200일선 아래로 내려왔어요. 반도체 지수는 200일선보다 13.3% 아래예요.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Double-Shot">
+<meta property="og:site_name" content="더블샷(Double-Shot)">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://doubleshot.space/weekly/2026-11-06/">
 <meta property="og:title" content="코스피 한 주 −11.7%, 나스닥은 200일선 아래로 — 주간 장기 리포트">
@@ -26,7 +26,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"주간 장기 리포트","item":"https://doubleshot.space/weekly/"},{"@type":"ListItem","position":3,"name":"11월 첫째 주","item":"https://doubleshot.space/weekly/2026-11-06/"}]}</script>
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=20261108a">
+<link rel="stylesheet" href="/assets/style.css?v=20261113">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0F172A">
@@ -107,7 +107,17 @@
   .ltp th:first-child,.ltp td:first-child{text-align:left}
   .ltp td{padding:7px 4px;border-bottom:1px solid var(--hairline);text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
   .ltp tr.hl td{background:var(--primary-bg);font-weight:700}
-  @media(max-width:560px){.ltp-plot{height:180px;padding-left:38px}.ltp-ax{width:32px}.ltp-yrs{margin-left:38px}.ltp-kpis{grid-template-columns:1fr 1fr}.ltp-ml:not(.now){display:none}}
+  /* 큰 시장 사건 — 세로 점선 + 이름표(2026-11-12, 나스닥 체크와 같은 모양). 폰은 번호만 찍고 그래프 아래 목록 */
+  .ltp-ev{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #94A3B8;opacity:.75;pointer-events:none}
+  .ltp-evl{position:absolute;bottom:4px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#475569;background:var(--canvas);border:1px solid var(--hairline);border-radius:6px;padding:1px 6px;white-space:nowrap;pointer-events:none}
+  .ltp-evl.r1{bottom:26px}
+  .ltp-evl.top{bottom:auto;top:4px}.ltp-evl.top.r1{top:26px}
+  .ltp-evl .no{display:none}
+  html.dark .ltp-evl{color:var(--muted)}
+  .ltp-evlist{display:none;margin:8px 0 0 44px;font-size:11.5px;color:var(--muted);line-height:1.7}
+  .ltp-evlist span{white-space:nowrap}
+  @media(max-width:560px){.ltp-plot{height:180px;padding-left:38px}.ltp-ax{width:32px}.ltp-yrs{margin-left:38px}.ltp-kpis{grid-template-columns:1fr 1fr}.ltp-ml:not(.now){display:none}
+    .ltp-evl{padding:0 4px}.ltp-evl.r1:not(.top){bottom:4px}.ltp-evl.top.r1{top:4px}.ltp-evl .tx{display:none}.ltp-evl .no{display:inline}.ltp-evlist{display:flex;flex-wrap:wrap;gap:0 10px;margin-left:38px}}
 </style>
 <style>
   .wkp-head{border:1px solid var(--hairline);border-radius:14px;background:var(--canvas);padding:16px}
@@ -139,13 +149,13 @@
   .wf .nm small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
   .wf .tot{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
   .wf .tot small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
-  .stp{position:relative;height:64px;display:flex;gap:4px}
+  .stp{position:relative;height:112px;margin:16px 0;display:flex;gap:4px}
   .stp::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed var(--muted);opacity:.7}
   .stp div{flex:1;position:relative}
-  .stp i{position:absolute;left:3px;right:3px;border-radius:3px}
+  .stp i{position:absolute;left:50%;width:clamp(14px,30%,26px);transform:translateX(-50%);border-radius:2px;z-index:1}
   .stp i.u{background:#E86464}.stp i.d{background:#5D97F1}
   .stp em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
-  .stp u{position:absolute;left:0;right:-4px;border-top:1px solid var(--hairline)}
+  .stp u{position:absolute;left:50%;right:calc(-50% - 4px);border-top:1px solid var(--hairline);z-index:0}
   .stp .off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
   .dayax{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;margin-top:2px}
   .dayax .ds{display:flex;gap:4px}
@@ -206,16 +216,16 @@
 
     <div class="uwk-h">미국 지수<span>점선 = 지난주 금요일 종가 · 막대 위·아래 숫자 = 그날 등락</span></div>
     <div class="wf"><div class="nm">반도체(SOX)<small>10,688.80 → 9,390.25</small></div>
-      <div class="stp" style="--z:25.00%"><div><i class="d" style="top:25.00%;height:14.05%"></i><em class="dn" style="top:calc(39.05% + 1px)">−3.4</em><u style="top:39.05%"></u></div><div><i class="u" style="top:28.45%;height:10.61%"></i><em class="up" style="top:calc(28.45% - 13px)">+2.6</em><u style="top:28.45%"></u></div><div><i class="d" style="top:28.45%;height:12.93%"></i><em class="dn" style="top:calc(41.38% + 1px)">−3.1</em><u style="top:41.38%"></u></div><div><i class="d" style="top:41.38%;height:49.02%"></i><em class="dn" style="top:calc(90.40% + 1px)">−12.2</em><u style="top:90.40%"></u></div><div><i class="u" style="top:75.62%;height:14.78%"></i><em class="up" style="top:calc(75.62% - 13px)">+4.2</em></div></div>
+      <div class="stp" style="--z:9.68%"><div><i class="d" style="top:9.68%;height:17.33%"></i><em class="dn" style="top:calc(27.01% + 1px)">−3.4</em><u style="top:27.01%"></u></div><div><i class="u" style="top:13.93%;height:13.08%"></i><em class="up" style="top:calc(13.93% - 13px)">+2.6</em><u style="top:13.93%"></u></div><div><i class="d" style="top:13.93%;height:15.95%"></i><em class="dn" style="top:calc(29.87% + 1px)">−3.1</em><u style="top:29.87%"></u></div><div><i class="d" style="top:29.87%;height:60.45%"></i><em class="dn" style="top:calc(90.32% + 1px)">−12.2</em><u style="top:90.32%"></u></div><div><i class="u" style="top:72.10%;height:18.22%"></i><em class="up" style="top:calc(72.10% - 13px)">+4.2</em></div></div>
       <div class="tot dn">−12.15%<small>한 주</small></div></div>
     <div class="wf"><div class="nm">나스닥<small>25,437.00 → 24,579.43</small></div>
-      <div class="stp" style="--z:25.00%"><div><i class="d" style="top:25.00%;height:4.47%"></i><em class="dn" style="top:calc(29.47% + 1px)">−1.1</em><u style="top:29.47%"></u></div><div><i class="u" style="top:26.06%;height:3.40%"></i><em class="up" style="top:calc(26.06% - 13px)">+0.8</em><u style="top:26.06%"></u></div><div><i class="u" style="top:20.09%;height:5.97%"></i><em class="up" style="top:calc(20.09% - 13px)">+1.4</em><u style="top:20.09%"></u></div><div><i class="d" style="top:20.09%;height:23.28%"></i><em class="dn" style="top:calc(43.38% + 1px)">−5.5</em><u style="top:43.38%"></u></div><div><i class="u" style="top:39.05%;height:4.33%"></i><em class="up" style="top:calc(39.05% - 13px)">+1.1</em></div></div>
+      <div class="stp" style="--z:26.67%"><div><i class="d" style="top:26.67%;height:15.47%"></i><em class="dn" style="top:calc(42.14% + 1px)">−1.1</em><u style="top:42.14%"></u></div><div><i class="u" style="top:30.36%;height:11.78%"></i><em class="up" style="top:calc(30.36% - 13px)">+0.8</em><u style="top:30.36%"></u></div><div><i class="u" style="top:9.68%;height:20.68%"></i><em class="up" style="top:calc(9.68% - 13px)">+1.4</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:80.65%"></i><em class="dn" style="top:calc(90.32% + 1px)">−5.5</em><u style="top:90.32%"></u></div><div><i class="u" style="top:75.32%;height:15.00%"></i><em class="up" style="top:calc(75.32% - 13px)">+1.1</em></div></div>
       <div class="tot dn">−3.37%<small>한 주</small></div></div>
     <div class="wf"><div class="nm">S&P 500<small>7,580.07 → 7,376.86</small></div>
-      <div class="stp" style="--z:25.00%"><div><i class="d" style="top:25.00%;height:2.13%"></i><em class="dn" style="top:calc(27.13% + 1px)">−0.5</em><u style="top:27.13%"></u></div><div><i class="u" style="top:25.61%;height:1.51%"></i><em class="up" style="top:calc(25.61% - 13px)">+0.4</em><u style="top:25.61%"></u></div><div><i class="u" style="top:19.03%;height:6.58%"></i><em class="up" style="top:calc(19.03% - 13px)">+1.6</em><u style="top:19.03%"></u></div><div><i class="d" style="top:19.03%;height:18.41%"></i><em class="dn" style="top:calc(37.44% + 1px)">−4.4</em><u style="top:37.44%"></u></div><div><i class="u" style="top:36.17%;height:1.27%"></i><em class="up" style="top:calc(36.17% - 13px)">+0.3</em></div></div>
+      <div class="stp" style="--z:35.82%"><div><i class="d" style="top:35.82%;height:9.31%"></i><em class="dn" style="top:calc(45.13% + 1px)">−0.5</em><u style="top:45.13%"></u></div><div><i class="u" style="top:38.50%;height:6.63%"></i><em class="up" style="top:calc(38.50% - 13px)">+0.4</em><u style="top:38.50%"></u></div><div><i class="u" style="top:9.68%;height:28.83%"></i><em class="up" style="top:calc(9.68% - 13px)">+1.6</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:80.65%"></i><em class="dn" style="top:calc(90.32% + 1px)">−4.4</em><u style="top:90.32%"></u></div><div><i class="u" style="top:84.75%;height:5.57%"></i><em class="up" style="top:calc(84.75% - 13px)">+0.3</em></div></div>
       <div class="tot dn">−2.68%<small>한 주</small></div></div>
     <div class="wf"><div class="nm">다우<small>51,770.31 → 51,285.73</small></div>
-      <div class="stp" style="--z:25.00%"><div><i class="u" style="top:23.28%;height:1.72%"></i><em class="up" style="top:calc(23.28% - 13px)">+0.4</em><u style="top:23.28%"></u></div><div><i class="d" style="top:23.28%;height:1.59%"></i><em class="dn" style="top:calc(24.87% + 1px)">−0.4</em><u style="top:24.87%"></u></div><div><i class="u" style="top:12.24%;height:12.63%"></i><em class="up" style="top:calc(12.24% - 13px)">+3.0</em><u style="top:12.24%"></u></div><div><i class="d" style="top:12.24%;height:14.75%"></i><em class="dn" style="top:calc(26.99% + 1px)">−3.4</em><u style="top:26.99%"></u></div><div><i class="d" style="top:26.99%;height:1.91%"></i><em class="dn" style="top:calc(28.90% + 1px)">−0.5</em></div></div>
+      <div class="stp" style="--z:71.45%"><div><i class="u" style="top:63.12%;height:8.32%"></i><em class="up" style="top:calc(63.12% - 13px)">+0.4</em><u style="top:63.12%"></u></div><div><i class="d" style="top:63.12%;height:7.68%"></i><em class="dn" style="top:calc(70.81% + 1px)">−0.4</em><u style="top:70.81%"></u></div><div><i class="u" style="top:9.68%;height:61.13%"></i><em class="up" style="top:calc(9.68% - 13px)">+3.0</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:71.40%"></i><em class="dn" style="top:calc(81.08% + 1px)">−3.4</em><u style="top:81.08%"></u></div><div><i class="d" style="top:81.08%;height:9.24%"></i><em class="dn" style="top:calc(90.32% + 1px)">−0.5</em></div></div>
       <div class="tot dn">−0.94%<small>한 주</small></div></div>
     
     <div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div>
@@ -282,10 +292,10 @@
     <a href="/legal/terms/">이용약관</a>
     <a href="mailto:pulum0083@gmail.com">문의</a>
   </div>
-  <div class="site-footer__base">© 2026 Double-Shot</div>
+  <div class="site-footer__base">© 2026 더블샷(Double-Shot)</div>
 </footer>
 
-<script src="/assets/main.js?v=20261108a"></script>
+<script src="/assets/main.js?v=20261113"></script>
 <script>
 window.addEventListener('load', function() {
   if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();

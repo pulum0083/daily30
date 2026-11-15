@@ -346,17 +346,24 @@ def _weekly_rows(idx: dict, monday: str) -> tuple:
             continue
         base = s[0][1]
         cells = [None] * 5
+        row_cums = [0.0]
         prev = base
         for d, c in s[1:]:
             k = (date.fromisoformat(d) - date.fromisoformat(monday)).days
             if 0 <= k < 5:
                 cells[k] = {"d": d, "pct": (c / prev - 1) * 100, "a": (prev / base - 1) * 100, "b": (c / base - 1) * 100}
                 cums.append(cells[k]["b"])
+                row_cums.append(cells[k]["b"])
             prev = c
-        rows.append({"name": name, "key": key, "from": s[0][1], "to": s[-1][1], "wk": (s[-1][1] / base - 1) * 100, "cells": cells})
+        # 줄마다 그 지수의 최저·최고(지난주 종가 0% 포함)에 여유 12%를 둔다 — 한 눈금이면 반도체 옆에서
+        # 나스닥·다우의 하루 ±0.5%가 납작해진다(2026-11-15 사용자 결정, 종목 홈 home-hero.js usWeekSteps와 같은 계산)
+        rlo, rhi = min(row_cums), max(row_cums)
+        pad = (rhi - rlo) * 0.12 or 0.5
+        rows.append({"name": name, "key": key, "from": s[0][1], "to": s[-1][1], "wk": (s[-1][1] / base - 1) * 100, "cells": cells,
+                     "lo": rlo - pad, "hi": rhi + pad})
     lo, hi = math.floor(min(cums) - 2), math.ceil(max(cums) + 2)
-    Y = lambda v: (hi - v) / (hi - lo) * 100
     for r in rows:
+        Y = lambda v, r=r: (r["hi"] - v) / (r["hi"] - r["lo"]) * 100
         r["wk_s"] = _signed(r["wk"], 2)
         r["z"] = f"{Y(0):.2f}%"
         for c in r["cells"]:
