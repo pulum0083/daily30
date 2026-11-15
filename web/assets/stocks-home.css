@@ -935,14 +935,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .uwk-n small{display:block;font-size:10.5px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
 .uwk-t{text-align:right;font-size:15px;font-weight:900;font-variant-numeric:tabular-nums}
 .uwk-t.up{color:#E03131}.uwk-t.dn{color:#2775ED}
-.uwk-s{position:relative;height:96px;margin:14px 0;display:flex;gap:4px}
+.uwk-s{position:relative;height:112px;margin:16px 0;display:flex;gap:4px}
 .uwk-s::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed #94A3B8}
 .uwk-s>div{flex:1;position:relative}
-.uwk-s i{position:absolute;left:3px;right:3px;border-radius:3px}
+/* 막대는 코스피 계단(.st-b)처럼 칸 가운데 얇게 — 2026-11-15 사용자 결정 */
+.uwk-s i{position:absolute;left:50%;width:clamp(14px,30%,26px);transform:translateX(-50%);border-radius:2px;z-index:1}
 .uwk-s i.u{background:#E86464}.uwk-s i.d{background:#5D97F1}
 .uwk-s em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
 .uwk-s em.up{color:#E03131}.uwk-s em.dn{color:#2775ED}
-.uwk-s u{position:absolute;left:0;right:-4px;border-top:1px solid #CBD5E1}
+.uwk-s u{position:absolute;left:50%;right:calc(-50% - 4px);border-top:1px solid #CBD5E1;z-index:0}
 .uwk-off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
 .uwk-x{display:grid;grid-template-columns:96px 1fr 72px;gap:10px;margin-top:3px}
 .uwk-x div{display:flex;gap:4px}
