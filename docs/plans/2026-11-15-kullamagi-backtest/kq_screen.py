@@ -1,5 +1,4 @@
 # 쿨라매기 조건 스크리너 — 검토용(2026-11-15), 지금 시점 후보 수를 센다
-# 쿨라매기 돌파 조건(일봉으로 잴 수 있는 부분)을 S&P 500에 돌려 보는 검토용 스크리너
 import json, sys
 import yfinance as yf, pandas as pd, numpy as np
 items = json.load(open(sys.argv[1]))["items"]
