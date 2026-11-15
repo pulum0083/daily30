@@ -162,11 +162,27 @@ test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표�
   assert.equal(api.ma5Row(null, '2026-10-26', '2026-10-26'), '');
 });
 
-test('장기 신호 블록 — 나스닥 → S&P 500 → 월봉 순, 코스피 체크 없음, 주간 리포트 링크, 줄이 없으면 블록째 뺀다', () => {
+// ── 중간선거 해 비교(2026-11-15) ──────────────────────────────────────
+const MT = { asof: '2026-11-13', years: [2018, 2026], now: 10.46, same: { date: '2018-11-13', pct: 1.82 }, ups: 19, n_mid: 19,
+  a: [[1, 0.5], [100, 5], [365, -6.2], [729, 20.8]], b: [[1, 0.2], [100, 8], [316, 10.46]] };
+test('장기 신호 · 중간선거 해 비교 — 2026 연초 대비·2018년 같은 날·19번 모두 오름, 두 선 그래프', () => {
+  const h = api.midtermRow(MT, '2026-11-15');
+  assert.match(h, /href="\/stocks\/midterm-2018\/"/);
+  assert.match(h, /중간선거 해 · 2018년 비교/);
+  assert.match(h, /11\/13\(금\) 종가/);
+  assert.match(h, /\+10\.5%<small>2018년 같은 날 \+1\.8%<\/small>/);
+  assert.match(h, /1950년 이후 19번 모두 올랐어요/);
+  assert.match(h, /class="p18"/);
+  assert.match(api.midtermRow({ ...MT, ups: 17 }, '2026-11-15'), /19번 중 17번 올랐어요/);
+  assert.equal(api.midtermRow(MT, '2026-11-30'), '');               // 10일 넘게 멈춘 값
+  assert.equal(api.midtermRow(null, '2026-11-15'), '');
+});
+
+test('장기 신호 블록 — 나스닥 → S&P 500 → 중간선거 → 월봉 순, 코스피 체크 없음, 주간 리포트 링크, 줄이 없으면 블록째 뺀다', () => {
   const m5 = { items: [{ name: '삼성화재', streak: 6, strip: [] }] };
-  const h = api.structHtml({ gap_pct: 48.9 }, SPH, m5, '2026-11-06', '2026-11-08');
+  const h = api.structHtml({ gap_pct: 48.9 }, SPH, m5, '2026-11-06', '2026-11-08', { ...MT, asof: '2026-11-06' });
   const at = (s) => h.indexOf(s);
-  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('월봉 5개월선'));
+  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('중간선거 해') && at('중간선거 해') < at('월봉 5개월선'));
   assert.match(h, /장기 신호/);
   assert.match(h, /07:30 갱신/);
   assert.match(h, /href="\/weekly\/">주간 장기 리포트 ›/);

@@ -332,3 +332,196 @@ def weekly_context(d: dict, prev_url: str = "") -> dict:
         "sectors_week": [{"label": x["label"], "pct": x["pct"], "s": _signed(x["pct"], 2), "w": f"{abs(x['pct']) / mx * 50:.1f}%"} for x in sw],
         "prev_url": prev_url, "kr_last": d.get("kr_last", ""), "us_last": d.get("us_last", ""),
     }}
+
+
+# ─────────────────────────── 중간선거 해 비교(2018 vs 2026) ───────────────────────────
+# 시안 docs/prototypes/2026-11-15-midterm-2018.html · 기록 docs/plans/2026-11-15-midterm-2018/
+
+MIDTERM_EVENTS_PATH = Path(__file__).resolve().parent / "config" / "midterm_events.json"
+MT_RANGES = (("2y", "2년", 0, 730), ("y1", "선거 해", 0, 364), ("mid", "선거 전후", 243, 455))   # 1월 1일 = 0일
+MONTHS_KO = "1월 2월 3월 4월 5월 6월 7월 8월 9월 10월 11월 12월".split()
+
+
+def _sg(v: float, d: int = 1) -> str:
+    return ("+" if v > 0 else "−" if v < 0 else "") + f"{abs(v):.{d}f}"
+
+
+def _mt_events(data: dict) -> list:
+    """설정 파일 사건 + 2026년 연중 고점(데이터에서 계산). 일(그해 1월 1일 = 0)·그날 값·예정 여부를 붙인다."""
+    y0, y1 = data["years"]
+    try:
+        evs = json.loads(MIDTERM_EVENTS_PATH.read_text(encoding="utf-8")).get("events") or []
+    except Exception:
+        evs = []
+    b_year = [p for p in data["b"] if p[2][:4] == str(y1)]
+    if b_year:
+        top = max(b_year, key=lambda p: p[1])
+        evs = evs + [{"d": top[2], "label": "연중 고점"}]
+    out = []
+    for e in sorted(evs, key=lambda e: e.get("d", "")):
+        d = str(e.get("d") or "")
+        yr = int(d[:4]) if d[:4].isdigit() else 0
+        grp = y0 if yr in (y0, y0 + 1) else y1 if yr in (y1, y1 + 1) else None
+        if grp is None:
+            continue
+        src = data["a"] if grp == y0 else data["b"]
+        day = (date.fromisoformat(d) - date(grp, 1, 1)).days
+        later = d > data["asof"]
+        v = None if later else next((p[1] for p in src if p[2] >= d), None)
+        out.append({"d": d, "day": day, "g": 18 if grp == y0 else 26, "label": e.get("label", "") + (" (예정)" if later else ""),
+                    "v": v, "v_s": f"{_sg(v)}%" if v is not None else "아직",
+                    "when": (f"{int(d[5:7])}/{int(d[8:10])}" if yr == grp else f"{d[2:4]}/{int(d[5:7])}/{int(d[8:10])}")})
+    a_ev = [e for e in out if e["g"] == 18]
+    b_ev = [e for e in out if e["g"] == 26]
+    for i, e in enumerate(a_ev + b_ev, 1):
+        e["n"] = i
+    return a_ev + b_ev
+
+
+def _mt_chart(data: dict, evs: list, S: int, E: int) -> dict:
+    """창 [S, E]일만 그린다 — 세로 눈금·사건 번호·월 이름을 창에 맞춰 다시 잡는다(나스닥 체크 기간 버튼과 같은 방식)."""
+    W = E - S
+    pa = [p for p in data["a"] if S <= p[0] <= E]
+    pb = [p for p in data["b"] if S <= p[0] <= E]
+    vals = [p[1] for p in pa + pb] + [0]
+    step = 5 if max(vals) - min(vals) < 26 else 10
+    lo = math.floor((min(vals) - 1) / step) * step
+    hi = math.ceil((max(vals) + 1) / step) * step
+    xx = lambda d: (d - S) / W * 100
+    yy = lambda v: (hi - v) / (hi - lo) * 100
+    pl = lambda ps: " ".join(f"{xx(d) * 10:.1f},{yy(v) * 2:.1f}" for d, v, _ in ps)
+    y0 = str(data["years"][0])
+    a1 = [p for p in pa if p[2][:4] == y0]
+    a2 = [p for p in pa if p[2][:4] != y0]
+    if a1 and a2:
+        a2 = [a1[-1]] + a2
+    ticks = list(range(int(lo), int(hi) + 1, step))
+    marks = []
+    for e in evs:
+        if S <= e["day"] <= E:
+            marks.append(dict(e, x=xx(e["day"])))
+    for g in (18, 26):                                   # 번호가 가까우면 줄을 바꿔 엇갈린다
+        last = {}
+        for m in [m for m in marks if m["g"] == g]:
+            r = 0
+            while r in last and m["x"] - last[r] < 5.2:
+                r += 1
+            m["row"], last[r] = r, m["x"]
+            m["off"] = r * 17 if g == 18 else r * 17 - 8
+    months = []
+    every = 3 if W > 400 else 2 if W > 250 else 1
+    for k, yr in ((0, 1), (365, 2)):
+        for mi in range(12):
+            d = (date(2001 + yr, mi + 1, 1) - date(2002, 1, 1)).days
+            if S <= d <= E and mi % every == 0:
+                months.append({"left": f"{xx(d):.1f}%", "label": MONTHS_KO[mi]})
+    now = data["b"][-1]
+    y0i, y1i = data["years"]
+    return {
+        "s": S, "e": E,
+        "ticks": [{"top": f"{yy(v):.1f}%", "v": f"{_sg(v, 0)}%", "y": f"{yy(v) * 2:.1f}", "zero": v == 0} for v in ticks],
+        "a1": pl(a1), "a2": pl(a2), "b": pl(pb),
+        "yr": f"{xx(365) * 10:.1f}" if S < 365 < E else "",
+        "labs": ([{"left": f"{xx((S + 365) / 2):.1f}%", "t": f"{y0i} · {y1i}"},
+                  {"left": f"{xx((365 + E) / 2):.1f}%", "t": f"{y0i + 1} · {y1i + 1}"}] if S < 365 < E else []),
+        "now": ({"left": f"{xx(now[0]):.2f}%", "top": f"{yy(now[1]):.2f}%", "s": f"{_sg(now[1])}%"} if S <= now[0] <= E else None),
+        "marks": [{"left": f"{m['x']:.2f}%", "g": m["g"], "n": m["n"], "off": m["off"]} for m in marks],
+        "months": months,
+    }
+
+
+def _moves_text(moves: list) -> str:
+    """[[날짜, 값, ±1]] → '3번 올렸어요(3·6·9월)' 같은 짧은 문장. 바뀐 적이 없으면 '그대로 뒀어요'."""
+    if not moves:
+        return "그대로 뒀어요"
+    ups = [m for m in moves if m[2] > 0]
+    dns = [m for m in moves if m[2] < 0]
+    mon = lambda ms: "·".join(str(int(m[0][5:7])) for m in ms) + "월"
+    parts = []
+    if ups:
+        parts.append(f"{len(ups)}번 올렸어요({mon(ups)})" if len(ups) > 1 else f"{mon(ups)}에 올렸어요")
+    if dns:
+        parts.append(f"{len(dns)}번 내렸어요({mon(dns)})" if len(dns) > 1 else f"{mon(dns)}에 내렸어요")
+    return ", ".join(parts)
+
+
+def _moves_short(moves: list) -> str:
+    """표 칸용 — '3번 인상(3·6·9월)' · '9월 인상' · '동결'."""
+    if not moves:
+        return "동결"
+    out = []
+    for sign, word in ((1, "인상"), (-1, "인하")):
+        ms = [m for m in moves if m[2] == sign]
+        if ms:
+            mon = "·".join(str(int(m[0][5:7])) for m in ms) + "월"
+            out.append(f"{len(ms)}번 {word}({mon})" if len(ms) > 1 else f"{mon} {word}")
+    return ", ".join(out)
+
+
+def midterm_context(data: dict) -> dict:
+    """data/midterm_2018.json → /stocks/midterm-2018/ 컨텍스트. 2026년 기록이 없으면 {}. 문장은 정해진 틀(LLM 없음, §0)."""
+    if not data or not data.get("b") or not data.get("a") or not data.get("same"):
+        return {}
+    y0, y1 = data["years"]
+    now = data["b"][-1]
+    asof = data["asof"]
+    same = data["same"]
+    evs = _mt_events(data)
+    ranges = [dict(_mt_chart(data, evs, S, E), key=k, label=l) for k, l, S, E in MT_RANGES]
+    mid = data.get("midterms") or []
+    base = data.get("base") or {}
+    ups = sum(1 for _, v in mid if v > 0)
+    m_avg = round(sum(v for _, v in mid) / len(mid), 1) if mid else None
+    worst = min(mid, key=lambda r: r[1]) if mid else None
+    BH, BL = 40, min(0, math.floor(min((v for _, v in mid), default=0) / 10) * 10)
+    by = lambda v: (BH - v) / (BH - BL) * 100
+    bars = [{"y": y, "v": v, "v_s": _sg(v, 0), "hl": y == y0, "top": f"{by(max(v, 0)):.1f}%",
+             "h": f"{abs(by(v) - by(0)):.1f}%"} for y, v in mid]
+    say = (f"{y0}년 같은 날엔 <b>{_sg(same['pct'])}%</b>였어요.")
+    if data.get("corr") is not None:
+        say += f" 두 해 곡선이 닮은 정도는 <b>{data['corr']:.2f}</b>예요(1이면 똑같고 0이면 관계없어요)."
+        if data.get("corr_daily") is not None and data["corr_daily"] < 0.3:
+            say += " 큰 줄기는 비슷해도, 하루하루 움직임은 거의 관계가 없어요."
+    dd, tnx, fed, ret, low = data.get("dd") or {}, data.get("tnx") or {}, data.get("fed") or {}, data.get("ret") or {}, data.get("low_a") or {}
+    sd = same["date"]
+    rows = [{"k": "연초 대비 S&P 500", "a": f"{_sg(same['pct'])}%", "b": f"{_sg(now[1])}%"}]
+    if dd.get("a") is not None and dd.get("b") is not None:
+        rows.append({"k": "그해 고점에서", "a": f"{_sg(dd['a'])}%", "b": f"{_sg(dd['b'])}%"})
+    if tnx:
+        rows.append({"k": "10년물 국채 금리", "a": f"{tnx['a']:.2f}%", "b": f"{tnx['b']:.2f}%"})
+    if fed:
+        rows.append({"k": "기준금리(상단)", "a": f"{fed['a']:.2f}% · {_moves_short(fed.get('a_moves'))}",
+                     "b": f"{fed['b']:.2f}% · {_moves_short(fed.get('b_moves'))}", "hl": True})
+    concl = []
+    if fed:
+        concl.append(f"<b>기준금리</b> — 그날까지 {y0}년엔 {_moves_text(fed.get('a_moves'))}, {y1}년엔 {_moves_text(fed.get('b_moves'))}.")
+    if dd.get("a") is not None and dd.get("b") is not None:
+        t = f"<b>고점에서</b> — {y0}년 같은 날엔 그해 고점보다 {abs(dd['a']):.1f}% 아래, 지금은 {abs(dd['b']):.1f}% 아래예요."
+        if low and low.get("date", "") > sd:
+            t += f" {y0}년엔 그 뒤 {int(low['date'][5:7])}/{int(low['date'][8:10])}까지 고점 대비 {_sg(low['dd'])}%로 깊어졌어요."
+        concl.append(t)
+    if tnx:
+        diff = tnx["b"] - tnx["a"]
+        concl.append(f"<b>10년물 금리</b> — {y1}년이 {abs(diff):.1f}%p {'높아요' if diff > 0 else '낮아요'}.")
+    rest = [m for m in fed.get("after_a") or [] if m[0][:4] == str(y0) and m[0] > sd]
+    after = [m for m in fed.get("after_a") or [] if m[0][:4] == str(y0 + 1)]
+    r19, n19 = (ret.get("spx") or {}).get(str(y0 + 1)), (ret.get("ixic") or {}).get(str(y0 + 1))
+    if r19 is not None:
+        t = f"<b>{y0 + 1}년엔</b> — "
+        if rest and after:
+            t += f"연준이 {y0}년 {int(rest[-1][0][5:7])}월에 한 번 더 {'올린' if rest[-1][2] > 0 else '내린'} 뒤, {y0 + 1}년엔 {_moves_text(after)}. "
+        elif after:
+            t += f"연준이 {_moves_text(after)}. "
+        t += (f"S&amp;P 500은 그해 {_sg(r19)}%" + (f"(나스닥 {_sg(n19)}%)" if n19 is not None else "")
+              + (" 올랐어요." if r19 >= 0 else " 내렸어요."))
+        concl.append(t)
+    return {"mt": {
+        "asof": asof, "asof_label": f"{int(asof[5:7])}/{int(asof[8:10])}", "dow": DOW[date.fromisoformat(asof).weekday()],
+        "y0": y0, "y1": y1, "now_s": _sg(now[1]), "same_s": _sg(same["pct"]), "same_label": f"{int(sd[5:7])}/{int(sd[8:10])}",
+        "say": say, "ranges": ranges, "events": evs, "rows": rows, "concl": concl,
+        "bars": bars, "bar_axes": [{"top": f"{by(v):.1f}%", "v": _sg(v, 0) if v else "0"} for v in range(int(BL), BH + 1, 20)],
+        "bar_base": {"top": f"{by(base['avg']):.1f}%", "avg": base["avg"], "up": base["up"]} if base else None,
+        "n_mid": len(mid), "ups": ups, "m_avg": m_avg, "worst": worst,
+        "first": mid[0][0] if mid else None, "last": mid[-1][0] if mid else None,
+        "data_js": json.dumps({"a": [p[:2] + [p[2]] for p in data["a"]], "b": data["b"]}, ensure_ascii=False, separators=(",", ":")),
+    }}

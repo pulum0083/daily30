@@ -251,7 +251,7 @@
   }
 
   // ── 장기 신호(2026-11-09 §68 ⑤ 개정, 시안 docs/prototypes/2026-11-09-home-longterm-entry.html) ──
-  //   줄마다 이름·큰 숫자·한 줄 설명·작은 그래프 — 깊은 그래프는 상세 페이지에 있다. 순서: 나스닥 체크 → S&P 500 200일선(사용자 결정). 코스피 체크는 2026-11-15에 뺐다.
+  //   줄마다 이름·큰 숫자·한 줄 설명·작은 그래프 — 깊은 그래프는 상세 페이지에 있다. 순서: 나스닥 체크 → S&P 500 200일선 → 중간선거 해 비교(사용자 결정). 코스피 체크는 2026-11-15에 뺐다.
   //   하루 종일 보인다(장중·마감엔 맨 아래). 값이 없거나 오래된 줄만 빠진다.
   function sg1(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1); }
   // 작은 선 그래프 — zero가 있으면 그 높이에 점선(S&P 50%). 마지막 점을 찍는다.
@@ -309,6 +309,31 @@
       [cmp, cnt].filter(Boolean).join(' · '), ltSpark(sp.spark, 50));
   }
 
+  // 중간선거 해 비교(2026-11-15, /stocks/midterm-2018/) — S&P 500 연초 대비, 2018년 같은 날과 나란히.
+  //   작은 그래프는 2년(2018~2019 분홍 · 2026 검정)을 같은 가로축에 겹친다. 원천은 미국 장기 지표 아침 갱신이 쓰는 /data/midterm-home.json.
+  function midSpark(a, b) {
+    var ok = function (p) { return Array.isArray(p) && typeof p[0] === 'number' && typeof p[1] === 'number'; };
+    a = (a || []).filter(ok); b = (b || []).filter(ok);
+    if (a.length < 2 || b.length < 2) return '<span class="lt-g"></span>';
+    var vals = a.concat(b).map(function (p) { return p[1]; }).concat([0]);
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if (hi === lo) hi = lo + 1;
+    var X = function (d) { return (d / 730 * 100).toFixed(2); }, Y = function (v) { return ((hi - v) / (hi - lo) * 100).toFixed(2); };
+    var path = function (ps) { return ps.map(function (p, i) { return (i ? 'L' : 'M') + X(p[0]) + ' ' + Y(p[1]); }).join(' '); };
+    var last = b[b.length - 1];
+    return '<span class="lt-g mt"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="100" y1="' + Y(0) + '" y2="' + Y(0) + '"/>' +
+      '<path class="p18" d="' + path(a) + '"/><path class="l" d="' + path(b) + '"/></svg><i style="left:' + X(last[0]) + '%;top:' + Y(last[1]) + '%"></i></span>';
+  }
+  function midtermRow(mt, today) {
+    if (!mt || typeof mt.now !== 'number' || !/^\d{4}-\d{2}-\d{2}$/.test(mt.asof || '') || !Array.isArray(mt.years)) return '';
+    if (daysBetween(mt.asof, today) > STRUCT_MAX_AGE) return '';   // 수집이 멈췄으면 옛 값을 보여주지 않는다(§20)
+    var y0 = mt.years[0], same = mt.same && typeof mt.same.pct === 'number' ? mt.same.pct : null;
+    var desc = typeof mt.n_mid === 'number' && mt.n_mid > 0
+      ? '중간선거 뒤 12개월, 1950년 이후 ' + (mt.ups === mt.n_mid ? mt.n_mid + '번 모두 올랐어요' : mt.n_mid + '번 중 ' + mt.ups + '번 올랐어요') : '';
+    return ltRow('/stocks/midterm-2018/', '중간선거 해 · ' + y0 + '년 비교', md(mt.asof) + '(' + dowOf(mt.asof) + ') 종가',
+      sg1(mt.now) + '%' + (same == null ? '' : '<small>' + y0 + '년 같은 날 ' + sg1(same) + '%</small>'), desc, midSpark(mt.a, mt.b));
+  }
+
   // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 줄을 뺀다.
   function ma5Row(m5, ymd, today) {
     if (!m5 || !Array.isArray(m5.items)) return '';
@@ -332,8 +357,8 @@
       '<em>월말 종가 ÷ 5개월 평균' + (now ? ' · ' + now : '') + '</em></a>';
   }
 
-  function structHtml(nq, sp, m5, m5Date, today) {
-    var rows = nasdaqRow(nq, today) + sp500Row(sp, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
+  function structHtml(nq, sp, m5, m5Date, today, mt) {
+    var rows = nasdaqRow(nq, today) + sp500Row(sp, today) + midtermRow(mt, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
     return rows ? '<div class="block__h"><span class="block__t"><span class="ic">📐</span>장기 신호</span><span class="block__s">07:30 갱신</span></div>' +
       rows + '<div class="lt-f"><span>매주 토요일 한 주 정리</span><a href="/weekly/">주간 장기 리포트 ›</a></div>' : '';
   }
@@ -345,8 +370,8 @@
     var usD = latestReady(slots, 'us', today), krD = latestReady(slots, 'kospi', today);
     var snap = function (d, t) { return d ? json('/briefings/' + d + '/' + t + '/analysis_snapshot.json') : Promise.resolve(null); };
     return Promise.all([snap(usD, 'us'), snap(krD, 'kospi'), json('/data/sp500-home.json'),
-                        json('/data/nasdaq-home.json')]).then(function (r) {
-      var html = structHtml(pickNasdaq(r[3], r[0] && r[0].nasdaq_overheat), r[2], r[1] && r[1].monthly_ma5, krD, today);
+                        json('/data/nasdaq-home.json'), json('/data/midterm-home.json')]).then(function (r) {
+      var html = structHtml(pickNasdaq(r[3], r[0] && r[0].nasdaq_overheat), r[2], r[1] && r[1].monthly_ma5, krD, today, r[4]);
       structEl.innerHTML = html;
       structEl.hidden = !html;
     });
@@ -437,7 +462,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, pickNasdaq: pickNasdaq, sp500Row: sp500Row, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, pickNasdaq: pickNasdaq, sp500Row: sp500Row, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, midtermRow: midtermRow, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);

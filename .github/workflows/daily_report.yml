@@ -261,7 +261,7 @@ jobs:
       - name: 📦 Python 패키지 설치
         run: pip install -r requirements.txt
 
-      - name: 📈 나스닥 체크·📏 S&P 500 200일선 — 직전 미국장 종가
+      - name: 📈 나스닥 체크·📏 S&P 500 200일선·🗳️ 중간선거 비교 — 직전 미국장 종가
         id: refresh
         timeout-minutes: 8
         run: |
@@ -270,6 +270,8 @@ jobs:
           ok=false
           if python3 scripts/nasdaq_overheat.py && python3 scripts/generate_html.py --nasdaq-page --date "$today"; then ok=true; fi
           if python3 scripts/sp500_ma200.py --date "$today" && python3 scripts/generate_html.py --sp500-page --date "$today"; then ok=true; fi
+          # 중간선거 해 비교(2026-11-15) — 2027년 말까지. 실패해도 다른 두 지표는 그대로 커밋한다.
+          if python3 scripts/midterm_compare.py --date "$today" && python3 scripts/generate_html.py --midterm-page --date "$today"; then ok=true; fi
           echo "ok=$ok" >> "$GITHUB_OUTPUT"
 
       - name: 💾 커밋 → main 푸시
@@ -277,7 +279,7 @@ jobs:
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
-          git add web/stocks/nasdaq-check web/stocks/sp500-200 web/data/nasdaq-home.json web/data/sp500-home.json data/sp500_breadth_history.json
+          git add web/stocks/nasdaq-check web/stocks/sp500-200 web/stocks/midterm-2018 web/data/nasdaq-home.json web/data/sp500-home.json web/data/midterm-home.json data/sp500_breadth_history.json
           if git diff --staged --quiet; then echo "바뀐 것 없음"; exit 0; fi
           git commit -m "📐 미국 장기 지표 아침 갱신: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
           git stash --include-untracked -q || true

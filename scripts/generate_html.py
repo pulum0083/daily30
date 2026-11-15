@@ -988,6 +988,7 @@ def write_nasdaq_home(data: dict) -> None:
 
 
 SP500_PAGE_URL = f"{SITE_BASE}/stocks/sp500-200/"
+MIDTERM_PAGE_URL = f"{SITE_BASE}/stocks/midterm-2018/"
 
 
 def _write_lt_page(tpl: str, ctx: dict, rel: str, url: str, name: str) -> bool:
@@ -1023,6 +1024,34 @@ def write_sp500_page(target_date: str) -> bool:
             "spark": [p[1] for p in s["points"][-120:]]}
     (WEB_DIR / "data" / "sp500-home.json").write_text(json.dumps(home, ensure_ascii=False) + "\n", encoding="utf-8")
     return _write_lt_page("pages/sp500_200.html", ctx, "/stocks/sp500-200/", SP500_PAGE_URL, "S&P 500 200일선")
+
+
+def write_midterm_page(target_date: str) -> bool:
+    """data/midterm_2018.json(midterm_compare.py)으로 /stocks/midterm-2018/과 홈 줄 파일을 쓴다(2026-11-15).
+    기준일이 target_date(KST)의 직전 미국장이 아니면 쓰지 않는다 — 직전 페이지가 남는다(§14·§20)."""
+    import longterm_pages as lp
+    from session_label import prev_us_session
+    try:
+        data = json.loads((DATA_DIR / "midterm_2018.json").read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] 중간선거 비교 페이지 생략 — 데이터 없음({e})")
+        return False
+    want = prev_us_session(date.fromisoformat(target_date))
+    if not want or data.get("asof") != want.isoformat():
+        print(f"[generate_html] 중간선거 비교 페이지 생략 — 기준일 불일치({data.get('asof')} ≠ {want})")
+        return False
+    ctx = lp.midterm_context(data)
+    if not ctx:
+        print("[generate_html] 중간선거 비교 페이지 생략 — 비교할 기록이 없음")
+        return False
+    # 종목 홈 '장기 신호' 줄용 작은 파일 — 페이지와 같은 값. 작은 그래프는 사흘마다 한 점(2년치 두 선).
+    mt = ctx["mt"]
+    home = {"asof": data["asof"], "years": data["years"], "now": data["b"][-1][1], "same": data["same"],
+            "ups": mt["ups"], "n_mid": mt["n_mid"],
+            "a": [p[:2] for p in data["a"][::3]] + [data["a"][-1][:2]], "b": [p[:2] for p in data["b"][::3]] + [data["b"][-1][:2]]}
+    (WEB_DIR / "data").mkdir(parents=True, exist_ok=True)
+    (WEB_DIR / "data" / "midterm-home.json").write_text(json.dumps(home, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    return _write_lt_page("pages/midterm_2018.html", ctx, "/stocks/midterm-2018/", MIDTERM_PAGE_URL, "중간선거 해 비교")
 
 
 RECORD_PAGES = (("accuracy", "pages/accuracy.html", "예측 성적표"),
@@ -2912,6 +2941,7 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/stocks/income-designer/",       "changefreq": "monthly", "priority": "0.8"},
         {"loc": f"{BASE}/stocks/nasdaq-check/",          "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/stocks/sp500-200/",             "changefreq": "daily",   "priority": "0.7"},
+        {"loc": f"{BASE}/stocks/midterm-2018/",          "changefreq": "daily",   "priority": "0.6"},
         {"loc": f"{BASE}/weekly/",                       "changefreq": "weekly",  "priority": "0.7"},
         {"loc": f"{BASE}/accuracy/",                     "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/methodology/",                  "changefreq": "monthly", "priority": "0.6"},
@@ -3192,6 +3222,8 @@ def main():
                         help="섹터별 종목 페이지 8개 생성하고 종료")
     parser.add_argument("--nasdaq-page", dest="nasdaq_page", action="store_true",
                         help="--date 날짜의 data/nasdaq_overheat.json으로 /stocks/nasdaq-check/ 상세 페이지만 다시 쓴다")
+    parser.add_argument("--midterm-page", dest="midterm_page", action="store_true",
+                        help="--date(KST) 직전 미국장 기준 data/midterm_2018.json으로 /stocks/midterm-2018/ 상세 페이지만 다시 쓴다")
     parser.add_argument("--sp500-page", dest="sp500_page", action="store_true",
                         help="--date 날짜의 data/sp500_ma200.json으로 /stocks/sp500-200/ 상세 페이지만 다시 쓴다")
     parser.add_argument("--record-pages", dest="record_pages", action="store_true",
@@ -3212,10 +3244,10 @@ def main():
         _finish_page_build(written)
         return
 
-    if args.sp500_page:
+    if args.sp500_page or args.midterm_page:
         if not args.date:
-            parser.error("--sp500-page 는 --date 가 필요합니다")
-        write_sp500_page(args.date)
+            parser.error("--sp500-page·--midterm-page 는 --date 가 필요합니다")
+        (write_midterm_page if args.midterm_page else write_sp500_page)(args.date)
         write_sitemap_xml()
         _finish_page_build([])
         return
