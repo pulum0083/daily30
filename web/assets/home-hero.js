@@ -162,15 +162,17 @@
 
   // 미국 지수 요일 계단(2026-11-09 사용자 결정, 시안 docs/prototypes/2026-11-09-weekly-market.html A안).
   //   주간 장기 리포트가 토요일 아침 저장한 /weekly/{금요일}/data.json을 읽는다 — 리포트가 아직 없으면(금요일 밤~토요일 아침) 빠진다.
-  //   지수마다 한 줄, 월~금 다섯 칸에 그날 오르내린 만큼 계단을 이어 쌓는다. 네 지수가 같은 눈금이고, 거래가 없던 요일은 '휴장'.
+  //   지수마다 한 줄, 월~금 다섯 칸에 그날 오르내린 만큼 계단을 이어 쌓는다. 거래가 없던 요일은 '휴장'.
+  //   눈금은 줄마다 따로다(2026-11-15 사용자 결정) — 네 지수를 한 눈금에 두면 반도체(+8%) 옆에서 나스닥·다우의
+  //   하루 ±0.5%가 선처럼 납작해져 오르내림이 안 보였다. 지수끼리의 크기 비교는 오른쪽 주간 등락률이 맡는다.
   var US_WEEK = [['^SOX', '반도체(SOX)'], ['^IXIC', '나스닥'], ['^GSPC', 'S&P 500'], ['^DJI', '다우']];
   function usWeekSteps(wk, monday) {
     if (!wk || wk.monday !== monday || !wk.idx) return '';
-    var rows = [], cums = [0];
+    var rows = [];
     US_WEEK.forEach(function (x) {
       var s = wk.idx[x[0]];
       if (!Array.isArray(s) || s.length < 2) return;
-      var base = s[0][1], prev = base, cells = [null, null, null, null, null];
+      var base = s[0][1], prev = base, cells = [null, null, null, null, null], cums = [0];
       for (var i = 1; i < s.length; i++) {
         var k = daysBetween(monday, s[i][0]);
         if (k >= 0 && k < 5) {
@@ -179,14 +181,15 @@
         }
         prev = s[i][1];
       }
-      rows.push({ name: x[1], from: base, to: s[s.length - 1][1], wk: (s[s.length - 1][1] / base - 1) * 100, cells: cells });
+      // 줄마다 그 지수의 최저·최고(지난주 종가 0% 포함)에 여유 12%를 둔다 — 코스피 계단(weekSteps)과 같은 방식
+      var lo = Math.min.apply(null, cums), hi = Math.max.apply(null, cums), pad = (hi - lo) * 0.12 || 0.5;
+      rows.push({ name: x[1], from: base, to: s[s.length - 1][1], wk: (s[s.length - 1][1] / base - 1) * 100, cells: cells, lo: lo - pad, hi: hi + pad });
     });
     if (!rows.length) return '';
-    var lo = Math.floor(Math.min.apply(null, cums) - 2), hi = Math.ceil(Math.max.apply(null, cums) + 2);
-    var Y = function (v) { return (hi - v) / (hi - lo) * 100; };
     var sg = function (v, d) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d); };
     var f2 = function (v) { return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
     var html = rows.map(function (r) {
+      var Y = function (v) { return (r.hi - v) / (r.hi - r.lo) * 100; };
       var cells = r.cells.map(function (c, i) {
         if (!c) return '<div><span class="uwk-off">휴장</span></div>';
         var top = Y(Math.max(c.a, c.b)), h = Math.max(Y(Math.min(c.a, c.b)) - top, 0.6), up = c.pct >= 0;
