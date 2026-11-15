@@ -26,7 +26,7 @@ EV = [("2018-10-03", "파월 '갈 길 멀다'", 18), ("2018-11-06", "중간선�
 def ev_at(d, y):
     y0 = 2018 if y == 18 else 2026; t = pd.Timestamp(d); src = A if y == 18 else B
     v = next((p[1] for p in src if p[2] >= d), None)
-    return {"left": f"{X((t - pd.Timestamp(y0, 1, 1)).days):.2f}%", "y": y, "d": f"{t.year}.{t.month}.{t.day}", "v": v}
+    return {"left": f"{X((t - pd.Timestamp(y0, 1, 1)).days):.2f}%", "day": (t - pd.Timestamp(y0, 1, 1)).days, "y": y, "d": f"{t.year}.{t.month}.{t.day}", "v": v}
 evs = []
 for i, (d, lab, y) in enumerate(EV, 1):
     e = ev_at(d, y); e.update(n=i, label=lab); evs.append(e)
@@ -51,21 +51,63 @@ m_avg = round(sum(v for _, v in mid) / len(mid), 1)
 def sg(v, d=1): return ("+" if v > 0 else "−" if v < 0 else "") + f"{abs(v):.{d}f}"
 data = {"a": [[p[0], p[1], p[2]] for p in A], "b": [[p[0], p[1], p[2]] for p in B], "lo": LO, "hi": HI, "span": SPAN}
 
-def chart(cls=""):
-    yt = "".join(f'<span class="ax" style="top:{Y(v):.1f}%">{sg(v,0)}%</span>' for v in (-10, 0, 10, 20))
-    grid = "".join(f'<line x1="0" x2="1000" y1="{Y(v)*2:.1f}" y2="{Y(v)*2:.1f}" class="{"z" if v == 0 else "g"}"/>' for v in (-10, 0, 10, 20))
-    ev = "".join(f'<i class="ev y{e["y"]}" style="left:{e["left"]}"></i><b class="evn y{e["y"]}" style="left:{e["left"]};{"top" if e["y"] == 18 else "bottom"}:{(e["row"] * 17) if e["y"] == 18 else (e["row"] * 17 - 8)}px">{e["n"]}</b>' for e in evs)
-    return (f'<div class="mt-plot {cls}">{yt}<div class="mt-in" id="mtin{cls}">'
-            f'<svg viewBox="0 0 1000 200" preserveAspectRatio="none">{grid}'
-            f'<line x1="500" x2="500" y1="0" y2="200" class="yr"/>'
-            f'<polyline class="a18" points="{poly(A, 0, cut + 1)}"/><polyline class="a19" points="{poly(A, cut)}"/>'
-            f'<polyline class="b26" points="{poly(B)}"/></svg>{ev}'
-            f'<i class="now" style="left:{X(now[0]):.2f}%;top:{Y(now[1]):.2f}%"></i>'
-            f'<span class="nowl" style="left:{X(now[0]):.2f}%;top:{Y(now[1]):.2f}%">지금 {sg(now[1])}%</span>'
-            f'<span class="yrl l" style="left:25%">2018 · 2026</span><span class="yrl" style="left:75%">2019 · 2027</span>'
-            f'<i class="cur" hidden></i><div class="tip" hidden></div></div></div>'
-            f'<div class="mt-x"><span style="left:0">1월</span><span style="left:16.6%">4월</span><span style="left:33.3%">7월</span><span style="left:41.6%">9월</span>'
-            f'<span style="left:50%">1월</span><span style="left:66.6%">4월</span><span style="left:83.3%">7월</span><span style="left:91.6%">9월</span></div>')
+RANGES = [("2y", "2년", 0, 730), ("y1", "선거 해", 0, 364), ("mid", "선거 전후", 243, 455)]   # 일(1월 1일 = 0) 기준 창
+
+def chart(key, S, E, shown):
+    """창 [S, E]일만 그린다 — 세로 눈금·사건 번호·월 이름을 창에 맞춰 다시 잡는다(나스닥 체크 기간 버튼과 같은 방식)."""
+    W = E - S
+    pa = [p for p in A if S <= p[0] <= E]; pb = [p for p in B if S <= p[0] <= E]
+    vals = [p[1] for p in pa + pb] + [0]
+    step = 5 if max(vals) - min(vals) < 26 else 10
+    lo = math.floor((min(vals) - 1) / step) * step; hi = math.ceil((max(vals) + 1) / step) * step
+    xx = lambda d: (d - S) / W * 100
+    yy = lambda v: (hi - v) / (hi - lo) * 100
+    pl = lambda p: " ".join(f"{xx(d)*10:.1f},{yy(v)*2:.1f}" for d, v, _ in p)
+    ticks = list(range(int(lo), int(hi) + 1, step))
+    yt = "".join(f'<span class="ax" style="top:{yy(v):.1f}%">{sg(v,0)}%</span>' for v in ticks)
+    grid = "".join(f'<line x1="0" x2="1000" y1="{yy(v)*2:.1f}" y2="{yy(v)*2:.1f}" class="{"z" if v == 0 else "g"}"/>' for v in ticks)
+    a1 = [p for p in pa if p[2] < "2019"]; a2 = [p for p in pa if p[2] >= "2019"]
+    if a1 and a2: a2 = [a1[-1]] + a2
+    # 사건 — 창 안의 것만, 가까우면 줄을 바꿔 엇갈린다
+    evw = []
+    for e in evs:
+        d = e["day"]
+        if S <= d <= E:
+            evw.append(dict(e, x=xx(d)))
+    for yv in (18, 26):
+        last = {}
+        for e in [x for x in evw if x["y"] == yv]:
+            r = 0
+            while r in last and e["x"] - last[r] < 5.2: r += 1
+            e["row"] = r; last[r] = e["x"]
+    ev = "".join(f'<i class="ev y{e["y"]}" style="left:{e["x"]:.2f}%"></i><b class="evn y{e["y"]}" style="left:{e["x"]:.2f}%;'
+                 f'{"top" if e["y"] == 18 else "bottom"}:{(e["row"] * 17) if e["y"] == 18 else (e["row"] * 17 - 8)}px">{e["n"]}</b>' for e in evw)
+    yr = f'<line x1="{xx(365)*10:.1f}" x2="{xx(365)*10:.1f}" y1="0" y2="200" class="yr"/>' if S < 365 < E else ""
+    labs = ""
+    if S < 365 < E:
+        labs = (f'<span class="yrl" style="left:{xx((S + 365) / 2):.1f}%">2018 · 2026</span>'
+                f'<span class="yrl" style="left:{xx((365 + E) / 2):.1f}%">2019 · 2027</span>')
+    nowh = (f'<i class="now" style="left:{xx(now[0]):.2f}%;top:{yy(now[1]):.2f}%"></i>'
+            f'<span class="nowl" style="left:{xx(now[0]):.2f}%;top:{yy(now[1]):.2f}%">지금 {sg(now[1])}%</span>') if S <= now[0] <= E else ""
+    # 월 이름 — 창 길이에 따라 3·2·1개월마다
+    every = 3 if W > 400 else 2 if W > 250 else 1
+    mx = ""
+    for y0 in (0, 365):
+        for mth in range(1, 13):
+            d = (pd.Timestamp(2018 if y0 == 0 else 2019, mth, 1) - pd.Timestamp(2018, 1, 1)).days
+            if S <= d <= E and (mth - 1) % every == 0:
+                mx += f'<span style="left:{xx(d):.1f}%">{mth}월</span>'
+    return (f'<div class="mt-r" data-r="{key}"{"" if shown else " hidden"}><div class="mt-plot">{yt}<div class="mt-in" data-s="{S}" data-e="{E}">'
+            f'<svg viewBox="0 0 1000 200" preserveAspectRatio="none">{grid}{yr}'
+            + (f'<polyline class="a18" points="{pl(a1)}"/>' if a1 else "") + (f'<polyline class="a19" points="{pl(a2)}"/>' if a2 else "")
+            + (f'<polyline class="b26" points="{pl(pb)}"/>' if pb else "") +
+            f'</svg>{ev}{nowh}{labs}<i class="cur" hidden></i><div class="tip" hidden></div></div></div>'
+            f'<div class="mt-x">{mx}</div></div>')
+
+def charts():
+    seg = '<div class="mt-seg" role="group" aria-label="기간">' + "".join(
+        f'<button type="button" data-r="{k}" aria-pressed="{"true" if i == 0 else "false"}">{l}</button>' for i, (k, l, _, _) in enumerate(RANGES)) + '</div>'
+    return seg, "".join(chart(k, S, E, i == 0) for i, (k, _, S, E) in enumerate(RANGES))
 
 evlist = ("<div class='mt-evs'><div><h4><i class='k18'></i>2018 ~ 2019</h4>" +
           "".join(f'<p><b class="y18">{e["n"]}</b>{e["d"][5:].replace(".", "/") if e["d"].startswith("2018") else e["d"][2:].replace(".", "/")} {e["label"]}<em>{sg(e["v"])}%</em></p>' for e in evs if e["y"] == 18) +
@@ -87,6 +129,7 @@ home_row = (f'<a class="lt-r" href="#detail"><span class="lt-t"><span class="lt-
             f'<i style="left:{X(now[0]):.1f}%;top:{Y(now[1]):.1f}%"></i></span><span class="lt-go">›</span></a>')
 
 css = open("mt_proto.css").read()
+SEG, CH = charts()
 detail = f'''
 <main class="ltp" id="detail">
   <div class="ltp-crumb"><span><a href="#">종목 홈</a> › 중간선거 해 비교</span></div>
@@ -100,9 +143,9 @@ detail = f'''
   </section>
 
   <section class="ltp-card">
-    <div class="ltp-h"><h2>연초 대비 흐름 · 2년</h2><small>S&amp;P 500 일별 종가, 직전 해 말 종가 = 0%</small></div>
-    <div class="ltp-leg"><span><i class="k18"></i>2018년</span><span><i class="k19"></i>2019년(그다음 해)</span><span><i class="k26"></i>2026년</span><span><i class="z"></i>0% = 직전 해 말</span></div>
-    {chart()}
+    <div class="ltp-h"><h2>연초 대비 흐름</h2>{SEG}</div>
+    <div class="ltp-leg"><span><i class="k18"></i>2018년</span><span><i class="k19"></i>2019년(그다음 해)</span><span><i class="k26"></i>2026년</span><span><i class="z"></i>0% = 직전 해 말 종가</span></div>
+    {CH}
     {evlist}
   </section>
 
@@ -144,17 +187,23 @@ document.querySelectorAll('.mt-in').forEach(el => {{
   const at = (arr, d) => {{ let b = null; for (const p of arr) {{ if (p[0] <= d) b = p; else break; }} return b; }};
   const fmt = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + '%';
   el.addEventListener('mousemove', e => {{
-    const r = el.getBoundingClientRect(), f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), d = f * MT.span;
+    const S = +el.dataset.s, E = +el.dataset.e;
+    const r = el.getBoundingClientRect(), f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), d = S + f * (E - S);
     const a = at(MT.a, d), b = d <= MT.b[MT.b.length - 1][0] ? at(MT.b, d) : null;
     if (!a) return;
     const md = a[2].slice(5).replace('-', '/').replace(/^0/, '').replace('/0', '/');
-    const y2 = d >= 365;
+    const y2 = a[2] >= '2019';
     tip.innerHTML = '<b>' + md + '</b>' + (y2 ? '2019' : '2018') + ' <span class="k">' + fmt(a[1]) + '</span>' + (b ? '<br>' + (y2 ? '2027' : '2026') + ' <span class="k">' + fmt(b[1]) + '</span>' : (y2 ? '' : '<br>2026 <span class="k">아직</span>'));
     cur.style.left = (f * 100) + '%'; cur.hidden = false; tip.hidden = false;
     tip.style.left = Math.min(r.width - 120, Math.max(0, f * r.width + 10)) + 'px'; tip.style.top = '6px';
   }});
   el.addEventListener('mouseleave', () => {{ cur.hidden = true; tip.hidden = true; }});
 }});
+document.querySelectorAll('.mt-seg button').forEach(btn => btn.addEventListener('click', () => {{
+  const card = btn.closest('.ltp-card'), k = btn.dataset.r;
+  card.querySelectorAll('.mt-seg button').forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+  card.querySelectorAll('.mt-r').forEach(r => {{ r.hidden = r.dataset.r !== k; }});
+}}));
 </script></body></html>'''
 open(sys.argv[1], "w").write(html)
 print("ok", now, same18, corr, m_avg, base_up, base_avg)
