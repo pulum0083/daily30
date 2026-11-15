@@ -473,10 +473,18 @@ def midterm_context(data: dict) -> dict:
     ups = sum(1 for _, v in mid if v > 0)
     m_avg = round(sum(v for _, v in mid) / len(mid), 1) if mid else None
     worst = min(mid, key=lambda r: r[1]) if mid else None
-    BH, BL = 40, min(0, math.floor(min((v for _, v in mid), default=0) / 10) * 10)
+    live = data.get("midterm_live")
+    BH = 40
+    lowest = min([v for _, v in mid] + ([live["pct"]] if live else []), default=0)
+    BL = math.floor(lowest / 10) * 10 if lowest < -2 else 0      # 조금 빠진 정도로 아래 칸을 늘리지 않는다
     by = lambda v: (BH - v) / (BH - BL) * 100
     bars = [{"y": y, "v": v, "v_s": _sg(v, 0), "hl": y == y0, "top": f"{by(max(v, 0)):.1f}%",
              "h": f"{abs(by(v) - by(0)):.1f}%"} for y, v in mid]
+    if live:   # 진행 중 칸 — 선거일 종가 → 지금. 점선 막대로, 확정 통계(평균·오른 횟수)에는 넣지 않는다
+        v = live["pct"]
+        bars.append({"y": live["y"], "v": v, "v_s": _sg(v, 1), "live": True, "top": f"{by(max(v, 0)):.1f}%",
+                     "h": f"{max(abs(by(v) - by(0)), 0.8):.1f}%",
+                     "from_s": f"{int(live['from'][5:7])}/{int(live['from'][8:10])}"})
     say = (f"{y0}년 같은 날엔 <b>{_sg(same['pct'])}%</b>였어요.")
     if data.get("corr") is not None:
         say += f" 두 해 곡선이 닮은 정도는 <b>{data['corr']:.2f}</b>예요(1이면 똑같고 0이면 관계없어요)."
@@ -521,6 +529,7 @@ def midterm_context(data: dict) -> dict:
         "say": say, "ranges": ranges, "events": evs, "rows": rows, "concl": concl,
         "bars": bars, "bar_axes": [{"top": f"{by(v):.1f}%", "v": _sg(v, 0) if v else "0"} for v in range(int(BL), BH + 1, 20)],
         "bar_base": {"top": f"{by(base['avg']):.1f}%", "avg": base["avg"], "up": base["up"]} if base else None,
+        "live": bars[-1] if live else None,
         "n_mid": len(mid), "ups": ups, "m_avg": m_avg, "worst": worst,
         "first": mid[0][0] if mid else None, "last": mid[-1][0] if mid else None,
         "data_js": json.dumps({"a": [p[:2] + [p[2]] for p in data["a"]], "b": data["b"]}, ensure_ascii=False, separators=(",", ":")),

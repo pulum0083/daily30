@@ -192,6 +192,12 @@ def build(spx: list, ixic: list, tnx: list, fed: list, session: str) -> dict | N
     for k, s in (("spx", spx), ("ixic", ixic)):
         out["ret"][k] = {str(y): year_ret(s, y) for y in (Y0, Y0 + 1)}
     out["midterms"], out["base"] = midterm_stats(spx, session)
+    # 진행 중인 중간선거(선거일이 지났고 12개월이 안 찬 것) — 선거일 종가 → 지금. 확정 통계(평균·오른 횟수)에는 넣지 않는다.
+    ed = midterm_day(Y1).isoformat()
+    p0 = at_or_before(spx, ed)
+    if p0 and p0[0] == ed and session > ed:
+        out["midterm_live"] = {"y": Y1, "from": ed, "pct": round((spx[-1][1] / p0[1] - 1) * 100, 1),
+                               "days": sum(1 for d, _c in spx if ed < d <= session)}
     return out
 
 

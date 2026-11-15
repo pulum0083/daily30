@@ -100,3 +100,21 @@ def test_page_in_publish_gate_and_sitemap():
     assert "https://doubleshot.space/stocks/midterm-2018/" in {u for _, u in expected_pages()}
     sm = (Path(__file__).resolve().parents[1] / "web" / "sitemap.xml").read_text(encoding="utf-8")
     assert "/stocks/midterm-2018/" in sm
+
+
+def test_live_midterm_column_is_separate_from_stats():
+    """2026 칸 — 선거일(11/3) 종가 → 지금. 진행 중이라 평균·오른 횟수에 넣지 않는다(2026-11-15)."""
+    d = _data()
+    assert d["midterm_live"]["y"] == 2026 and d["midterm_live"]["from"] == "2026-11-03" and d["midterm_live"]["days"] == 8
+    c = lp.midterm_context(d)["mt"]
+    assert c["bars"][-1]["live"] and c["bars"][-1]["y"] == 2026 and c["live"]["from_s"] == "11/3"
+    assert c["n_mid"] == 3 and c["ups"] == 3                                 # 확정 3번만 센다
+    import generate_html as gh
+    html = gh.make_env().get_template("pages/midterm_2018.html").render(
+        **lp.midterm_context(d), css_path="/a.css", js_path="/a.js", canonical_url="https://x/", seo_jsonld=[])
+    assert 'class="mtb live"' in html and "진행 중" in html and "평균에 넣지 않았고" in html
+
+
+def test_no_live_column_before_election_day():
+    d = mc.build(_spx(), _spx(), [], [], "2026-11-02")
+    assert "midterm_live" not in d

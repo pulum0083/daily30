@@ -59,8 +59,15 @@
   .mtb.hl em{color:#C2410C}
   .mtb span{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-size:9.5px;color:var(--muted)}
   .mtb.hl span{font-weight:800;color:var(--ink)}
+  /* 진행 중 칸 — 칸 전체를 옅은 빗금으로(값을 부풀리지 않는다), 실제 값은 검은 작은 막대 */
+  .mtb.live::before{content:'';position:absolute;top:0;bottom:0;left:12%;right:12%;border-radius:3px;
+    background:repeating-linear-gradient(135deg,rgba(148,163,184,.22) 0 3px,transparent 3px 7px)}
+  .mtb.live i{background:var(--ink);min-height:2px}
+  .mtb.live em{left:auto;right:-2px;white-space:nowrap;color:var(--ink)}
+  .mtb.live em.lt{top:-16px;font-size:9.5px;font-weight:800}
+  .mtb.live span{font-weight:800;color:var(--ink)}
   @media(max-width:560px){.mtp-seg button{padding:5px 8px;font-size:11.5px}.mtp-plot{height:200px;padding-left:32px}.mtp-plot .ax{width:28px}.mtp-x{margin-left:32px}
-    .mtp-evs{grid-template-columns:1fr}.mtp-in .yrl{display:none}.mtb em{display:none}.mtb.hl em{display:block}}
+    .mtp-evs{grid-template-columns:1fr}.mtp-in .yrl{display:none}.mtb em{display:none}.mtb.hl em,.mtb.live em{display:block}}
 </style>
 {% endblock %}
 {% block body %}
@@ -123,10 +130,10 @@
       {% for a in mt.bar_axes %}<span class="ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
       <div class="mtb-in">
         {% if mt.bar_base %}<i class="mtb-base" style="top:{{ mt.bar_base.top }}"><span>아무 날 평균 +{{ mt.bar_base.avg }}%</span></i>{% endif %}
-        {% for b in mt.bars %}<div class="mtb{{ ' hl' if b.hl }}" title="{{ b.y }}년 선거일 뒤 12개월 {{ b.v_s }}%"><i style="top:{{ b.top }};height:{{ b.h }}"></i><em style="top:calc({{ b.top }} - 15px)">{{ b.v_s }}</em><span>{{ (b.y|string)[2:] }}</span></div>{% endfor %}
+        {% for b in mt.bars %}<div class="mtb{{ ' hl' if b.hl }}{{ ' live' if b.live }}" title="{% if b.live %}{{ b.y }}년 선거일({{ b.from_s }}) 뒤 지금까지 {{ b.v_s }}% · 진행 중{% else %}{{ b.y }}년 선거일 뒤 12개월 {{ b.v_s }}%{% endif %}"><i style="top:{{ b.top }};height:{{ b.h }}"></i>{% if b.live %}<em class="lt">진행 중</em>{% endif %}<em style="top:calc({{ b.top }} - 15px)">{{ b.v_s }}</em><span>{{ (b.y|string)[2:] }}</span></div>{% endfor %}
       </div>
     </div>
-    <p class="ltp-fine">{{ mt.y1 }}년 칸은 {{ mt.y1 + 1 }}년 11월에 채워져요. 표본이 {{ mt.n_mid }}번뿐이고 시대마다 금리·경기가 달랐어요. 중간선거 뒤에 오른 이유는 해마다 달랐다는 점도 함께 봐 주세요.</p>
+    <p class="ltp-fine">{% if mt.live %}{{ mt.y1 }}년 칸(빗금)은 선거일({{ mt.live.from_s }}) 뒤 지금까지 {{ mt.live.v_s }}%예요 — 진행 중이라 평균에 넣지 않았고, {{ mt.y1 + 1 }}년 11월에 12개월이 차면 확정돼요.{% else %}{{ mt.y1 }}년 칸은 {{ mt.y1 + 1 }}년 11월에 채워져요.{% endif %} 표본이 {{ mt.n_mid }}번뿐이고 시대마다 금리·경기가 달랐어요. 중간선거 뒤에 오른 이유는 해마다 달랐다는 점도 함께 봐 주세요.</p>
   </section>
   {% endif %}
 
