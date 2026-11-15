@@ -1,10 +1,30 @@
 {
   "slots": {
+    "2026-11-16": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-16/kospi/",
+        "headline": "수출은 역대 최대인데, 엔비디아가 발목을 잡았다",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-13": {
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-13/kospi/",
         "headline": "미국 대형 기술주가 일제히 숨 고르기에 들어갔어요.",
+        "hit": false,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -23,6 +43,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-13/us/",
         "headline": "젠슨 황이 떠나자 AMD·AVGO가 웃었다",
+        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
@@ -883,26 +904,6 @@
         "pill_text": "▲",
         "title": "상승 우위",
         "time": "21:17"
-      }
-    },
-    "2026-10-05": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-05/us/",
-        "headline": "금리 동결 안도감 속 기술주는 숨 고르기 — VIX 반등이 변동성 경고등을 켰다",
-        "hit": true,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:16"
       }
     }
   }

@@ -1,0 +1,175 @@
+{
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 24,
+    "down_pct": 76,
+    "confidence": 72,
+    "basis": "open"
+  },
+  "reason_title": "젠슨 황 사임 후폭풍, 반도체 또 흔들린다",
+  "todays_view": {
+    "view_title": "수출은 역대 최대인데, 엔비디아가 발목을 잡았다",
+    "dek": "11월 1~10일 반도체 수출이 <b>+331.2%</b> 급증하며 역대 최대 기록을 세웠는데, 정작 시장은 엔비디아 CEO 사임 소식에 더 크게 반응하고 있어요. 숫자는 좋은데 심리가 안 좋은, 엇갈린 하루예요.",
+    "recap": [
+      {
+        "text": "반도체가 지수를 끌어내렸어요. <b>SK하이닉스</b>가 <b>-3.03%</b>, <b>삼성전자</b>가 <b>-0.96%</b> 빠지며 지수 하락을 주도했어요.",
+        "codes": [
+          "000660",
+          "005930"
+        ]
+      },
+      {
+        "text": "외국인이 오후 들어 순매도로 돌아섰어요. 전일 외국인 순매도 규모가 <b>5,505억원</b>에 달했어요.",
+        "codes": []
+      },
+      {
+        "text": "금융주는 홀로 강세였어요. <b>KB금융</b>이 <b>+4.74%</b>, <b>신한지주</b>가 <b>+5.65%</b> 오르며 방어막 역할을 했어요.",
+        "codes": [
+          "105560",
+          "055550"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "watch",
+        "text": "엔비디아 CEO 공백이 美 증시 전반 투자심리를 계속 짓누를지 지켜봐야 해요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "반도체 수출 호조라는 펀더멘털이 투자심리 악화를 상쇄할 수 있을지 확인하세요.",
+        "source": null
+      },
+      {
+        "tag": "event",
+        "text": "케빈 워시 연준 의장 발언이 내일 새벽 2시 예정돼 있어요 — 금리 경로의 다음 단서예요.",
+        "source": "calendar"
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>엔비디아 CEO 사임 소식이 반도체 투자심리를 직격했어요.</b> AI 산업 불확실성이 커지면서 필라델피아 반도체지수(SOX)가 <b>-3.42%</b> 급락했고, 국내 반도체 대형주에도 갭하락 압력이 실릴 가능성이 커요.",
+      "codes": []
+    },
+    {
+      "text": "<b>미국 지수선물이 여전히 약세를 가리키고 있어요.</b> 나스닥 선물이 <b>-1.23%</b>로 가장 크게 밀리고 있어 기술주 중심의 코스피 개장도 눌릴 공산이 커요.",
+      "codes": []
+    },
+    {
+      "text": "<b>외국인 자금 이탈 흐름이 이어지고 있어요.</b> 10월에만 외국인이 <b>5,505억 1천만 달러</b>를 순유출했고, EWY도 <b>-1.79%</b> 추가 하락하며 수급 부담이 가시지 않고 있어요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-16T07:28:27.164372+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-16T07:26:48.742946+09:00",
+    "briefing_date": "2026-11-16",
+    "us_session_date": "2026-11-13",
+    "session_label": "지난 금요일",
+    "cards": [
+      {
+        "title": "젠슨 황 사임 충격, 엔비디아 목표주가 하향 도미노",
+        "sides": [
+          {
+            "side": "down",
+            "label": "엔비디아",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -2.01
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "엔비디아는 <b>내렸어요</b>"
+      },
+      {
+        "title": "경쟁사 AMD·브로드컴은 반사이익 챙겨",
+        "sides": [
+          {
+            "side": "up",
+            "label": "AI 반도체 경쟁사",
+            "marks": [
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -8.75
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": -4.76
+              }
+            ],
+            "proxy": null
+          },
+          {
+            "side": "down",
+            "label": "엔비디아",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -2.01
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI 반도체 경쟁사는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "지난 금요일 PPI·근원 PPI 발표, 금리 레벨도 높아진 상태",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": -0.4
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>내렸어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-16",
+    "generated_at": "2026-11-16T07:26:49.924926+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": []
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-13",
+    "direction": "하락 우위",
+    "ok": false,
+    "open_pct": 2.05
+  },
+  "prior_signals": {
+    "sox": -3.42,
+    "nasdaq": -0.9,
+    "nq": -1.23,
+    "ewy_resid": -0.808,
+    "vix": 3.2085
+  },
+  "prev_supply": {
+    "date": "20261113",
+    "individual": 172,
+    "institution": 23,
+    "foreign": -5505
+  }
+}
