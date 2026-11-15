@@ -146,26 +146,6 @@ test('장기 신호 · S&P 500 — 비율·한 주 전·보통 대비·과열/20
   assert.equal(api.sp500Row(null, '2026-11-08'), '');
 });
 
-// ── 코스피 체크 ─────────────────────────────────────────────────────
-const KC_SERIES = [];
-for (let y = 2001; y <= 2026; y++) for (let m = 1; m <= 12; m++) {
-  const k = `${y}-${String(m).padStart(2, '0')}`;
-  if (k < '2001-11' || k > '2026-11') continue;
-  KC_SERIES.push([k, k === '2007-10' ? 87.5 : k === '2026-05' ? 178.6 : k === '2026-11' ? 49.2 : 10]);
-}
-const KC = { asof: '2026-11-06', gap_pct: 49.2, since: '2001-11', months: 301, above: 39, year_max: { m: '2026-05', gap: 178.6 }, prev_max: { m: '2007-10', gap: 87.5 }, series: KC_SERIES };
-test('장기 신호 · 코스피 체크 — 거리·올해 꼭대기에서 좁혀진 설명·25년 작은 그래프, 판정 없음', () => {
-  const h = api.kospiRow(KC, '2026-11-08');
-  assert.match(h, /href="\/stocks\/kospi-check\/"/);
-  assert.match(h, /11\/6\(금\) 종가/);
-  assert.match(h, /\+49\.2%/);
-  assert.match(h, /올해 5월 \+178\.6%에서 좁혀졌어요/);
-  assert.doesNotMatch(h, /정상|주의|경고|class="pill/);
-  assert.match(api.kospiRow({ ...KC, gap_pct: 178.6, year_max: { m: '2026-11', gap: 178.6 } }, '2026-11-08'), /올해 들어 가장 멀어요/);
-  assert.equal(api.kospiRow(KC, '2026-11-20'), '');
-  assert.equal(api.kospiRow(null, '2026-11-03'), '');
-});
-
 test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표시), 종목이 없으면 줄째 뺀다', () => {
   const strip = ['5월', '6월', '7월', '8월', '9월', '10월', '이번 달'].map((label, i) =>
     ({ label, gap_pct: [-9.69, -5.49, 11.59, 7.87, 8.69, 3.1, 5.46][i], run: i >= 2 && i <= 4, cur: i === 6 }));
@@ -182,16 +162,17 @@ test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표�
   assert.equal(api.ma5Row(null, '2026-10-26', '2026-10-26'), '');
 });
 
-test('장기 신호 블록 — 나스닥 → S&P 500 → 코스피 → 월봉 순, 주간 리포트 링크, 줄이 없으면 블록째 뺀다', () => {
+test('장기 신호 블록 — 나스닥 → S&P 500 → 월봉 순, 코스피 체크 없음, 주간 리포트 링크, 줄이 없으면 블록째 뺀다', () => {
   const m5 = { items: [{ name: '삼성화재', streak: 6, strip: [] }] };
-  const h = api.structHtml({ gap_pct: 48.9 }, SPH, KC, m5, '2026-11-06', '2026-11-08');
+  const h = api.structHtml({ gap_pct: 48.9 }, SPH, m5, '2026-11-06', '2026-11-08');
   const at = (s) => h.indexOf(s);
-  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('코스피 체크') && at('코스피 체크') < at('월봉 5개월선'));
+  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('월봉 5개월선'));
   assert.match(h, /장기 신호/);
+  assert.match(h, /07:30 갱신/);
   assert.match(h, /href="\/weekly\/">주간 장기 리포트 ›/);
-  assert.doesNotMatch(h, /구조 신호|200일선 대비/);
-  assert.equal(api.structHtml(null, null, null, { items: [] }, '2026-11-06', '2026-11-08'), '');
-  assert.doesNotMatch(api.structHtml({ gap_pct: 48.9 }, null, null, null, null, '2026-11-08'), /S&amp;P|코스피 체크/);
+  assert.doesNotMatch(h, /구조 신호|200일선 대비|코스피 체크|kospi-check/);
+  assert.equal(api.structHtml(null, null, { items: [] }, '2026-11-06', '2026-11-08'), '');
+  assert.doesNotMatch(api.structHtml({ gap_pct: 48.9 }, null, null, null, '2026-11-08'), /S&amp;P/);
 });
 
 // ── 주말 카드(§68 ⑥) ───────────────────────────────────────────────────

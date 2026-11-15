@@ -3,7 +3,6 @@
 쓰는 곳(web/assets/home-hero.js):
   · 마감 카드의 '📝 아침 시초가 예측 → 시초가 x% ✓' — 오늘 채점은 정확도 잡(다음 거래일 09:10)보다 먼저 필요하다
   · 주말 카드의 이번 주 코스피 등락·일별 등락·이번 주 예측 성적·섹터 주간 등락(`sectors_week`)
-  · 구조 신호의 코스피 체크(`kospi_check`, kospi_check.py) — 아침·주말에 나온다
 공개 JSON에 없는 값이라 마감 잡이 만든다. **이 파일의 주인은 kospi-close 잡 하나다(§18).**
 
 채점 규칙은 check_accuracy와 같다 — 시가 ÷ 직전 종가(지수 일봉, §57), 같은 classify_direction_correct.
@@ -20,14 +19,12 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_accuracy import classify_direction_correct  # noqa: E402
-import kospi_check  # noqa: E402
 from prediction_basis import is_open_basis  # noqa: E402
 
 KST = ZoneInfo("Asia/Seoul")
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "web" / "data" / "home-summary.json"
 BRIEFINGS = ROOT / "data" / "briefings.json"
-KOSPI_CHECK_OUT = ROOT / "data" / "kospi_check.json"           # 코스피 체크 상세 페이지 원천(gitignore)
 SNAPSHOT = ROOT / "web" / "data" / "stocks-snapshot.json"      # 같은 잡이 앞 스텝에서 쓴다(build_stocks_snapshot)
 UNIVERSE = ROOT / "scripts" / "config" / "stock_universe.json"
 DAYS = 10            # 최근 거래일 수(주간 등락 계산에 직전 주 마지막 종가까지 필요)
@@ -124,12 +121,6 @@ def main():
     if out is None:
         print("[home_summary] 지수 일봉 부족 — 파일을 쓰지 않는다", file=sys.stderr)
         sys.exit(1)
-    last_day = out["kospi_days"][-1]
-    check = kospi_check.fetch(last_day["date"], last_day["close"])
-    if check:
-        # 월별 기록은 상세 페이지(/stocks/kospi-check/)만 쓴다 — 홈이 매번 받는 JSON에 싣지 않는다.
-        KOSPI_CHECK_OUT.write_text(json.dumps(check, ensure_ascii=False) + "\n", encoding="utf-8")
-        out["kospi_check"] = {k: v for k, v in check.items() if k != "history"}
     out["generated_at"] = datetime.now(KST).isoformat(timespec="seconds")
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     last = out["scores"][-1] if out["scores"] else None

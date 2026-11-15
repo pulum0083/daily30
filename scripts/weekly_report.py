@@ -1,11 +1,11 @@
-# 주간 장기 리포트 — 한 주의 지수 등락과 장기 지표(코스피 체크·나스닥 체크·S&P 500 200일선·월봉 5개월선)를 모아 /weekly/{금요일}/을 쓴다
+# 주간 장기 리포트 — 한 주의 지수 등락과 장기 지표(나스닥 체크·S&P 500 200일선·월봉 5개월선)를 모아 /weekly/{금요일}/을 쓴다
 """
 토요일 아침(미국 금요일 장 마감 뒤) 한 번 만들고 고치지 않는다. 모은 값은 web/weekly/{금요일}/data.json에 함께 남기고,
 다시 그릴 땐 그 파일만 읽는다(브리핑 analysis_snapshot과 같은 원칙, §2) — 나중에 다시 돌려도 그 주의 숫자가 바뀌지 않는다.
 
 깨끗한 체크아웃에서 돈다(.github/workflows/weekly-report.yml) — gitignore된 data/*.json에 기대지 않는다.
   · 코스피 종가: 네이버 지수 일봉(build_home_summary.fetch_kospi_days)
-  · 미국 지수·나스닥 체크·코스피 체크: 야후 일봉(nasdaq_overheat.fetch_daily)
+  · 미국 지수·나스닥 체크: 야후 일봉(nasdaq_overheat.fetch_daily)
   · S&P 500 200일선 비율: sp500_ma200.py를 이 자리에서 돌려 금요일 세션까지 누적 기록에 넣는다
   · 월봉 5개월선: 그 주 브리핑 스냅샷(커밋됨) · 섹터 주간 등락: home-summary.json(커밋됨, 날짜가 맞을 때만)
 문장·헤드라인은 longterm_pages.weekly_context가 정해진 틀로 만든다(LLM 없음, §0).
@@ -28,7 +28,6 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import kospi_check as kc  # noqa: E402
 import nasdaq_overheat as nq  # noqa: E402
 
 KST = ZoneInfo("Asia/Seoul")
@@ -118,7 +117,7 @@ def collect(end: date) -> dict:
     if not ks:
         print("[weekly] 코스피 종가 없음 — 중단", file=sys.stderr)
         return None
-    kr_last, kr_prev = ks[-1][0], ks[0][0]
+    kr_last = ks[-1][0]
     idx = {"KS": ks}
     us_daily, ma = {}, {}
     for sym, name in US_IDX:
@@ -131,12 +130,6 @@ def collect(end: date) -> dict:
             ma[name] = [ma200_gap(rows, s[-1][0]), ma200_gap(rows, s[0][0])]
     us_last = (idx.get("^GSPC") or [[e]])[-1][0]
     us_prev = (idx.get("^GSPC") or [[prev_end]])[0][0]
-
-    ks_daily = kc.fetch_daily(e)
-    now_c = kc.compute(ks_daily, kr_last, ks[-1][1])
-    prev_c = kc.compute(ks_daily, kr_prev, ks[0][1])
-    kcd = {"now": now_c and now_c["gap_pct"], "prev": prev_c and prev_c["gap_pct"],
-           "year_max": now_c and now_c.get("year_max"), "prev_max": now_c and now_c.get("prev_max")}
 
     def nqat(d):
         c = nq.compute(nq.monthly([r for r in us_daily["^IXIC"] if r[0] <= d]))
@@ -174,7 +167,7 @@ def collect(end: date) -> dict:
 
     return {
         "end": e, "monday": monday, "prev_end": prev_end, "kr_last": kr_last, "us_last": us_last,
-        "idx": idx, "kc": kcd, "nq": nqd, "spx": spd, "ma200": ma,
+        "idx": idx, "nq": nqd, "spx": spd, "ma200": ma,
         "ma5": {"kr": ma5_lists("kospi", "monthly_ma5", monday, e, prev_kospi_session),
                 "us": ma5_lists("us", "monthly_ma5_us", monday, e, prev_us_session)},
         "sectors_week": sectors_week,
@@ -224,9 +217,8 @@ def telegram_text(d: dict, ctx: dict, today: date, base_url: str) -> str:
         lines.append(" · ".join(us[i:i + 2]))
     if wk["cards"]:
         lines += ["", "📐 장기 지표 (지난주 → 이번 주)"]
-        short = {"코스피 체크": "코스피 체크", "나스닥 체크": "나스닥 체크", "S&P 500": "S&P 500 200일선 위"}
-        # 종목 홈 장기 신호와 같은 순서 — 나스닥 → S&P 500 → 코스피(2026-11-09 사용자 결정)
-        for c in sorted(wk["cards"], key=lambda c: c["name"].startswith("코스피")):
+        short = {"나스닥 체크": "나스닥 체크", "S&P 500": "S&P 500 200일선 위"}
+        for c in wk["cards"]:
             k = next((v for key, v in short.items() if c["name"].startswith(key)), c["name"].split(" · ")[0])
             lines.append(f"{k} {c['a']} → {c['b']}")
     from send_telegram import link_line

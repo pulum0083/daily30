@@ -1,62 +1,15 @@
-# 장기 지표 영구 페이지(코스피 체크·S&P 500 200일선)와 주간 장기 리포트 테스트 — 네트워크 없음
+# 장기 지표 영구 페이지(S&P 500 200일선)와 주간 장기 리포트 테스트 — 네트워크 없음
 import json
 import sys
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import kospi_check as kc  # noqa: E402
 import longterm_pages as lp  # noqa: E402
 import sp500_ma200 as sp  # noqa: E402
 import weekly_report as wr  # noqa: E402
-
-
-# ── 코스피 체크 ──
-
-def _months(n, start=2000):
-    return [f"{start + i // 12}-{i % 12 + 1:02d}" for i in range(n)]
-
-
-def test_forward_skips_month_whose_year_ahead_is_in_progress():
-    ms = [{"m": m, "close": 100.0, "low": 90.0, "high": 110.0} for m in _months(30)]
-    assert kc.forward(ms, 17) == (None, None)          # 17+12 = 29 = 마지막 달(진행 중) → 아직 결과 없음
-    r, dd = kc.forward(ms, 16)                          # 16+12 = 28 → 끝난 달
-    assert r == 0.0 and dd == pytest.approx(-10.0)
-
-
-def test_history_and_episodes_grouping():
-    hist = [["2005-01", 45, 1, 1, 10.0, -3.0], ["2005-02", 50, 1, 1, 20.0, -5.0], ["2005-06", 41, 1, 1, 5.0, -1.0],
-            ["2005-11", 55, 1, 1, -8.0, -25.0], ["2006-01", 30, 1, 1, 1.0, 0.0], ["2006-02", 45, 1, 1, None, None]]
-    eps = kc.episodes(hist, 40.0, 60.0)
-    assert [e["months"] for e in eps] == [["2005-01", "2005-02"], ["2005-06"], ["2005-11"]]   # 2006-02는 결과 없음
-    assert kc.bucket_of(49.2) == (40.0, 60.0) and kc.bucket_of(-3) == (None, 0.0) and kc.bucket_of(75) == (60.0, None)
-
-
-def _kc_data(n=80):
-    ms = _months(n)
-    hist = []
-    for i, m in enumerate(ms):
-        g = 50.0 if i in (10, 11, 40, 60) else 10.0
-        r = None if i >= n - 13 else (15.0 if i in (10, 11) else -20.0 if i == 40 else 30.0 if i == 60 else 2.0)
-        hist.append([m, g, 1000.0 + i, 800.0, r, None if r is None else -5.0])
-    hist[-1][1] = 49.2
-    return {"asof": f"{ms[-1]}-06", "gap_pct": 49.2, "close": 1079.0, "ma60": 800.0, "above": 4,
-            "year_max": {"m": ms[-3], "gap": 10.0}, "prev_max": {"m": ms[10], "gap": 50.0}, "history": hist}
-
-
-def test_kospi_context_episodes_and_conclusion():
-    c = lp.kospi_context(_kc_data())["kc"]
-    assert c["bucket"] == "40~60%" and len(c["eps"]) == 3 and c["nu"] == 2 and c["nd"] == 1
-    assert "거리만으로는 갈리지 않았어요" in c["concl"]
-    assert next(r for r in c["table"] if r["now"])["label"] == "40~60%"
-    assert c["eps"][0]["n"] == 2 and c["eps"][0]["up"]
-
-
-def test_kospi_context_empty_without_history():
-    assert lp.kospi_context({"asof": "2026-11-06", "gap_pct": 1.0, "history": []}) == {}
 
 
 # ── S&P 500 200일선 ──
@@ -125,7 +78,6 @@ def _wk(ma=None):
             "idx": {"KS": [["2026-10-30", 5730.74], ["2026-11-02", 5859.08], ["2026-11-03", 5648.79],
                            ["2026-11-05", 5383.8], ["2026-11-06", 5059.69]],             # 11/4 휴장
                     "^GSPC": s([99, 100, None, 98, 97])},
-            "kc": {"now": 49.2, "prev": 70.8, "year_max": {"m": "2026-05", "gap": 178.6}, "prev_max": {"m": "2007-10", "gap": 87.5}},
             "nq": {"now": {"gap": 48.9, "month": "2026-11", "high": 26048.8, "level": "ok"},
                    "prev": {"gap": 59.9, "month": "2026-10", "high": 27722.8, "level": "ok"}},
             "spx": {"now": ["2026-11-06", 58.8], "prev": ["2026-10-30", 61.6], "median_all": 66.3, "from_label": "2020년 8월",
@@ -143,7 +95,9 @@ def test_weekly_headline_uses_first_crossing_event():
     assert [c["dow"] for c in k["cols"]] == ["월", "화", "목", "금"] and k["cols"][2]["lab"] == "−4.69%"   # 목요일 등락은 화요일 종가 대비
     assert k["head_day"] == "금요일" and k["head_pt"] == "−324p" and k["n"] == 6
     assert [r["name"] for r in w["rows"]] == ["S&P 500"]                # 미국 지수만 요일 계단(A안)
-    assert "헬스케어는 90%, 커뮤니케이션은 23%만 선 위예요" in w["cards"][2]["txt"]
+    assert "헬스케어는 90%, 커뮤니케이션은 23%만 선 위예요" in w["cards"][1]["txt"]
+    assert [c["name"].split(" · ")[0] for c in w["cards"]] == ["나스닥 체크", "S&P 500"]   # 코스피 체크는 2026-11-15 제거
+    assert w["sub"].startswith("코스피는 5,731에서 5,060으로 내려왔어요.")
 
 
 def test_weekly_headline_without_event():
@@ -171,9 +125,6 @@ def test_templates_render(tmp_path):
     import generate_html as gh
     env = gh.make_env()
     base = {"css_path": "/a.css", "js_path": "/a.js", "canonical_url": "https://x/", "seo_jsonld": []}
-    html = env.get_template("pages/kospi_check.html").render(**lp.kospi_context(_kc_data()), **base)
-    assert "지금과 비슷했던 때" in html and "None" not in html
-    assert "한 달 전" not in html and "월 말</span>" in html                 # 지난달 말 값 — '한 달 전'이 아니다(2026-11-09)
     html = env.get_template("pages/sp500_200.html").render(**lp.sp500_context(_sp_data(), _sp_hist()), **base)
     assert "빠진 종목은 없고" not in html and "빠진 종목은 계산에 들어 있지 않고" in html
     assert html.index("🔥 과열") < html.index("200일선 위로") < html.index("200일선 아래로") and "None" not in html
@@ -185,9 +136,10 @@ def test_templates_render(tmp_path):
 def test_pages_are_in_publish_gate_and_sitemap():
     from verify_publish_gate import expected_pages
     urls = {u for _, u in expected_pages()}
-    assert {"https://doubleshot.space/stocks/kospi-check/", "https://doubleshot.space/stocks/sp500-200/"} <= urls
+    assert "https://doubleshot.space/stocks/sp500-200/" in urls
+    assert not any("kospi-check" in u for u in urls)                     # 2026-11-15 제거
     sm = (Path(__file__).resolve().parents[1] / "web" / "sitemap.xml").read_text(encoding="utf-8")
-    assert "/stocks/kospi-check/" in sm and "/stocks/sp500-200/" in sm and "/weekly/" in sm
+    assert "/stocks/sp500-200/" in sm and "/weekly/" in sm and "kospi-check" not in sm
 
 
 def test_write_sp500_page_also_writes_home_file(tmp_path, monkeypatch):
@@ -234,22 +186,6 @@ def test_recent_weekly_sits_between_monday_and_friday():
     assert 'class="rb-item wk"' in html
 
 
-def test_kospi_daily_joins_naver_before_yahoo():
-    """야후(1996-12~) 앞을 네이버 일봉으로 잇는다 — 겹치는 기간은 야후(2026-11-09)."""
-    yahoo = [("1996-12-11", 709.5, 704.4, 704.7), ("1996-12-12", 706.0, 688.7, 689.4)]
-    naver = [("1990-01-04", 933.2, 911.2, 928.8), ("1996-12-10", 1, 1, 1), ("1996-12-11", 9, 9, 9)]
-    assert kc.join_daily(yahoo, naver) == [naver[0], naver[1]] + yahoo
-    assert kc.join_daily([], naver) == naver
-
-
-def test_kospi_fetch_daily_falls_back_to_yahoo(monkeypatch):
-    monkeypatch.setattr(kc.nq, "fetch_daily", lambda s: [("1996-12-11", 1.0, 1.0, 1.0)])
-    def boom(end):
-        raise OSError("down")
-    monkeypatch.setattr(kc, "naver_daily", boom)
-    assert kc.fetch_daily("2026-11-06") == [("1996-12-11", 1.0, 1.0, 1.0)]
-
-
 def test_weekly_telegram_text():
     d = _wk()
     t = wr.telegram_text(d, lp.weekly_context(d), date(2026, 11, 7), "https://doubleshot.space")
@@ -258,10 +194,10 @@ def test_weekly_telegram_text():
     assert "🎯 <b>코스피 한 주 −11.7%" in t
     assert "코스피 5,731 → 5,060 (−11.71%)" in t
     assert "S&P 500 −3.00%" in t                                             # 99 → 97
-    assert "코스피 체크 70.8% → 49.2%" in t and "나스닥 체크 59.9% → 48.9%" in t
+    assert "나스닥 체크 59.9% → 48.9%" in t and "코스피 체크" not in t
     assert "S&P 500 200일선 위 61.6% → 58.8%" in t
-    i = lines.index("📐 장기 지표 (지난주 → 이번 주)")                       # 나스닥 → S&P 500 → 코스피(홈과 같은 순서)
-    assert [l.split(" ")[0] for l in lines[i + 1:i + 4]] == ["나스닥", "S&P", "코스피"]
+    i = lines.index("📐 장기 지표 (지난주 → 이번 주)")                       # 나스닥 → S&P 500(홈과 같은 순서)
+    assert [l.split(" ")[0] for l in lines[i + 1:i + 3]] == ["나스닥", "S&P"]
     assert lines[-1] == "🔗 주간 장기 리포트 → https://doubleshot.space/weekly/2026-11-06/"
 
 

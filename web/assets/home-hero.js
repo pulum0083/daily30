@@ -251,10 +251,10 @@
   }
 
   // ── 장기 신호(2026-11-09 §68 ⑤ 개정, 시안 docs/prototypes/2026-11-09-home-longterm-entry.html) ──
-  //   줄마다 이름·큰 숫자·한 줄 설명·작은 그래프 — 깊은 그래프는 상세 페이지에 있다. 순서: 나스닥 체크 → S&P 500 200일선 → 코스피 체크(사용자 결정).
+  //   줄마다 이름·큰 숫자·한 줄 설명·작은 그래프 — 깊은 그래프는 상세 페이지에 있다. 순서: 나스닥 체크 → S&P 500 200일선(사용자 결정). 코스피 체크는 2026-11-15에 뺐다.
   //   하루 종일 보인다(장중·마감엔 맨 아래). 값이 없거나 오래된 줄만 빠진다.
   function sg1(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1); }
-  // 작은 선 그래프 — zero가 있으면 그 높이에 점선(코스피 0% · S&P 50%). 마지막 점을 찍는다.
+  // 작은 선 그래프 — zero가 있으면 그 높이에 점선(S&P 50%). 마지막 점을 찍는다.
   function ltSpark(vals, zero) {
     vals = (vals || []).filter(function (v) { return typeof v === 'number' && isFinite(v); });
     if (vals.length < 2) return '<span class="lt-g"></span>';
@@ -309,18 +309,6 @@
       [cmp, cnt].filter(Boolean).join(' · '), ltSpark(sp.spark, 50));
   }
 
-  // 코스피 체크 — 종가 ÷ 5년(60개월) 평균. 정상·주의·경고를 판정하지 않는다(§68 ⑤). 25년 흐름을 작게.
-  function kospiRow(kc, today) {
-    if (!kc || typeof kc.gap_pct !== 'number' || !isFinite(kc.gap_pct) || !/^\d{4}-\d{2}-\d{2}$/.test(kc.asof || '')) return '';
-    if (daysBetween(kc.asof, today) > STRUCT_MAX_AGE) return '';   // 수집이 멈췄으면 옛 값을 보여주지 않는다(§20)
-    var g = kc.gap_pct, ym = kc.year_max && typeof kc.year_max.gap === 'number' ? kc.year_max : null;
-    var desc = ym && ym.gap > g + 0.05 ? '올해 ' + (+String(ym.m).slice(5, 7)) + '월 ' + sg1(ym.gap) + '%에서 좁혀졌어요'
-             : ym ? '올해 들어 가장 멀어요' : '';
-    var series = (Array.isArray(kc.series) ? kc.series : []).map(function (p) { return p && p[1]; });
-    return ltRow('/stocks/kospi-check/', '코스피 체크 · 5년 평균과의 거리', md(kc.asof) + '(' + dowOf(kc.asof) + ') 종가',
-      sg1(g) + '%', desc, ltSpark(series, 0));
-  }
-
   // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 줄을 뺀다.
   function ma5Row(m5, ymd, today) {
     if (!m5 || !Array.isArray(m5.items)) return '';
@@ -344,9 +332,9 @@
       '<em>월말 종가 ÷ 5개월 평균' + (now ? ' · ' + now : '') + '</em></a>';
   }
 
-  function structHtml(nq, sp, kc, m5, m5Date, today) {
-    var rows = nasdaqRow(nq, today) + sp500Row(sp, today) + kospiRow(kc, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
-    return rows ? '<div class="block__h"><span class="block__t"><span class="ic">📐</span>장기 신호</span><span class="block__s">미국 07:30 · 코스피 16:30 갱신</span></div>' +
+  function structHtml(nq, sp, m5, m5Date, today) {
+    var rows = nasdaqRow(nq, today) + sp500Row(sp, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
+    return rows ? '<div class="block__h"><span class="block__t"><span class="ic">📐</span>장기 신호</span><span class="block__s">07:30 갱신</span></div>' +
       rows + '<div class="lt-f"><span>매주 토요일 한 주 정리</span><a href="/weekly/">주간 장기 리포트 ›</a></div>' : '';
   }
 
@@ -356,9 +344,9 @@
     if (!structEl) return;
     var usD = latestReady(slots, 'us', today), krD = latestReady(slots, 'kospi', today);
     var snap = function (d, t) { return d ? json('/briefings/' + d + '/' + t + '/analysis_snapshot.json') : Promise.resolve(null); };
-    return Promise.all([snap(usD, 'us'), snap(krD, 'kospi'), json('/data/home-summary.json'), json('/data/sp500-home.json'),
+    return Promise.all([snap(usD, 'us'), snap(krD, 'kospi'), json('/data/sp500-home.json'),
                         json('/data/nasdaq-home.json')]).then(function (r) {
-      var html = structHtml(pickNasdaq(r[4], r[0] && r[0].nasdaq_overheat), r[3], r[2] && r[2].kospi_check, r[1] && r[1].monthly_ma5, krD, today);
+      var html = structHtml(pickNasdaq(r[3], r[0] && r[0].nasdaq_overheat), r[2], r[1] && r[1].monthly_ma5, krD, today);
       structEl.innerHTML = html;
       structEl.hidden = !html;
     });
@@ -449,7 +437,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, pickNasdaq: pickNasdaq, sp500Row: sp500Row, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, kospiRow: kospiRow, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, pickNasdaq: pickNasdaq, sp500Row: sp500Row, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);
