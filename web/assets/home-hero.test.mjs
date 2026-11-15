@@ -168,7 +168,7 @@ const MT = { asof: '2026-11-13', years: [2018, 2026], now: 10.46, same: { date: 
 test('장기 신호 · 중간선거 해 비교 — 2026 연초 대비·2018년 같은 날·19번 모두 오름, 두 선 그래프', () => {
   const h = api.midtermRow(MT, '2026-11-15');
   assert.match(h, /href="\/stocks\/midterm-2018\/"/);
-  assert.match(h, /중간선거 해 · 2018년 비교/);
+  assert.match(h, /트럼프 1기 중간선거 뒤와 닮았을까\?/);              // 상세 페이지 타이틀과 같은 이름(2026-11-15)
   assert.match(h, /11\/13\(금\) 종가/);
   assert.match(h, /\+10\.5%<small>2018년 같은 날 \+1\.8%<\/small>/);
   assert.match(h, /1950년 이후 19번 모두 올랐어요/);
@@ -182,7 +182,7 @@ test('장기 신호 블록 — 나스닥 → S&P 500 → 중간선거 → 월봉
   const m5 = { items: [{ name: '삼성화재', streak: 6, strip: [] }] };
   const h = api.structHtml({ gap_pct: 48.9 }, SPH, m5, '2026-11-06', '2026-11-08', { ...MT, asof: '2026-11-06' });
   const at = (s) => h.indexOf(s);
-  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('중간선거 해') && at('중간선거 해') < at('월봉 5개월선'));
+  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('트럼프 1기') && at('트럼프 1기') < at('월봉 5개월선'));
   assert.match(h, /장기 신호/);
   assert.match(h, /07:30 갱신/);
   assert.match(h, /href="\/weekly\/">주간 장기 리포트 ›/);

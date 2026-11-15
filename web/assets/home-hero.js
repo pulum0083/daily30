@@ -330,7 +330,7 @@
     var y0 = mt.years[0], same = mt.same && typeof mt.same.pct === 'number' ? mt.same.pct : null;
     var desc = typeof mt.n_mid === 'number' && mt.n_mid > 0
       ? '중간선거 뒤 12개월, 1950년 이후 ' + (mt.ups === mt.n_mid ? mt.n_mid + '번 모두 올랐어요' : mt.n_mid + '번 중 ' + mt.ups + '번 올랐어요') : '';
-    return ltRow('/stocks/midterm-2018/', '중간선거 해 · ' + y0 + '년 비교', md(mt.asof) + '(' + dowOf(mt.asof) + ') 종가',
+    return ltRow('/stocks/midterm-2018/', '트럼프 1기 중간선거 뒤와 닮았을까?', md(mt.asof) + '(' + dowOf(mt.asof) + ') 종가',
       sg1(mt.now) + '%' + (same == null ? '' : '<small>' + y0 + '년 같은 날 ' + sg1(same) + '%</small>'), desc, midSpark(mt.a, mt.b));
   }
 
