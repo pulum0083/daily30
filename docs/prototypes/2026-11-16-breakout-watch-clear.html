@@ -1,0 +1,149 @@
+<!doctype html>
+<!-- 미국 브리핑 '돌파 관찰 목록' 쉬운 화면 시안 (2026-11-16) — 숫자는 2026-11-15 시안(S&P 500 11/5·11/13 종가 실측) 그대로 -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>돌파 관찰 목록 — 쉬운 화면 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--canvas:#fff;--bg:#F7F8FA;--surface:#F7F9FC;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#0F172A;--sub:#334155;--muted:#6B7280;--primary:#2775ED;--up:#E03131;--dn:#2775ED;--warn:#B45309;--warnbg:#FFF7ED;--ok:#12A150}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Pretendard,system-ui,sans-serif;color:var(--ink);padding:24px 16px 80px}
+h1{font-size:22px;margin:0 0 6px}h2{font-size:18px;margin:44px 0 4px;padding-top:20px;border-top:2px solid var(--hair)}
+.lead{color:var(--muted);font-size:14px;margin:0 0 16px;line-height:1.6;max-width:820px}
+.pair{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.frame .lab{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px}
+.pc{width:720px;max-width:100%}.mo{width:343px;max-width:100%}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.sec{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px}
+.sh{display:flex;align-items:center;gap:8px}.st{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}.st::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.sd{margin-left:auto;font-size:12px;color:var(--muted)}
+.intro{font-size:13.5px;color:var(--sub);line-height:1.65;margin:8px 0 12px}
+/* 단계 흐름 */
+.flow{display:grid;grid-template-columns:1fr 18px 1fr 18px 1fr;align-items:stretch;margin-bottom:14px}
+.flow .s{background:var(--surface);border-radius:10px;padding:9px 10px;text-align:center}
+.flow .s b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.flow .s span{font-size:12px;color:var(--sub);font-weight:700}
+.flow .s small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.flow .ar{display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:14px}
+.mo .flow .s b{font-size:17px}.mo .flow .s small{display:none}
+/* 묶음 제목 */
+.gh{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;margin:16px 0 8px}
+.num{width:18px;height:18px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center}
+.gh small{font-size:12px;color:var(--muted);font-weight:500}
+/* 종목 카드 */
+.card{border:1px solid var(--hair);border-radius:12px;padding:12px 13px;margin-bottom:8px}
+.ch{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}.ch b{font-size:15px}.ch .tk{font-size:12px;color:var(--muted)}
+.ch .px{margin-left:auto;font-size:13px;font-variant-numeric:tabular-nums;color:var(--sub)}
+.say{font-size:13.5px;line-height:1.6;margin:6px 0 8px;color:var(--ink)}.say b{font-variant-numeric:tabular-nums}
+/* 가격 선 — 이름표를 점 바로 위·아래에 */
+.line{position:relative;height:74px;margin:4px 6px 2px}
+.line .bar{position:absolute;left:0;right:0;top:34px;height:4px;border-radius:2px;background:var(--inset)}
+.line .zone{position:absolute;top:34px;height:4px;border-radius:2px}
+.line .pt{position:absolute;top:29px;width:14px;height:14px;margin-left:-7px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.line .lb{position:absolute;font-size:11px;line-height:1.25;white-space:nowrap;transform:translateX(-50%);text-align:center;color:var(--sub)}
+.line .lb.t{top:0}.line .lb.b{top:47px}
+.line .lb b{font-variant-numeric:tabular-nums}
+.line .lb.l{transform:none}.line .lb.r{transform:translateX(-100%)}
+.c-now{background:var(--ink)}.c-stop{background:var(--dn)}.c-in{background:var(--up)}.c-in.o{background:#fff;border:2px solid var(--up)}
+/* 고른 이유 */
+.why{list-style:none;margin:8px 0 0;padding:8px 0 0;border-top:1px dashed var(--hair);display:grid;gap:3px}
+.why li{font-size:12px;color:var(--sub);padding-left:16px;position:relative}.why li::before{content:'✓';position:absolute;left:0;color:var(--ok);font-weight:800}
+.why li b{font-variant-numeric:tabular-nums}
+.mo .why{display:none}.mo .card.open .why{display:grid}
+.more{display:none;font-size:12px;color:var(--primary);margin-top:6px}.mo .more{display:inline-block}
+/* 결과 */
+.score{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--sub);margin-bottom:8px}
+.score .chip{border-radius:999px;padding:3px 9px;font-weight:700;font-size:12px}
+.chip.win{background:#FDECEC;color:var(--up)}.chip.lose{background:#E8F0FE;color:var(--dn)}.chip.live{background:var(--inset);color:var(--sub)}
+.res{list-style:none;margin:0;padding:0}
+.res li{display:grid;grid-template-columns:1fr auto 64px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #F1F5F9;font-size:13.5px}
+.res li:last-child{border-bottom:0}.res .nm small{display:block;font-size:11.5px;color:var(--muted)}
+.res .tag{font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;white-space:nowrap}
+.tag.live{background:var(--inset);color:var(--sub)}.tag.stop{background:#E8F0FE;color:var(--dn)}.tag.exit{background:#F1F5F9;color:var(--sub)}
+.res .v{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.mo .res li{grid-template-columns:1fr 56px}.mo .res .tag{grid-column:1;justify-self:start;margin-top:-4px}.mo .res li{row-gap:2px}
+.mo .res .v{grid-row:1/3;grid-column:2}
+.empty{font-size:13px;color:var(--muted);background:var(--surface);border-radius:10px;padding:12px;text-align:center}
+/* 정직한 한 줄 */
+.honest{margin-top:14px;background:var(--warnbg);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--warn);line-height:1.6}
+.honest b{color:#92400E}
+details.fine{margin-top:8px;font-size:12px;color:var(--muted)}details.fine summary{cursor:pointer}details.fine p{line-height:1.7;margin:6px 0 0}
+</style></head><body>
+<h1>돌파 관찰 목록 — 쉬운 화면 시안</h1>
+<p class="lead">2026-11-15 시안과 같은 숫자(S&amp;P 500 11/5·11/13 종가 실측)를 더 쉽게 다시 그렸어요. 바뀐 점은 네 가지예요. ① 맨 위에 '기다림 → 돌파 → 결과' 세 단계와 종목 수를 먼저 보여 줘요. ② 종목마다 한 문장으로 지금 상황을 말해요. ③ 가격 선의 점 바로 옆에 이름표를 붙였어요(범례 없음). ④ 결과는 R 대신 '돌파 가격에서 몇 % 움직였나'와 이김·짐으로 보여 줘요.</p>
+
+<h2>11/5 · 돌파 1종목 + 기다림 4종목</h2>
+<div class="pair"><div class="frame"><div class="lab">PC</div><div class="pc" id="d1-pc"></div></div><div class="frame"><div class="lab">휴대폰 — 고른 이유는 '왜 골랐나'를 누르면 펼쳐져요</div><div class="mo" id="d1-mo"></div></div></div>
+
+<h2>11/13 · 새 돌파가 없는 날</h2>
+<p class="lead">11/5에 돌파한 에스티로더는 다음 날 손절선에 닿아 끝났어요. 그 결과도 3단계에 그대로 남아요.</p>
+<div class="pair"><div class="frame"><div class="lab">PC</div><div class="pc" id="d2-pc"></div></div><div class="frame"><div class="lab">휴대폰</div><div class="mo" id="d2-mo"></div></div></div>
+
+<script>
+const usd=v=>'$'+v.toFixed(2), sg=(v,d=1)=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(d);
+const D1={asof:'11/5',
+ broke:[{nm:'에스티로더',tk:'EL',close:107.65,chg:-3.92,entry:113.53,stop:105.70,why:['3달 동안 <b>+32%</b> 올랐어요 (S&amp;P 500 상위 2%)','최근 2주 움직임이 <b>10.0%</b>로, 그 전 4주(17.9%)보다 좁아졌어요','10일·20일 평균선 위에 있어요']}],
+ wait:[
+  {nm:'에퀴팩스',tk:'EFX',close:193.84,pivot:197.00,stop:184.01,why:['1달 동안 <b>+36%</b> 올랐어요 (상위 0.6%)','최근 2주 움직임 <b>12.0%</b> — 그 전 4주 26.5%보다 좁아요','10일·20일 평균선 위에 있어요']},
+  {nm:'팩트셋',tk:'FDS',close:340.47,pivot:348.00,stop:323.26,why:['6달 동안 <b>+53%</b> 올랐어요 (상위 1.8%)','최근 2주 움직임 <b>12.3%</b> — 그 전 4주 25.8%보다 좁아요','10일·20일 평균선 위에 있어요']},
+  {nm:'액센츄어',tk:'ACN',close:265.16,pivot:271.76,stop:251.39,why:['3달 동안 <b>+52%</b> 올랐어요 (상위 0.2%)','최근 2주 움직임 <b>14.8%</b> — 그 전 4주 33.4%보다 좁아요','10일·20일 평균선 위에 있어요']},
+  {nm:'크라운캐슬',tk:'CCI',close:90.95,pivot:93.50,stop:87.43,why:['1달 동안 <b>+32%</b> 올랐어요 (상위 1.4%)','최근 2주 움직임 <b>10.8%</b> — 그 전 4주 19.7%보다 좁아요','10일·20일 평균선 위에 있어요']}],
+ res:[
+  {nm:'CDW',from:'11/4',st:'live',days:1,pct:-4.7},{nm:'에퀴팩스',from:'11/4',st:'live',days:1,pct:0.0},
+  {nm:'스카이웍스',from:'11/2',st:'stop',days:2,pct:-18.2},{nm:'액센츄어',from:'10/30',st:'live',days:4,pct:2.2},
+  {nm:'젠디지털',from:'10/30',st:'live',days:4,pct:6.9},{nm:'가트너',from:'10/16',st:'stop',days:12,pct:-7.6},
+  {nm:'메틀러토레도',from:'10/14',st:'live',days:16,pct:4.7},{nm:'필립스66',from:'9/2',st:'exit',days:44,pct:6.0},
+  {nm:'마라톤페트롤리엄',from:'8/28',st:'exit',days:46,pct:14.1},{nm:'아이큐비아',from:'8/24',st:'exit',days:50,pct:-3.0}]};
+const D2={asof:'11/13',broke:[],
+ wait:[{nm:'젠디지털',tk:'GEN',close:30.40,pivot:31.20,stop:29.16,why:['1달 동안 <b>+22%</b> 올랐어요 (상위 1.8%)','최근 2주 움직임 <b>7.2%</b> — 그 전 4주 24.5%보다 좁아요','10일·20일 평균선 위에 있어요']}],
+ res:[
+  {nm:'해즈브로',from:'11/11',st:'live',days:2,pct:-2.8},{nm:'에스티로더',from:'11/5',st:'stop',days:1,pct:-7.1},
+  {nm:'CDW',from:'11/4',st:'stop',days:2,pct:-7.5},{nm:'에퀴팩스',from:'11/4',st:'live',days:7,pct:-3.0},
+  {nm:'액센츄어',from:'10/30',st:'live',days:10,pct:-3.4},{nm:'젠디지털',from:'10/30',st:'live',days:10,pct:6.2},
+  {nm:'메틀러토레도',from:'10/14',st:'live',days:22,pct:8.4}]};
+
+// 가격 선: 점 위치는 값의 상대 위치, 이름표는 위(t)/아래(b)로 번갈아 겹침을 피한다
+function line(pts){
+  const vs=pts.map(p=>p.v), lo=Math.min(...vs), hi=Math.max(...vs), X=v=>8+(v-lo)/(hi-lo)*84;
+  let h='<div class="line"><div class="bar"></div>';
+  const s=pts.find(p=>p.k==='stop'), n=pts.find(p=>p.k==='now');
+  h+=`<div class="zone" style="left:${Math.min(X(s.v),X(n.v))}%;width:${Math.abs(X(n.v)-X(s.v))}%;background:#C7D7F7"></div>`;
+  pts.forEach((p,i)=>{const x=X(p.v), al=x<15?' l':x>85?' r':'';
+    h+=`<i class="pt ${p.c}" style="left:${x}%"></i><div class="lb ${p.pos}${al}" style="left:${al===' l'?x-2:al===' r'?x+2:x}%">${p.t}<br><b>${usd(p.v)}</b></div>`;});
+  return h+'</div>';
+}
+const why=r=>`<ul class="why">${r.why.map(w=>`<li>${w}</li>`).join('')}</ul><span class="more">왜 골랐나 ▾</span>`;
+function brokeCard(r){
+  const toStop=(r.stop/r.close-1)*100;
+  return `<div class="card"><div class="ch"><b>${r.nm}</b><span class="tk">${r.tk}</span><span class="px">종가 ${usd(r.close)} <span class="${r.chg<0?'dn':'up'}">${sg(r.chg,2)}%</span></span></div>
+  <p class="say">장중에 기준선 <b>${usd(r.entry)}</b>을 넘었어요. 규칙상 <b>${usd(r.stop)}</b> 아래로 내려가면 손절이에요. 지금 종가에서 손절선까지 <b>${Math.abs(toStop).toFixed(1)}%</b> 남았어요.</p>
+  ${line([{k:'stop',v:r.stop,c:'c-stop',t:'손절선',pos:'b'},{k:'now',v:r.close,c:'c-now',t:'지금',pos:'t'},{k:'in',v:r.entry,c:'c-in',t:'돌파한 가격',pos:'b'}])}${why(r)}</div>`;
+}
+function waitCard(r){
+  const to=(r.pivot/r.close-1)*100;
+  return `<div class="card"><div class="ch"><b>${r.nm}</b><span class="tk">${r.tk}</span><span class="px">종가 ${usd(r.close)}</span></div>
+  <p class="say"><b>${usd(r.pivot)}</b>(최근 10일 최고가)을 넘으면 돌파예요. 지금 <b>${sg(to)}%</b> 남았어요. 넘으면 손절선은 <b>${usd(r.stop)}</b>이에요.</p>
+  ${line([{k:'stop',v:r.stop,c:'c-stop',t:'넘으면 손절선',pos:'b'},{k:'now',v:r.close,c:'c-now',t:'지금',pos:'t'},{k:'in',v:r.pivot,c:'c-in o',t:'넘을 선',pos:'b'}])}${why(r)}</div>`;
+}
+function results(rs){
+  const done=rs.filter(x=>x.st!=='live'), win=done.filter(x=>x.pct>0).length, lose=done.length-win, live=rs.length-done.length;
+  const lab={live:x=>`진행 중 · ${x.days}거래일째`,stop:x=>`손절로 끝 · ${x.days}거래일`,exit:x=>`추세 끝(20일 최저가) · ${x.days}거래일`};
+  return `<div class="score">최근 돌파 ${rs.length}번 <span class="chip win">이김 ${win}</span><span class="chip lose">짐 ${lose}</span><span class="chip live">진행 중 ${live}</span></div>
+  <ul class="res">${rs.map(x=>`<li><span class="nm"><b>${x.nm}</b><small>${x.from} 돌파</small></span><span class="tag ${x.st}">${lab[x.st](x)}</span><span class="v ${x.pct>0?'up':x.pct<0?'dn':''}">${sg(x.pct)}%</span></li>`).join('')}</ul>
+  <p style="font-size:11.5px;color:var(--muted);margin:6px 0 0">% = 돌파한 가격에서 끝난 가격(진행 중은 오늘 종가)까지예요.</p>`;
+}
+function sec(S){
+  const nb=S.broke.length, nw=S.wait.length, done=S.res.filter(x=>x.st!=='live').length;
+  return `<div class="sec"><div class="sh"><span class="st">돌파 관찰 목록</span><span class="sd">S&amp;P 500 · ${S.asof} 종가</span></div>
+  <p class="intro">크게 오른 뒤 쉬고 있는 종목이 최근 고점을 다시 넘는지 지켜보는 목록이에요. 넘은 뒤 어떻게 됐는지도 빠짐없이 남겨요.</p>
+  <div class="flow"><div class="s"><span>1 기다리는 중</span><b>${nw}</b><small>조건을 채우고 고점 아래</small></div><div class="ar">→</div>
+  <div class="s"><span>2 오늘 돌파</span><b>${nb}</b><small>최근 10일 최고가를 넘음</small></div><div class="ar">→</div>
+  <div class="s"><span>3 그 뒤 결과</span><b>${S.res.length}</b><small>끝 ${done} · 진행 중 ${S.res.length-done}</small></div></div>
+  <div class="gh"><span class="num">1</span>돌파를 기다리는 종목 <small>남은 거리가 가까운 순</small></div>${nw?S.wait.map(waitCard).join(''):'<div class="empty">조건을 채운 종목이 없어요.</div>'}
+  <div class="gh"><span class="num">2</span>오늘 돌파한 종목</div>${nb?S.broke.map(brokeCard).join(''):'<div class="empty">오늘 새로 넘은 종목은 없어요.</div>'}
+  <div class="gh"><span class="num">3</span>돌파한 뒤 어떻게 됐나</div>${results(S.res)}
+  <div class="honest"><b>이 규칙의 과거 성적</b> — 2016년부터 S&amp;P 500에서 돌파 때 샀다면, 2025년 한 해를 빼면 아무 날에나 산 것과 거의 같았어요. 이긴 비율은 31%예요. 종목을 고르는 힘이 확인된 목록이 아니에요.</div>
+  <details class="fine"><summary>고르는 조건과 계산 방법</summary><p>1·3·6달 상승률 중 하나가 S&amp;P 500 상위 2%, 6달 저점에서 30% 넘게 오름, 종가가 10일·20일 평균선 위, 최근 10거래일 폭이 그 전 20거래일 폭의 60%보다 좁고 저점이 높아짐, 하루 평균 움직임 3% 이상(쿨라매기 조건). 넘을 선은 최근 10일 최고가, 손절선은 그 가격에서 하루 평균 움직임의 두 배 아래, 추세 끝은 20일 최저가를 깰 때예요(터틀 규칙). 같은 종목은 10거래일 안에 다시 돌파로 세지 않아요. 지금 S&amp;P 500에 남은 종목으로 시험해 실제보다 좋게 나왔을 수 있어요. 매수 권유가 아니에요.</p></details></div>`;
+}
+document.getElementById('d1-pc').innerHTML=sec(D1);document.getElementById('d1-mo').innerHTML=sec(D1);
+document.getElementById('d2-pc').innerHTML=sec(D2);document.getElementById('d2-mo').innerHTML=sec(D2);
+document.querySelectorAll('.mo .more').forEach(m=>m.addEventListener('click',()=>{const c=m.closest('.card');c.classList.toggle('open');m.textContent=c.classList.contains('open')?'접기 ▴':'왜 골랐나 ▾';}));
+</script>
+</body></html>
