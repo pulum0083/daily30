@@ -8,6 +8,8 @@ import { usSessionState, usBaseClose } from './_us-session.mjs';
 import { krMarketOpen, isKospiHoliday } from './_market-calendar.mjs';
 // 장이 닫힌 뒤 정규장 값은 공용 모듈이 만든다 — 실시간 closePrice·저가는 애프터장이 섞인다(§48).
 import { fetchClosedSession } from './_kr-regular-session.mjs';
+// 한국 낮(뉴욕 20:00~04:00) 미국 주간거래 실제 체결가 — 야후·네이버엔 없다(2026-11-16).
+import { overnightSessionStart, fetchOvernightTrades, withOvernight } from './_us-overnight.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 const HDR_M = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' };
 
@@ -184,6 +186,17 @@ export async function fetchOverseas(sym) {
   }
 }
 
+// 주간거래 세션이면 장 마감 시세에 그 세션 체결가를 얹는다 — 로빈후드 한 번에 묶어 조회.
+// 세션이 아니거나 조회가 막히면 아무것도 바꾸지 않는다(직전 종가가 남는다).
+async function withOvernightAll(quotes, nowMs = Date.now()) {
+  const start = overnightSessionStart(nowMs);
+  if (start == null) return quotes;
+  const closed = quotes.filter((q) => q.state === 'closed');
+  if (!closed.length) return quotes;
+  const trades = await fetchOvernightTrades([...new Set(closed.map((q) => naverToYahoo(q.sym)))], start);
+  return quotes.map((q) => withOvernight(q, trades[naverToYahoo(q.sym).toUpperCase()]));
+}
+
 export default async function handler(req, res) {
   // 최단 소비자는 60초 폴링(밤사이 미국·주도주). 엣지는 s-maxage가 지나도 stale-while-revalidate
   // 동안 옛 값을 먼저 주므로, 화면 값의 나이는 최대 s-maxage+swr이다. 예전 60+120이면 60초마다
@@ -198,7 +211,7 @@ export default async function handler(req, res) {
     const open = krMarketOpen();
     const [prices, us] = await Promise.all([
       Promise.all(codes.map(open ? fetchOne : (c) => closedWithAfter(c))).then(a => a.filter(Boolean)),
-      Promise.all(usSyms.map(fetchOverseas)).then(a => a.filter(Boolean)),
+      Promise.all(usSyms.map(fetchOverseas)).then(a => a.filter(Boolean)).then(withOvernightAll),
     ]);
     return res.status(200).json({ open, prices, us });
   } catch (e) {

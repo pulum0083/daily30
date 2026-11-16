@@ -483,9 +483,30 @@ test('goStock — 종목을 누르면 그 종목의 섹터 페이지로 간다(S
 test('마감 시간대 저녁(밤사이 미국이 보일 때) 순서 — 밤사이 미국 → 이시각 추정가 → 마감 카드(2026-10-27)', () => {
   const src = readFileSync(join(HERE, 'stocks-home.js'), 'utf8');
   const css = readFileSync(join(HERE, 'stocks-home.css'), 'utf8');
-  assert.match(src, /classList\.toggle\('ue-on', ev\)/);                 // 노출 판정과 같은 값으로 클래스를 단다
+  assert.match(src, /classList\.toggle\('ue-on', ev && /);               // 노출될 때만, 17:00부터 클래스를 단다(isUeTop)
   assert.match(css, /#home\.slot-close\.ue-on #us-evening\{order:-2\}/);
   assert.match(css, /#home\.slot-close\.ue-on #us-linked-widget\{order:-1\}/);
   assert.match(css, /#home #home-hero\{order:0\}/);
   assert.doesNotMatch(css, /#home\.slot-close #us-evening\{order:-1\}/);  // 17:00 전엔 주도주가 마감 카드 위로 오면 안 된다
+});
+
+// 밤사이 미국은 평일 15:30부터 보인다 — 한국 낮에도 미국 주간거래가 열려 있다(2026-11-16).
+// 맨 위로 올라가는 순서(ue-on)는 지금처럼 17:00부터다.
+function ueAt(iso) {
+  const win = loadWindow({ now: Date.parse(iso) });
+  const home = win.document.getElementById('home');
+  let on = null;
+  home.classList.toggle = (c, v) => { if (c === 'ue-on') on = v; };
+  win.__ueLoad = noop; win.__ueStop = noop;
+  win.ueGate();
+  return { shown: win.document.getElementById('us-evening').style.display !== 'none', top: on };
+}
+
+test('밤사이 미국 노출 경계 — 평일 15:29 숨김, 15:30 보임(맨 위 아님), 17:00 맨 위', () => {
+  assert.deepEqual(ueAt('2026-11-16T15:29:00+09:00'), { shown: false, top: false });
+  assert.deepEqual(ueAt('2026-11-16T15:30:00+09:00'), { shown: true, top: false });
+  assert.deepEqual(ueAt('2026-11-16T16:59:00+09:00'), { shown: true, top: false });
+  assert.deepEqual(ueAt('2026-11-16T17:00:00+09:00'), { shown: true, top: true });
+  assert.deepEqual(ueAt('2026-11-17T08:59:00+09:00'), { shown: true, top: true });
+  assert.deepEqual(ueAt('2026-11-17T09:00:00+09:00'), { shown: false, top: false });
 });

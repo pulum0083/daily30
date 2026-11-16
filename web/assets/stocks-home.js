@@ -294,14 +294,14 @@
     macroEl.innerHTML='<span>나스닥 QQQ '+cgHtml(qq.changePct)+'</span>'
       +'<span>VIX '+((vix&&typeof vix.price==='number')?'<b>'+vix.price.toFixed(2)+'</b> '+cgHtml(vix.changePct):'<span class="cg" style="color:var(--muted)">—</span>')+'</span>';
     var cap=document.getElementById('ue-cap');
-    if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 직전 종가, 장중엔 실시간';
+    if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'주간거래·프리장·정규장·애프터장은 실시간, 그 밖엔 직전 종가';
   }
   function renderBreadth(){ var el=document.getElementById('ue-breadth'); if(el){ el.classList.remove('has-data'); el.innerHTML=''; } }
   function render(){ renderGrid(); renderMacro(); renderBreadth(); }
-  /* 실시간 기준 배지 — 정규장/프리장/애프터장이면 LIVE, 그 외엔 전일 종가 표시 */
+  /* 실시간 기준 배지 — 정규장/프리장/애프터장/주간거래(한국 낮, 2026-11-16)면 LIVE, 그 외엔 전일 종가 표시 */
   function updateLiveBadge(){
     var b=document.getElementById('ue-live'); if(!b) return;
-    var label={open:'정규장',pre:'프리장',post:'애프터장'}[sessionState];
+    var label={open:'정규장',pre:'프리장',post:'애프터장',overnight:'주간거래'}[sessionState];
     if(isLive && label){
       b.classList.remove('closed');
       // 꼬리(· 60초 갱신)는 폰에서 숨긴다 — 머리 줄에 원화/달러 토글까지 한 줄로 넣기 위해(2026-10-28)
@@ -364,8 +364,8 @@
         if(!rep) rep=live.us[0]||{};
         sessionState=rep.state||'closed';
         basisAt=rep.tradedAt||null;
-        // 하나라도 정규장·프리장·애프터장이면 라이브로 간주
-        isLive=live.us.some(function(x){ return x.state==='open'||x.state==='pre'||x.state==='post'; });
+        // 하나라도 정규장·프리장·애프터장·주간거래면 라이브로 간주
+        isLive=live.us.some(function(x){ return x.state==='open'||x.state==='pre'||x.state==='post'||x.state==='overnight'; });
       }
       if(mkt&&mkt.forex&&typeof mkt.forex.price==='number') fx=mkt.forex.price;
       if(mkt&&mkt.vix&&typeof mkt.vix.price==='number') vix=mkt.vix;
@@ -401,13 +401,20 @@
   syncToggle();
   function kstNow(){ return new Date(Date.now()+9*3600*1000); }
   var todayKospiReady=null;   // null=미확인. 평일 공휴일이면 오늘 코스피 브리핑이 ready가 아님 → 비거래일로 보고 종일 노출.
-  // 노출 조건: 평일 17:00~익일 09:00(코스피 개장 전까지 — §68 ⑦, 아침 카드 아래 밤사이 미국). 주말(토·일)·평일 공휴일은 종일 노출.
+  // 노출 조건: 평일 15:30~익일 09:00(코스피 장이 끝나면 바로 — 한국 낮에도 미국 주간거래가 열려 있다, 2026-11-16).
+  // 주말(토·일)·평일 공휴일은 종일 노출.
   function isEvening(d){
     var wd=d.getUTCDay();
     if(wd===0||wd===6) return true;                    // 주말 종일
     var hm=d.getUTCHours()*60+d.getUTCMinutes();
-    if(hm>=1020 || hm<540) return true;                // 평일 17:00~익일 09:00
+    if(hm>=930 || hm<540) return true;                 // 평일 15:30~익일 09:00
     return todayKospiReady===false;                    // 평일 공휴일(오늘 코스피 미생성) = 비거래일 → 종일 노출
+  }
+  // 박스를 맨 위로 올리는 순서(ue-on)는 지금처럼 17:00부터 — 15:30~17:00엔 마감 카드가 먼저다(§68 ⑦).
+  function isUeTop(d){
+    var wd=d.getUTCDay(), hm=d.getUTCHours()*60+d.getUTCMinutes();
+    if(wd>=1&&wd<=5&&hm>=930&&hm<1020&&todayKospiReady!==false) return false;
+    return true;
   }
   // 개발용 ?slot=(home-hero.js와 같은 값) — 시간대별 화면을 지금 시각과 상관없이 보려고 노출만 따라간다(§68).
   function devSlot(){ try{ return new URLSearchParams(location.search).get('slot'); }catch(e){ return null; } }
@@ -416,7 +423,7 @@
     var ev=dev ? /^(morning|evening|weekend)$/.test(dev) : isEvening(kstNow());
     box.style.display = ev ? '' : 'none';
     var home=document.getElementById('home');
-    if(home) home.classList.toggle('ue-on', ev);   // 마감 시간대 블록 순서(stocks-home.css slot-close.ue-on)
+    if(home) home.classList.toggle('ue-on', ev && (dev ? true : isUeTop(kstNow())));   // 마감 시간대 블록 순서(stocks-home.css slot-close.ue-on)
     if(ev) window.__ueLoad(); else window.__ueStop();
   };
   // 오늘 코스피 브리핑 ready 여부로 비거래일(공휴일) 판별 — 서버 휴일 로직과 정합. 확인 후 게이트 재평가.
