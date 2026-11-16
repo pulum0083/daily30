@@ -14,10 +14,11 @@
 <div class="open-section bw-section">
   <div class="open-section__title">🔭 돌파 관찰 목록 <span class="bw-asof">S&amp;P 500 · {{ b.asof_label }}</span></div>
   <p class="bw-intro">크게 오른 뒤 쉬고 있는 종목이 최근 고점을 다시 넘는지 지켜보는 목록이에요. 넘은 뒤 어떻게 됐는지도 빠짐없이 남겨요.</p>
-  <div class="bw-flow">
-    <div class="s"><span>1 기다리는 중</span><b>{{ b.n_wait }}</b><small>조건을 채우고 고점 아래</small></div><div class="ar">→</div>
-    <div class="s"><span>2 오늘 돌파</span><b>{{ b.today|length }}</b><small>최근 10일 최고가를 넘음</small></div><div class="ar">→</div>
-    <div class="s"><span>3 그 뒤 결과</span><b>{{ b.track|length }}</b><small>끝 {{ b.n_done }} · 진행 중 {{ b.n_live }}</small></div>
+  {# 진행 표시줄 — 종목이 있는 단계만 검은 원(2026-11-16 사용자 결정 A안, 시안 docs/prototypes/2026-11-16-breakout-step-combined.html) #}
+  <div class="bw-step">
+    {% for n, lab, sub in [(b.n_wait, '기다리는 중', '고점 아래'), (b.today|length, '오늘 돌파', '10일 최고가 넘음'), (b.track|length, '그 뒤 결과', '끝 ' ~ b.n_done ~ ' · 진행 ' ~ b.n_live)] %}
+    <div class="p{{ ' on' if n else '' }}"><div class="c">{{ n }}</div><div class="l"><i>{{ loop.index }}</i>{{ lab }}</div><div class="s">{{ sub }}</div></div>
+    {% endfor %}
   </div>
 
   <div class="bw-gh"><span class="num">1</span>돌파를 기다리는 종목 <small>남은 거리가 가까운 순</small></div>
