@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-11-16T09:31:30.537478+09:00",
+  "generated_at": "2026-11-16T10:01:16.773174+09:00",
   "date": "2026-11-16",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 0.24,
-      "surge": 0.12,
+      "changePct": -0.49,
+      "surge": 0.17,
       "events": [
         {
           "time": "07:59",
           "headline": "\"삼성전자, 차세대 연산 메모리로 재평가…목표가 45만원\"",
           "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5DcWdMNEYwMTZ4NXpFUy1sTnVQbU5ncjNxWU9HMEF3aDU1N0NucnVoeXFOdXNvaUhSN1lqVTNCR2tGVzhzZm1kemI5V25PUUtnNWQ3Q2pScE9oZ9IBVEFVX3lxTE92U0FaTVpGRUNtYzczZmlJa1RQX2NrYWg2LXg0SDZJZnFib2JNSC1VNzZqZHI5Wk5McXFVRm1EdGhSaGZjaE1ZeHZ5amhPZ3llVFp1Rw?oc=5",
           "source": "더팩트",
-          "why": "LS증권은 삼성전자가 차세대 연산 메모리 기술을 통해 재평가받을 것이라며 목표가를 45만원으로 제시했다. (개별 인과 단정 안 함)",
+          "why": "LS증권은 삼성전자가 차세대 연산 메모리 기술을 통해 주가 재평가를 받을 수 있으며 목표가를 45만원으로 제시했다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
@@ -31,9 +31,18 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -1.27,
-      "surge": 0.13,
+      "changePct": -2.3,
+      "surge": 0.2,
       "events": [
+        {
+          "time": "08:55",
+          "headline": "반도체 호황이라 믿었는데…삼성·SK 빚투, 주가 하락하면 결국 벌어지는 일",
+          "url": "https://news.google.com/rss/articles/CBMiQ0FVX3lxTE1rVE40WGZRZVYtdHlyMi1qZmR4OExFUmRaWi1pOXV2ZWJFUXFnanRvTUVwaG5EUHZzbzFwZEk0aldMZm8?oc=5",
+          "source": "한국공공정책신문",
+          "why": "반도체 호황이라 믿었는데…삼성·SK 빚투, 주가 하락하면 결국 벌어지는 일",
+          "tier": "why",
+          "sentiment": "neg"
+        },
         {
           "time": "07:34",
           "headline": "LS證 “SK하이닉스, HBM4 공급 확대에 사상 최대 실적 행진… 목표가 240만원 유지”",
@@ -42,23 +51,14 @@
           "why": "LS증권은 SK하이닉스가 HBM4 공급 확대에 힘입어 사상 최대 실적을 기록할 것으로 전망하며 목표가를 240만원으로 유지했습니다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
-        },
-        {
-          "time": "09:04",
-          "headline": "SK하이닉스 주가 상승 중",
-          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5TRHdkazJqVFpReGF4RjM0T19nMTk5SVN4UXF2ZGpYYUVmTXlKLW40dFlVTjlERWxtWll2UDZpN2kwQVl3MFdBbFlYVzZwdEg3d2U5YzdxMkNQQ1p2?oc=5",
-          "source": "아시아뉴스통신",
-          "why": "SK하이닉스 주가 상승 중 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 0.93,
-      "surge": 0.09,
+      "changePct": 0.19,
+      "surge": 0.13,
       "events": []
     }
   ]
