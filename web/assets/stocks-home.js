@@ -400,28 +400,21 @@
   });
   syncToggle();
   function kstNow(){ return new Date(Date.now()+9*3600*1000); }
-  var todayKospiReady=null;   // null=미확인. 평일 공휴일이면 오늘 코스피 브리핑이 ready가 아님 → 비거래일로 보고 종일 노출.
-  // 노출 조건: 평일 15:30~익일 09:00(코스피 장이 끝나면 바로 — 한국 낮에도 미국 주간거래가 열려 있다, 2026-11-16).
-  // 주말(토·일)·평일 공휴일은 종일 노출.
-  function isEvening(d){
-    var wd=d.getUTCDay();
-    if(wd===0||wd===6) return true;                    // 주말 종일
-    var hm=d.getUTCHours()*60+d.getUTCMinutes();
-    if(hm>=930 || hm<540) return true;                 // 평일 15:30~익일 09:00
-    return todayKospiReady===false;                    // 평일 공휴일(오늘 코스피 미생성) = 비거래일 → 종일 노출
-  }
-  // 박스를 맨 위로 올리는 순서(ue-on)는 지금처럼 17:00부터 — 15:30~17:00엔 마감 카드가 먼저다(§68 ⑦).
+  var todayKospiReady=null;   // null=미확인. 평일 공휴일이면 오늘 코스피 브리핑이 ready가 아님 → 비거래일로 보고 종일 맨 위.
+  // 노출: 하루 종일(2026-11-16 사용자 결정) — 평일 한국 낮에도 미국은 애프터장(~10:00)·주간거래(10:00~18:00)로 거래된다.
+  // 장중(09:00~15:30)엔 CSS 순서로 섹터 아래에 둔다(stocks-home.css slot-intraday).
+  // 박스를 맨 위로 올리는 순서(ue-on)는 17:00부터 — 평일 09:00~17:00엔 코스피 화면이 먼저다(§68 ⑦). 평일 공휴일은 종일 위.
   function isUeTop(d){
     var wd=d.getUTCDay(), hm=d.getUTCHours()*60+d.getUTCMinutes();
-    if(wd>=1&&wd<=5&&hm>=930&&hm<1020&&todayKospiReady!==false) return false;
+    if(wd>=1&&wd<=5&&hm>=540&&hm<1020&&todayKospiReady!==false) return false;
     return true;
   }
   // 개발용 ?slot=(home-hero.js와 같은 값) — 시간대별 화면을 지금 시각과 상관없이 보려고 노출만 따라간다(§68).
   function devSlot(){ try{ return new URLSearchParams(location.search).get('slot'); }catch(e){ return null; } }
   window.ueGate=function(){
     var dev=devSlot();
-    var ev=dev ? /^(morning|evening|weekend)$/.test(dev) : isEvening(kstNow());
-    box.style.display = ev ? '' : 'none';
+    var ev=true;
+    box.style.display = '';
     var home=document.getElementById('home');
     if(home) home.classList.toggle('ue-on', ev && (dev ? true : isUeTop(kstNow())));   // 마감 시간대 블록 순서(stocks-home.css slot-close.ue-on)
     if(ev) window.__ueLoad(); else window.__ueStop();

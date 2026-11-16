@@ -490,8 +490,8 @@ test('마감 시간대 저녁(밤사이 미국이 보일 때) 순서 — 밤사�
   assert.doesNotMatch(css, /#home\.slot-close #us-evening\{order:-1\}/);  // 17:00 전엔 주도주가 마감 카드 위로 오면 안 된다
 });
 
-// 밤사이 미국은 평일 15:30부터 보인다 — 한국 낮에도 미국 주간거래가 열려 있다(2026-11-16).
-// 맨 위로 올라가는 순서(ue-on)는 지금처럼 17:00부터다.
+// 지금 미국은 하루 종일 보인다 — 평일 한국 낮에도 미국 애프터장·주간거래가 열려 있다(2026-11-16).
+// 맨 위로 올라가는 순서(ue-on)는 17:00부터, 장중엔 섹터 아래(CSS).
 function ueAt(iso) {
   const win = loadWindow({ now: Date.parse(iso) });
   const home = win.document.getElementById('home');
@@ -502,11 +502,17 @@ function ueAt(iso) {
   return { shown: win.document.getElementById('us-evening').style.display !== 'none', top: on };
 }
 
-test('밤사이 미국 노출 경계 — 평일 15:29 숨김, 15:30 보임(맨 위 아님), 17:00 맨 위', () => {
-  assert.deepEqual(ueAt('2026-11-16T15:29:00+09:00'), { shown: false, top: false });
-  assert.deepEqual(ueAt('2026-11-16T15:30:00+09:00'), { shown: true, top: false });
+test('지금 미국 노출 경계 — 하루 종일 보이고, 평일 09:00~17:00만 맨 위가 아니다', () => {
+  assert.deepEqual(ueAt('2026-11-16T08:59:00+09:00'), { shown: true, top: true });
+  assert.deepEqual(ueAt('2026-11-16T09:00:00+09:00'), { shown: true, top: false });
+  assert.deepEqual(ueAt('2026-11-16T12:00:00+09:00'), { shown: true, top: false });
   assert.deepEqual(ueAt('2026-11-16T16:59:00+09:00'), { shown: true, top: false });
   assert.deepEqual(ueAt('2026-11-16T17:00:00+09:00'), { shown: true, top: true });
-  assert.deepEqual(ueAt('2026-11-17T08:59:00+09:00'), { shown: true, top: true });
-  assert.deepEqual(ueAt('2026-11-17T09:00:00+09:00'), { shown: false, top: false });
+  assert.deepEqual(ueAt('2026-11-15T12:00:00+09:00'), { shown: true, top: true });   // 일요일
+});
+
+test('장중엔 지금 미국을 섹터 아래·장기 신호 위에 둔다', () => {
+  const css = readFileSync(join(HERE, 'stocks-home.css'), 'utf8');
+  assert.match(css, /#home\.slot-intraday #us-evening\{order:8\}/);
+  assert.match(css, /#home\.slot-intraday \.sbx-block\{order:4\}/);
 });

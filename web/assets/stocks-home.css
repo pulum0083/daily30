@@ -927,6 +927,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #home #us-linked-widget{order:4} #home #struct-sig{order:5} #home #sig-block{order:6} #home .sbx-block{order:7}
 #home.slot-intraday #sig-block{order:2} #home.slot-intraday #us-linked-widget{order:3} #home.slot-intraday .sbx-block{order:4}
 #home.slot-close .sbx-block{order:2} #home.slot-close #sig-block{order:3} #home.slot-close #us-linked-widget{order:4}
+#home.slot-intraday #us-evening{order:8}   /* 지금 미국 — 장중엔 섹터 아래(2026-11-16 하루 종일 노출) */
 #home.slot-intraday #struct-sig,#home.slot-close #struct-sig{order:9}   /* 장기 신호 — 장중·마감엔 맨 아래(2026-11-09) */
 /* 마감 슬롯에서 밤사이 미국이 보이면(평일 17:00~, ueGate가 #home에 ue-on을 붙인다)
    밤사이 미국 → 지금 이시각 추정가 → 마감 브리핑 카드 순 — 사용자 결정 2026-10-27. */
