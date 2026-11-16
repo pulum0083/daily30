@@ -138,8 +138,33 @@ def compute(O, H, L, C, session: date) -> dict | None:
                      "to_pivot": round((piv / c - 1) * 100, 1), "why": why(ind, H, L, C, t, I)})
     wait.sort(key=lambda r: r["to_pivot"])
     track.sort(key=lambda r: r["from"], reverse=True)
-    return {"asof": days[I], "n": int(C.iloc[-1].notna().sum()), "today": today,
-            "wait": wait[:MAX_WAIT], "wait_more": max(len(wait) - MAX_WAIT, 0), "track": track[:MAX_TRACK]}
+    return {"asof": days[I], "n": int(C.iloc[-1].notna().sum()), "today": today, "wait": wait, "track": track}
+
+
+def order_by_cap(result: dict, caps: dict) -> dict:
+    """세 목록을 시가총액 큰 순으로(2026-11-16 사용자 결정) 세우고 개수를 자른다. 시총을 못 읽은 종목은 뒤로, 그 안에선 원래 순서."""
+    key = lambda r: -(caps.get(r["t"]) or 0)
+    for k in ("today", "wait", "track"):
+        for r in result[k]:
+            r["cap"] = caps.get(r["t"])
+        result[k].sort(key=key)
+    result["wait_more"] = max(len(result["wait"]) - MAX_WAIT, 0)
+    result["wait"] = result["wait"][:MAX_WAIT]
+    result["track"] = result["track"][:MAX_TRACK]
+    return result
+
+
+def fetch_caps(tickers: list) -> dict:
+    """시가총액(달러) — 야후 fast_info. 못 읽으면 빠진다(sp500_ma200.add_caps와 같은 원천)."""
+    import yfinance as yf
+
+    def cap(t):
+        try:
+            return float(yf.Ticker(t).fast_info["marketCap"])
+        except Exception:
+            return None
+    with ThreadPoolExecutor(8) as ex:
+        return {t: c for t, c in zip(tickers, ex.map(cap, tickers)) if c}
 
 
 def add_names(result: dict, names: dict) -> None:
@@ -201,6 +226,7 @@ def main() -> int:
         last = C.index[-1].date() if len(C) else None
         print(f"[breakout_watch] 계산 불가(직전 정규장 {session}, 마지막 봉 {last}) — 파일을 쓰지 않는다", file=sys.stderr)
         return 1
+    order_by_cap(result, fetch_caps(sorted({r["t"] for k in ("today", "wait", "track") for r in result[k]})))
     add_names(result, names)
     result["date"] = brief.isoformat()
     OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

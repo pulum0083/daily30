@@ -21,26 +21,26 @@
     {% endfor %}
   </div>
 
-  <div class="bw-gh"><span class="num">1</span>돌파를 기다리는 종목 <small>남은 거리가 가까운 순</small></div>
+  <div class="bw-gh"><span class="num">1</span>돌파를 기다리는 종목 <small>시가총액 큰 순</small></div>
   {% for r in b.wait %}
   <div class="bw-card">
-    <div class="ch"><b>{{ r.name }}</b><span class="tk">{{ r.t }}</span><span class="px">종가 ${{ '%.2f'|format(r.close) }}</span></div>
+    <div class="ch"><b>{{ r.name }}</b><span class="tk">{{ r.t }}{% if r.cap_label %} · 시총 {{ r.cap_label }}{% endif %}</span><span class="px">종가 ${{ '%.2f'|format(r.close) }}</span></div>
     <p class="say"><b>${{ '%.2f'|format(r.pivot) }}</b>(최근 10일 최고가)을 넘으면 돌파예요. 지금 <b>{{ '%.1f'|format(r.to_pivot) }}%</b> 남았어요. 넘으면 손절선은 <b>${{ '%.2f'|format(r.stop) }}</b>이에요.</p>
     {{ priceline(r.line) }}{{ reasons(r.why) }}
   </div>
   {% else %}<div class="bw-empty">조건을 채운 종목이 없어요.</div>{% endfor %}
   {% if b.wait_more %}<p class="bw-more">이 밖에 {{ b.wait_more }}종목이 더 조건을 채웠어요.</p>{% endif %}
 
-  <div class="bw-gh"><span class="num">2</span>오늘 돌파한 종목</div>
+  <div class="bw-gh"><span class="num">2</span>오늘 돌파한 종목 <small>시가총액 큰 순</small></div>
   {% for r in b.today %}
   <div class="bw-card">
-    <div class="ch"><b>{{ r.name }}</b><span class="tk">{{ r.t }}</span><span class="px">종가 ${{ '%.2f'|format(r.close) }} <span class="{{ 'dn' if r.chg < 0 else 'up' }}">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span></div>
+    <div class="ch"><b>{{ r.name }}</b><span class="tk">{{ r.t }}{% if r.cap_label %} · 시총 {{ r.cap_label }}{% endif %}</span><span class="px">종가 ${{ '%.2f'|format(r.close) }} <span class="{{ 'dn' if r.chg < 0 else 'up' }}">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span></div>
     <p class="say">기준선 <b>${{ '%.2f'|format(r.entry) }}</b>을 넘었어요. 규칙상 <b>${{ '%.2f'|format(r.stop) }}</b> 아래로 내려가면 손절이에요. 지금 종가에서 손절선까지 <b>{{ '%.1f'|format(r.to_stop) }}%</b> 남았어요.</p>
     {{ priceline(r.line) }}{{ reasons(r.why) }}
   </div>
   {% else %}<div class="bw-empty">오늘 새로 넘은 종목은 없어요.</div>{% endfor %}
 
-  <div class="bw-gh"><span class="num">3</span>돌파한 뒤 어떻게 됐나</div>
+  <div class="bw-gh"><span class="num">3</span>돌파한 뒤 어떻게 됐나 <small>진행 중 먼저 · 시가총액 큰 순</small></div>
   {% if b.track %}
   <div class="bw-score">최근 돌파 {{ b.track|length }}번 <span class="chip win">이김 {{ b.win }}</span><span class="chip lose">짐 {{ b.lose }}</span><span class="chip live">진행 중 {{ b.n_live }}</span></div>
   {# 2열 타일 — 진행 중 먼저, 끝난 것 뒤(2026-11-16 사용자 결정 D안, 시안 docs/prototypes/2026-11-16-breakout-results-mobile.html) #}

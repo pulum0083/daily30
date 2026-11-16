@@ -844,6 +844,13 @@ def read_breakout_watch(analysis: dict, target_date: str = ""):
     return data
 
 
+def _cap_label(v) -> str:
+    """시가총액 표기 — $1.2조 · $850억(달러 그대로, 원화로 바꾸지 않는다). 없으면 빈 문자열."""
+    if not isinstance(v, (int, float)) or v <= 0:
+        return ""
+    return f"${v / 1e12:.1f}조" if v >= 1e12 else f"${v / 1e8:,.0f}억"
+
+
 def _bw_line(pts: list) -> dict:
     """가격 선 — 점 위치(%)·이름표 정렬·손절선~지금 구간. pts = [(키, 값, 이름표, 위/아래)]."""
     vs = [v for _, v, _, _ in pts]
@@ -875,6 +882,7 @@ def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
     today, wait, track = d.get("today") or [], d.get("wait") or [], d.get("track") or []
     if not (today or wait or track):
         return {}
+    today, wait, track = ([dict(r, cap_label=_cap_label(r.get("cap"))) for r in x] for x in (today, wait, track))
     tcards = [dict(r, to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
                    line=_bw_line([("stop", r["stop"], "손절선", "b"), ("now", r["close"], "지금", "t"),
                                   ("in", r["entry"], "돌파한 가격", "b")]))

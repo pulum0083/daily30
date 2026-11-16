@@ -145,3 +145,19 @@ def test_render_1105_replay():
 def test_us_template_includes_section_after_sp500():
     src = (Path(gh.TEMPLATES_DIR) / "briefings" / "us.html").read_text()
     assert src.index("sp500_ma200.html") < src.index("breakout_watch.html") < src.index('class="divider"')
+
+
+def test_order_by_cap_sorts_all_lists_and_trims():
+    r = {"today": [{"t": "S"}, {"t": "B"}],
+         "wait": [{"t": f"W{i}"} for i in range(8)],
+         "track": [{"t": "X"}, {"t": "Y"}, {"t": "Z"}]}
+    caps = {"B": 3e12, "S": 1e10, "W7": 9e11, "W3": 5e11, "Y": 2e11, "Z": 1e11}
+    bw.order_by_cap(r, caps)
+    assert [x["t"] for x in r["today"]] == ["B", "S"]
+    assert [x["t"] for x in r["wait"]][:2] == ["W7", "W3"] and len(r["wait"]) == 6 and r["wait_more"] == 2
+    assert [x["t"] for x in r["track"]] == ["Y", "Z", "X"]          # 시총을 못 읽은 X는 뒤로
+    assert r["track"][2]["cap"] is None and r["today"][0]["cap"] == 3e12
+
+
+def test_cap_label():
+    assert gh._cap_label(3.92e12) == "$3.9조" and gh._cap_label(8.5e10) == "$850억" and gh._cap_label(None) == ""
