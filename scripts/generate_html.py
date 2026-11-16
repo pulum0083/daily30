@@ -2758,7 +2758,10 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/weekly/",                       "changefreq": "weekly",  "priority": "0.7"},
         {"loc": f"{BASE}/accuracy/",                     "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/methodology/",                  "changefreq": "monthly", "priority": "0.6"},
-        {"loc": f"{BASE}/guides/accuracy-baseline/",     "changefreq": "monthly", "priority": "0.6"},   # 해설 글(2026-11-16)
+        {"loc": f"{BASE}/guides/",                       "changefreq": "weekly",  "priority": "0.6"},   # 해설 글(2026-11-16, §87)
+        {"loc": f"{BASE}/guides/accuracy-baseline/",     "changefreq": "monthly", "priority": "0.6"},
+        {"loc": f"{BASE}/guides/aftermarket-close/",     "changefreq": "monthly", "priority": "0.6"},
+        {"loc": f"{BASE}/guides/nasdaq-5y-average/",     "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/about/",                        "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/legal/disclaimer/",             "changefreq": "yearly",  "priority": "0.3"},
         {"loc": f"{BASE}/legal/privacy/",                "changefreq": "yearly",  "priority": "0.3"},
