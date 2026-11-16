@@ -666,7 +666,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 }
 #us-linked-widget{background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;}#why-moved .lw-h{font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:10px;color:#0F172A}#why-moved .lw-note{margin-left:auto;font-size:12px;font-weight:700;color:var(--muted)}
 #us-evening .ue-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;row-gap:6px;}
-#us-evening .ue-h-lead{display:flex;align-items:center;gap:8px;}
+#us-evening .ue-h-lead{display:flex;align-items:center;gap:0;}   /* 제목과 ?는 .help-q 왼쪽 여백 6px만 — 코스피 주도주와 같게(2026-11-16) */
 /* 머리 줄 — 제목·? · LIVE 배지(바로 옆) · 원화/달러 토글(같은 줄 오른쪽 끝, margin-left:auto). 요약(#ue-breadth)은 지금 비워 둔다. */
 #us-evening #ue-breadth{display:none;font-size:12px;color:var(--muted);white-space:nowrap;}
 #us-evening #ue-breadth.has-data{display:inline-flex;align-items:center;}
