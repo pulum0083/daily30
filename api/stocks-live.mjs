@@ -140,16 +140,19 @@ async function fetchYahoo(sym) {
   }
 }
 
-// 네이버 해외 시세의 프리·애프터장 체결가(overMarketPriceInfo) — 열려 있고 3시간 안에 체결된 값만.
+// 네이버 해외 시세의 프리·애프터장 체결가(overMarketPriceInfo) — 열려 있고 오늘(뉴욕 날짜) 체결된 값만.
+// '3시간 안'이 아니라 '오늘'로 본다(2026-11-16 MS — 04:00 체결 뒤 07:05까지 거래가 없었다). fetch_data와 같은 규칙(§30).
 // 기준가는 closePrice다: 프리장엔 직전 정규장 종가, 애프터장엔 그날 정규장 종가(§30 세션별 기준가와 같다).
 // 열린 연장시간대인데 값이 없으면 { missing: true } — 어제 종가 등락으로 대신하지 않는다(§0).
+const etDate = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+
 export function naverExtendedQuote(sym, d, nowMs = Date.now()) {
   const o = d?.overMarketPriceInfo;
   const type = o?.tradingSessionType;
   if (!o || (type !== 'PRE_MARKET' && type !== 'AFTER_MARKET') || o.overMarketStatus !== 'OPEN') return null;
   const price = toNum(o.overPrice), base = toNum(d.closePrice);
   const at = Date.parse(o.localTradedAt || '');
-  if (price == null || base == null || base <= 0 || !isFinite(at) || nowMs - at > 3 * 3600000) return { missing: true };
+  if (price == null || base == null || base <= 0 || !isFinite(at) || etDate(at) !== etDate(nowMs) || at > nowMs + 300000) return { missing: true };
   const state = type === 'PRE_MARKET' ? 'pre' : 'post';
   const pct = ((price - base) / base) * 100;
   if (implausibleExtended(state, pct)) return { missing: true };

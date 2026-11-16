@@ -163,7 +163,8 @@ test('naverExtendedQuote: 프리마켓 체결가와 직전 종가로 등락을 �
   const now = Date.parse('2026-11-11T05:20:00-05:00');
   const q = naverExtendedQuote('NVDA.O', d, now);
   assert.equal(q.state, 'pre'); assert.equal(q.price, 176.25); assert.equal(q.changePct, 4.36); assert.equal(q.source, 'naver');
-  assert.deepEqual(naverExtendedQuote('NVDA.O', d, now + 4 * 3600000), { missing: true });       // 3시간 넘은 체결
+  assert.equal(naverExtendedQuote('NVDA.O', d, now + 4 * 3600000).price, 176.25);               // 몇 시간 전이어도 오늘 체결이면 쓴다
+  assert.deepEqual(naverExtendedQuote('NVDA.O', d, Date.parse('2026-11-12T05:20:00-05:00')), { missing: true }); // 어제 체결
   const shut = { ...d, overMarketPriceInfo: { ...d.overMarketPriceInfo, overMarketStatus: 'CLOSE' } };
   assert.equal(naverExtendedQuote('NVDA.O', shut, now), null);                                     // 연장시간대가 아니면 판단하지 않는다
 });

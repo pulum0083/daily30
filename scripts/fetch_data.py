@@ -574,8 +574,12 @@ def _num(v):
         return None
 
 
-def naver_extended_quote(d: dict, now=None, max_age_hours: float = 3.0):
-    """네이버 basic 응답에서 (현재가, 기준가)를 꺼낸다. 프리·애프터장이 열려 있고 3시간 안 체결일 때만.
+def naver_extended_quote(d: dict, now=None):
+    """네이버 basic 응답에서 (현재가, 기준가)를 꺼낸다. 프리·애프터장이 열려 있고 오늘(뉴욕 날짜) 체결일 때만.
+
+    '3시간 안'이 아니라 '오늘'로 본다(2026-11-16) — NYSE 은행주는 이른 프리마켓에 04:00 체결 하나 뒤
+    07:05까지 체결이 없어(MS) 3시간 기준이면 오늘 체결가를 버렸다. 11/11 사고는 어제 체결을 오늘로 쓴 것이라
+    날짜만 보면 막힌다.
 
     기준가는 closePrice — 프리장엔 직전 정규장 종가, 애프터장엔 그날 정규장 종가다(§30).
     정규장 종가에서 25% 넘게 벌어지면 시세가 아니라 데이터 문제로 본다(§79). 아니면 None.
@@ -590,16 +594,19 @@ def naver_extended_quote(d: dict, now=None, max_age_hours: float = 3.0):
         at = datetime.fromisoformat(str(o.get("localTradedAt")))
     except ValueError:
         return None
-    now = now or datetime.now(at.tzinfo)
-    if (now - at).total_seconds() > max_age_hours * 3600:
+    if at.tzinfo is None:
+        return None
+    now = now or datetime.now(pytz.utc)
+    if at.astimezone(_ET).date() != now.astimezone(_ET).date() or at > now + timedelta(minutes=5):
         return None
     if abs(price / base - 1) > 0.25:
         return None
     return price, base
 
 
-def _yahoo_extended_fresh(intraday, now=None, max_age_hours: float = 3.0) -> bool:
-    """야후 연장시간대 시계열에 '오늘(뉴욕 날짜)' 체결이 3시간 안에 있는가. 어제 애프터장 봉은 오늘 프리마켓이 아니다."""
+def _yahoo_extended_fresh(intraday, now=None) -> bool:
+    """야후 연장시간대 시계열에 '오늘(뉴욕 날짜)' 체결이 있는가. 어제 애프터장 봉은 오늘 프리마켓이 아니다.
+    몇 시간 전 체결이어도 오늘 것이면 그게 지금 값이다(2026-11-16 MS — 04:00 체결 뒤 07:05까지 거래 없음)."""
     if intraday is None or len(intraday) == 0:
         return False
     closes = intraday["Close"].dropna()
@@ -610,7 +617,7 @@ def _yahoo_extended_fresh(intraday, now=None, max_age_hours: float = 3.0) -> boo
         return False
     now_et = (now or datetime.now(pytz.utc)).astimezone(_ET)
     last_et = last.tz_convert(_ET) if hasattr(last, "tz_convert") else last.astimezone(_ET)
-    return last_et.date() == now_et.date() and (now_et - last_et).total_seconds() <= max_age_hours * 3600
+    return last_et.date() == now_et.date()
 
 
 def _is_us_equity(ticker: str) -> bool:
@@ -622,18 +629,25 @@ def _is_us_equity(ticker: str) -> bool:
 FEED_ISSUES: list = []
 
 
+FEED_ALERT_MIN_SUB = 3   # 네이버로 대신한 종목이 이만큼 넘을 때만 알린다 — 한두 종목은 체결이 드물거나 야후 봉이 늦게 올라온 것
+
+
 def feed_alert_text(issues: list, btype: str) -> str:
-    """수집 불가 알림 문구(평문, §37). 알릴 것이 없으면 빈 문자열."""
-    if not issues:
-        return ""
+    """수집 불가 알림 문구(평문, §37). 알릴 것이 없으면 빈 문자열.
+
+    알리는 경우는 둘이다 — 오늘 체결가를 아무 데서도 못 구한 종목이 있거나(값이 직전 정규장 종가로 남는다),
+    네이버로 대신한 종목이 FEED_ALERT_MIN_SUB개 이상이거나(11/11처럼 야후가 통째로 비운 날).
+    2026-11-16 GS 한 종목 대신·MS 한 종목(실제로는 오늘 04:00 체결)으로 잘못 울렸다."""
     sub = sorted({i["ticker"] for i in issues if i["how"] == "naver"})
     gone = sorted({i["ticker"] for i in issues if i["how"] == "missing"})
+    if not gone and len(sub) < FEED_ALERT_MIN_SUB:
+        return ""
     label = {"kospi": "코스피 아침", "us": "미국"}.get(btype, btype)
     lines = [f"⚠️ 야후 미국 시세 수집 불가 — {label} 브리핑 수집 중", "야후가 오늘 프리·애프터장 체결을 주지 않았어요."]
     if sub:
         lines.append(f"네이버 체결가로 대신 {len(sub)}종목: {', '.join(sub)}")
     if gone:
-        lines.append(f"네이버에도 없어 어제 종가 기준으로 남은 {len(gone)}종목: {', '.join(gone)} — 브리핑의 '지금' 값이 아닐 수 있어요.")
+        lines.append(f"네이버에도 오늘 체결이 없어 직전 정규장 종가로 남은 {len(gone)}종목: {', '.join(gone)} — 등락이 '지금'이 아니라 직전 정규장 것이에요.")
     lines.append("홈 '지금 미국'도 같은 원천이라 함께 영향을 받아요(§85).")
     return "\n".join(lines)
 
@@ -641,6 +655,9 @@ def feed_alert_text(issues: list, btype: str) -> str:
 def alert_feed_issues(btype: str) -> None:
     msg = feed_alert_text(FEED_ISSUES, btype)
     if not msg:
+        if FEED_ISSUES:      # 알릴 만큼은 아니어도 로그엔 남긴다
+            print(f"[fetch_data] 네이버로 대신한 종목(알림 기준 미만): {sorted({i['ticker'] for i in FEED_ISSUES})}",
+                  file=sys.stderr)
         return
     print(f"[fetch_data] {msg}", file=sys.stderr)
     try:
@@ -681,8 +698,10 @@ def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
             return nq
         o = (nb or {}).get("overMarketPriceInfo") or {}
         if o.get("tradingSessionType") in ("PRE_MARKET", "AFTER_MARKET") and o.get("overMarketStatus") == "OPEN":
-            # 연장시간대가 열려 있는데 야후·네이버 모두 체결이 없다 — 아래 fast_info(어제 종가)로 내려간다
+            # 연장시간대가 열려 있는데 야후·네이버 모두 오늘 체결이 없다 — 직전 정규장 종가(fast_info)로 내려간다.
+            # 야후 시계열의 마지막 봉은 어제 애프터장이라 '지금'으로 쓰지 않는다(11/11 사고와 같은 이유).
             FEED_ISSUES.append({"ticker": ticker, "how": "missing"})
+            intraday = None
 
     # 1순위: fast_info (기준가) + intraday 교차 검증 (현재가)
     try:
