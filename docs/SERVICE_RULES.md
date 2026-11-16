@@ -2897,3 +2897,13 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - 2018년 이미지(유튜브 캡처)의 "2018년 10월 10년 금리 첫 3% 돌파"는 틀렸다(첫 3% 종가 4/25) — 화면에 쓰지 않는다.
 - 테스트 `scripts/test_midterm_compare.py`, `web/assets/home-hero.test.mjs`(midtermRow).
 
+
+
+### 87. 해설 글 `/guides/` (2026-11-16 신설)
+
+애드센스 재신청 준비(§80·§33). 매일 같은 틀의 자동 브리핑 말고, 이 사이트의 기록·백테스트로 쓴 오래 남는 글을 쌓는다. 주제 목록은 `docs/plans/2026-11-13-adsense-articles/topics.md`.
+
+- **손으로 쓴 정적 페이지다** — 생성기가 다시 쓰지 않는다. 숫자는 글을 쓴 날 저장소 파일에서 뽑고 본문 머리에 기준일을 적는다(첫 글은 11/13 채점분). 숫자가 바뀌어도 고쳐 쓰지 않고 성적표·장기 지표 페이지로 보낸다.
+- 모양은 `/about/`(`.legal-*`)을 따른다. `<head>`에 애드센스 로더(§70)·네이버 인증·canonical·og·Article/BreadcrumbList JSON-LD, 제목 끝 `| 더블샷(Double-Shot)`.
+- 새 글을 올리면 `write_sitemap_xml()` 고정 목록에 주소를 넣고, 관련 페이지에서 링크한다.
+- 첫 글 `/guides/accuracy-baseline/` — 적중률을 기준선과 나란히 읽는 법. 예측 성적표 상단 안내문에서 링크한다. 초안은 `draft-01-accuracy.md`, "운영자 한마디" 칸은 운영자가 쓰면 넣는다.
