@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-17": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-17/kospi/",
+        "headline": "지수선물까지 약세를 재확인시켜줘요.",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-16": {
       "kospi": {
         "state": "ready",
@@ -872,8 +891,7 @@
         "headline": "코스피 6,800선 붕괴, 버틴 요인보다 내린 요인이 강했어요",
         "title": "6,803.90",
         "price": "6,803.90",
-        "time": "",
-        "chg": -1.98
+        "time": ""
       },
       "us": {
         "state": "ready",
@@ -883,36 +901,6 @@
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
-        "time": "21:17"
-      }
-    },
-    "2026-10-06": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-10-06/kospi/",
-        "headline": "휴장 하루 쉬고 돌아온 코스피, 밀린 호재부터 반영할 시간",
-        "hit": false,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:28"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-06/close/",
-        "headline": "코스피 7000선 붕괴, 버틴 힘과 내린 힘의 줄다리기",
-        "title": "6,941.39",
-        "price": "6,941.39",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-06/us/",
-        "headline": "금리가 오르는데 주가도 오른다 — AI가 채권시장을 무시하고 있다",
-        "hit": true,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
         "time": "21:17"
       }
     }

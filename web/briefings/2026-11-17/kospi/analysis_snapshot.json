@@ -1,0 +1,170 @@
+{
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 8,
+    "down_pct": 92,
+    "confidence": 82,
+    "basis": "open"
+  },
+  "reason_title": "긴급 점검: 반도체 2차 쇼크, SOX -5.28% 후폭풍",
+  "todays_view": {
+    "view_title": "지수선물까지 약세를 재확인시켜줘요.",
+    "dek": "전날 코스피가 <b>-3.59%</b> 급락하며 이미 충격을 흡수했는데, 간밤 미국 반도체 지수(SOX)가 <b>-5.28%</b> 추가로 밀리며 오늘 또 한 번 갭 하락 출발할 공산이 커요. 엔비디아 CEO 사임 여파와 D램 담합 소송 패소가 겹치며 투자 심리가 쉽게 회복되지 않는 모습이에요.",
+    "recap": [
+      {
+        "text": "코스피가 외국인·기관 동반 매도에 <b>-3.59%</b> 급락하며 5100선으로 밀렸어요. 외국인은 <b>-1조 3,769억원</b>, 기관도 <b>-4,518억원</b> 순매도했어요.",
+        "codes": []
+      },
+      {
+        "text": "삼성전자와 SK하이닉스가 미국 반도체 지수 동반 약세 여파로 장중 큰 폭 하락했어요. 삼성전자는 <b>-4.47%</b>, SK하이닉스는 <b>-7.89%</b> 밀렸어요.",
+        "codes": [
+          "005930",
+          "000660"
+        ]
+      },
+      {
+        "text": "캘리포니아 북부연방법원이 삼성전자·SK하이닉스·마이크론의 D램 공급 담합 소송 기각 신청을 거부하며 메모리 3사에 법적 부담이 더해졌어요.",
+        "codes": [
+          "005930",
+          "000660"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "오늘 밤 10시 30분 미국 10월 소매판매·산업생산 지표가 발표돼요 — 소비 둔화 확인되면 추가 하방 압력이 커질 수 있어요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "반도체 매도세가 오늘도 이어질지가 관건이에요 — SOX·DRAM ETF 낙폭이 더 커지면 갭이 더 벌어질 수 있어요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "VIX가 <b>22.91</b>까지 튀어 리스크 경계 구간에 들어섰어요 — 추가 상승하면 안전자산 쏠림이 강해질 수 있어요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>지수선물까지 약세를 재확인시켜줘요.</b> 브리핑 시점 NQ선물 <b>-2.67%</b>, S&P선물 <b>-1.91%</b>로 아직 반등 기미가 없어요. 어제 이미 -3.59% 빠진 코스피가 오늘 또 갭다운으로 출발할 여지가 높아요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-17T07:28:09.983724+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-17T07:26:36.858468+09:00",
+    "briefing_date": "2026-11-17",
+    "us_session_date": "2026-11-16",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "앤트로픽 나스닥 상장 대기, AI 밸류에이션 재평가 압박",
+        "sides": [
+          {
+            "side": "down",
+            "label": "AI 테마주",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -4.12
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -5.58
+              },
+              {
+                "ticker": "MSFT",
+                "name": "MSFT",
+                "pct": -1.12
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI 테마주는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "나스닥 약세에 장비주까지 동반 조정",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체 장비",
+            "marks": [
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -5.47
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -6.68
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": -5.49
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체 장비는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "VIX 20선 돌파, 20일선 위로 올라선 공포지수",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^VIX",
+                "name": "VIX",
+                "pct": 18.7
+              }
+            ],
+            "proxy": "VIX"
+          }
+        ],
+        "check_line": "지수 전반은 <b>올랐어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-17",
+    "generated_at": "2026-11-17T07:26:37.895702+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": []
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-16",
+    "direction": "하락 우위",
+    "ok": false,
+    "open_pct": 0.28
+  },
+  "prior_signals": {
+    "sox": -5.28,
+    "nasdaq": -2.49,
+    "nq": -2.67,
+    "ewy_resid": -0.108,
+    "vix": 18.7047
+  },
+  "prev_supply": {
+    "date": "20261116",
+    "individual": 13403,
+    "institution": -4518,
+    "foreign": -13769
+  }
+}
