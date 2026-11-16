@@ -43,7 +43,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261113"
+ASSET_VER = "20261116"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 KST = pytz.timezone("Asia/Seoul")
@@ -818,6 +818,80 @@ def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
         "below_secs": sectors(d.get("below") or []),
         "hot": [dict(r, w=f"{r['gap'] / mx * 100:.1f}", x=f"{1 + r['gap'] / 100:.1f}") for r in hot],
         "hot_pct": 40,
+    }}
+
+
+BREAKOUT_BACKTEST_PATH = CONFIG_DIR / "breakout_watch_backtest.json"
+
+
+def read_breakout_watch(analysis: dict, target_date: str = ""):
+    """돌파 관찰 목록 데이터 — 스냅샷이 1순위, 데이터 파일은 브리핑 날짜와 같을 때만(§14·§45). 읽으면 스냅샷에 남긴다."""
+    data = analysis.get("breakout_watch")
+    if isinstance(data, dict):
+        return data
+    path = DATA_DIR / "breakout_watch.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] breakout_watch 파싱 실패: {e}")
+        return None
+    if target_date and data.get("date") != target_date:
+        print(f"[generate_html] ⚠️ breakout_watch 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
+        return None
+    analysis["breakout_watch"] = data
+    return data
+
+
+def _bw_line(pts: list) -> dict:
+    """가격 선 — 점 위치(%)·이름표 정렬·손절선~지금 구간. pts = [(키, 값, 이름표, 위/아래)]."""
+    vs = [v for _, v, _, _ in pts]
+    lo, hi = min(vs), max(vs)
+    X = lambda v: 8 + (v - lo) / (hi - lo) * 84 if hi > lo else 50
+    out = []
+    for k, v, lab, pos in pts:
+        x = X(v)
+        out.append({"k": k, "v": v, "lab": lab, "pos": pos, "x": f"{x:.1f}",
+                    "al": "l" if x < 15 else "r" if x > 85 else ""})
+    xs = {p["k"]: float(p["x"]) for p in out}
+    a, b = sorted((xs["stop"], xs["now"]))
+    return {"pts": out, "zone_l": f"{a:.1f}", "zone_w": f"{b - a:.1f}"}
+
+
+def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
+    """미국 브리핑 '돌파 관찰 목록' 섹션(2026-11-16 사용자 결정, 시안 2026-11-16-breakout-watch-clear.html, §88).
+
+    1 기다리는 종목 → 2 오늘 돌파한 종목 → 3 돌파한 뒤 결과. 숫자는 breakout_watch.py가 만든 그대로 — 새 숫자를 만들지 않는다.
+    과거 성적 파일이 없으면 섹션째 뺀다(성적 없이 종목만 보이면 '사라'로 읽힌다). 세 묶음이 모두 비어도 뺀다.
+    """
+    d = read_breakout_watch(analysis, target_date)
+    if not d or not d.get("asof"):
+        return {}
+    try:
+        bt = json.loads(BREAKOUT_BACKTEST_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    today, wait, track = d.get("today") or [], d.get("wait") or [], d.get("track") or []
+    if not (today or wait or track):
+        return {}
+    tcards = [dict(r, to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
+                   line=_bw_line([("stop", r["stop"], "손절선", "b"), ("now", r["close"], "지금", "t"),
+                                  ("in", r["entry"], "돌파한 가격", "b")]))
+              for r in today]
+    wcards = [dict(r, line=_bw_line([("stop", r["stop"], "넘으면 손절선", "b"), ("now", r["close"], "지금", "t"),
+                                     ("in", r["pivot"], "넘을 선", "b")]))
+              for r in wait]
+    lab = {"live": "진행 중 · {}거래일째", "stop": "손절로 끝 · {}거래일", "exit": "추세 끝(20일 최저가) · {}거래일"}
+    rows = [dict(r, label=lab.get(r["state"], "{}").format(r["days"]), from_md=_md(r["from"])) for r in track]
+    done = [r for r in track if r["state"] != "live"]
+    asof = d["asof"]
+    return {"bw": {
+        "asof_label": f"{_md(asof)}({_dow(asof)}) 종가 기준",
+        "today": tcards, "wait": wcards, "wait_more": d.get("wait_more") or 0, "track": rows,
+        "n_wait": len(wcards) + (d.get("wait_more") or 0), "n_done": len(done),
+        "win": sum(1 for r in done if r["pct"] > 0), "lose": sum(1 for r in done if r["pct"] <= 0),
+        "n_live": len(track) - len(done), "bt": bt,
     }}
 
 
@@ -2202,6 +2276,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["todays_view"] = analysis.get("todays_view")
         ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
         ctx.update(build_sp500_ma200(analysis, target_date))    # S&P 500 200일선 체크(§81) — 나스닥 체크 아래
+        ctx.update(build_breakout_watch(analysis, target_date)) # 돌파 관찰 목록(§88) — 200일선 체크 아래
         ctx.update(build_premarket_strip(analysis, market_data, target_date, gen_time))   # 프리마켓 실측 띠 — 맨 위
         save_us_index_position(analysis, market_data, target_date)
         ctx.update(build_struct_signal(analysis))               # 구조 신호 — 본문 맨 아래, 모바일은 시장 지표 위(§68 ⑤)
