@@ -1,5 +1,5 @@
 {# 돌파 관찰 목록 — 쿨라매기 조건 종목의 10일 최고가 돌파와 그 뒤 터틀 규칙 결과(결정론, SERVICE_RULES §88).
-   1 기다리는 종목 → 2 오늘 돌파 → 3 그 뒤 결과. 과거 성적은 섹션 안에 꺼내 둔다(추천 목록이 아니다). 텔레그램에는 넣지 않는다. #}
+   1 기다리는 종목 → 2 오늘 돌파 → 3 그 뒤 결과(2열 타일). 과거 성적은 맨 아래 '근거와 면책 고지'에 접어 둔다(추천 목록이 아니다). 텔레그램에는 넣지 않는다. #}
 {% set b = bw %}
 {% macro priceline(l) -%}
 <div class="bw-line" aria-hidden="true"><div class="bar"></div><div class="zone" style="left:{{ l.zone_l }}%;width:{{ l.zone_w }}%"></div>
@@ -12,7 +12,7 @@
 <li>10일·20일 평균선 위에 있어요</li></ul></details>
 {%- endmacro %}
 <div class="open-section bw-section">
-  <div class="open-section__title">돌파 관찰 목록 <span class="bw-asof">S&amp;P 500 · {{ b.asof_label }}</span></div>
+  <div class="open-section__title">🔭 돌파 관찰 목록 <span class="bw-asof">S&amp;P 500 · {{ b.asof_label }}</span></div>
   <p class="bw-intro">크게 오른 뒤 쉬고 있는 종목이 최근 고점을 다시 넘는지 지켜보는 목록이에요. 넘은 뒤 어떻게 됐는지도 빠짐없이 남겨요.</p>
   <div class="bw-flow">
     <div class="s"><span>1 기다리는 중</span><b>{{ b.n_wait }}</b><small>조건을 채우고 고점 아래</small></div><div class="ar">→</div>
@@ -42,14 +42,14 @@
   <div class="bw-gh"><span class="num">3</span>돌파한 뒤 어떻게 됐나</div>
   {% if b.track %}
   <div class="bw-score">최근 돌파 {{ b.track|length }}번 <span class="chip win">이김 {{ b.win }}</span><span class="chip lose">짐 {{ b.lose }}</span><span class="chip live">진행 중 {{ b.n_live }}</span></div>
-  <ul class="bw-res">
-    {% for r in b.track %}
-    <li><span class="nm"><b>{{ r.name }}</b><small>{{ r.from_md }} 돌파</small></span><span class="tag {{ r.state }}">{{ r.label }}</span><span class="v {{ 'up' if r.pct > 0 else 'dn' if r.pct < 0 else '' }}">{{ '%+.1f'|format(r.pct)|replace('-', '−') if r.pct else '0.0' }}%</span></li>
+  {# 2열 타일 — 진행 중 먼저, 끝난 것 뒤(2026-11-16 사용자 결정 D안, 시안 docs/prototypes/2026-11-16-breakout-results-mobile.html) #}
+  <div class="bw-tiles">
+    {% for r in (b.track|selectattr('state','equalto','live')|list) + (b.track|rejectattr('state','equalto','live')|list) %}
+    <div class="bw-tile {{ r.state }}"><b class="nm">{{ r.name }}</b><span class="v {{ 'up' if r.pct > 0 else 'dn' if r.pct < 0 else '' }}">{{ '%+.1f'|format(r.pct)|replace('-', '−') if r.pct else '0.0' }}%</span><small><span class="st">{{ {'live': '진행 중', 'stop': '손절로 끝', 'exit': '추세 끝'}.get(r.state, r.state) }}</span> · {{ r.days }}거래일{{ '째' if r.state == 'live' else '' }}<br>{{ r.from_md }} 돌파</small></div>
     {% endfor %}
-  </ul>
+  </div>
   <p class="bw-note">% = 돌파한 가격에서 끝난 가격(진행 중은 오늘 종가)까지예요.</p>
   {% else %}<div class="bw-empty">최근 60거래일 안에 돌파한 종목이 없어요.</div>{% endif %}
 
-  <div class="bw-honest"><b>이 규칙의 과거 성적</b> — {{ b.bt.start_year }}년부터 {{ b.bt.universe }}에서 돌파 때 샀다면, 2025년 한 해를 빼면 한 번 평균 {{ '%+.2f'|format(b.bt.avg_r_ex2025) }}R로 아무 날에나 산 경우({{ '%+.2f'|format(b.bt.random_r_ex2025) }}R)와 거의 같았어요. 이긴 비율은 {{ b.bt.win_pct }}%예요. 종목을 고르는 힘이 확인된 목록이 아니에요.</div>
-  <details class="bw-fine"><summary>고르는 조건과 계산 방법</summary><p>1·3·6달 상승률 중 하나가 S&amp;P 500 상위 2%, 6달 저점에서 30% 넘게 오름, 종가가 10일·20일 평균선 위, 최근 10거래일 폭이 그 전 20거래일 폭의 60%보다 좁고 저점이 높아짐, 하루 평균 움직임 3% 이상(크리스티안 쿨라매기의 고르기 조건). 넘을 선은 최근 10일 최고가, 손절선은 산 가격에서 하루 평균 움직임의 두 배 아래, 추세 끝은 20일 최저가를 깰 때예요(리처드 데니스의 터틀 규칙). 같은 종목은 10거래일 안에 다시 돌파로 세지 않아요. R은 손익을 손절할 때 잃는 돈으로 나눈 값이에요. 지금 S&amp;P 500에 남은 종목으로 시험해 실제보다 좋게 나왔을 수 있어요. 매수 권유가 아니에요.</p></details>
+  <details class="bw-fine"><summary>근거와 면책 고지</summary><div class="bw-honest"><b>이 규칙의 과거 성적</b> — {{ b.bt.start_year }}년부터 {{ b.bt.universe }}에서 돌파 때 샀다면, 2025년 한 해를 빼면 한 번 평균 {{ '%+.2f'|format(b.bt.avg_r_ex2025) }}R로 아무 날에나 산 경우({{ '%+.2f'|format(b.bt.random_r_ex2025) }}R)와 거의 같았어요. 이긴 비율은 {{ b.bt.win_pct }}%예요. 종목을 고르는 힘이 확인된 목록이 아니에요.</div><p>1·3·6달 상승률 중 하나가 S&amp;P 500 상위 2%, 6달 저점에서 30% 넘게 오름, 종가가 10일·20일 평균선 위, 최근 10거래일 폭이 그 전 20거래일 폭의 60%보다 좁고 저점이 높아짐, 하루 평균 움직임 3% 이상(크리스티안 쿨라매기의 고르기 조건). 넘을 선은 최근 10일 최고가, 손절선은 산 가격에서 하루 평균 움직임의 두 배 아래, 추세 끝은 20일 최저가를 깰 때예요(리처드 데니스의 터틀 규칙). 같은 종목은 10거래일 안에 다시 돌파로 세지 않아요. R은 손익을 손절할 때 잃는 돈으로 나눈 값이에요. 지금 S&amp;P 500에 남은 종목으로 시험해 실제보다 좋게 나왔을 수 있어요. 매수 권유가 아니에요.</p></details>
 </div>
