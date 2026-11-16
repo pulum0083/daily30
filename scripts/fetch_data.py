@@ -634,7 +634,7 @@ def feed_alert_text(issues: list, btype: str) -> str:
         lines.append(f"네이버 체결가로 대신 {len(sub)}종목: {', '.join(sub)}")
     if gone:
         lines.append(f"네이버에도 없어 어제 종가 기준으로 남은 {len(gone)}종목: {', '.join(gone)} — 브리핑의 '지금' 값이 아닐 수 있어요.")
-    lines.append("홈 '밤사이 미국'도 같은 원천이라 함께 영향을 받아요(§85).")
+    lines.append("홈 '지금 미국'도 같은 원천이라 함께 영향을 받아요(§85).")
     return "\n".join(lines)
 
 
