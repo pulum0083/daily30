@@ -79,8 +79,14 @@ def md_body(md, charts):
         if l.startswith("## "):
             if sec_open: out.append("  </section>")
             out.append('  <section class="legal-sec">'); out.append(f"    <h2>{inline(l[3:])}</h2>"); sec_open = True
-        elif l.startswith("> "):  # 운영자 한마디 자리 — 글이 올 때까지 싣지 않는다
-            pass
+        elif l.startswith("> "):  # 인용 묶음 — '운영자 한마디'만 상자로 싣고 나머지 인용은 싣지 않는다
+            blk = []
+            while i < len(lines) and lines[i].startswith("> "):
+                blk.append(lines[i][2:]); i += 1
+            if "운영자 한마디" in blk[0] and len(blk) > 1:
+                out.append('    <div class="g-note"><p class="g-note-h">운영자 한마디</p>'
+                           + "".join(f"<p>{inline(x)}</p>" for x in blk[1:]) + "</div>")
+            continue
         elif l.startswith("[그래프 자리"):
             out.append(charts.pop(0))
         elif l.startswith("|"):
