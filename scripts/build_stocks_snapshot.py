@@ -195,7 +195,6 @@ def build_snapshot():
                                        "change_pct": rec["change_pct"]}
 
     # session_date: 한국 종목들의 마지막 봉 날짜가 전부 일치할 때만 채택(§0 — 엇갈리면 생략).
-    # 밤사이 브리지(fetch_data.fetch_overnight_bridge)가 이 값으로만 세션 정합성을 게이트한다.
     session_date = _reconcile_session_date(kr_bar_dates)
     if session_date is None:
         distinct = sorted({d for d in kr_bar_dates if d})

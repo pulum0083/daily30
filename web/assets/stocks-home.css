@@ -725,40 +725,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .gnb__tg-btn:hover{background:rgba(90,162,255,.24);color:#8CBFFF;}
 .gnb__tg-btn svg{width:15px;height:15px;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
-/* ── 밤사이 브리지(#overnight-bridge) — 거래일 07:30~09:00에만 노출(stocks-home.js) ──
-   ncai 규칙: 좌측 컬러 액센트 바 금지, 강조는 surface-soft 톤 + 굵기. 상태는 pill 배지로만.
-   색은 한국 시장 관례 그대로 --up=빨강(상승) / --dn=파랑(하락) — semantic 팔레트 금지.
-   변수엔 전부 폴백을 준다(§5 — 변수 하나가 비어 페이지가 통째로 빈 화면이 된 적이 있다). */
-#overnight-bridge{background:var(--canvas,#FFF);border:1px solid var(--hair,#E5E7EB);border-radius:16px;box-shadow:var(--s1,0 1px 3px rgba(0,0,0,.06));padding:14px 16px;margin-bottom:16px;}
-.ob-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-bottom:2px;}
-.ob-t{font-size:15px;font-weight:800;color:var(--ink,#13151A);}
-.ob-date{font-size:13px;font-weight:500;color:var(--muted,#5B6472);}
-.ob-list{margin-top:4px;}
-.ob-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:10px 0;border-bottom:1px solid var(--hair,#E5E7EB);}
-.ob-row:last-child{border-bottom:none;}
-.ob-sec{flex:0 0 auto;min-width:66px;font-size:13px;font-weight:700;color:var(--ink,#13151A);}
-.ob-leg{display:inline-flex;align-items:center;gap:4px;min-width:0;font-size:13px;}
-.ob-mk{flex:0 0 auto;font-size:13px;font-weight:500;color:var(--muted,#5B6472);background:var(--soft,#F9FAFB);border-radius:6px;padding:1px 6px;}
-.ob-leg b{font-weight:800;font-variant-numeric:tabular-nums;}
-.ob-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted,#5B6472);}
-.ob-gap{margin-left:auto;display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;}
-.ob-pill{height:24px;display:inline-flex;align-items:center;padding:0 8px;border-radius:999px;background:var(--soft,#F9FAFB);border:1px solid var(--hair,#E5E7EB);font-size:13px;font-weight:500;color:var(--muted,#5B6472);}
-.ob-pill.up{color:var(--up,#E03131);}
-.ob-pill.dn{color:var(--dn,#2775ED);}
-/* 색은 붙여준 .up/.dn(전역 규칙)이 결정한다 — 여기서 color를 지정하면 특이도가 높아 그걸 덮어써
-   '동조'가 아닌 행까지 먹색으로 나온다. 동조(gap_cls="")일 땐 클래스가 없어 본문색을 그대로 쓴다. */
-.ob-gap b{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
-.ob-note{font-size:13px;line-height:1.55;color:var(--muted,#5B6472);margin:0;padding-top:10px;border-top:1px solid var(--hair,#E5E7EB);}
-/* 좁은 화면에선 한 줄에 다 넣으면 행마다 줄바꿈 위치가 달라져 들쭉날쭉해진다.
-   섹터명+갭을 첫 줄에 고정하고, 미국·한국 다리를 각각 한 줄씩 내린다(행 3줄 고정). */
-@media(max-width:600px){
-  #overnight-bridge{padding:13px 14px;}
-  .ob-row{gap:3px 10px;padding:11px 0;}
-  .ob-sec{order:1;flex:1 1 auto;}
-  .ob-gap{order:2;}
-  .ob-leg{order:3;flex:0 0 100%;}
-}
-
 /* 탭에 없는 화면 진입 링크. '전체 보기' 링크는 기존 .more(stocks-home.css:258)를 그대로 쓴다 — 새로 만들지 않는다. */
 .xlink{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--hair,#E5E7EB);cursor:pointer;}
 .xlink:last-child{border-bottom:0;}
@@ -957,23 +923,21 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #home.on{display:flex;flex-direction:column}
 #home .home-cols,#home .home-full,#home .home-side{display:contents}
 /* 기본(슬롯 미정) — 예전 모바일 순서. 모든 블록에 id 선택자로 명시한다(.sig-block{order:-1} 같은 옛 규칙이 이기지 않게). */
-#home #home-hero{order:0} #home #vs-root{order:1} #home #us-evening{order:2} #home #overnight-bridge{order:3}
+#home #home-hero{order:0} #home #vs-root{order:1} #home #us-evening{order:2}
 #home #us-linked-widget{order:4} #home #struct-sig{order:5} #home #sig-block{order:6} #home .sbx-block{order:7}
 #home.slot-intraday #sig-block{order:2} #home.slot-intraday #us-linked-widget{order:3} #home.slot-intraday .sbx-block{order:4}
 #home.slot-close .sbx-block{order:2} #home.slot-close #sig-block{order:3} #home.slot-close #us-linked-widget{order:4}
-#home.slot-close #overnight-bridge{order:6}
 #home.slot-intraday #struct-sig,#home.slot-close #struct-sig{order:9}   /* 장기 신호 — 장중·마감엔 맨 아래(2026-11-09) */
 /* 마감 슬롯에서 밤사이 미국이 보이면(평일 17:00~, ueGate가 #home에 ue-on을 붙인다)
    밤사이 미국 → 지금 이시각 추정가 → 마감 브리핑 카드 순 — 사용자 결정 2026-10-27. */
 #home.slot-close.ue-on #us-evening{order:-2} #home.slot-close.ue-on #us-linked-widget{order:-1}
 #home.slot-morning #us-evening,#home.slot-evening #us-evening{order:2}
-#home.slot-morning #overnight-bridge,#home.slot-evening #overnight-bridge{order:3}
 #home.slot-morning #us-linked-widget,#home.slot-evening #us-linked-widget{order:4}
 #home.slot-morning #struct-sig,#home.slot-evening #struct-sig{order:5}
 #home.slot-morning .sbx-block,#home.slot-evening .sbx-block{order:6}
 #home.slot-morning #sig-block,#home.slot-evening #sig-block{order:7}
 #home.slot-weekend #struct-sig{order:2} #home.slot-weekend .sbx-block{order:3} #home.slot-weekend #us-linked-widget{order:4}
-#home.slot-weekend #us-evening{order:5} #home.slot-weekend #overnight-bridge{order:6} #home.slot-weekend #sig-block{order:7}
+#home.slot-weekend #us-evening{order:5} #home.slot-weekend #sig-block{order:7}
 /* PC 전용 — 섹터 막대 2열(1~4 왼쪽, 5~8 오른쪽) */
 @media(min-width:720px){
   #home .sb-bars{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);grid-auto-flow:column;column-gap:28px}
