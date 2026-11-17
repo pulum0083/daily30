@@ -5,6 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate_html as gh  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 
 
 def _rec(date, direction="상승 우위", ok=None, gap=None, basis="open"):
@@ -18,7 +19,7 @@ def _rec(date, direction="상승 우위", ok=None, gap=None, basis="open"):
 
 def _briefings(tmp_path, monkeypatch, rows):
     (tmp_path / "briefings.json").write_text(json.dumps({"briefings": rows}), encoding="utf-8")
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
 
 
 def _no_net(_d):
@@ -55,7 +56,7 @@ def test_prev_chip_skips_close_basis_record(tmp_path, monkeypatch):
 
 
 def test_prev_chip_prefers_snapshot_and_labels_monday(tmp_path, monkeypatch):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)   # briefings.json 없어도 스냅샷 값이면 된다
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)   # briefings.json 없어도 스냅샷 값이면 된다
     a = {"prev_prediction_result": {"date": "2026-10-23", "direction": "하락 우위", "ok": True, "open_pct": -2.1}}
     ctx = gh.build_prev_prediction(a, "2026-10-26", gap_fn=_no_net)
     assert ctx["prev_pred"]["label"] == "지난 금요일"          # 월요일에 '어제'라고 쓰지 않는다(§24)
@@ -215,7 +216,7 @@ def test_domestic_news_shows_absolute_time_not_relative(tmp_path, monkeypatch):
         "date": "2026-10-23", "window": {"from": "2026-10-22 15:30", "label": "x"},
         "issues": [{"title": "한은 동결", "source": "연합", "url": "https://a.example/1", "published_at": "2026-10-22 21:44"}]}),
         encoding="utf-8")
-    monkeypatch.setattr(gh, "BASE_DIR", tmp_path)
+    gen_patch(monkeypatch, "BASE_DIR", tmp_path)
     ctx = gh.build_domestic_issues("2026-10-23")
     assert ctx["domestic_issues"][0]["time_abs"] == "10/22 21:44"
     html = _issue_html(**ctx)

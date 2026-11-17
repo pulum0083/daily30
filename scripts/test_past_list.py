@@ -5,6 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import generate_html as g  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 
 
 def _page(root, date, btype, close=None, snap=None):
@@ -20,8 +21,8 @@ def _setup(tmp_path, monkeypatch, briefings):
     bdir, ddir = tmp_path / "b", tmp_path / "d"
     bdir.mkdir(); ddir.mkdir()
     (ddir / "briefings.json").write_text(json.dumps({"briefings": briefings}), encoding="utf-8")
-    monkeypatch.setattr(g, "BRIEFINGS_DIR", bdir)
-    monkeypatch.setattr(g, "DATA_DIR", ddir)
+    gen_patch(monkeypatch, "BRIEFINGS_DIR", bdir)
+    gen_patch(monkeypatch, "DATA_DIR", ddir)
     return bdir
 
 
@@ -63,7 +64,7 @@ def test_list_json_has_hit_and_change(tmp_path, monkeypatch):
         {"date": "2026-11-11", "type": "us", "predicted_direction": "상승 우위", "is_correct": True},
     ])
     web = tmp_path / "w"
-    monkeypatch.setattr(g, "WEB_DIR", web)
+    gen_patch(monkeypatch, "WEB_DIR", web)
     _page(bdir, "2026-11-10", "close", "5,239.13")
     _page(bdir, "2026-11-11", "close", "5,375.36")
     _page(bdir, "2026-11-11", "us", snap={"todays_view": {"view_title": "CPI 쇼크"}})

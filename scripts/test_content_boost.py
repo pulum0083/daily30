@@ -4,6 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate_html as gh  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 
 KOSPI_MD = {
     "generated_at": "2026-10-23T07:26:00+09:00",
@@ -100,7 +101,7 @@ def _us_item():
 
 
 def test_us_ma5_corner_from_data_file(tmp_path, monkeypatch):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "monthly_ma5_us.json").write_text(_json.dumps({"date": "2026-10-23", "items": [_us_item()]}), encoding="utf-8")
     a = {}
     ctx = gh.build_monthly_ma5(a, "2026-10-23", "us")
@@ -112,7 +113,7 @@ def test_us_ma5_corner_from_data_file(tmp_path, monkeypatch):
 
 
 def test_us_ma5_corner_omitted_without_backtest_or_other_date(tmp_path, monkeypatch):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "monthly_ma5_us.json").write_text(_json.dumps({"date": "2026-10-22", "items": [_us_item()]}), encoding="utf-8")
     assert gh.build_monthly_ma5({}, "2026-10-23", "us")["ma5m_items"] == []
     monkeypatch.setitem(gh.MA5_MARKETS["us"], "bt", tmp_path / "없음.json")
@@ -136,7 +137,7 @@ def test_ib_views_date_mismatch_omitted(tmp_path, monkeypatch):
     (tmp_path / "data").mkdir()
     (tmp_path / "data" / "ib_korea_views.json").write_text(_json.dumps(
         {"date": "2026-10-22", "views": [{"house": "JP모건", "url": "https://x.example/1"}]}), encoding="utf-8")
-    monkeypatch.setattr(gh, "BASE_DIR", tmp_path)
+    gen_patch(monkeypatch, "BASE_DIR", tmp_path)
     assert gh.build_ib_korea_views("2026-10-23") == {"ib_korea_views": []}
     assert len(gh.build_ib_korea_views("2026-10-22")["ib_korea_views"]) == 1
 

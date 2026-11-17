@@ -10,6 +10,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import breakout_watch as bw  # noqa: E402
 import generate_html as gh  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 
 FIX = Path(__file__).resolve().parent / "fixtures" / "breakout_watch_20261105.json"
 DAYS = pd.bdate_range("2026-01-01", periods=80)
@@ -109,9 +110,9 @@ def _write(tmp_path, monkeypatch, data, bt=True):
     p = tmp_path / "data"
     p.mkdir()
     (p / "breakout_watch.json").write_text(json.dumps(data, ensure_ascii=False))
-    monkeypatch.setattr(gh, "DATA_DIR", p)
+    gen_patch(monkeypatch, "DATA_DIR", p)
     if not bt:
-        monkeypatch.setattr(gh, "BREAKOUT_BACKTEST_PATH", tmp_path / "none.json")
+        gen_patch(monkeypatch, "BREAKOUT_BACKTEST_PATH", tmp_path / "none.json")
 
 
 def test_build_skips_on_date_mismatch(tmp_path, monkeypatch):

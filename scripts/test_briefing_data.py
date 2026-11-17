@@ -8,6 +8,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from briefing_data import read_dated_payload, read_snapshot_payload
 import generate_html as gh
+from gen_testkit import gen_patch  # noqa: E402
 
 
 @pytest.mark.parametrize("raw", ["{", "[]", "null", '"text"', "123", '{"date":"2026-11-16"}'])
@@ -46,14 +47,14 @@ def test_empty_snapshot_is_preserved(tmp_path):
     (lambda date: gh.read_breakout_watch({}, date), "breakout_watch.json"),
 ])
 def test_section_readers_reject_non_object_json(tmp_path, monkeypatch, reader, filename):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / filename).write_text("[]", encoding="utf-8")
     assert reader("2026-11-17") is None
 
 
 @pytest.mark.parametrize("raw", ["{", "[]", "null"])
 def test_optional_news_corruption_does_not_abort_render(tmp_path, monkeypatch, raw):
-    monkeypatch.setattr(gh, "BASE_DIR", tmp_path)
+    gen_patch(monkeypatch, "BASE_DIR", tmp_path)
     (tmp_path / "data").mkdir()
     for filename in ("ib_korea_views.json", "domestic_issues.json"):
         (tmp_path / "data" / filename).write_text(raw, encoding="utf-8")

@@ -5,6 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import generate_html as g  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 
 SECTORS = ["semicon", "power", "defense", "ship", "battery", "auto", "bio", "finance"]
 
@@ -39,7 +40,7 @@ def test_unknown_key_is_empty():
 
 def test_missing_file_is_safe(monkeypatch, tmp_path):
     """카피 파일이 없어도 페이지 생성은 계속돼야 한다(경고만)."""
-    monkeypatch.setattr(g, "_SECTOR_COPY_PATH", tmp_path / "없는파일.json")
+    gen_patch(monkeypatch, "_SECTOR_COPY_PATH", tmp_path / "없는파일.json")
     assert g._sector_copy("semicon") == {}
 
 

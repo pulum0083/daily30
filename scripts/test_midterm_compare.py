@@ -82,6 +82,7 @@ def test_context_sentences_events_and_ranges():
 
 def test_template_renders(tmp_path):
     import generate_html as gh
+    from gen_testkit import gen_patch  # noqa: E402
     html = gh.make_env().get_template("pages/midterm_2018.html").render(
         **lp.midterm_context(_data()), css_path="/a.css", js_path="/a.js", canonical_url="https://x/", seo_jsonld=[])
     assert "트럼프 1기 중간선거 뒤와 닮았을까?" in html and html.count('class="mtp-r"') == 3
@@ -90,8 +91,9 @@ def test_template_renders(tmp_path):
 
 def test_write_page_refuses_other_session(tmp_path, monkeypatch):
     import generate_html as gh
+    from gen_testkit import gen_patch  # noqa: E402
     (tmp_path / "midterm_2018.json").write_text(json.dumps(_data()), encoding="utf-8")
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     assert gh.write_midterm_page("2026-11-20") is False                     # 직전 미국장(11/19) ≠ 11/13
 
 
@@ -110,6 +112,7 @@ def test_live_midterm_column_is_separate_from_stats():
     assert c["bars"][-1]["live"] and c["bars"][-1]["y"] == 2026 and c["live"]["from_s"] == "11/3"
     assert c["n_mid"] == 3 and c["ups"] == 3                                 # 확정 3번만 센다
     import generate_html as gh
+    from gen_testkit import gen_patch  # noqa: E402
     html = gh.make_env().get_template("pages/midterm_2018.html").render(
         **lp.midterm_context(d), css_path="/a.css", js_path="/a.js", canonical_url="https://x/", seo_jsonld=[])
     assert 'class="mtb live"' in html and "진행 중" in html and "평균에 넣지 않았고" in html

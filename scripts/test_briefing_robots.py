@@ -1,5 +1,6 @@
 # 30일 지난 브리핑의 noindex·sitemap 제외 회귀 테스트(2026-11-13, 애드센스 재신청 준비)
 import generate_html as g
+from gen_testkit import gen_patch  # noqa: E402
 
 INDEX = g.ROBOTS_INDEX
 NOINDEX = g.ROBOTS_NOINDEX
@@ -18,7 +19,7 @@ def test_30일_경계():
 
 
 def test_오래된_브리핑만_noindex로_바뀌고_본문은_그대로(tmp_path, monkeypatch):
-    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    gen_patch(monkeypatch, "BRIEFINGS_DIR", tmp_path)
     old = _page(tmp_path, "2026-09-01", "kospi", INDEX)
     new = _page(tmp_path, "2026-11-12", "us", INDEX)
     assert g.apply_briefing_robots("2026-11-13") == 1
@@ -29,14 +30,14 @@ def test_오래된_브리핑만_noindex로_바뀌고_본문은_그대로(tmp_pat
 
 
 def test_robots_메타가_없는_옛_발행본엔_넣는다(tmp_path, monkeypatch):
-    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    gen_patch(monkeypatch, "BRIEFINGS_DIR", tmp_path)
     p = _page(tmp_path, "2026-07-12", "kospi", '<meta charset="UTF-8">')
     g.apply_briefing_robots("2026-11-13")
     assert p.read_text().count(NOINDEX) == 1
 
 
 def test_재생성으로_색인_메타가_돌아와도_다시_noindex(tmp_path, monkeypatch):
-    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    gen_patch(monkeypatch, "BRIEFINGS_DIR", tmp_path)
     p = _page(tmp_path, "2026-08-01", "close", NOINDEX)
     p.write_text(p.read_text().replace(NOINDEX, INDEX))
     assert g.apply_briefing_robots("2026-11-13") == 1 and NOINDEX in p.read_text()
@@ -54,10 +55,10 @@ def test_sitemap엔_30일_안의_브리핑만(tmp_path, monkeypatch):
     for d in (recent, old):
         _page(bdir, d, "kospi", INDEX)
     (data / "briefings.json").write_text(json.dumps({"briefings": [{"date": recent}, {"date": old}]}))
-    monkeypatch.setattr(g, "BRIEFINGS_DIR", bdir)
-    monkeypatch.setattr(g, "WEB_DIR", web)
-    monkeypatch.setattr(g, "DATA_DIR", data)
-    monkeypatch.setattr(g, "CONFIG_DIR", tmp_path / "noconfig")
+    gen_patch(monkeypatch, "BRIEFINGS_DIR", bdir)
+    gen_patch(monkeypatch, "WEB_DIR", web)
+    gen_patch(monkeypatch, "DATA_DIR", data)
+    gen_patch(monkeypatch, "CONFIG_DIR", tmp_path / "noconfig")
     g.write_sitemap_xml()
     sm = (web / "sitemap.xml").read_text()
     assert f"/briefings/{recent}/kospi/" in sm

@@ -11,6 +11,7 @@ import call_claude as cc  # noqa: E402
 import check_accuracy as ca  # noqa: E402
 import fit_us_close_prior as fit  # noqa: E402
 import generate_html as gh  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 import hl_shadow_report as hr  # noqa: E402
 import hl_signals as hs  # noqa: E402
 import nasdaq_overheat as nq  # noqa: E402
@@ -172,7 +173,7 @@ def test_silent_when_high_unchanged_or_stale():
 
 def test_silent_on_old_snapshot_or_missing_data(monkeypatch):
     assert cc._nasdaq_change_lines({"nasdaq_overheat": {"gap_pct": 61.0, "month": "2026-11", "last_date": "2026-11-02"}}, "2026-11-03") == []
-    monkeypatch.setattr(gh, "_read_nasdaq_overheat", lambda d: None)
+    gen_patch(monkeypatch, "_read_nasdaq_overheat", lambda d: None)
     assert cc._nasdaq_change_lines({}, "2026-11-03") == []
 
 

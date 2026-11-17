@@ -9,6 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import backtest_nasdaq_overheat as bt  # noqa: E402
 import call_claude as cc  # noqa: E402
 import generate_html as gh  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
+import nasdaq_charts  # noqa: E402
 import nasdaq_overheat as nq  # noqa: E402
 
 FIX = json.loads((Path(__file__).parent / "fixtures" / "nasdaq_monthly_20261023.json").read_text(encoding="utf-8"))
@@ -61,7 +63,7 @@ def test_committed_backtest_file_matches_script():
 
 # ── 페이지 컨텍스트·렌더 ──
 def _ctx(tmp_path, monkeypatch, data, target="2026-10-23", analysis=None):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     if data is not None:
         (tmp_path / "nasdaq_overheat.json").write_text(json.dumps(data), encoding="utf-8")
     return gh.build_nasdaq_check(analysis if analysis is not None else {}, target)
@@ -76,7 +78,7 @@ def test_date_mismatch_omits_section(tmp_path, monkeypatch):
 
 
 def test_missing_backtest_file_omits_section(tmp_path, monkeypatch):
-    monkeypatch.setattr(gh, "NASDAQ_BACKTEST_PATH", tmp_path / "없음.json")
+    gen_patch(monkeypatch, "NASDAQ_BACKTEST_PATH", tmp_path / "없음.json")
     assert _ctx(tmp_path, monkeypatch, _data()) == {}
 
 
@@ -125,7 +127,7 @@ def test_us_template_puts_section_under_issues():
 
 # ── 텔레그램 ──
 def _tg(tmp_path, monkeypatch, gap):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     analysis = {"prediction": {"up_pct": 40, "down_pct": 60}, "todays_view": {"view_title": "제목"},
                 "issues": [{"title": "첫 이슈"}], "nasdaq_overheat": _data(gap=gap, streak=4)}
@@ -140,7 +142,7 @@ def test_telegram_no_block_when_high_unchanged(tmp_path, monkeypatch, gap):
 
 
 def test_telegram_block_after_watch_line_when_crossing_70(tmp_path, monkeypatch):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     d = _data(gap=72.4, streak=4)
     d.update(high_changed=True, high=29300.0, prev_high=28800.0, prev_month_high=30000.0, ma60=17000.0,
@@ -171,8 +173,8 @@ def test_snapshot_does_not_store_history(tmp_path, monkeypatch):
 
 
 def _page(tmp_path, monkeypatch, data, target="2026-10-23"):
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
-    monkeypatch.setattr(gh, "WEB_DIR", tmp_path / "web")
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "WEB_DIR", tmp_path / "web")
     if data is not None:
         (tmp_path / "nasdaq_overheat.json").write_text(json.dumps(data), encoding="utf-8")
     ok = gh.write_nasdaq_page(target)
@@ -216,6 +218,6 @@ def test_page_range_buttons_full_10y_5y(tmp_path, monkeypatch):
 
 def test_sub_range_rescales_axis():
     hist = [{"m": f"{2016 + (i + 11) // 12}-{(i + 11) % 12 + 1:02d}", "g": 10 + i * 0.5} for i in range(120)]
-    g = gh._nqp_gap_chart(hist, 60, 70, full=False, every=2)
+    g = nasdaq_charts._nqp_gap_chart(hist, 60, 70, full=False, every=2)
     assert g["lo"] == 0 and g["hi"] == 80                                      # 2000년 +182%에 눌리지 않는다
     assert g["peak"] is None                                                   # 최고가 기간 끝 달이면 이름표를 뺀다

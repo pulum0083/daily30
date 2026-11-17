@@ -123,6 +123,7 @@ def test_ma5_lists_from_snapshots(tmp_path, monkeypatch):
 
 def test_templates_render(tmp_path):
     import generate_html as gh
+    from gen_testkit import gen_patch  # noqa: E402
     env = gh.make_env()
     base = {"css_path": "/a.css", "js_path": "/a.js", "canonical_url": "https://x/", "seo_jsonld": []}
     html = env.get_template("pages/sp500_200.html").render(**lp.sp500_context(_sp_data(), _sp_hist()), **base)
@@ -144,13 +145,14 @@ def test_pages_are_in_publish_gate_and_sitemap():
 
 def test_write_sp500_page_also_writes_home_file(tmp_path, monkeypatch):
     import generate_html as gh
+    from gen_testkit import gen_patch  # noqa: E402
     (tmp_path / "data").mkdir()
     (tmp_path / "web" / "data").mkdir(parents=True)
     d = dict(_sp_data(), date="2026-11-09")
     (tmp_path / "data" / "sp500_ma200.json").write_text(json.dumps(d), encoding="utf-8")
     (tmp_path / "data" / "sp500_breadth_history.json").write_text(json.dumps({"rows": _sp_hist()}), encoding="utf-8")
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path / "data")
-    monkeypatch.setattr(gh, "WEB_DIR", tmp_path / "web")
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path / "data")
+    gen_patch(monkeypatch, "WEB_DIR", tmp_path / "web")
     assert gh.write_sp500_page("2026-11-09")
     home = json.loads((tmp_path / "web" / "data" / "sp500-home.json").read_text(encoding="utf-8"))
     assert home["asof"] == "2026-11-06" and home["hot"] == 3 and home["deep"] == 40 and len(home["spark"]) == 120
@@ -159,7 +161,8 @@ def test_write_sp500_page_also_writes_home_file(tmp_path, monkeypatch):
 
 def test_recent_weekly_line(tmp_path, monkeypatch):
     import generate_html as gh
-    monkeypatch.setattr(gh, "WEB_DIR", tmp_path)
+    from gen_testkit import gen_patch  # noqa: E402
+    gen_patch(monkeypatch, "WEB_DIR", tmp_path)
     assert gh.build_recent_weekly("2026-11-09") == {}                     # 리포트가 없으면 줄이 없다
     d = tmp_path / "weekly" / "2026-11-06"
     d.mkdir(parents=True)
@@ -176,6 +179,7 @@ def test_recent_weekly_line(tmp_path, monkeypatch):
 def test_recent_weekly_sits_between_monday_and_friday():
     """주간 리포트는 발행 순서대로 — 월요일 브리핑 아래, 금요일 브리핑 위. 파란 바(feat)는 가장 최근 1편(2026-11-09)."""
     import generate_html as gh
+    from gen_testkit import gen_patch  # noqa: E402
     items = [{"url": f"/b{k}/", "label": "x", "iso": d, "date": d, "headline": f"h{k}", "dek": "요약" if k == 0 else ""}
              for k, d in enumerate(["2026-11-09", "2026-11-09", "2026-11-06", "2026-11-06"])]
     wk = {"url": "/weekly/2026-11-06/", "label": "주간 장기 리포트", "end": "2026-11-06", "date": "11/2~11/6", "headline": "w"}

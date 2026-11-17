@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import generate_html  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 from generate_html import _baseline_pct, _edge_cls, build_scorecard  # noqa: E402
 
 
@@ -91,7 +92,7 @@ def _ctx(monkeypatch, tmp_path, rows):
     """
     (tmp_path / "briefings.json").write_text(
         json.dumps({"briefings": rows}, ensure_ascii=False), encoding="utf-8")
-    monkeypatch.setattr(generate_html, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
     return build_scorecard("kospi")
 
 

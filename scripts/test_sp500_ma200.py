@@ -9,6 +9,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import call_claude as cc  # noqa: E402
 import generate_html as gh  # noqa: E402
+from gen_testkit import gen_patch  # noqa: E402
 import sp500_ma200 as sp  # noqa: E402
 
 SESSION = date(2026, 11, 6)
@@ -59,7 +60,7 @@ DATA = {"date": "2026-11-09", "asof": "2026-11-06", "prev": "2026-11-05", "n": 5
 
 def _with_file(tmp_path, monkeypatch, data):
     (tmp_path / "sp500_ma200.json").write_text(json.dumps(data), encoding="utf-8")
-    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    gen_patch(monkeypatch, "DATA_DIR", tmp_path)
 
 
 EVENT = dict(DATA, above_pct=48.8, above_pct_prev=51.4)    # 50%를 넘나든 날 — 섹션이 나온다
