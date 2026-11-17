@@ -47,6 +47,10 @@ GUIDES = [
      "h1": "나스닥이 5년 평균보다 60% 높으면 위험할까", "sub": "1990년부터 442개월 기록 · 2026년 11월 16일 · 지금 값은 11월 13일 종가",
      "desc": "나스닥 종합지수가 5년 평균보다 60%, 70% 위에 있었을 때 1년 뒤 무슨 일이 있었는지 1990년부터 442개월 기록으로 정리했어요.",
      "draft": "draft-03-nasdaq-overheat.md"},
+    {"slug": "kospi-open-us-signals", "title": "코스피 시초가는 왜 밤사이 미국장을 따라갈까 — 727거래일로 확인한 신호",
+     "h1": "코스피 시초가는 왜 밤사이 미국장을 따라갈까", "sub": "727거래일로 확인한 신호 · 2026년 11월 17일 · 숫자는 11월 17일 시초가까지",
+     "desc": "밤사이 미국 반도체·나스닥·EWY·VIX·환율 가운데 무엇이 다음 날 코스피 시초가를 잘 설명했는지 2023년 11월부터 727거래일 기록으로 정리했어요.",
+     "draft": "draft-04-kospi-open-us-signals.md", "date": "2026-11-17T12:00:00+09:00"},
 ]
 
 
@@ -178,12 +182,57 @@ def chart_nasdaq():
             '<figcaption>달마다 나스닥 종합지수 고점이 최근 60개월 월말 종가 평균보다 몇 % 위였는지(1990년 1월~2026년 10월, 야후 파이낸스 ^IXIC로 계산). 70%를 넘은 달은 1997~2000년과 2020~2021년에 몰려 있어요.</figcaption></figure>')
 
 
-def page(slug, title, desc, crumb_title, h1, sub, body, article=True):
+def chart_open_years():
+    d = json.load(open(DATA / "kospi_open_gap_20261117.json"))
+    W, H, L, R, T, B = 420, 220, 36, 8, 22, 28
+    y = lambda v: T + (H - T - B) * (100 - v) / 100
+    out = []
+    for v in (0, 25, 50, 75, 100):
+        out.append(f'<line class="g-grid" x1="{L}" x2="{W-R}" y1="{y(v):.1f}" y2="{y(v):.1f}"/><text class="g-ax" x="{L-6}" y="{y(v)+4:.1f}" text-anchor="end">{v}%</text>')
+    gw = (W - L - R) / len(d["years"]); bw = gw * 0.3
+    for i, r in enumerate(d["years"]):
+        cx = L + gw * (i + 0.5)
+        for v, dx, fill, cls in ((r["base"], -bw * 0.55, "#B5BCC7", "g-ax"), (r["model"], bw * 0.55, "#2775ED", "g-lb")):
+            X = cx + dx - bw / 2
+            out.append(f'<rect x="{X:.1f}" y="{y(v):.1f}" width="{bw:.1f}" height="{y(0)-y(v):.1f}" rx="2" fill="{fill}"/>'
+                       f'<text class="{cls}" x="{X+bw/2:.1f}" y="{y(v)-5:.1f}" text-anchor="middle">{v:.0f}</text>')
+        out.append(f'<text class="g-ax" x="{cx:.1f}" y="{H-9}" text-anchor="middle">{r["y"]}</text>')
+    leg = (f'<rect x="{L}" y="4" width="10" height="10" rx="2" fill="#B5BCC7"/><text class="g-ax" x="{L+14}" y="13">매일 \'위로\'만 찍었을 때</text>'
+           f'<rect x="{L+150}" y="4" width="10" height="10" rx="2" fill="#2775ED"/><text class="g-ax" x="{L+164}" y="13">미국 신호로 예측</text>')
+    svg = (f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="연도별 코스피 시초가 방향 적중률 — 매일 위로 찍었을 때와 미국 신호로 예측했을 때">'
+           f'{"".join(out)}{leg}</svg>')
+    return ('    <figure class="g-fig">' + svg +
+            f'<figcaption>코스피 시초가가 전날 종가보다 높게 열릴지 맞힌 비율(%). {d["from"][:4]}년 11월~{d["to"][:4]}년 11월 {d["days"]}거래일, 2026년 11월 17일에 다시 계산했어요.</figcaption></figure>')
+
+
+def chart_open_signals():
+    d = json.load(open(DATA / "kospi_open_gap_20261117.json"))
+    rows = d["signals"]
+    W, L, R, T, rh = 420, 150, 34, 8, 26
+    H = T + rh * len(rows) + 26
+    x = lambda v: L + (W - L - R) * (v - 30) / 50     # 30~80% 구간을 그린다
+    out = []
+    for v in (30, 40, 50, 60, 70, 80):
+        out.append(f'<line class="g-grid" x1="{x(v):.1f}" x2="{x(v):.1f}" y1="{T}" y2="{T+rh*len(rows)}"/><text class="g-ax" x="{x(v):.1f}" y="{H-8}" text-anchor="middle">{v}%</text>')
+    for i, r in enumerate(rows):
+        Y = T + rh * i
+        dim = r["k"] in ("ewy", "usdkrw")
+        out.append(f'<text class="g-ax" x="{L-8}" y="{Y+rh/2+4:.1f}" text-anchor="end" style="fill:var(--ink)">{html.escape(r["name"])}</text>'
+                   f'<rect x="{x(30):.1f}" y="{Y+6:.1f}" width="{x(r["hit"])-x(30):.1f}" height="{rh-12}" rx="2" fill="{"#B5BCC7" if dim else "#2775ED"}"/>'
+                   f'<text class="g-lb" x="{x(r["hit"])+4:.1f}" y="{Y+rh/2+4:.1f}">{r["hit"]:.1f}</text>')
+    for v, c, lab in ((50, "var(--muted)", "동전 50%"), (59.6, "#E03131", "매일 위로 59.6%")):
+        out.append(f'<line x1="{x(v):.1f}" x2="{x(v):.1f}" y1="{T-4}" y2="{T+rh*len(rows)}" stroke="{c}" stroke-width="1.2" stroke-dasharray="4 3"/>')
+    svg = (f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="밤사이 미국 숫자별 코스피 시초가 방향 부호 적중률">{"".join(out)}</svg>')
+    return ('    <figure class="g-fig">' + svg +
+            '<figcaption>숫자 하나만으로 다음 날 시초가 방향을 맞힌 비율(%). 빨간 점선은 매일 \'위로\'만 찍었을 때(59.6%), 회색 점선은 동전 던지기(50%)예요. 회색 막대 둘(EWY 그대로·원/달러)은 더블샷이 쓰지 않는 형태예요.</figcaption></figure>')
+
+
+def page(slug, title, desc, crumb_title, h1, sub, body, article=True, date=DATE_ISO):
     url = f"{SITE}/guides/{slug}/" if slug else f"{SITE}/guides/"
     lds = []
     if article:
         lds.append({"@context": "https://schema.org", "@type": "Article", "headline": title, "description": desc,
-                    "datePublished": DATE_ISO, "dateModified": DATE_ISO, "inLanguage": "ko-KR", "mainEntityOfPage": url,
+                    "datePublished": date, "dateModified": date, "inLanguage": "ko-KR", "mainEntityOfPage": url,
                     "author": {"@type": "Organization", "name": "더블샷", "alternateName": "Double-Shot", "url": f"{SITE}/about/"},
                     "publisher": {"@type": "Organization", "name": "더블샷", "alternateName": "Double-Shot",
                                   "logo": {"@type": "ImageObject", "url": f"{SITE}/icons/icon-512.png"}}})
@@ -210,17 +259,18 @@ def page(slug, title, desc, crumb_title, h1, sub, body, article=True):
             + body + "\n\n" + FOOT + "\n</div>\n</body>\n</html>\n")
 
 
-charts = {"aftermarket-close": [chart_close()], "nasdaq-5y-average": [chart_nasdaq()]}
+charts = {"aftermarket-close": [chart_close()], "nasdaq-5y-average": [chart_nasdaq()],
+          "kospi-open-us-signals": [chart_open_years(), chart_open_signals()]}
 for gd in GUIDES[1:]:
     md = (DRAFTS / gd["draft"]).read_text()
     body = md_body(md, charts[gd["slug"]])
     out = ROOT / f"web/guides/{gd['slug']}/index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(page(gd["slug"], gd["title"], gd["desc"], gd["h1"], gd["h1"], gd["sub"], body))
+    out.write_text(page(gd["slug"], gd["title"], gd["desc"], gd["h1"], gd["h1"], gd["sub"], body, date=gd.get("date", DATE_ISO)))
     print("wrote", out, len(body))
 
 lis = "".join(f'<li><a href="/guides/{g["slug"]}/">{html.escape(g["title"])}</a><p>{html.escape(g["desc"])}</p></li>' for g in reversed(GUIDES))
 idx_body = ('  <p class="legal-lead">더블샷이 매일 쌓는 예측 채점 기록과 직접 돌린 백테스트, 데이터를 다루다 알게 된 사실을 정리한 글이에요. 숫자는 글마다 기준일을 적었고, 지금 값은 각 지표 페이지에서 확인할 수 있어요.</p>\n'
             f'  <section class="legal-sec">\n    <ul class="g-guide-list">{lis}</ul>\n  </section>')
-(ROOT / "web/guides/index.html").write_text(page("", "해설 글 — 시장 지표와 예측 기록 읽는 법", "더블샷이 매일 채점한 예측 기록과 직접 돌린 백테스트로 시장 지표를 읽는 법을 정리한 해설 글 모음이에요.", "", "해설 글", "2026년 11월 16일 갱신", idx_body, article=False))
+(ROOT / "web/guides/index.html").write_text(page("", "해설 글 — 시장 지표와 예측 기록 읽는 법", "더블샷이 매일 채점한 예측 기록과 직접 돌린 백테스트로 시장 지표를 읽는 법을 정리한 해설 글 모음이에요.", "", "해설 글", "2026년 11월 17일 갱신", idx_body, article=False))
 print("wrote index")

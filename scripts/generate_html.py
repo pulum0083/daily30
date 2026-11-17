@@ -2845,6 +2845,7 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/guides/accuracy-baseline/",     "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/guides/aftermarket-close/",     "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/guides/nasdaq-5y-average/",     "changefreq": "monthly", "priority": "0.6"},
+        {"loc": f"{BASE}/guides/kospi-open-us-signals/", "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/about/",                        "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/legal/disclaimer/",             "changefreq": "yearly",  "priority": "0.3"},
         {"loc": f"{BASE}/legal/privacy/",                "changefreq": "yearly",  "priority": "0.3"},

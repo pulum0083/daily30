@@ -31,7 +31,7 @@
       <thead><tr><th>신호</th><th>무엇을 보나</th><th>가중치</th></tr></thead>
       <tbody>{% for w in weights %}<tr><td>{{ w.name }}</td><td class="wrap">{{ w.what }}</td><td class="rec-num">{{ '%g'|format(w.w)|replace('-', '−') }}</td></tr>{% endfor %}</tbody>
     </table></div>
-    {% if kospi %}<p class="rec-fine">원/달러 환율도 넣었었지만, 환율 방향으로 시초가를 맞힌 날이 {{ kospi.usdkrw_sign_hit_pct }}%로 절반도 안 돼 뺐어요. 값은 기록만 해요.</p>{% endif %}
+    {% if kospi %}<p class="rec-fine">원/달러 환율도 넣었었지만, 환율 방향으로 시초가를 맞힌 날이 {{ kospi.usdkrw_sign_hit_pct }}%로 절반도 안 돼 뺐어요. 값은 기록만 해요. 신호마다 얼마나 맞았는지는 <a href="/guides/kospi-open-us-signals/">해설 글</a>에 정리했어요.</p>{% endif %}
     <h3>② 점수를 확률로 바꿔요</h3>
     <div class="rec-formula">상승 확률 = 1 ÷ (1 + e<sup>−({{ prob_a }} + {{ prob_b }} × 점수)</sup>)</div>
     {% if kospi %}
