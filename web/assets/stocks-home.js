@@ -283,7 +283,7 @@
     var mx=Math.max.apply(null, ai.map(function(t){ var d=dataBySym[t.sym]; return d&&typeof d.changePct==='number'&&isFinite(d.changePct)?Math.abs(d.changePct):0; }))||0;
     gridEl.innerHTML=''
       +'<div class="ue-sec"><div class="ue-st"><h4>코스피 선행 ETF</h4>'+(lc.n?'<span>'+lc.n+'개 중 <b class="up">'+lc.up+' 상승</b></span>':'')+'</div>'
-      +'<p class="ue-sd">한국 장이 열리기 전에 코스피 방향을 먼저 보여주는 ETF예요.</p>'
+      +'<p class="ue-sd">코스피와 함께 움직이는 미국 상장 ETF예요. 한국 장이 닫혀 있을 땐 다음 코스피 방향을 먼저 보여줘요.</p>'
       +'<div class="ue-leads">'+LEAD.map(leadHtml).join('')+'</div></div>'
       +'<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4>'+(ac.n?'<span>'+ac.n+'개 중 <b class="up">'+ac.up+' 상승</b> · <b class="dn">'+ac.dn+' 하락</b></span>':'')+'</div>'
       +'<div class="ue-ais">'+AI_GROUPS.map(function(g){ return '<div class="ue-g"><div class="ue-gt">'+g.g+'</div>'+g.items.map(function(t){ return aiRowHtml(t, mx); }).join('')+'</div>'; }).join('')+'</div></div>';
