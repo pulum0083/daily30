@@ -16,3 +16,4 @@
 - 그 뒤로 '테스트가 진짜 파일·네트워크를 건드리는지'를 전후로 비교하는 장치를 만들었다(스크래치패드 open_audit.py — 테스트마다 data/·web/ 파일 열기를 감사 훅으로 기록, nonet_pytest.py — 네트워크를 막고 실패 목록). 분할 직전 커밋(7859954ed)과 지금이 같다(읽기 68건·쓰기 0건, 네트워크 의존 실패 0건).
 - 이 감사로 3단계에서 놓친 것도 찾았다 — test_index_superlatives가 va._index_extremes = … 로 직접 대입해, 옮겨 간 게이트가 그 값을 못 보고 진짜 지수 시세를 조회하면서도 통과하고 있었다. gate_superlative를 직접 바꾸게 고쳤다. 같은 패턴(test_calibration_hint·test_signal_snapshot의 cc.BASE_DIR/DATA_DIR 직접 대입)도 analysis_history로 옮겼다.
 - 소스 문자열을 읽는 테스트(test_kospi_picks_removed·test_prediction_accuracy_upgrade)는 call_claude 묶음 전체(gen_testkit.CC_MODULES)를 읽게 바꿨다.
+- 5단계 fetch_news는 Gemini·RSS를 부르는 경로라 결정론 골든을 따로 만들지 않았다. 게이트는 순수 함수이고 테스트(test_news_*·test_us_news_rss 등)가 덮는다. 대신 네트워크 차단 테스트·테스트별 파일 접근 감사가 분할 직전과 같음을 확인했고, 다른 스크립트(fetch_domestic_issues의 get_gemini_api_key)가 읽는 이름이 남았는지 대조했다. 실적 조회 캐시(_earnings_age_cache·_release_cache)는 그 함수와 같은 모듈로 함께 옮겼다.

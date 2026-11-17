@@ -5,22 +5,23 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import news_patch  # noqa: E402
 import fetch_news as fn
 
 
 def test_returns_empty_when_no_prev_file(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     assert fn._load_prev_catalysts("us") == []
 
 
 def test_returns_empty_on_corrupt_json(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "news_summary_us.json").write_text("{not valid json", encoding="utf-8")
     assert fn._load_prev_catalysts("us") == []
 
 
 def test_combines_catalysts_and_headlines(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "news_summary_us.json").write_text(json.dumps({
         "catalysts": ["ASML 실적 서프라이즈 → 반도체 장비주 강세"],
         "headlines": ["ASML 호실적에 반도체 장비주 강세 전망"],
@@ -31,7 +32,7 @@ def test_combines_catalysts_and_headlines(tmp_path, monkeypatch):
 
 
 def test_respects_max_items_cap(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "news_summary_us.json").write_text(json.dumps({
         "catalysts": [f"c{i}" for i in range(5)],
         "headlines": [f"h{i}" for i in range(5)],
@@ -41,7 +42,7 @@ def test_respects_max_items_cap(tmp_path, monkeypatch):
 
 def test_isolated_per_briefing_type(tmp_path, monkeypatch):
     # kospi 파일만 있고 us 파일은 없으면 us 조회는 빈 리스트여야 한다(타입 간 혼선 금지)
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "news_summary_kospi.json").write_text(json.dumps({
         "catalysts": ["코스피 전용 이슈"],
     }), encoding="utf-8")

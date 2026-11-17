@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import news_patch  # noqa: E402
 import fetch_news as fn  # noqa: E402
 import news_sources as ns  # noqa: E402
 
@@ -60,7 +61,7 @@ def test_is_recent_window():
 
 
 def test_verify_articles_keeps_only_verified_recent(monkeypatch):
-    monkeypatch.setattr(fn, "_is_recent", lambda p, now=None: p.year == 2026 and p.month == 11)
+    news_patch(monkeypatch, "_is_recent", lambda p, now=None: p.year == 2026 and p.month == 11)
     links = {"a": "https://x.com/a", "b": "https://x.com/b", "c": ""}
     pubs = {"https://x.com/a": datetime(2026, 11, 9, 8, tzinfo=timezone.utc),
             "https://x.com/b": datetime(2026, 6, 25, 8, tzinfo=timezone.utc)}
@@ -103,13 +104,13 @@ def test_main_stops_briefing_on_billing_error(monkeypatch, tmp_path):
     sent = []
     import send_telegram
     monkeypatch.setattr(send_telegram, "send_admin_alert", lambda m: sent.append(m))
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     gh_out = tmp_path / "gh_output"
     monkeypatch.setenv("GITHUB_OUTPUT", str(gh_out))
 
     def boom(t):
         raise Exception(BILLING)
-    monkeypatch.setattr(fn, "fetch_and_summarize_rss", boom)
+    news_patch(monkeypatch, "fetch_and_summarize_rss", boom)
     import time
     monkeypatch.setattr(time, "sleep", lambda s: pytest.fail("결제 오류는 기다리지 않는다"))
     monkeypatch.setattr(sys, "argv", ["fetch_news.py", "--type", "us", "--source", "rss"])
@@ -126,12 +127,12 @@ def test_main_transient_error_still_publishes_without_news(monkeypatch, tmp_path
     """일시 오류(429 등)는 예전처럼 뉴스 없이 계속 간다 — 막힘으로 보지 않는다."""
     import send_telegram
     monkeypatch.setattr(send_telegram, "send_admin_alert", lambda m: pytest.fail("일시 오류는 알리지 않는다"))
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
 
     def boom(t):
         raise ValueError("JSON 파싱 실패")
-    monkeypatch.setattr(fn, "fetch_and_summarize_rss", boom)
+    news_patch(monkeypatch, "fetch_and_summarize_rss", boom)
     monkeypatch.setattr(sys, "argv", ["fetch_news.py", "--type", "us", "--source", "rss"])
     fn.main()
     assert (tmp_path / "news_summary_us.json").exists()

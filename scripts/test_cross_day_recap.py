@@ -7,6 +7,7 @@ from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import news_patch  # noqa: E402
 import fetch_news as fn
 
 # 실제 git 이력의 ASML 변형
@@ -50,7 +51,7 @@ def test_drop_only_the_recap():
 
 # ── 히스토리 나이 필터 ────────────────────────────────────────────
 def test_load_stale_only_two_plus_days_old(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "catalyst_history_us.json").write_text(json.dumps([
         {"date": "2026-07-15", "catalysts": [ASML_15]},   # 5일 전 → stale
         {"date": "2026-07-19", "catalysts": ["어제 사건"]},  # 어제 → 제외
@@ -61,13 +62,13 @@ def test_load_stale_only_two_plus_days_old(tmp_path, monkeypatch):
 
 
 def test_load_stale_empty_when_no_file(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     assert fn._load_stale_catalysts("us", date(2026, 7, 20)) == []
 
 
 # ── 히스토리 기록·정리 ────────────────────────────────────────────
 def test_append_creates_and_prunes(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     for i in range(1, 8):  # 7일치 append → 최근 5일만 남아야
         fn._append_catalyst_history("us", date(2026, 7, i), [f"c{i}"])
     hist = json.load(open(tmp_path / "catalyst_history_us.json", encoding="utf-8"))
@@ -77,7 +78,7 @@ def test_append_creates_and_prunes(tmp_path, monkeypatch):
 
 
 def test_append_same_day_replaces(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     fn._append_catalyst_history("us", date(2026, 7, 20), ["원본"])
     fn._append_catalyst_history("us", date(2026, 7, 20), ["정정본"])  # 같은 날 재실행
     hist = json.load(open(tmp_path / "catalyst_history_us.json", encoding="utf-8"))
@@ -87,7 +88,7 @@ def test_append_same_day_replaces(tmp_path, monkeypatch):
 
 # ── 통합: 게이트가 실제 ASML 재탕을 걸러내는 end-to-end 시나리오 ──
 def test_end_to_end_asml_recap_dropped(tmp_path, monkeypatch):
-    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    news_patch(monkeypatch, "DATA_DIR", tmp_path)
     fn._append_catalyst_history("us", date(2026, 7, 15), [ASML_15])
     stale = fn._load_stale_catalysts("us", date(2026, 7, 20))
     kept = fn._drop_cross_day_recaps([ASML_20, OIL], stale)

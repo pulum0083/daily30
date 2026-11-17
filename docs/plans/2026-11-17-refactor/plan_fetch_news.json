@@ -1,0 +1,24 @@
+{"modules": [
+ {"name": "news_common", "header": "# 뉴스 수집 모듈들이 함께 쓰는 경로·시간대·Gemini 키 읽기·빈 뉴스 형태", "items": [
+  "BASE_DIR","DATA_DIR","KST","get_gemini_api_key","EMPTY_NEWS"]},
+ {"name": "news_prompts", "header": "# 뉴스 검색 프롬프트 — 코스피 아침·마감·미국, 코스피 세션 창 계산", "items": [
+  "_WEEKDAY_KO","_kospi_session_window","KOSPI_PROMPT","KOSPI_CLOSE_PROMPT","US_PROMPT","PROMPT_MAP"]},
+ {"name": "news_gate_reality", "header": "# 뉴스 실측 대조 게이트 — 방향·최상급·지수 레벨이 실측과 반대인 항목, 오래된 촉매 제외", "items": [
+  "_DATE_PREFIX_RE","_parse_iso_date","_UP_WORDS","_DOWN_WORDS","_REALITY_SUBJECTS","_INDEX_SYMBOLS","_HIGH_SUPERLATIVE_RE",
+  "_LOW_SUPERLATIVE_RE","_INDEX_LEVEL_RE","_PRICE_LEVEL_RE","_claim_direction","_superlative_claim_wrong","_level_claim_wrong",
+  "_drop_reality_contradictions","_fetch_reality_snapshot","_catalyst_cutoff","_filter_stale_catalysts"]},
+ {"name": "news_gate_history", "header": "# 뉴스 반복 게이트 — 직전 실행 에코·전날 장 리캡 제외와 촉매 기록 읽고 쓰기", "items": [
+  "_load_prev_catalysts","_GENERIC_UPPER","_norm_for_match","_char_ngrams","_jaccard","_distinctive_entities","_is_cross_day_recap",
+  "_drop_prev_run_echoes","_SELF_LABELED_ECHO_RE","_drop_cross_day_recaps","_history_path","_load_stale_catalysts","_append_catalyst_history"]},
+ {"name": "news_gate_earnings", "header": "# 뉴스 실적 게이트 — 오래된 실적·이미 발표된 실적의 예고 기사 제외(주어 종목 기준)", "items": [
+  "_EARNINGS_KEYWORDS","_is_earnings_catalyst","_parse_tickers","_earnings_age_cache","_days_since_last_earnings","_NAME_TO_TICKER",
+  "_NAME_TO_TICKER_NORM","_resolve_company_tickers","_ARROW_RE","_PAREN_TICKER_RE","_earnings_subject_tickers","_drop_stale_earnings",
+  "_PREVIEW_RE","_release_cache","_last_earnings_release","_drop_preview_after_release"]},
+ {"name": "news_gate_grounding", "header": "# 뉴스 그라운딩 게이트 — 항목 모양 통일, 수집 실패 신호 판정, 익명 주어·슬롯 에코·검색 실패 자백 제외", "items": [
+  "_SEARCH_FAILURE_RE","_PLACEHOLDER_ENTITY_RE","_load_today_calendar","_TEXT_KEY_HINTS","_NON_TEXT_KEYS","_ISO_DATE_RE","_item_text",
+  "_normalize_news_items","_NO_EVENT_CLAIM_RE","_grounding_failure_signals","_count_grounding_chunks","_is_grounding_failure",
+  "_drop_placeholder_entities","_SLOT_ECHO_RE","_drop_prompt_slot_echoes","_drop_search_failure_notes"]},
+ {"name": "news_rss", "header": "# RSS 우선 뉴스 수집 — 기사 모으기·발행일 확인·LLM 선별·출처 붙이기", "items": [
+  "_dedupe_articles","_articles_prompt_block","_PCT_RE","_article_blob","_unsourced_claim","_resolve_selection","_attach_verified_sources",
+  "_US_RSS_QUERIES","RSS_SELECT_MAX","RECENT_HOURS","_RSS_SELECT_PROMPT","_us_news_session","_is_recent","_verify_articles","fetch_and_summarize_rss"]}
+]}

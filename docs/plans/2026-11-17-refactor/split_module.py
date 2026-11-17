@@ -131,6 +131,8 @@ for m in plan["modules"]:
         n = st["node"]
         if isinstance(n, ast.Try):
             return True
+        if isinstance(n, ast.Import):
+            return all((src_path.parent / f"{a.name.split('.')[0]}.py").exists() for a in n.names)
         return (isinstance(n, ast.ImportFrom) and n.level == 0 and n.module
                 and (src_path.parent / f"{n.module.split('.')[0]}.py").exists())
 
