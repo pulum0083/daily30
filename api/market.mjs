@@ -1,4 +1,6 @@
 // 코스닥·코스피200·원달러·KOSPI 수급 실시간 지표 프록시 — 장 중 사이드바용
+import { parseBasicIndex } from './_naver-quote.mjs';
+
 const HDR = { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://finance.naver.com/' };
 
 // Toss Open API 토큰 캐시 (서버리스 인스턴스 내 재사용)
@@ -37,34 +39,23 @@ async function _fetchForexToss() {
   return { price: Math.round(price * 100) / 100, changePct: 0 };
 }
 
-async function fetchIndex(code) {
-  const r = await fetch(`https://m.stock.naver.com/api/index/${code}/basic`, {
-    headers: HDR, signal: AbortSignal.timeout(6000),
+async function fetchBasicIndex(url, headers = HDR) {
+  const r = await fetch(url, {
+    headers, signal: AbortSignal.timeout(6000),
   });
-  if (!r.ok) throw new Error(`index/${code} ${r.status}`);
-  const d = await r.json();
-  const sign = ['1','2'].includes((d.compareToPreviousPrice||{}).code) ? 1
-              : ['4','5'].includes((d.compareToPreviousPrice||{}).code) ? -1 : 0;
-  return {
-    price:     parseFloat(d.closePrice.replace(/,/g, '')),
-    changePct: Math.round(sign * Math.abs(parseFloat(d.fluctuationsRatio.replace(/,/g,''))) * 100) / 100,
-  };
+  if (!r.ok) throw new Error(`index ${r.status}: ${url}`);
+  return parseBasicIndex(await r.json());
+}
+
+function fetchIndex(code) {
+  return fetchBasicIndex(`https://m.stock.naver.com/api/index/${code}/basic`);
 }
 
 // VIX 변동성 지수 (CBOE) — 네이버 해외지수. 미국 장 기준 15분 지연.
-async function fetchVix() {
-  const r = await fetch('https://api.stock.naver.com/index/.VIX/basic', {
-    headers: { ...HDR, Referer: 'https://m.stock.naver.com/' },
-    signal: AbortSignal.timeout(6000),
+function fetchVix() {
+  return fetchBasicIndex('https://api.stock.naver.com/index/.VIX/basic', {
+    ...HDR, Referer: 'https://m.stock.naver.com/',
   });
-  if (!r.ok) throw new Error(`vix ${r.status}`);
-  const d = await r.json();
-  const sign = ['1', '2'].includes((d.compareToPreviousPrice || {}).code) ? 1
-              : ['4', '5'].includes((d.compareToPreviousPrice || {}).code) ? -1 : 0;
-  return {
-    price:     parseFloat(String(d.closePrice).replace(/,/g, '')),
-    changePct: Math.round(sign * Math.abs(parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''))) * 100) / 100,
-  };
 }
 
 async function fetchForex() {

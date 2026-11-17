@@ -1,6 +1,8 @@
 // 네이버 폴링 API로 코스피 실시간 지수를 브라우저에 CORS 없이 전달하는 프록시
 // 장중: polling API (7초 갱신) → 실패 시 basic API
 // 장 마감(15:30~): polling API 건너뛰고 basic API 직행 (polling은 장 후 nv=0 반환)
+import { parseBasicIndex, signedChange, toNum } from './_naver-quote.mjs';
+
 const POLLING_URL = 'https://polling.finance.naver.com/api/realtime?query=SERVICE_INDEX:KOSPI';
 const FALLBACK_URL = 'https://m.stock.naver.com/api/index/KOSPI/basic';
 
@@ -18,15 +20,9 @@ async function fetchBasic() {
   });
   if (!r.ok) throw new Error(`basic ${r.status}`);
   const d = await r.json();
-  const price  = parseFloat(d.closePrice.replace(/,/g, ''));
-  const absChg = parseFloat(d.compareToPreviousClosePrice.replace(/,/g, ''));
-  const ratio  = parseFloat(d.fluctuationsRatio.replace(/,/g, ''));
-  const code   = (d.compareToPreviousPrice || {}).code || '3';
-  const sign   = ['1','2'].includes(code) ? 1 : ['4','5'].includes(code) ? -1 : 0;
   return {
-    price,
-    changePct:  Math.round(sign * Math.abs(ratio)  * 100) / 100,
-    changeAbs:  Math.round(sign * Math.abs(absChg)),
+    ...parseBasicIndex(d),
+    changeAbs: signedChange(d.compareToPreviousClosePrice, d.compareToPreviousPrice?.code, 0),
     marketStatus: d.marketStatus || 'UNKNOWN',
     updatedAt:  new Date().toISOString(),
   };
@@ -53,11 +49,14 @@ export default async function handler(req, res) {
     if (!r.ok) throw new Error(`polling ${r.status}`);
     const d    = await r.json();
     const item = d?.result?.areas?.[0]?.datas?.[0];
-    if (!item || !item.nv) throw new Error('no data');
+    const price = toNum(item?.nv);
+    if (price == null || price <= 0) throw new Error('no data');
+    const ratio = toNum(item.cr), change = toNum(item.cv);
+    if (ratio == null) throw new Error('no changePct');
     return res.json({
-      price:        item.nv / 100,
-      changePct:    Math.round(item.cr * 100) / 100,
-      changeAbs:    Math.round(item.cv / 100),
+      price:        price / 100,
+      changePct:    Math.round(ratio * 100) / 100,
+      changeAbs:    change == null ? null : Math.round(change / 100),
       marketStatus: item.ms || 'UNKNOWN',
       updatedAt:    new Date().toISOString(),
     });

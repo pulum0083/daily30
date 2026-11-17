@@ -1,9 +1,9 @@
 // 한국 종목 정규장(09:00~15:30) 시·고·저·종·거래량 — 장이 닫힌 뒤 애프터장이 섞이지 않은 값의 단일 소스(§48·§30)
 // stocks-live(주도주 타일)·hl-night(야간 추정가 앵커)·signals(장 마감 특이 신호)가 함께 쓴다. '_' 접두라 라우트로 배포되지 않는다.
 import { isKospiHoliday, lastTradingDay } from './_market-calendar.mjs';
+import { toNum } from './_naver-quote.mjs';
 
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
-const toNum = (v) => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isFinite(n) ? n : null; };
 
 // 장이 닫힌 뒤(애프터장 16:00~20:00, 밤·주말)엔 실시간 응답의 closePrice·저가·거래대금에
 // 애프터장 체결이 섞인다 — 9/14 17:10 SK하이닉스 closePrice 1,686,000(공식 종가 1,697,000),

@@ -10,10 +10,9 @@ import { krMarketOpen, isKospiHoliday } from './_market-calendar.mjs';
 import { fetchClosedSession } from './_kr-regular-session.mjs';
 // 한국 낮(뉴욕 20:00~04:00) 미국 주간거래 실제 체결가 — 야후·네이버엔 없다(2026-11-16).
 import { overnightSessionStart, fetchOvernightTrades, withOvernight } from './_us-overnight.mjs';
+import { toNum } from './_naver-quote.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 const HDR_M = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' };
-
-const toNum = (v) => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isFinite(n) ? n : null; };
 
 // 테스트가 네트워크 없이 필드 추출을 검증할 수 있게 export한다(기본 export인 handler는 그대로).
 export async function fetchOne(code) {
@@ -175,12 +174,12 @@ export async function fetchOverseas(sym) {
     // 야후가 연장시간대라고 했는데 네이버에도 그 체결이 없으면 빼둔다 — 어제 종가 등락을 '지금'으로 보이지 않는다.
     if (y && y.needExtended) return null;
     const open = d.marketStatus === 'OPEN';
-    const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
-    const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
-    if (!isFinite(price)) return null;
+    const price = toNum(d.closePrice);
+    const pct = toNum(d.fluctuationsRatio);
+    if (price == null) return null;
     return {
       sym, price,
-      changePct: isFinite(pct) ? pct : null,
+      changePct: pct,
       source: 'naver', state: open ? 'open' : 'closed',
       tradedAt: d.localTradedAt || null,
     };
