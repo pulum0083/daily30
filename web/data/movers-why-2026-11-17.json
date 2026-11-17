@@ -1,34 +1,53 @@
 {
-  "generated_at": "2026-11-17T12:31:19.153701+09:00",
+  "generated_at": "2026-11-17T13:01:28.267545+09:00",
   "date": "2026-11-17",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -1.83,
-      "surge": 0.57,
-      "events": []
+      "changePct": -2.9,
+      "surge": 0.62,
+      "events": [
+        {
+          "time": "10:56",
+          "headline": "삼성전자 주가 장중 2%대 내려, 젠슨 황 사임 여파에 미국 반도체주 약세 지속",
+          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5lUnktSjJ6N1BCZjA4S09JU1Itc05SR3pUTTQ1X2VuZ3dUUzRzQ0hzQWtpOV96VGNpenlKTGJlMXI2LVRwakQyZWNIb2hOaTZIcGhubUswdHFaSzBaMHRMX25PWEZWY1NxQ01Kb1B3V0FoVXM?oc=5",
+          "source": "비즈니스포스트",
+          "why": "젠슨 황 사임 여파로 미국 반도체주 약세가 지속되면서 삼성전자 주가가 장중 2%대 하락했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:38",
+          "headline": "삼성전자 19만원선도 위태…SK하이닉스와 동반 하락에 반도체주 휘청",
+          "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5aTVl0dGFBaDIxNWdLcTMxWGRTSVdlaGZSVXFqVGhkSE5IN05OM0NLWEFIM0VRbldmdUEwQUI3b2cxX3YtTlNmMG8zWHN0UWVMaHY3eS1RRjRQTnY4VDR6WXpOb2hmWG9hVi15TFpIZw?oc=5",
+          "source": "진일보 | 전남일보",
+          "why": "삼성전자 19만원선도 위태…SK하이닉스와 동반 하락에 반도체주 휘청",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 1.7,
-      "surge": 0.53,
+      "changePct": -0.27,
+      "surge": 0.58,
       "events": []
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -1.69,
-      "surge": 0.3,
+      "changePct": -2.26,
+      "surge": 0.32,
       "events": [
         {
           "time": "10:22",
           "headline": "현대차, 뚜렷한 악재 없이 장중 2%대 약세 : 기업주식정보",
           "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE8wajRIR0F0ZU8wc0RuZkpFQ212NWVobXBkRnJ1bWNKOE1URDVDc09EWV9tTUxJbFRwZWRFaFRFN2Mxb3pmcUdKTXhSOA?oc=5",
           "source": "재경일보",
-          "why": "현대차는 뚜렷한 악재 없이 장중 2%대 약세를 보였다. (개별 인과 단정 안 함)",
-          "tier": "related",
+          "why": "현대차는 뚜렷한 악재 없이 장중 2%대 약세를 보였다.",
+          "tier": "why",
           "sentiment": "neg"
         },
         {
@@ -36,8 +55,8 @@
           "headline": "현대차 주가, 11월 17일 장중 260,000원 2.07% 하락",
           "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE1ramJLOV95X0VJaWd0Mzk1bF91QVhlTi1UUHlUUzlRM0l2R3h3MkdxYTAtWERKS1k3M2xQLW9ZbFcxX3laSnplczlNWVI2N1hFQ1BKUjZpLUM3dVdKVU9Kdlg4OGNrdXowWnAxQ0k5cTNsdw?oc=5",
           "source": "중앙이코노미뉴스",
-          "why": "현대차 주가, 11월 17일 장중 260,000원 2.07% 하락 (개별 인과 단정 안 함)",
-          "tier": "related",
+          "why": "현대차 주가, 11월 17일 장중 260,000원 2.07% 하락",
+          "tier": "why",
           "sentiment": "neg"
         }
       ]
