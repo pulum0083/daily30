@@ -5085,11 +5085,11 @@
       "down_pct": 76,
       "confidence": 72,
       "basis": "open",
-      "actual_direction": null,
-      "actual_change_pct": null,
-      "is_correct": null,
+      "actual_direction": "상승",
+      "actual_change_pct": -3.59,
+      "is_correct": false,
       "generated_at": "2026-11-16T07:28:33.164100+09:00",
-      "checked_at": null,
+      "checked_at": "2026-11-17T09:11:15.750758+09:00",
       "prior_direction": "하락",
       "prior_score": -6.833,
       "prior_strength": "strong",
@@ -5111,7 +5111,8 @@
         "SMSN": -2.744,
         "SKHX": -2.926,
         "EWY": -1.781
-      }
+      },
+      "actual_open_pct": 0.28
     },
     {
       "date": "2026-11-16",
@@ -5120,11 +5121,11 @@
       "up_pct": 25,
       "down_pct": 75,
       "confidence": 0,
-      "actual_direction": null,
-      "actual_change_pct": null,
-      "is_correct": null,
+      "actual_direction": "하락",
+      "actual_change_pct": -1.92,
+      "is_correct": true,
       "generated_at": "2026-11-16T21:17:36.230221+09:00",
-      "checked_at": null,
+      "checked_at": "2026-11-17T09:11:16.995511+09:00",
       "prior_direction": "하락",
       "prior_up_pct": 20,
       "signals": {
