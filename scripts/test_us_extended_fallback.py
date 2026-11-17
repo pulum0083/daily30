@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import data_patch  # noqa: E402
 import fetch_data as fd  # noqa: E402
 
 ET = timezone(timedelta(hours=-5))
@@ -45,10 +46,10 @@ def test_yahoo_fresh_needs_todays_bar():
 
 
 def test_realtime_price_uses_naver_when_yahoo_empty(monkeypatch):
-    monkeypatch.setattr(fd, "_pin_date_for", lambda t: None)
-    monkeypatch.setattr(fd, "_yf_history", lambda *a, **k: pd.DataFrame({"Close": []}))
-    monkeypatch.setattr(fd, "_naver_us_basic", lambda t: NVDA)
-    monkeypatch.setattr(fd, "naver_extended_quote", lambda d, now=None: (176.25, 168.89))
+    data_patch(monkeypatch, "_pin_date_for", lambda t: None)
+    data_patch(monkeypatch, "_yf_history", lambda *a, **k: pd.DataFrame({"Close": []}))
+    data_patch(monkeypatch, "_naver_us_basic", lambda t: NVDA)
+    data_patch(monkeypatch, "naver_extended_quote", lambda d, now=None: (176.25, 168.89))
     assert fd._get_realtime_price("NVDA") == (176.25, 168.89)
 
 
@@ -59,10 +60,10 @@ def test_futures_and_indices_skip_naver():
 
 def test_feed_alert_text_and_recording(monkeypatch):
     fd.FEED_ISSUES.clear()
-    monkeypatch.setattr(fd, "_pin_date_for", lambda t: None)
-    monkeypatch.setattr(fd, "_yf_history", lambda *a, **k: pd.DataFrame({"Close": []}))
-    monkeypatch.setattr(fd, "_naver_us_basic", lambda t: NVDA)
-    monkeypatch.setattr(fd, "naver_extended_quote", lambda d, now=None: (176.25, 168.89))
+    data_patch(monkeypatch, "_pin_date_for", lambda t: None)
+    data_patch(monkeypatch, "_yf_history", lambda *a, **k: pd.DataFrame({"Close": []}))
+    data_patch(monkeypatch, "_naver_us_basic", lambda t: NVDA)
+    data_patch(monkeypatch, "naver_extended_quote", lambda d, now=None: (176.25, 168.89))
     fd._get_realtime_price("NVDA")
     assert fd.FEED_ISSUES == [{"ticker": "NVDA", "how": "naver"}]
     assert fd.feed_alert_text(fd.FEED_ISSUES, "us") == ""          # 한 종목 대신은 알리지 않는다
@@ -103,12 +104,12 @@ def test_alert_only_for_missing_or_many_substitutions():
 def test_missing_does_not_use_yesterdays_after_hours_bar(monkeypatch):
     """야후·네이버 모두 오늘 체결이 없으면 어제 애프터장 봉이 아니라 직전 정규장 종가로 남는다."""
     fd.FEED_ISSUES.clear()
-    monkeypatch.setattr(fd, "_pin_date_for", lambda t: None)
+    data_patch(monkeypatch, "_pin_date_for", lambda t: None)
     idx = pd.DatetimeIndex([pd.Timestamp("2026-11-13 19:55-05:00")])
-    monkeypatch.setattr(fd, "_yf_history", lambda *a, **k: pd.DataFrame({"Close": [195.0]}, index=idx))
+    data_patch(monkeypatch, "_yf_history", lambda *a, **k: pd.DataFrame({"Close": [195.0]}, index=idx))
     nb = {"closePrice": "190.65", "overMarketPriceInfo": {"tradingSessionType": "PRE_MARKET", "overMarketStatus": "OPEN",
           "overPrice": "189.50", "localTradedAt": "2026-11-13T19:55:00-05:00"}}
-    monkeypatch.setattr(fd, "_naver_us_basic", lambda t: nb)
+    data_patch(monkeypatch, "_naver_us_basic", lambda t: nb)
 
     class FI:
         last_price, previous_close = 190.65, 189.0

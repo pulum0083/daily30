@@ -1,0 +1,18 @@
+{"modules": [
+ {"name": "market_common", "header": "# 시장 데이터 수집 모듈들이 함께 쓰는 경로·시간대", "items": ["BASE_DIR","DATA_DIR","KST","UTC"]},
+ {"name": "market_universe", "header": "# 시장 데이터 수집 대상 목록 — 섹터 집중 종목·미국 후보·사이드바 티커", "items": [
+  "SECTOR_FOCUS_STOCKS","US_CANDIDATES","SIDEBAR_TICKERS_KOSPI","SIDEBAR_TICKERS_US"]},
+ {"name": "econ_calendar", "header": "# 경제 캘린더 수집 — 이벤트를 발표 시각(KST)으로 끝남·예정으로 나눈다", "items": [
+  "_bucket_calendar_events","fetch_economic_calendar"]},
+ {"name": "investor_flow", "header": "# 코스피 투자자별 수급 — 1분 시계열 수집·정규장 마감(15:31~15:40) 값·날짜별 저장", "items": [
+  "INVESTOR_TREND_URL","INVESTOR_TIME_URL","INVESTOR_TIME_DIR","INVESTOR_REGULAR_FROM","INVESTOR_REGULAR_UNTIL","INVESTOR_GUBUN",
+  "INVESTOR_INST_KEYS","_get_text","parse_investor_time_json","fetch_investor_time_rows","save_investor_time","load_investor_time",
+  "regular_session_investor","latest_investor_bizdate","fetch_investor_trading_kospi"]},
+ {"name": "price_quotes", "header": "# 종목·지수 시세 조회 — 일봉 교차 검증, 미국 연장시간대(야후→네이버), 200일선 위치, 피드 이상 알림", "items": [
+  "_PIN_ASIA_TICKERS","_pin_date_for","_truncate_at_pin","_yf_history","_prev_close_from_daily","_is_futures_like","_extended_hours_price",
+  "_NAVER_US_SUFFIX","_ET","_naver_us_basic","_num","naver_extended_quote","_yahoo_extended_fresh","_is_us_equity","FEED_ISSUES",
+  "FEED_ALERT_MIN_SUB","feed_alert_text","alert_feed_issues","_get_realtime_price","_recent_sessions","_ma200_position",
+  "get_ticker_full","get_hourly_sparkline"]},
+ {"name": "fx_rates", "header": "# 원/달러 환율 수집 — 네이버 우선, 실패 시 공개 환율 API로 대신하고 등락은 같은 기준으로 계산", "items": [
+  "_fx_change","_fx_from_naver_rows","_fx_from_manana","_fx_from_fawazahmed0","_fx_from_price_only","fetch_naver_usdkrw"]}
+]}

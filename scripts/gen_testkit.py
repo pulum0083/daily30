@@ -1,5 +1,5 @@
 # 테스트에서 역할별로 나눈 모듈 묶음 전체의 같은 이름을 한 번에 바꿔치는 도우미
-"""generate_html·validate_analysis·call_claude·fetch_news를 역할별 모듈로 나눈 뒤로는 경로 상수·조회 함수가 여러 모듈에 따로
+"""generate_html·validate_analysis·call_claude·fetch_news·fetch_data를 역할별 모듈로 나눈 뒤로는 경로 상수·조회 함수가 여러 모듈에 따로
 묶여 있다. monkeypatch.setattr(generate_html, "DATA_DIR", …)는 그 모듈 한 곳만 바꾸므로, 옮겨 간 함수가
 진짜 data/ · web/ 를 읽거나 진짜 시세를 조회하게 된다. 이 도우미는 그 이름을 가진 묶음 안의 모든
 모듈에서 함께 바꾼다."""
@@ -13,6 +13,8 @@ CC_MODULES = ("call_claude", "claude_common", "claude_prompts", "prompt_directiv
               "telegram_messages")
 NEWS_MODULES = ("fetch_news", "news_common", "news_prompts", "news_gate_reality", "news_gate_history",
                 "news_gate_earnings", "news_gate_grounding", "news_rss")
+DATA_MODULES = ("fetch_data", "market_common", "market_universe", "econ_calendar", "investor_flow",
+                "price_quotes", "fx_rates")
 
 
 def _patch(monkeypatch, modules, name, value):
@@ -43,3 +45,8 @@ def cc_patch(monkeypatch, name, value):
 def news_patch(monkeypatch, name, value):
     """뉴스 수집(fetch_news와 나눈 모듈)."""
     _patch(monkeypatch, NEWS_MODULES, name, value)
+
+
+def data_patch(monkeypatch, name, value):
+    """시장 데이터 수집(fetch_data와 나눈 모듈)."""
+    _patch(monkeypatch, DATA_MODULES, name, value)
