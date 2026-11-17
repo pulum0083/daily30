@@ -1,6 +1,12 @@
 {
   "name": "daily30",
   "version": "1.0.0",
+  "scripts": {
+    "test": "npm run test:js && npm run test:python",
+    "test:js": "node --test api/*.test.mjs web/assets/*.test.mjs",
+    "test:python": "python3 -m pytest scripts/ tests/ -q",
+    "lint": "npx --yes eslint@9 web/assets/ api/"
+  },
   "dependencies": {
     "resend": "^3.2.0"
   }
