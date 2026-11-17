@@ -11,8 +11,13 @@
         "time": "07:28"
       },
       "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
+        "state": "ready",
+        "url": "/briefings/2026-11-17/close/",
+        "headline": "AI 반도체 규제 폭탄, 코스피를 4968까지 끌어내렸다",
+        "title": "4,968.48",
+        "price": "4,968.48",
+        "time": "",
+        "chg": -2.59
       },
       "us": {
         "state": "pending",
@@ -24,6 +29,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-16/kospi/",
         "headline": "수출은 역대 최대인데, 엔비디아가 발목을 잡았다",
+        "hit": false,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -42,6 +48,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-16/us/",
         "headline": "젠슨 없는 엔비디아의 첫 성적표, AI 빅위크의 시작",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
