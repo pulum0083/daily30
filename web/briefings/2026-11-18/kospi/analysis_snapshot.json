@@ -1,0 +1,254 @@
+{
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 43,
+    "down_pct": 57,
+    "confidence": 65,
+    "basis": "open"
+  },
+  "reason_title": "엔비디아 충격 2라운드, 선물도 하락 쪽으로 기울었다",
+  "todays_view": {
+    "view_title": "엔비디아 전 CEO 사임, 반도체 불안을 다시 깨웠다",
+    "dek": "간밤 미국 증시가 <b>엔비디아</b> 관련 악재로 흔들리며 나스닥·S&P500이 동반 하락했어요. 코스피 반도체 섹터도 이 여진을 오늘 개장부터 체감할 가능성이 커요.",
+    "recap": [
+      {
+        "text": "코스피 반도체 대형주가 나란히 약세로 마감했어요. <b>삼성전자</b>가 <b>-3.30%</b>, <b>SK하이닉스</b>가 <b>-1.96%</b> 빠지며 지수 하단을 눌렀어요.",
+        "codes": [
+          "005930",
+          "000660"
+        ]
+      },
+      {
+        "text": "외국인이 코스피에서 <b>1조 4,460억원</b>을 순매도했어요. 기관이 <b>5,392억원</b> 순매수로 일부 받아냈지만 수급 공백을 메우기엔 부족했어요.",
+        "codes": []
+      },
+      {
+        "text": "전력설비·방산·조선 등 전통 수출주도 일제히 조정을 받았어요. <b>HD현대일렉트릭</b>이 <b>-5.61%</b>, <b>HD현대중공업</b>이 <b>-5.00%</b> 빠지며 낙폭이 컸어요.",
+        "codes": [
+          "267260",
+          "329180"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "내일 새벽 4시 FOMC 11월 의사록이 공개돼요. 금리 경로에 대한 힌트가 나오면 환율·외국인 수급 방향이 다시 흔들릴 수 있어요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "SOX는 전일 소폭 반등했지만 NQ선물은 다시 밀리고 있어요. 개장 직후 이 둘의 방향이 갈리면 어느 쪽을 따라갈지가 관전 포인트예요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인이 오늘도 순매도를 이어가는지, 아니면 저가 매수로 돌아서는지가 반도체 낙폭을 결정할 거예요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>엔비디아 전 CEO 사임 소식이 간밤 미국 증시를 다시 흔들었어요.</b> 나스닥 <b>-0.74%</b>, S&P500 <b>-1.03%</b>로 마감하며 AI 투자 우려가 재부각됐고, 이 여진이 오늘 코스피 반도체 섹터로 이어질 가능성이 커요.",
+      "codes": []
+    },
+    {
+      "text": "<b>미 지수선물이 추가로 밀리고 있어요.</b> S&P선물 <b>-0.97%</b>, 다우선물 <b>-1.63%</b>로 종가보다 더 하락한 상태라, 개장 전 분위기가 쉽게 반전되기 어려워요.",
+      "codes": []
+    },
+    {
+      "text": "<b>VIX가 하루 만에 11% 넘게 튀었어요.</b> 25선을 넘기며 경계 구간에 들어섰고, 이는 위험자산 회피 심리가 아직 가시지 않았다는 신호예요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-18T07:28:07.163094+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-18T07:26:41.518476+09:00",
+    "briefing_date": "2026-11-18",
+    "us_session_date": "2026-11-17",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "미국, 대중국 AI칩 우회 수출까지 전면 차단",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -0.44
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -0.17
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": 2.46
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -0.29
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -0.07
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": 0.42
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -0.92
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체는 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "젠슨 황 복귀 무산설에 엔비디아 실적 앞두고 불안 커져",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체·AI 인프라",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -0.44
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체·AI 인프라는 <b>내렸어요</b>"
+      },
+      {
+        "title": "HSBC, AI칩 투자 전망 28% 하향·엔비디아 목표가 낮춰",
+        "sides": [
+          {
+            "side": "down",
+            "label": "AI 반도체 밸류체인",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -0.44
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -0.92
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -0.29
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -0.07
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI 반도체 밸류체인은 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "엔비디아 '매도 금지' 목록에 메가스피드 포함",
+        "sides": [
+          {
+            "side": "down",
+            "label": "대중 수출 비중 반도체",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -0.44
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -0.29
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -0.07
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": 0.42
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "대중 수출 비중 반도체는 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "VIX 급등 후 숨 고르기, 간밤 소매판매가 분위기 가를 듯",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^VIX",
+                "name": "VIX",
+                "pct": 11.13
+              }
+            ],
+            "proxy": "VIX"
+          }
+        ],
+        "check_line": "지수 전반은 <b>올랐어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-18",
+    "generated_at": "2026-11-18T07:26:42.381669+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": []
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-17",
+    "direction": "하락 우위",
+    "ok": true,
+    "open_pct": -1.81
+  },
+  "prior_signals": {
+    "sox": 0.34,
+    "nasdaq": -0.74,
+    "nq": -0.58,
+    "ewy_resid": 3.3,
+    "vix": 11.1305
+  },
+  "prev_supply": {
+    "date": "20261117",
+    "individual": 4261,
+    "institution": 5392,
+    "foreign": -14460
+  }
+}
