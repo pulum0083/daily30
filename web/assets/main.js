@@ -1472,7 +1472,7 @@
    버전을 올리면 다시 뜬다. ⚠️ 월배당 페이지(main.js를 싣지 않는다)도 같은 키·버전을 직접 저장한다 —
    버전을 바꾸면 web/stocks/income-designer/index.html 의 NAV_SEEN 값도 함께 바꿀 것. */
 (function () {
-  var NEW = { '/stocks/income-designer/': '2026-11-12' };   // 메뉴 주소 → 새 소식 버전
+  var NEW = {};   // 메뉴 주소 → 새 소식 버전. 2026-11-17 월배당 점을 뺐다(사용자 요청) — 다시 띄울 땐 여기에 넣는다
   var KEY = 'ds-nav-seen:';
   function seen(p) { try { return localStorage.getItem(KEY + p) || ''; } catch (e) { return NEW[p]; } }
   function mark(p) { try { localStorage.setItem(KEY + p, NEW[p]); } catch (e) {} }
