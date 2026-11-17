@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+import analysis_history  # noqa: E402 — 옮겨 간 함수는 이 모듈의 전역을 본다
 import call_claude as cc  # noqa: E402
 
 
@@ -11,12 +12,12 @@ def _with_latest(tmp_path, latest):
     (tmp_path / "latest_kospi.json").write_text(
         json.dumps(latest, ensure_ascii=False), encoding="utf-8"
     )
-    orig = cc.DATA_DIR
-    cc.DATA_DIR = tmp_path
+    orig = analysis_history.DATA_DIR
+    analysis_history.DATA_DIR = tmp_path
     try:
         return cc._signal_snapshot("kospi")
     finally:
-        cc.DATA_DIR = orig
+        analysis_history.DATA_DIR = orig
 
 
 LATEST = {
@@ -61,9 +62,9 @@ def test_non_kospi_types_skipped():
 
 def test_missing_file_is_silent(tmp_path):
     """latest_kospi.json이 없어도 발행을 막지 않는다."""
-    orig = cc.DATA_DIR
-    cc.DATA_DIR = tmp_path
+    orig = analysis_history.DATA_DIR
+    analysis_history.DATA_DIR = tmp_path
     try:
         assert cc._signal_snapshot("kospi") == {}
     finally:
-        cc.DATA_DIR = orig
+        analysis_history.DATA_DIR = orig

@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import backtest_nasdaq_overheat as bt  # noqa: E402
 import call_claude as cc  # noqa: E402
 import generate_html as gh  # noqa: E402
-from gen_testkit import gen_patch  # noqa: E402
+from gen_testkit import gen_patch, cc_patch  # noqa: E402
 import nasdaq_charts  # noqa: E402
 import nasdaq_overheat as nq  # noqa: E402
 
@@ -128,7 +128,7 @@ def test_us_template_puts_section_under_issues():
 # ── 텔레그램 ──
 def _tg(tmp_path, monkeypatch, gap):
     gen_patch(monkeypatch, "DATA_DIR", tmp_path)
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {"prediction": {"up_pct": 40, "down_pct": 60}, "todays_view": {"view_title": "제목"},
                 "issues": [{"title": "첫 이슈"}], "nasdaq_overheat": _data(gap=gap, streak=4)}
     cc.save_telegram_message("us", "2026-10-23", analysis)
@@ -143,7 +143,7 @@ def test_telegram_no_block_when_high_unchanged(tmp_path, monkeypatch, gap):
 
 def test_telegram_block_after_watch_line_when_crossing_70(tmp_path, monkeypatch):
     gen_patch(monkeypatch, "DATA_DIR", tmp_path)
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     d = _data(gap=72.4, streak=4)
     d.update(high_changed=True, high=29300.0, prev_high=28800.0, prev_month_high=30000.0, ma60=17000.0,
              month="2026-10", last_date="2026-10-22")

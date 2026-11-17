@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from gen_testkit import gate_patch  # noqa: E402
+from gen_testkit import gate_patch, cc_patch  # noqa: E402
 import check_accuracy as ca  # noqa: E402
 import prediction_basis as pb  # noqa: E402
 
@@ -87,9 +87,9 @@ def test_prediction_record_carries_basis_and_scored_record_keeps_its_own(tmp_pat
         {"date": "2026-10-08", "type": "kospi", "predicted_direction": "하락 우위",
          "actual_direction": "하락", "actual_change_pct": -2.62, "is_correct": True},
     ]}, ensure_ascii=False), encoding="utf-8")
-    monkeypatch.setattr(cc, "BASE_DIR", tmp_path)
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path / "data")
-    monkeypatch.setattr(cc, "_signal_snapshot", lambda t, d="": {})
+    cc_patch(monkeypatch, "BASE_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path / "data")
+    cc_patch(monkeypatch, "_signal_snapshot", lambda t, d="": {})
     pred = {"prediction": {"direction": "상승 우위", "up_pct": 62, "down_pct": 38, "confidence": 60, "basis": "open"}}
     cc.save_prediction_to_briefings("kospi", "2026-10-13", pred)     # 새 기록 → 시초가 기준
     cc.save_prediction_to_briefings("kospi", "2026-10-08", pred)     # 이미 종가로 채점된 날의 재실행 → 기준 유지

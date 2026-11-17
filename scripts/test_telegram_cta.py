@@ -4,13 +4,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from gen_testkit import gen_patch  # noqa: E402
+from gen_testkit import gen_patch, cc_patch  # noqa: E402
 import call_claude as cc
 
 
 def test_kospi_headline_and_one_watch_line(tmp_path, monkeypatch):
     # 코스피는 방향·확률(신뢰도) → 헤드라인 → 개장 후 볼 것 한 줄(2026-10-25). 지난 예측 배지·시그널 목록은 없다.
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {
         "prediction": {"direction": "하락 우위", "up_pct": 7, "down_pct": 93, "confidence": 82, "basis": "open"},
         "reason_title": "긴급 점검: 반도체 쇼크",
@@ -35,7 +35,7 @@ def test_kospi_headline_and_one_watch_line(tmp_path, monkeypatch):
 
 
 def test_kospi_falls_back_to_reason_title_and_skips_empty_outlook(tmp_path, monkeypatch):
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {"prediction": {"direction": "상승 우위", "up_pct": 63, "down_pct": 37, "confidence": 72},
                 "reason_title": "왜 오를까 — 반도체 강세", "todays_view": {}}
     cc.save_telegram_message("kospi", "2026-07-17", analysis)
@@ -47,7 +47,7 @@ def test_kospi_falls_back_to_reason_title_and_skips_empty_outlook(tmp_path, monk
 
 def test_close_title_and_one_dek_line(tmp_path, monkeypatch):
     # 마감: 지수 → 🎯 타이틀 → 서브 한 문장(2026-10-25). scenario 형식은 reason_title을 쓴다.
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {"analysis_format": "scenario", "reason_title": "-4%까지 빠졌는데 플러스 마감?",
                 "dek": "기관이 <b>8,726억원</b>을 사들였어요.", "telegram_signals": ["🚀 옛 시그널"]}
     md = {"indices": {"kospi": {"price": 5550.3, "change_pct": 0.30},
@@ -62,7 +62,7 @@ def test_close_title_and_one_dek_line(tmp_path, monkeypatch):
 
 
 def test_close_prefers_market_title_and_skips_missing_dek(tmp_path, monkeypatch):
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     cc.save_closing_telegram_message("2026-07-16", {"market_title": "코스닥 테마 폭발", "reason_title": "다른 제목"},
                                      {"indices": {}})
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
@@ -71,7 +71,7 @@ def test_close_prefers_market_title_and_skips_missing_dek(tmp_path, monkeypatch)
 
 def test_us_first_issue_and_has_cta(tmp_path, monkeypatch):
     # 미국도 코스피처럼 첫 이슈 하나만 "오늘 밤 볼 것"으로 싣는다(2026-10-25).
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {
         "prediction": {"up_pct": 62, "down_pct": 38},
         "todays_view": {"view_title": "돈이 SW에서 AI 인프라로"},
@@ -92,7 +92,7 @@ def _ma5_item():
 
 def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
     # 월봉 5개월선 종목이 페이지에 보이는 날만 텔레그램에도 싣는다. 백테스트 설명 줄은 페이지에만 둔다
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {"prediction": {"direction": "하락 우위", "up_pct": 7, "down_pct": 93, "confidence": 82},
                 "todays_view": {"view_title": "제목"},
                 "monthly_ma5": {"date": "2026-10-26", "items": [_ma5_item()]}}
@@ -105,7 +105,7 @@ def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
 
 def test_kospi_skips_ma5_block_when_no_items_or_no_backtest(tmp_path, monkeypatch):
     import generate_html as gh
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     base = {"prediction": {"direction": "상승 우위", "up_pct": 60, "down_pct": 40, "confidence": 70}}
     cc.save_telegram_message("kospi", "2026-10-26", {**base, "monthly_ma5": {"date": "2026-10-26", "items": []}})
     assert "월봉" not in (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
@@ -119,7 +119,7 @@ def test_close_badge_follows_title_and_lines_fit_divider(tmp_path, monkeypatch):
     import json, check_accuracy as ca, send_telegram as st
     (tmp_path / "briefings.json").write_text(json.dumps({"briefings": [
         {"type": "kospi", "date": "2026-10-26", "basis": "open", "predicted_direction": "상승 우위"}]}), encoding="utf-8")
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: (5400.0, 5450.0, -0.92))
     cc.save_closing_telegram_message("2026-10-26", {"reason_title": "7개월 최저치인데 기관은 6,047억 사들였다",
                                                     "dek": "기관이 방어했어요."}, {"indices": {}})

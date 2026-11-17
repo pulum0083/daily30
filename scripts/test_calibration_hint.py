@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+import analysis_history  # noqa: E402 — 옮겨 간 함수는 이 모듈의 전역을 본다
 import call_claude as cc  # noqa: E402
 
 
@@ -17,12 +18,12 @@ def _write(tmp_rows, monkey_dir):
 def _with_fixture(tmp_path, rows, **kw):
     """BASE_DIR을 임시 경로로 갈아끼워 픽스처로 계산한다."""
     _write(rows, tmp_path)
-    orig = cc.BASE_DIR
-    cc.BASE_DIR = tmp_path
+    orig = analysis_history.BASE_DIR
+    analysis_history.BASE_DIR = tmp_path
     try:
         return cc.build_calibration_hint("kospi", **kw)
     finally:
-        cc.BASE_DIR = orig
+        analysis_history.BASE_DIR = orig
 
 
 def _row(up_pct, actual, type_="kospi"):
@@ -61,12 +62,12 @@ def test_small_sample_returns_empty(tmp_path):
 
 def test_missing_file_returns_empty(tmp_path):
     """briefings.json이 없어도 터지지 않는다(파이프라인 보호)."""
-    orig = cc.BASE_DIR
-    cc.BASE_DIR = tmp_path
+    orig = analysis_history.BASE_DIR
+    analysis_history.BASE_DIR = tmp_path
     try:
         assert cc.build_calibration_hint("kospi") == ""
     finally:
-        cc.BASE_DIR = orig
+        analysis_history.BASE_DIR = orig
 
 
 def test_real_data_shape():

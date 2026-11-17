@@ -6,7 +6,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import call_claude as cc
 import fetch_data as fd
 
-SRC = (Path(__file__).resolve().parent / "call_claude.py").read_text(encoding="utf-8")
+# call_claude는 역할별 모듈로 나뉘었다(2026-11-17) — 묶음 전체의 소스를 본다
+from gen_testkit import CC_MODULES  # noqa: E402
+SRC = "\n".join((Path(__file__).resolve().parent / f"{m}.py").read_text(encoding="utf-8") for m in CC_MODULES)
 
 
 def test_kospi_prompt_has_no_picks():

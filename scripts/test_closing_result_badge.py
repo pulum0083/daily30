@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import cc_patch  # noqa: E402
 import call_claude as cc
 
 
@@ -31,7 +32,7 @@ def test_badge_shows_hit_when_direction_matches(tmp_path, monkeypatch):
         {"type": "kospi", "date": "2026-07-10", "is_correct": True},
         {"type": "kospi", "date": "2026-07-13", "is_correct": False},
     ])
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     cc.save_closing_telegram_message("2026-07-16", _analysis(), _market_data(-6.37))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
     assert "📝 아침 예측 하락 → 실제 -6.37% ✓" in text   # 종가 기준(전환 이전) 기록은 종가로 채점한다
@@ -42,7 +43,7 @@ def test_badge_shows_miss_when_direction_mismatches(tmp_path, monkeypatch):
     _write_briefings(tmp_path, [
         {"type": "kospi", "date": "2026-07-16", "predicted_direction": "하락 우위", "is_correct": None},
     ])
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     cc.save_closing_telegram_message("2026-07-16", _analysis(), _market_data(0.73))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
     assert "📝 아침 예측 하락 → 실제 +0.73% ✗" in text
@@ -53,7 +54,7 @@ def test_badge_omitted_when_no_today_prediction(tmp_path, monkeypatch):
     _write_briefings(tmp_path, [
         {"type": "kospi", "date": "2026-07-10", "predicted_direction": "상승 우위", "is_correct": True},
     ])
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     cc.save_closing_telegram_message("2026-07-16", _analysis(), _market_data(-6.37))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
     assert "📝" not in text   # 채점 배지(📝) 없음 — 🎯는 타이틀 줄(2026-10-25)
@@ -64,7 +65,7 @@ def test_badge_omitted_when_kospi_change_missing(tmp_path, monkeypatch):
     _write_briefings(tmp_path, [
         {"type": "kospi", "date": "2026-07-16", "predicted_direction": "하락 우위", "is_correct": None},
     ])
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     market_data = {"indices": {"kospi": {"error": "fetch failed"}, "kosdaq": {"price": 800.0, "change_pct": 1.0}}}
     cc.save_closing_telegram_message("2026-07-16", _analysis(), market_data)
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
@@ -80,7 +81,7 @@ def test_cumulative_accuracy_excludes_today_and_unscored(tmp_path, monkeypatch):
         {"type": "kospi", "date": "2026-07-14", "basis": "open", "is_correct": False},
         {"type": "us", "date": "2026-07-13", "is_correct": True},  # 다른 타입은 제외
     ])
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     assert cc._cumulative_kospi_accuracy("2026-07-16") == (2, 3)
 
 
@@ -93,7 +94,7 @@ def test_open_basis_badge_scores_by_open_gap_not_close(tmp_path, monkeypatch):
     # 위로 열리고(+0.58%) 밀려서 끝난 날(종가 -0.89%) — 2026-10-06 모양. 시초가 예측은 맞은 것이다.
     import check_accuracy as ca
     _write_briefings(tmp_path, [_open_pred("상승 우위")])
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: (6600.0, 6562.0, 0.58))
     cc.save_closing_telegram_message("2026-10-13", _analysis(), _market_data(-0.89))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
@@ -104,7 +105,7 @@ def test_open_basis_badge_omitted_when_gap_unavailable(tmp_path, monkeypatch):
     # 시가를 못 구하면 종가로 대신 채점하지 않고 배지를 뺀다(§0).
     import check_accuracy as ca
     _write_briefings(tmp_path, [_open_pred("상승 우위")])
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: None)
     cc.save_closing_telegram_message("2026-10-13", _analysis(), _market_data(1.5))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")

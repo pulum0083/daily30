@@ -3,11 +3,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import cc_patch  # noqa: E402
 import call_claude as cc
 
 
 def test_us_telegram_uses_todays_view_and_issues(tmp_path, monkeypatch):
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {
         "todays_view": {"view_title": "돈이 SW에서 AI 인프라로", "dek": "..."},
         "issues": [
@@ -28,7 +29,7 @@ def test_us_telegram_uses_todays_view_and_issues(tmp_path, monkeypatch):
 
 
 def test_us_telegram_direction_line(tmp_path, monkeypatch):
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     for (up, dn), want in {(32, 68): "📉 <b>하락 우위 68%</b>", (62, 38): "📈 <b>상승 우위 62%</b>",
                            (50, 50): "📊 <b>중립 50%</b>"}.items():
         cc.save_telegram_message("us", "2026-10-23", {"prediction": {"up_pct": up, "down_pct": dn},
@@ -38,7 +39,7 @@ def test_us_telegram_direction_line(tmp_path, monkeypatch):
 
 
 def test_kospi_telegram_still_has_prediction(tmp_path, monkeypatch):
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     analysis = {
         "prediction": {"direction": "상승 우위", "up_pct": 60, "down_pct": 40, "confidence": 70},
         "reason_title": "왜 오를까",

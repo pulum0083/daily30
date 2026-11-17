@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import gate_superlative  # noqa: E402 — 옮겨 간 함수는 이 모듈의 전역을 본다
 
 from validate_analysis import (  # noqa: E402
     find_superlative_violations,
@@ -57,8 +58,8 @@ def test_low_superlative_caught():
 def test_list_item_dropped_scalar_blocks(monkeypatch=None):
     """리스트 항목은 제거, 스칼라 산문에 남으면 차단."""
     import validate_analysis as va
-    orig = va._index_extremes
-    va._index_extremes = lambda sym: REAL.get(sym)
+    orig = gate_superlative._index_extremes
+    gate_superlative._index_extremes = lambda sym: REAL.get(sym)
     try:
         a = {
             "issues": [
@@ -77,24 +78,24 @@ def test_list_item_dropped_scalar_blocks(monkeypatch=None):
         validate_index_superlatives(a2, corr, warn, blocks)
         assert blocks, "스칼라 산문 위반은 차단돼야 함"
     finally:
-        va._index_extremes = orig
+        gate_superlative._index_extremes = orig
 
 
 def test_no_superlative_skips_network():
     """최상급 표현이 없으면 실측 조회 자체를 하지 않는다."""
     import validate_analysis as va
-    orig = va._index_extremes
+    orig = gate_superlative._index_extremes
 
     def boom(sym):
         raise AssertionError("네트워크 조회가 일어나면 안 됨")
 
-    va._index_extremes = boom
+    gate_superlative._index_extremes = boom
     try:
         corr, warn, blocks = [], [], []
         validate_index_superlatives({"why": "나스닥이 -0.22% 밀렸어요."}, corr, warn, blocks)
         assert not (corr or warn or blocks)
     finally:
-        va._index_extremes = orig
+        gate_superlative._index_extremes = orig
 
 
 # ── 2026-10-01 실사고(§59): 국채금리의 최고치를 다우의 주장으로 오판해 발행 차단 ─────────
@@ -111,14 +112,14 @@ def test_oct01_yield_record_is_not_dow_claim():
 
 def test_oct01_scalar_prose_does_not_block():
     import validate_analysis as va
-    orig = va._index_extremes
-    va._index_extremes = lambda sym: DOW_REAL.get(sym)
+    orig = gate_superlative._index_extremes
+    gate_superlative._index_extremes = lambda sym: DOW_REAL.get(sym)
     try:
         corr, warn, blocks = [], [], []
         validate_index_superlatives({"why": OCT01}, corr, warn, blocks)
         assert not blocks, blocks
     finally:
-        va._index_extremes = orig
+        gate_superlative._index_extremes = orig
 
 
 def test_yield_record_same_sentence_not_dow_claim():
@@ -157,15 +158,15 @@ def test_nearest_index_wins():
 def test_incident_in_list_item_field_split():
     """리스트 항목은 필드별로 본다 — 제목의 지수명이 본문의 국채금리 최고치에 붙지 않는다."""
     import validate_analysis as va
-    orig = va._index_extremes
-    va._index_extremes = lambda sym: DOW_REAL.get(sym)
+    orig = gate_superlative._index_extremes
+    gate_superlative._index_extremes = lambda sym: DOW_REAL.get(sym)
     try:
         a = {"key_drivers": [{"title": "다우 약세", "why": "사상 최고치 국채금리가 부담이에요"}]}
         corr, warn, blocks = [], [], []
         validate_index_superlatives(a, corr, warn, blocks)
         assert len(a["key_drivers"]) == 1 and not corr and not blocks
     finally:
-        va._index_extremes = orig
+        gate_superlative._index_extremes = orig
 
 
 if __name__ == "__main__":

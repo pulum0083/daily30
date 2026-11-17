@@ -11,7 +11,7 @@ import call_claude as cc  # noqa: E402
 import check_accuracy as ca  # noqa: E402
 import fit_us_close_prior as fit  # noqa: E402
 import generate_html as gh  # noqa: E402
-from gen_testkit import gen_patch  # noqa: E402
+from gen_testkit import gen_patch, cc_patch  # noqa: E402
 import hl_shadow_report as hr  # noqa: E402
 import hl_signals as hs  # noqa: E402
 import nasdaq_overheat as nq  # noqa: E402
@@ -78,7 +78,7 @@ def test_direction_from_pct(up, down, want):
 
 
 def test_save_and_score_us_prediction(tmp_path, monkeypatch):
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "latest_us.json").write_text(json.dumps({"futures": {"sp500_fut": {"change_pct": -0.18}}}), encoding="utf-8")
     cc.save_prediction_to_briefings("us", "2026-11-03", {"prediction": {"up_pct": 35, "down_pct": 65}})
     path = tmp_path / "briefings.json"
@@ -216,11 +216,13 @@ def test_hl_coin_failure_keeps_others(monkeypatch):
 
 
 def test_hl_is_recorded_not_prompted(tmp_path, monkeypatch):
-    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc_patch(monkeypatch, "DATA_DIR", tmp_path)
     (tmp_path / "hl_signals.json").write_text(json.dumps({"date": "2026-11-03", "moves": {"KR200": -1.6}}), encoding="utf-8")
     assert cc._hl_snapshot("2026-11-03") == {"hl": {"KR200": -1.6}}
     assert cc._hl_snapshot("2026-11-04") == {}                             # 다른 날 파일은 쓰지 않는다
-    assert Path(cc.__file__).read_text(encoding="utf-8").count("hl_signals") == 2   # 설명 주석과 기록 함수뿐 — 프롬프트 경로에 없다
+    from gen_testkit import CC_MODULES
+    src = "".join((Path(cc.__file__).parent / f"{m}.py").read_text(encoding="utf-8") for m in CC_MODULES)
+    assert src.count("hl_signals") == 2   # 설명 주석과 기록 함수뿐 — 프롬프트 경로에 없다
 
 
 def test_shadow_report_counts():

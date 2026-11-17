@@ -123,6 +123,9 @@ for m in plan["modules"]:
         elif n in defined and n not in owner and not is_import(stmts[defined[n]]["node"]):
             problems.append(f"{m['name']}: 원본에 남는 '{n}'을 참조 — 순환 import")
     body = [m["header"], ""]
+    if any(isinstance(st["node"], ast.ImportFrom) and st["node"].module == "__future__" for st in import_stmts):
+        body.append("from __future__ import annotations")   # 3.9에서 'dict | None' 힌트를 쓰려면 모든 새 모듈에 필요
+        need_imports = [st for st in need_imports if not (isinstance(st["node"], ast.ImportFrom) and st["node"].module == "__future__")]
 
     def is_sibling(st):
         n = st["node"]
@@ -179,7 +182,29 @@ if problems:
 drop = set()
 for i in stmt_owner:
     drop |= set(range(stmts[i]["start"], stmts[i]["end"] + 1))
-last_import_end = max(st["end"] for st in import_stmts)
+# 옮긴 코드 앞의 떠 있는 주석 문단(구역 제목 등)도 지운다 — 다음 코드 줄이 옮겨 갔으면 그 문단은 옮긴 코드의 설명이다
+in_stmt = set()
+for st in stmts:
+    in_stmt |= set(range(st["start"], st["end"] + 1))
+paras, cur = [], []
+for ln, text in enumerate(lines, start=1):
+    if ln not in in_stmt and text.lstrip().startswith("#"):
+        cur.append(ln)
+    else:
+        if cur:
+            paras.append(cur)
+        cur = []
+for para in reversed(paras):
+    j = para[-1] + 1
+    while j <= len(lines) and not lines[j - 1].strip():
+        j += 1
+    if j <= len(lines) and j in drop:
+        drop |= set(para)
+# 다시 내보내는 줄은 맨 위 import 묶음 바로 뒤에 둔다(파일 중간의 늦은 import 뒤가 아니라)
+first_body = min((st["start"] for st in stmts if not is_import(st["node"])
+                  and not (isinstance(st["node"], ast.Expr))), default=len(lines))
+last_import_end = max(st["end"] for st in import_stmts if st["end"] < first_body)
+top_level_src = "\n".join(lines[:first_body])
 out = []
 for ln, text in enumerate(lines, start=1):
     if ln in drop:
@@ -200,7 +225,7 @@ for ln, text in enumerate(lines, start=1):
         for mod in new_mods:
             visit(mod)
         out.append("")
-        if "sys.path.insert(0, str(Path(__file__).resolve().parent))" not in "\n".join(lines):
+        if "sys.path.insert(0, str(Path(__file__).resolve().parent))" not in top_level_src:
             out.append("sys.path.insert(0, str(Path(__file__).resolve().parent))")
         out.append(f"# 역할별 모듈로 나눈 정의 — 원래 이름({src_mod}.X)으로도 그대로 읽힌다.")
         for mod in order:
@@ -218,9 +243,10 @@ print("원본에 남는 줄:", len(text.split("\n")))
 for mod, body in files.items():
     print(f"{mod}.py: {len(body.splitlines())}줄, 의존 {sorted(deps[mod])}")
 if not dry:
+    if "--source-only" not in sys.argv:
+        for mod in files:
+            if (src_path.parent / f"{mod}.py").exists():
+                sys.exit(f"이미 있는 파일: {mod}.py")
+        for mod, body in files.items():
+            (src_path.parent / f"{mod}.py").write_text(body, encoding="utf-8")
     src_path.write_text(text, encoding="utf-8")
-    for mod, body in files.items():
-        p = src_path.parent / f"{mod}.py"
-        if p.exists():
-            sys.exit(f"이미 있는 파일: {p}")
-        p.write_text(body, encoding="utf-8")

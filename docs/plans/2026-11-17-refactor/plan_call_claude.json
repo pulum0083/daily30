@@ -1,0 +1,17 @@
+{"modules": [
+ {"name": "claude_common", "header": "# call_claude와 나눈 모듈이 함께 쓰는 경로·시간대·설정 읽기", "items": [
+  "BASE_DIR","DATA_DIR","GURU_QUOTES_FILE","QUOTE_TODAY_FILE","KST","load_config"]},
+ {"name": "claude_prompts", "header": "# Claude 분석 시스템 프롬프트 — 코스피 아침·미국·코스피 마감, 근거 형식·섹터 로테이션 풀, 타이틀 카피 원칙", "items": [
+  "FORMAT_POOL","FORMAT_WEIGHTS","FORMAT_POOL_CLOSE","FORMAT_WEIGHTS_CLOSE","SECTOR_POOL","SECTOR_BY_KEY","HEADLINE_CRAFT",
+  "KOSPI_SYSTEM_PROMPT","US_SYSTEM_PROMPT","KOSPI_CLOSE_SYSTEM_PROMPT"]},
+ {"name": "prompt_directives", "header": "# 그날 데이터로 만드는 프롬프트 지시문 — 세션 라벨·지수 위치·현직 인물·날짜별 일지·이벤트 시제·KST 날짜", "items": [
+  "_investor_to_eok","_us_news_session_directive","_session_label_directive","_index_position_directive","_officeholder_directive",
+  "_us_session_log_directive","_calendar_tense_directive","_event_when_directive"]},
+ {"name": "analysis_history", "header": "# 분석 기록 — 시그널·섹터 반복 회피 힌트, 예측을 briefings.json에 저장, 확률 보정 힌트", "items": [
+  "extract_signal_emojis","load_signal_history","save_signal_to_history","load_sector_history","save_sector_to_history",
+  "build_sector_avoidance_hint","pick_sector","build_avoidance_hint","_hl_snapshot","_signal_snapshot","_direction_from_pct",
+  "save_prediction_to_briefings","build_calibration_hint"]},
+ {"name": "telegram_messages", "header": "# 브리핑 텔레그램 메시지 조립 — 코스피 아침·미국·코스피 마감, 월봉 5개월선·S&P 200일선·나스닥 체크 줄", "items": [
+  "get_web_base_url","_today_kospi_prediction","_cumulative_kospi_accuracy","_ma5_telegram_lines","_sp500_lines","_nasdaq_change_lines",
+  "save_telegram_message","save_closing_telegram_message"]}
+]}
