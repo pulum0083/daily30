@@ -8,3 +8,6 @@
 - 옮긴 이름은 전부 generate_html에서 다시 import해 call_claude·weekly_report·테스트가 gh.X로 그대로 읽는다. 처음엔 안 쓰는 import를 정리하다 gate_write까지 지워 weekly_report가 깨질 뻔했다(테스트는 통과) — gh.X 참조를 전수 대조해 찾았다.
 - 테스트의 monkeypatch.setattr(gh, "DATA_DIR", …)는 이제 옮겨 간 함수에 닿지 않는다. scripts/gen_testkit.py의 gen_patch가 그 이름을 가진 생성기 모듈 전부를 함께 바꾼다. 테스트 뒤 git status로 진짜 data/·web/ 가 바뀌지 않았음을 확인했다.
 - 남겨 둔 것: test_stock_seo_meta.py가 2026-10-26에 지운 g._stock_seo를 부르는 죽은 테스트(섹터 페이지가 없으면 skip). 이번 범위 밖이라 그대로 뒀다.
+- 3단계 검증용으로 golden_validate.py를 만들었다 — 발행 게이트 validate()를 스냅샷 232편에 네트워크를 막고 다시 돌려 교정·경고·차단·교정본을 남긴다. 기준 코드로 두 번 돌려 같음을 확인(교정 306·경고 362·차단 16). 분할 뒤 차이 0줄.
+- validate_analysis는 scripts. 경로(`from scripts.validate_analysis import …`, 운영 규칙 §1 수동 검증 예시)로도 import되므로 모듈 맨 위에 sys.path.insert를 넣었다 — 그 경로로 import될 때 gate_* 를 못 찾는다.
+- 테스트의 바꿔치기는 gen_testkit.gate_patch(validate_analysis와 gate_* 전부)로 바꿨다. setattr이 여러 줄에 걸친 테스트(tests/test_prose_validation.py)를 처음에 놓쳐 진짜 시세를 조회하다 실패했다 — 정규식을 줄바꿈까지 받게 고쳤다.

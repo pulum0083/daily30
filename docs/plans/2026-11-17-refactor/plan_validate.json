@@ -1,0 +1,26 @@
+{"modules": [
+ {"name": "gate_text", "header": "# 발행 게이트가 함께 쓰는 본문 검사 도우미 — 금지 패턴·수치 추출·문장 나누기·문자열 순회", "items": [
+  "SCALAR_PROSE","EXCLUDED_FIELDS","FX_MIN","FX_MAX","INDEX_PCT_MAX","REASONS_MIN","GYEONG_RE","HWANYUL_CTX_RE","WON_NUM_RE","INDEX_CTX_RE","PCT_NUM_RE",
+  "parse_price","strip_tags","find_forbidden","is_contradicted","_CHANGE_CTX_RE","_PCT_RE","_extract_change_claims",
+  "_NON_TICKER","_PROSE_FETCH_ALIAS","_US_TICKER_RE","_UP_WORDS_RE","_DOWN_WORDS_RE","_sentence_split","_join_sentences","_direction_contradicts",
+  "_walk_strings","_collect_strings","_filter_list_prose"]},
+ {"name": "gate_realdata", "header": "# 발행 게이트의 실측 시세 조회 — 미국(토스→야후 프리마켓 포함)·국내(공식 종가) 일봉과 이격도", "items": [
+  "_closes_to_realdata","_closes_from_toss_candles","_us_live_price","_fetch_us_realdata","_pin_session_date","_drop_rows_at_pin",
+  "_toss_candle_date","_naver_row_date","_fetch_kospi_realdata"]},
+ {"name": "gate_prose", "header": "# 본문 수치 게이트 — 픽 밖 종목·복기/관전 문장·key_drivers의 등락률을 실측과 대조, 간밤·현직 인물 표기 교정", "items": [
+  "validate_prose_nonpick_stocks","validate_todays_view_recap","validate_todays_view_outlook","_us_figure_stale","_INDEX_NAME_SYMBOL",
+  "_PCT_NEAR_RE","_index_figures","_index_figure_wrong","validate_key_drivers","fix_overnight_labels","_ROLE_SUFFIX","fix_officeholder_names"]},
+ {"name": "gate_superlative", "header": "# 지수 최상급 주장(사상 최고 등) 실측 대조와 예측 확률을 선행 신호 범위로 당기는 게이트", "items": [
+  "_SUPERLATIVE_HIGH_RE","_SUPERLATIVE_LOW_RE","_SUPERLATIVE_LIST_FIELDS","_index_extremes","find_superlative_violations","_superlative_texts",
+  "clamp_prediction_to_prior","clamp_us_prediction_to_prior","validate_index_superlatives"]},
+ {"name": "gate_events", "header": "# 시점·세션 게이트 — 끝난 이벤트의 예고형, 오늘/내일 표기, 프리마켓 지수, 미국 이슈 카드 실측 대조", "items": [
+  "_PREVIEW_TENSE_RE","_EVENT_ACRONYM_RE","_event_keywords","find_event_tense_violations","validate_event_tense","fix_event_day_words",
+  "_NO_PREMARKET_INDEX","_SESSION_WORDS","_SENT_SPLIT","find_session_mislabels","_PREMARKET_PHRASE","_PREMARKET_DROP","_ISSUE_BODY_MAX_SENT",
+  "trim_issue_bodies","_ISSUE_FALL_NOW","_ISSUE_RISE_NOW","_ISSUE_MIN_MOVE","_premarket_opposite","fix_issue_premarket_contradictions",
+  "_ISSUE_ROSE_PAST","_ISSUE_FELL_PAST","_prev_us_session_str","drop_stale_earnings_issues","fix_issue_side_tickers","fix_session_mislabels","limit_data_issues"]},
+ {"name": "gate_close", "header": "# 마감 브리핑 수치 게이트 — 지수 레벨 주입·수급 금액 교정·'전종목' 과장·수급 스케일", "items": [
+  "_fetch_kospi_index_levels","inject_kospi_index_levels","_extract_eok_values","_SUPPLY_ACTORS","_SUPPLY_AMOUNT_RE","_SUPPLY_SKIP",
+  "_SUPPLY_SKIP_MORNING","_fmt_eok","_amount_value","fix_supply_amounts","_ALL_STOCKS_RE","_ALL_SECTORS_RE","fix_all_claims","_check_supply_scale"]},
+ {"name": "gate_format", "header": "# 형식·제목 게이트 — 근거 형식과 본문 필드 일치, 헤드라인 숫자 대조, 금액 쉼표", "items": [
+  "FORMAT_BODY_FIELDS","FORMAT_FALLBACK","_TITLE_PCT_RE","_AMOUNT_NO_COMMA_RE","fix_amount_commas","fix_view_title_figures","fix_format_payload_mismatch"]}
+]}

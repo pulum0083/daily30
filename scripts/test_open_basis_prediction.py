@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import gate_patch  # noqa: E402
 import check_accuracy as ca  # noqa: E402
 import prediction_basis as pb  # noqa: E402
 
@@ -164,10 +165,10 @@ def _run_gate(tmp_path, monkeypatch, direction, up_pct, sox, regen_direction=Non
                                         ensure_ascii=False), encoding="utf-8")
         return type("R", (), {"returncode": 0 if regen_direction else 1})()
 
-    monkeypatch.setattr(va, "DATA_DIR", tmp_path)
+    gate_patch(monkeypatch, "DATA_DIR", tmp_path)
     monkeypatch.setattr(va.subprocess, "run", fake_run)
-    monkeypatch.setattr(va, "send_admin_alert", lambda *a, **k: None)
-    monkeypatch.setattr(va, "validate", lambda a, l, b: {"analysis": a, "corrections": [], "warnings": [], "blocks": []})
+    gate_patch(monkeypatch, "send_admin_alert", lambda *a, **k: None)
+    gate_patch(monkeypatch, "validate", lambda a, l, b: {"analysis": a, "corrections": [], "warnings": [], "blocks": []})
     monkeypatch.setattr(sys, "argv", ["validate_analysis.py", "--type", "kospi"])
     rc = va.main()
     return rc, calls, json.loads(apath.read_text(encoding="utf-8"))["prediction"]

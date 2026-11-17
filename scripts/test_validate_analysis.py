@@ -4,6 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import validate_analysis as v
+from gen_testkit import gate_patch  # noqa: E402
 
 
 # ── parse_price ───────────────────────────────────────────────────────────────
@@ -203,7 +204,7 @@ def test_supply_scale_skipped_for_kospi():
 def test_todays_view_recap_removes_contradicted_stock(monkeypatch):
     def fake_fetch(code):
         return {"change_pct": -1.5, "price": 70000.0} if code == "005930" else {"error": "n/a"}
-    monkeypatch.setattr(v, "_fetch_kospi_realdata", fake_fetch)
+    gate_patch(monkeypatch, "_fetch_kospi_realdata", fake_fetch)
     analysis = {"todays_view": {"view_title": "t", "recap": [
         {"text": "<b>삼성전자</b>가 급등하며 지수를 끌어올렸어요.", "codes": ["005930"]},
         {"text": "외국인이 순매수로 전환했어요.", "codes": []},
@@ -218,7 +219,7 @@ def test_todays_view_recap_removes_contradicted_stock(monkeypatch):
 
 def test_todays_view_recap_warns_on_fetch_failure(monkeypatch):
     """실측 실패 종목은 fail-open(항목 유지)하되 경고를 남긴다."""
-    monkeypatch.setattr(v, "_fetch_kospi_realdata", lambda code: {"error": "n/a"})
+    gate_patch(monkeypatch, "_fetch_kospi_realdata", lambda code: {"error": "n/a"})
     analysis = {"todays_view": {"view_title": "t", "recap": [
         {"text": "<b>미검증종목</b>이 강세였어요.", "codes": ["123456"]},
     ], "outlook": []}}
@@ -249,7 +250,7 @@ def test_todays_view_outlook_drops_ungrounded_event():
 def test_validate_wires_todays_view(monkeypatch):
     def fake_fetch(code):
         return {"change_pct": -1.5, "price": 70000.0} if code == "005930" else {"error": "n/a"}
-    monkeypatch.setattr(v, "_fetch_kospi_realdata", fake_fetch)
+    gate_patch(monkeypatch, "_fetch_kospi_realdata", fake_fetch)
     analysis = {
         "prediction": {"direction": "상승 우위", "up_pct": 55},
         "todays_view": {"view_title": "t", "recap": [
@@ -280,7 +281,7 @@ def test_is_contradicted_misses_adjacent_session():
 
 def test_key_drivers_removes_stale_us_figure(monkeypatch):
     # 실사고 재현: 직전 세션 EWY 실측이 +1.72%인데 브리핑은 +6.18%(전 세션)를 인용.
-    monkeypatch.setattr(v, "_fetch_us_realdata",
+    gate_patch(monkeypatch, "_fetch_us_realdata",
                         lambda t: {"change_pct": 1.72} if t == "EWY" else {"error": "n/a"})
     analysis = {"key_drivers": [
         {"text": "<b>외국인 자금이 유입되고 있어요.</b> EWY가 <b>+6.18%</b> 폭등했어요.", "codes": []},
@@ -295,7 +296,7 @@ def test_key_drivers_removes_stale_us_figure(monkeypatch):
 
 
 def test_key_drivers_keeps_fresh_us_figure(monkeypatch):
-    monkeypatch.setattr(v, "_fetch_us_realdata",
+    gate_patch(monkeypatch, "_fetch_us_realdata",
                         lambda t: {"change_pct": 1.72} if t == "EWY" else {"error": "n/a"})
     analysis = {"key_drivers": [
         {"text": "<b>외국인 자금이 유입되고 있어요.</b> EWY가 <b>+1.72%</b> 올랐어요.", "codes": []},
@@ -307,7 +308,7 @@ def test_key_drivers_keeps_fresh_us_figure(monkeypatch):
 
 def test_key_drivers_us_fetch_failure_fail_open(monkeypatch):
     # 실측 실패 시 정상 항목을 오제거하지 않는다(fail-open).
-    monkeypatch.setattr(v, "_fetch_us_realdata", lambda t: {"error": "n/a"})
+    gate_patch(monkeypatch, "_fetch_us_realdata", lambda t: {"error": "n/a"})
     analysis = {"key_drivers": [
         {"text": "<b>반도체 강세예요.</b> SOX가 <b>+5.21%</b> 급등했어요.", "codes": []},
     ]}

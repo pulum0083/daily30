@@ -199,7 +199,10 @@ for ln, text in enumerate(lines, start=1):
 
         for mod in new_mods:
             visit(mod)
-        out.append("# 역할별 모듈로 나눈 정의 — 원래 이름(generate_html.X)으로도 그대로 읽힌다.")
+        out.append("")
+        if "sys.path.insert(0, str(Path(__file__).resolve().parent))" not in "\n".join(lines):
+            out.append("sys.path.insert(0, str(Path(__file__).resolve().parent))")
+        out.append(f"# 역할별 모듈로 나눈 정의 — 원래 이름({src_mod}.X)으로도 그대로 읽힌다.")
         for mod in order:
             names = [n for n in owner if owner[n] == mod]
             out.append(f"from {mod} import (  # noqa: F401")

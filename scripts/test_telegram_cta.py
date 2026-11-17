@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gen_testkit import gen_patch  # noqa: E402
 import call_claude as cc
 
 
@@ -104,7 +105,6 @@ def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
 
 def test_kospi_skips_ma5_block_when_no_items_or_no_backtest(tmp_path, monkeypatch):
     import generate_html as gh
-    from gen_testkit import gen_patch  # noqa: E402
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     base = {"prediction": {"direction": "상승 우위", "up_pct": 60, "down_pct": 40, "confidence": 70}}
     cc.save_telegram_message("kospi", "2026-10-26", {**base, "monthly_ma5": {"date": "2026-10-26", "items": []}})

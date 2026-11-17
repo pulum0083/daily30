@@ -81,6 +81,7 @@ def test_change_claim_detects_geupnak():
 from validate_analysis import (_direction_contradicts, _NON_TICKER,
                                validate_prose_nonpick_stocks)
 import validate_analysis as va
+from gen_testkit import gate_patch  # noqa: E402
 
 
 def test_naeryeoanja_quantitative_claim_extracted():
@@ -102,9 +103,7 @@ def test_dram_not_in_non_ticker_exclusion():
 
 def test_prose_nonpick_removes_hallucinated_dram(monkeypatch):
     # 통합: 실측 +9.66%를 주입하면 -1.84% 내려앉음 문장이 제거되어야 한다
-    monkeypatch.setattr(
-        va, "_fetch_us_realdata",
-        lambda tk: {"change_pct": 9.66} if tk == "DRAM" else {"error": "x"})
+    gate_patch(monkeypatch, "_fetch_us_realdata", lambda tk: {"change_pct": 9.66} if tk == "DRAM" else {"error": "x"})
     analysis = {
         "stock_picks": [],
         "reasons": [
@@ -130,7 +129,7 @@ def test_sox_ewy_gld_not_in_non_ticker_exclusion():
 def test_sox_fetch_uses_caret_alias(monkeypatch):
     # 산문 "SOX"는 ^SOX 심볼로 실측 조회되어야 한다
     called = []
-    monkeypatch.setattr(va, "_fetch_us_realdata",
+    gate_patch(monkeypatch, "_fetch_us_realdata",
                         lambda tk: called.append(tk) or {"change_pct": 6.42})
     analysis = {"stock_picks": [],
                 "reasons": ["SOX가 강세를 보였어요."]}
@@ -140,9 +139,7 @@ def test_sox_fetch_uses_caret_alias(monkeypatch):
 
 def test_prose_nonpick_removes_hallucinated_sox(monkeypatch):
     # 실측 SOX +6.42% 인데 "빠졌다" 하락 서술 → 제거
-    monkeypatch.setattr(
-        va, "_fetch_us_realdata",
-        lambda tk: {"change_pct": 6.42} if tk == "^SOX" else {"error": "x"})
+    gate_patch(monkeypatch, "_fetch_us_realdata", lambda tk: {"change_pct": 6.42} if tk == "^SOX" else {"error": "x"})
     analysis = {"stock_picks": [],
                 "reasons": ["📈 좋아요.", "💡 다만 SOX가 -2.1% 빠졌어요."]}
     validate_prose_nonpick_stocks(analysis, "us", [], [])
@@ -158,9 +155,7 @@ def test_index_etfs_not_in_non_ticker_exclusion():
 
 def test_prose_nonpick_removes_hallucinated_qqq(monkeypatch):
     # 실측 QQQ +1.5% 인데 "급락" 서술 → 제거
-    monkeypatch.setattr(
-        va, "_fetch_us_realdata",
-        lambda tk: {"change_pct": 1.5} if tk == "QQQ" else {"error": "x"})
+    gate_patch(monkeypatch, "_fetch_us_realdata", lambda tk: {"change_pct": 1.5} if tk == "QQQ" else {"error": "x"})
     analysis = {"stock_picks": [],
                 "reasons": ["📈 좋아요.", "💡 QQQ가 -3.2% 급락했어요."]}
     validate_prose_nonpick_stocks(analysis, "us", [], [])
@@ -170,9 +165,7 @@ def test_prose_nonpick_removes_hallucinated_qqq(monkeypatch):
 
 def test_prose_nonpick_keeps_correct_spy(monkeypatch):
     # 실측 SPY +0.8% 상승, 산문도 상승 → 유지 (오탐 방지)
-    monkeypatch.setattr(
-        va, "_fetch_us_realdata",
-        lambda tk: {"change_pct": 0.8} if tk == "SPY" else {"error": "x"})
+    gate_patch(monkeypatch, "_fetch_us_realdata", lambda tk: {"change_pct": 0.8} if tk == "SPY" else {"error": "x"})
     analysis = {"stock_picks": [],
                 "reasons": ["💡 SPY가 +0.8% 상승하며 견조했어요."]}
     validate_prose_nonpick_stocks(analysis, "us", [], [])
@@ -187,7 +180,7 @@ def test_vix_not_in_non_ticker_exclusion():
 def test_vix_fetch_uses_caret_alias(monkeypatch):
     # 산문 "VIX"는 ^VIX 심볼로 실측 조회되어야 한다
     called = []
-    monkeypatch.setattr(va, "_fetch_us_realdata",
+    gate_patch(monkeypatch, "_fetch_us_realdata",
                         lambda tk: called.append(tk) or {"change_pct": 12.0})
     analysis = {"stock_picks": [], "reasons": ["VIX가 급등했어요."]}
     validate_prose_nonpick_stocks(analysis, "us", [], [])
@@ -196,9 +189,7 @@ def test_vix_fetch_uses_caret_alias(monkeypatch):
 
 def test_prose_nonpick_removes_hallucinated_vix(monkeypatch):
     # 실측 VIX +12% 급등(공포 확대)인데 "급락" 서술 → 제거
-    monkeypatch.setattr(
-        va, "_fetch_us_realdata",
-        lambda tk: {"change_pct": 12.0} if tk == "^VIX" else {"error": "x"})
+    gate_patch(monkeypatch, "_fetch_us_realdata", lambda tk: {"change_pct": 12.0} if tk == "^VIX" else {"error": "x"})
     analysis = {"stock_picks": [],
                 "reasons": ["📈 좋아요.", "💡 VIX가 -8% 급락하며 안정됐어요."]}
     validate_prose_nonpick_stocks(analysis, "us", [], [])
