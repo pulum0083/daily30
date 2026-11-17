@@ -27,6 +27,9 @@ from jinja2 import Environment, FileSystemLoader
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from og_card import make_card
+from briefing_data import read_dated_payload, read_snapshot_payload
+# 기존 호출부의 이름을 유지하면서 그래프 계산을 조립기에서 분리한다.
+from nasdaq_charts import _nasdaq_chart, _nqp_gap_chart, _nqp_ranges
 from prediction_basis import OPEN as BASIS_OPEN, stats_rows, legacy_kospi_rows, outcome_pct
 
 try:
@@ -553,18 +556,7 @@ def _drop_ma5_repeats(data: dict, target_date: str, market: str) -> dict:
 
 def _read_monthly_ma5(target_date: str, filename: str = "monthly_ma5.json"):
     """data/{filename} 을 읽되 브리핑 날짜가 같을 때만 돌려준다."""
-    path = DATA_DIR / filename
-    if not path.exists():
-        return None
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
-        print(f"[generate_html] {filename} 파싱 실패: {e}")
-        return None
-    if target_date and data.get("date") != target_date:
-        print(f"[generate_html] ⚠️ {filename} 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
-        return None
-    return data
+    return read_dated_payload(DATA_DIR / filename, target_date)
 
 
 def _ma5_backtest_stats(path=None):
@@ -634,7 +626,6 @@ def save_us_index_position(analysis: dict, market_data: dict, target_date: str) 
 
 NASDAQ_BACKTEST_PATH = CONFIG_DIR / "nasdaq_overheat_backtest.json"
 _NQ_BADGE = {"ok": "✓ 정상", "caution": "⚠️ 주의", "warn": "🚨 경고"}
-_NQ_W, _NQ_H, _NQ_PADR, _NQ_PADT, _NQ_PADB = 640, 190, 8, 10, 22   # 그래프 SVG 좌표(프로토타입과 같다)
 
 
 def build_struct_signal(analysis: dict) -> dict:
@@ -704,75 +695,17 @@ def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
     }}
 
 
-def _nasdaq_chart(series: list, peak, caution: float, warn: float) -> dict:
-    """2014년 이후 월별 위치 그래프 — SVG는 선·면·기준선만, 글자·점은 HTML로 겹친다(모바일에서 SVG가 가로로 눌려
-    글자가 찌그러졌다). 좌표는 HTML용 퍼센트(top)·calc(left)로 같이 돌려준다."""
-    pts = [s for s in series if isinstance(s, dict) and isinstance(s.get("g"), (int, float))]
-    if len(pts) < 2:
-        return {}
-    W, H = _NQ_W, _NQ_H
-    def Y(v):
-        v = min(max(v, 0), 100)
-        return _NQ_PADT + (H - _NQ_PADT - _NQ_PADB) * (1 - v / 100)
-    xs = [i * (W - _NQ_PADR) / (len(pts) - 1) for i in range(len(pts))]
-    line = " ".join(f"{x:.1f},{Y(p['g']):.1f}" for x, p in zip(xs, pts))
-    left = lambda x: f"calc(34px + (100% - 34px) * {x / W:.4f})"
-    top = lambda v: f"{Y(v) / H * 100:.2f}%"
-    pi = max(range(len(pts)), key=lambda i: pts[i]["g"])
-    pk = peak if isinstance(peak, dict) and peak.get("m") else pts[pi]
-    return {
-        "w": W, "h": H, "x1": W - _NQ_PADR, "line": line,
-        "area": f"{xs[0]:.1f},{Y(0):.1f} {line} {xs[-1]:.1f},{Y(0):.1f}",
-        "y100": f"{Y(100):.1f}", "y_warn": f"{Y(warn):.1f}", "y_caution": f"{Y(caution):.1f}",
-        "h_warn": f"{Y(warn) - Y(100):.1f}", "h_caution": f"{Y(caution) - Y(warn):.1f}",
-        "dot": {"left": left(xs[-1]), "top": top(pts[-1]["g"])},
-        "peak_dot": {"left": left(xs[pi]), "top": top(pts[pi]["g"])},
-        "axes": [{"v": int(v), "top": top(v)} for v in (warn, caution, 0)],
-        "years": [{"y": p["m"][:4], "left": left(x)} for x, p in zip(xs, pts)
-                  if p["m"].endswith("-01") and int(p["m"][:4]) % 2 == 0],
-        "from_year": pts[0]["m"][:4],
-        "peak_label": f"{int(pk['m'][:4])}년 {int(pk['m'][5:7])}월 {pk['g']:.0f}%",
-    }
-
-
 def _read_nasdaq_overheat(target_date: str):
     """data/nasdaq_overheat.json 을 읽되 브리핑 날짜가 같을 때만 돌려준다."""
-    path = DATA_DIR / "nasdaq_overheat.json"
-    if not path.exists():
-        return None
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
-        print(f"[generate_html] nasdaq_overheat 파싱 실패: {e}")
-        return None
-    if target_date and data.get("date") != target_date:
-        print(f"[generate_html] ⚠️ nasdaq_overheat 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
-        return None
-    return data
+    return read_dated_payload(DATA_DIR / "nasdaq_overheat.json", target_date)
 
 
 SP500_CHIPS = 8        # 아래로·위로 칩은 시가총액 순 8개까지, 나머지는 '더 보기'(2026-11-08 시안 A안)
 
 
 def read_sp500_ma200(analysis: dict, target_date: str = ""):
-    """S&P 500 200일선 체크 데이터 — 스냅샷이 1순위, 데이터 파일은 브리핑 날짜와 같을 때만(§14·§45).
-    파일에서 읽으면 analysis에 넣어 스냅샷에 함께 남긴다. 텔레그램(call_claude)도 이 함수로 읽는다."""
-    data = analysis.get("sp500_ma200")
-    if isinstance(data, dict):
-        return data
-    path = DATA_DIR / "sp500_ma200.json"
-    if not path.exists():
-        return None
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
-        print(f"[generate_html] sp500_ma200 파싱 실패: {e}")
-        return None
-    if target_date and data.get("date") != target_date:
-        print(f"[generate_html] ⚠️ sp500_ma200 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
-        return None
-    analysis["sp500_ma200"] = data
-    return data
+    """S&P 500 200일선 — 스냅샷 우선, 새 파일은 날짜 확인 후 스냅샷에 남긴다."""
+    return read_snapshot_payload(analysis, "sp500_ma200", DATA_DIR, target_date)
 
 
 def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
@@ -825,23 +758,8 @@ BREAKOUT_BACKTEST_PATH = CONFIG_DIR / "breakout_watch_backtest.json"
 
 
 def read_breakout_watch(analysis: dict, target_date: str = ""):
-    """돌파 관찰 목록 데이터 — 스냅샷이 1순위, 데이터 파일은 브리핑 날짜와 같을 때만(§14·§45). 읽으면 스냅샷에 남긴다."""
-    data = analysis.get("breakout_watch")
-    if isinstance(data, dict):
-        return data
-    path = DATA_DIR / "breakout_watch.json"
-    if not path.exists():
-        return None
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
-        print(f"[generate_html] breakout_watch 파싱 실패: {e}")
-        return None
-    if target_date and data.get("date") != target_date:
-        print(f"[generate_html] ⚠️ breakout_watch 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
-        return None
-    analysis["breakout_watch"] = data
-    return data
+    """돌파 관찰 목록 — 스냅샷 우선, 새 파일은 날짜 확인 후 스냅샷에 남긴다."""
+    return read_snapshot_payload(analysis, "breakout_watch", DATA_DIR, target_date)
 
 
 def _cap_label(v) -> str:
@@ -912,89 +830,6 @@ def _dow(ymd: str) -> str:
 
 
 NASDAQ_PAGE_URL = f"{SITE_BASE}/stocks/nasdaq-check/"
-_NQP_W, _NQP_H = 1000, 300        # 상세 페이지 그래프 SVG 좌표 — 늘려 그리고 글자·점은 HTML로 겹친다(_nasdaq_chart와 같은 방식)
-_NQP_LOG_TICKS = (500, 1000, 2000, 5000, 10000, 20000, 50000)
-
-
-_NQP_RANGES = (("all", "전체", None), ("10y", "최근 10년", 120), ("5y", "최근 5년", 60))   # 기간 버튼(2026-11-12 사용자 결정)
-_NQP_SUB_LOG_TICKS = (2000, 3000, 5000, 7000, 10000, 15000, 20000, 30000, 50000)   # 짧은 기간은 눈금을 촘촘히
-
-
-def _nqp_years(hist: list, every: int = 5) -> list:
-    """every년마다 연도 눈금(1월 위치)."""
-    n = len(hist)
-    return [{"y": h["m"][:4], "left": f"{i / (n - 1) * 100:.2f}%"}
-            for i, h in enumerate(hist) if h["m"].endswith("-01") and int(h["m"][:4]) % every == 0]
-
-
-def _nqp_gap_chart(hist: list, caution: float, warn: float, full: bool = True, every: int = 5) -> dict:
-    """① 월별 이격률(월봉 고점 ÷ 60개월선 − 1). 주의·경고 구간을 칠하고 0·기준선을 긋는다.
-    full=False(최근 10년·5년)는 그 기간에 맞춰 세로 눈금을 다시 잡는다 — 2000년 +182%에 눌리지 않게."""
-    W, H = _NQP_W, _NQP_H
-    gs = [h["g"] for h in hist]
-    if full:
-        lo = min(-50.0, math.floor(min(gs) / 50) * 50)
-        hi = max(100.0, math.ceil(max(gs) / 50) * 50)
-        step = 50
-    else:
-        lo = min(0.0, math.floor(min(gs) / 20) * 20)
-        hi = max(warn + 10, math.ceil(max(gs) / 20) * 20)
-        step = 20
-    Y = lambda v: (hi - v) / (hi - lo) * H
-    xs = [i * W / (len(hist) - 1) for i in range(len(hist))]
-    line = " ".join(f"{x:.1f},{Y(g):.1f}" for x, g in zip(xs, gs))
-    top = lambda v: f"{Y(v) / H * 100:.2f}%"
-    pi = max(range(len(gs)), key=lambda i: gs[i])
-    return {
-        "w": W, "h": H, "line": line, "lo": lo, "hi": hi,   # 짚기 말풍선이 같은 눈금으로 점을 찍는다
-        "area": f"0,{Y(0):.1f} {line} {W},{Y(0):.1f}",
-        "y_hi": f"{Y(hi):.1f}", "y_warn": f"{Y(warn):.1f}", "y_caution": f"{Y(caution):.1f}", "y0": f"{Y(0):.1f}",
-        "h_warn": f"{Y(warn) - Y(hi):.1f}", "h_caution": f"{Y(caution) - Y(warn):.1f}",
-        "axes": [{"v": f"{int(v)}%", "top": top(v)} for v in range(int(lo), int(hi) + 1, step)],
-        "th": [{"v": f"{int(caution)} 주의", "top": top(caution), "cls": "caution"},
-               {"v": f"{int(warn)} 경고", "top": top(warn), "cls": "warn"}],
-        "dot": {"left": "100%", "top": top(gs[-1])},
-        # 최고점 이름표 — 기간 첫 달·끝 달 근처면 뺀다(최근 5년은 첫 달이 최고라 '최고'가 기간 시작일 뿐이고 이름표가 잘린다)
-        "peak": ({"left": f"{xs[pi] / W * 100:.2f}%", "top": top(gs[pi]),
-                  "label": f"{int(hist[pi]['m'][:4])}년 {int(hist[pi]['m'][5:7])}월 {gs[pi]:+.0f}%"}
-                 if 0.05 <= pi / (len(gs) - 1) <= 0.95 else None),
-        "years": _nqp_years(hist, every),
-    }
-
-
-def _nqp_level_chart(hist: list, full: bool = True, every: int = 5) -> dict:
-    """② 나스닥 월봉 고점과 60개월선 — 1990년 ~400에서 2만 7천대까지라 로그 눈금으로 그린다."""
-    W, H = _NQP_W, _NQP_H
-    vals = [v for h in hist for v in (h["h"], h["ma"]) if v and v > 0]
-    lo = min(vals) * 0.85
-    hi = max(vals) * 1.12
-    llo, lhi = math.log10(lo), math.log10(hi)
-    Y = lambda v: (lhi - math.log10(v)) / (lhi - llo) * H
-    xs = [i * W / (len(hist) - 1) for i in range(len(hist))]
-    pts = lambda key: " ".join(f"{x:.1f},{Y(h[key]):.1f}" for x, h in zip(xs, hist))
-    return {
-        "w": W, "h": H, "high": pts("h"), "ma": pts("ma"), "llo": round(llo, 6), "lhi": round(lhi, 6),
-        "axes": [{"v": f"{t:,}", "top": f"{Y(t) / H * 100:.2f}%"}
-                 for t in (_NQP_LOG_TICKS if full else _NQP_SUB_LOG_TICKS) if lo <= t <= hi],
-        "years": _nqp_years(hist, every),
-    }
-
-
-def _nqp_ranges(hist: list, caution: float, warn: float, lp) -> list:
-    """기간 버튼별 그래프 — 전체·최근 10년·최근 5년(2026-11-12 사용자 결정). 서버가 셋 다 그려 두고
-    버튼은 보이는 것만 바꾼다. off = 그 기간 첫 달의 전체 시계열 위치(짚기 말풍선이 같은 값을 쓴다)."""
-    out = []
-    for key, label, k in _NQP_RANGES:
-        if k and len(hist) <= k:
-            continue
-        h = hist[-k:] if k else hist
-        every = 5 if not k else (2 if k > 60 else 1)
-        out.append({"key": key, "label": label, "off": len(hist) - len(h), "n": len(h),
-                    "span": f"{int(h[0]['m'][:4])}년 {int(h[0]['m'][5:7])}월",
-                    "gap": _nqp_gap_chart(h, caution, warn, full=not k, every=every),
-                    "level": _nqp_level_chart(h, full=not k, every=every),
-                    "events": lp.market_events("nasdaq", [x["m"] for x in h])})
-    return out
 
 
 def build_nasdaq_page(data: dict, bt: dict, target_date: str) -> dict:
@@ -1822,15 +1657,10 @@ def build_ib_korea_views(target_date: str = None) -> dict:
     템플릿에서 섹션 자체 생략. 날짜가 브리핑 날짜와 다르면 쓰지 않는다 — 국내 이슈와 같은 검사(§14,
     2026-10-26 추가: 이전 실행의 잔존 파일이 다른 날짜 브리핑에 실릴 수 있었다).
     """
-    views_path = BASE_DIR / "data" / "ib_korea_views.json"
-    if not views_path.exists():
+    payload = read_dated_payload(BASE_DIR / "data" / "ib_korea_views.json", target_date)
+    if payload is None:
         return {"ib_korea_views": []}
-    with open(views_path, encoding="utf-8") as f:
-        payload = json.load(f)
-    if target_date and payload.get("date") != target_date:
-        print(f"[generate_html] ib_korea_views 날짜 불일치({payload.get('date')} != {target_date}) → 카드 생략")
-        return {"ib_korea_views": []}
-    views = [v for v in payload.get("views", []) if v.get("url")]
+    views = [v for v in (payload.get("views") or []) if isinstance(v, dict) and v.get("url")]
     return {"ib_korea_views": views}
 
 
@@ -1844,24 +1674,13 @@ def build_domestic_issues(target_date: str = None) -> dict:
     `time_abs`는 절대 시각('10/22 21:44')이다 — 발행 뒤 굳는 정적 페이지라 '3시간 전' 같은
     상대 라벨은 읽는 시각에 따라 틀린다(§20·§24에서 세 번 재발한 패턴).
     """
-    path = BASE_DIR / "data" / "domestic_issues.json"
-    if not path.exists():
-        return {"domestic_issues": [], "domestic_window_label": ""}
-    try:
-        with open(path, encoding="utf-8") as f:
-            payload = json.load(f)
-    except Exception as e:
-        print(f"[generate_html] domestic_issues 읽기 실패: {e}")
-        return {"domestic_issues": [], "domestic_window_label": ""}
-
-    if target_date and payload.get("date") != target_date:
-        print(f"[generate_html] domestic_issues 날짜 불일치"
-              f"({payload.get('date')} != {target_date}) → 섹션 생략")
+    payload = read_dated_payload(BASE_DIR / "data" / "domestic_issues.json", target_date)
+    if payload is None:
         return {"domestic_issues": [], "domestic_window_label": ""}
 
     items = []
-    for it in payload.get("issues", []):
-        if not it.get("url"):
+    for it in payload.get("issues") or []:
+        if not isinstance(it, dict) or not it.get("url"):
             continue
         items.append({**it, "time_abs": _abs_time_label(it.get("published_at"))})
     return {
