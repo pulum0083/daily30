@@ -7,4 +7,4 @@
 - [x] 4단계: call_claude.py 쪼개기 — 1,970줄 → 약 590줄 + 5개 모듈
 - [x] 5단계: fetch_news.py 쪼개기 — 1,831줄 → 408줄 + 7개 모듈
 - [x] 6단계: fetch_data.py 쪼개기 — 1,490줄 → 575줄 + 6개 모듈
-- [ ] SERVICE_RULES·CLAUDE.md 디렉토리 구조 갱신
+- [x] CLAUDE.md 디렉토리 구조 갱신(운영 규칙은 함수 이름이 그대로 읽히므로 고칠 곳 없음)

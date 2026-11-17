@@ -50,19 +50,25 @@ double-shot/
 ├── api/
 │   └── trigger.mjs              # Vercel Cron → GitHub Actions dispatch
 ├── scripts/
-│   ├── call_claude.py           # Claude Sonnet 5 + Prompt Caching 분석 생성
-│   ├── fetch_data.py            # yfinance 기반 코스피·미국 시장 데이터 수집
+│   ├── call_claude.py           # Claude Sonnet 5 + Prompt Caching 분석 생성 (API 호출·main)
+│   │                            #   claude_prompts·prompt_directives·analysis_history·telegram_messages·claude_common로 분리
+│   ├── fetch_data.py            # yfinance 기반 코스피·미국 시장 데이터 수집 (수집 조립·main)
+│   │                            #   price_quotes·investor_flow·fx_rates·econ_calendar·market_universe·market_common로 분리
 │   ├── fetch_closing_kospi.py   # 코스피 마감 데이터 수집 (수급·장중·시장폭·dpick)
-│   ├── fetch_news.py            # Gemini 2.5 Flash Lite 뉴스 요약
+│   ├── fetch_news.py            # Gemini 2.5 Flash Lite 뉴스 요약 (2단계 수집·main)
+│   │                            #   news_rss·news_prompts·news_gate_{reality,history,earnings,grounding}·news_common로 분리
 │   ├── fetch_news_live.py       # 이슈 브리핑 수집 (시간대별 슬롯 분기, 22회/일)
-│   ├── generate_html.py         # config-driven HTML 브리핑 조립기
+│   ├── generate_html.py         # config-driven HTML 브리핑 조립기 (render_briefing·main)
+│   │                            #   sections_{kospi,us,close,shared}·site_index·standalone_pages·sector_pages·briefing_meta·html_common로 분리
 │   ├── send_telegram.py         # 텔레그램 전송
 │   ├── holiday_check.py         # 한국/미국 공휴일 확인
 │   ├── patch_fg.py              # Fear & Greed 지수 HTML 패치 (09:05 KST)
 │   ├── check_accuracy.py        # 전일 예측 정확도 체크
 │   ├── monthly_ma5.py           # 월봉 5개월선 안착 종목 스크리닝 (코스피 아침 코너)
 │   ├── backtest_monthly_ma5.py  # 위 조건 백테스트 → config/monthly_ma5_backtest.json
-│   ├── validate_analysis.py     # 분석 결과 검증 게이트 (픽 실측 주입 + 교정)
+│   ├── validate_analysis.py     # 분석 결과 검증 게이트 (validate·main)
+│   │                            #   gate_{text,realdata,prose,superlative,events,close,format}로 분리
+│   ├── gen_testkit.py           # 테스트용 — 나눈 모듈 묶음 전체의 같은 이름을 함께 바꿔치기(gen_patch 등)
 │   ├── toss_client.py           # 토스증권 Open API 클라이언트
 │   ├── config/
 │   │   ├── kospi.json           # 코스피 브리핑 섹션 선언

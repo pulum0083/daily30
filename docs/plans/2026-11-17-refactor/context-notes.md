@@ -18,3 +18,5 @@
 - 소스 문자열을 읽는 테스트(test_kospi_picks_removed·test_prediction_accuracy_upgrade)는 call_claude 묶음 전체(gen_testkit.CC_MODULES)를 읽게 바꿨다.
 - 5단계 fetch_news는 Gemini·RSS를 부르는 경로라 결정론 골든을 따로 만들지 않았다. 게이트는 순수 함수이고 테스트(test_news_*·test_us_news_rss 등)가 덮는다. 대신 네트워크 차단 테스트·테스트별 파일 접근 감사가 분할 직전과 같음을 확인했고, 다른 스크립트(fetch_domestic_issues의 get_gemini_api_key)가 읽는 이름이 남았는지 대조했다. 실적 조회 캐시(_earnings_age_cache·_release_cache)는 그 함수와 같은 모듈로 함께 옮겼다.
 - 6단계 fetch_data의 FEED_ISSUES(시세 피드 이상을 모아 관리자에게 한 번 알리는 리스트)는 그걸 채우는 _get_realtime_price, 읽는 alert_feed_issues와 같은 모듈(price_quotes)로 옮겼다. 리스트 객체 하나를 fetch_data가 다시 내보내므로 fd.FEED_ISSUES.clear()도 같은 리스트를 비운다.
+- 나눈 모듈의 옛 이름은 원래 파일(generate_html·validate_analysis·call_claude·fetch_news·fetch_data)에서 모두 다시 내보낸다. 새 코드를 짤 때는 정의가 있는 모듈에서 직접 import하는 편이 낫다 — 테스트에서 바꿔치기할 때 그 모듈을 바꿔야 하기 때문이다(gen_testkit의 *_patch를 쓰면 묶음 전체가 바뀐다).
+- 최종 상태로 세 골든(발행 HTML·게이트·call_claude)을 다시 돌려 모두 차이 0줄. JS 테스트 427개, eslint 오류 0(기존 경고 6).
