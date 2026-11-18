@@ -407,7 +407,8 @@ python3 scripts/generate_html.py --write-list-only
 > 사는 상황을 경계할 것.** 복구가 필요하면 git 이력에서 꺼낸다.
 >
 > 현재 브리핑에서 실제로 동작하는 라이브 패널은 아래 셋이다.
-> `initLiveMarketPanel()`(시장 지표), `initNowBand()`(지금 코스피 밴드), `initSidebarSignals()`(특이 신호).
+> `initLiveMarketPanel()`(시장 지표), `initNowBand()`(지금 코스피 밴드).
+> 코스피 브리핑 사이드바의 장중 '오늘의 특이 신호'(`initSidebarSignals()`·`sections/_signals_today.html`)는 2026-11-18 사용자 결정으로 화면·코드째 뺐다 — 장중에도 시장 지표 패널이 그대로 보인다. `/api/signals`는 종목 홈 특이 신호가 계속 쓰므로 남긴다. 이미 발행된 코스피 브리핑에 남은 위젯 자리는 `hidden`이라 더는 보이지 않는다.
 
 #### 시장 지표 패널 (`initLiveMarketPanel()`)
 

@@ -522,15 +522,6 @@
       .catch(function() {});
   }
 
-  /* ── 공지사항 패널 ── */
-  function escHtml(s) {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
   /* ── 예측 로직 개선 안내 토스트 (브리핑 상세 진입 시 1회, 닫으면 영구 비표시) ── */
   function initPredictionToast() {
     // 브리핑 상세 페이지(/briefings/YYYY-MM-DD/type/)에서만 노출
@@ -590,13 +581,12 @@
   }
 
   /* ── 초기화 ── */
-  // 레이아웃을 정의하는 라이브 패널(지금 코스피 밴드·사이드바 특이신호)은
+  // 레이아웃을 정의하는 라이브 패널(지금 코스피 밴드)은
   // window.load(이미지·위젯까지 로드 완료)까지 기다리지 않고 파싱 직후 즉시 노출한다.
   // 이 스크립트는 <body> 끝에 있어 이 시점에 대상 DOM이 이미 준비돼 있으며, 노출 판정은
   // fetch 없이 KST 시각·URL 날짜만으로 동기 결정되므로, 본문이 먼저 그려진 뒤 밴드가
   // 뒤늦게 끼어들며 267px 밀려나는 레이아웃 튐(CLS)을 방지한다.
   initLiveMarketPanel();
-  initSidebarSignals();
 
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
@@ -1050,9 +1040,6 @@
   function initLiveMarketPanel() {
     var panel = document.getElementById('market-data-panel');
     if (!panel) return;
-    // 장중 '오늘의 특이 신호' 위젯이 있으면(코스피 당일 브리핑) 라이브 시장 지표 패널은 비활성화 —
-    // initSidebarSignals()가 장중에 시장 지표를 특이신호로 완전 교체하기 때문(2026-07-13).
-    if (document.getElementById('signals-today')) return;
     // 코스피 아침 브리핑(live-scoreboard 포함)에서만 활성화
     if (!document.getElementById('live-scoreboard')) return;
 
@@ -1374,59 +1361,6 @@
      데이터: /api/kospi-live(지수)·/api/market(코스닥·원달러·수급)·kospi-news(장중 이슈).
      실측만 채우고, 없으면 해당 영역 숨김(데이터 정합성). 날짜는 URL에서 파싱. */
 
-  /* ── 장중 '오늘의 특이 신호' 사이드바 위젯 — 장중(/api/signals phase==='intraday')에만
-     노출하며 시장 지표 패널(#market-data-panel)을 완전히 대체한다. 장외·과거/미래 브리핑·
-     데이터 없음이면 위젯을 숨기고 시장 지표를 그대로 둔다. 코스피 당일 브리핑 전용. ── */
-  // 종목 상세 페이지는 없다(2026-10-26 제거 — 사용자 결정) — 신호 행은 링크하지 않는다.
-  function sidebarSignalRowHtml(s) {
-    var pct = Number(s.pct) || 0;
-    var dir = pct >= 0 ? 'up' : 'dn';
-    var pctTxt = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
-    var badges = (s.badges || []).slice(0, 2).map(function (b) {
-      var flow = /^(외국인|기관)/.test(b);
-      return '<span class="ssig-bdg' + (flow ? ' flow' : '') + '">' + escHtml(b) + '</span>';
-    }).join('');
-    return '<span class="ssig-row ssig-row--sig">'
-      + '<span class="ssig-sig-main"><span class="ssig-name">' + escHtml(s.name || '') + '</span>'
-      + (badges ? '<span class="ssig-bdgs">' + badges + '</span>' : '') + '</span>'
-      + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></span>';
-  }
-
-  function initSidebarSignals() {
-    var box = document.getElementById('signals-today');
-    if (!box) return;
-    var list = document.getElementById('signals-today-list');
-    var mktPanel = document.getElementById('market-data-panel');
-
-    var todayKst = kstDateStr();
-    var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
-    var urlDate = m ? m[1] : todayKst;
-    if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 장중 신호는 '오늘'만 의미 → 시장 지표 유지
-
-    var SIDEBAR_MAX = 6;   // 사이드바 컴팩트 노출 개수 (API는 최대 8개 내려줌)
-    var rowHtml = sidebarSignalRowHtml;
-
-    var scheduled = false;
-    function poll() {
-      fetch('/api/signals', { signal: AbortSignal.timeout(8000) })
-        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function (data) {
-          // 장외(마감·주말·휴장)이거나 신호가 없으면 특이신호를 숨기고 시장 지표를 유지한다.
-          if (!data || data.phase !== 'intraday' || !Array.isArray(data.signals) || !data.signals.length) {
-            box.hidden = true;
-            if (mktPanel) mktPanel.style.display = '';
-            return;
-          }
-          if (list) list.innerHTML = data.signals.slice(0, SIDEBAR_MAX).map(rowHtml).join('');
-          box.hidden = false;
-          if (mktPanel) mktPanel.style.display = 'none';   // 장중: 시장 지표 완전 교체
-          if (!scheduled) { scheduled = true; setInterval(poll, 60000); }
-        })
-        .catch(function () {});
-    }
-    poll();
-  }
-
   /* ── 전역 노출 (인라인 핸들러·섹션 템플릿용) ── */
   window.toggleTheme = toggleTheme;
   window.openModal = openModal;
@@ -1450,7 +1384,6 @@
     kstMinsOfDay: kstMinsOfDay,
     trustRelTime: trustRelTime,
     TRUST_STALE_HOURS: TRUST_STALE_HOURS,
-    sidebarSignalRowHtml: sidebarSignalRowHtml,
   };
 })();
 

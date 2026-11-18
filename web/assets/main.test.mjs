@@ -218,18 +218,3 @@ test('stale 경계: 95h는 표시 대상, 97h는 숨김 대상', () => {
   assert.ok(t.trustRelTime(ago(95 * 3600 * 1000)).hours < t.TRUST_STALE_HOURS);
   assert.ok(t.trustRelTime(ago(97 * 3600 * 1000)).hours > t.TRUST_STALE_HOURS);
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 사이드바 특이신호 — 종목 상세 페이지 제거(2026-10-26) 뒤엔 어떤 종목도 링크하지 않는다
-// ─────────────────────────────────────────────────────────────────────────────
-
-test('사이드바 특이신호는 어떤 종목도 상세 페이지로 링크하지 않는다', () => {
-  const t = loadMainJs();
-  for (const [code, name] of [['005930', '삼성전자'], ['042700', '한미반도체']]) {
-    const html = t.sidebarSignalRowHtml({ code, name, pct: 1.2, badges: [] });
-    assert.doesNotMatch(html, /href=/);
-    assert.match(html, /^<span class="ssig-row ssig-row--sig">/);
-    assert.match(html, /<\/span>$/);
-    assert.match(html, new RegExp(name));
-  }
-});
