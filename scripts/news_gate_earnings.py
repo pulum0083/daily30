@@ -33,10 +33,40 @@ def _parse_tickers(ticker_field) -> list:
 
 _earnings_age_cache: dict = {}
 
+# 야후 실적 기록은 발표 직후 며칠 동안 이번 발표를 싣지 않는다(2026-11-18 실사고: 엔비디아가 11/17 장 마감 뒤
+# 실적을 냈는데 기록의 마지막 발표는 8/26 — '84일 전 실적'으로 판정돼, 찾았더라도 진짜 기사가 지워졌을 것이다).
+# 같은 시각 야후 일정(calendar)은 다음 발표일을 11/18로 적고 있었다. 기록이 한 분기 가까이 묵었는데 일정상
+# 발표일이 오늘 언저리면 '야후가 아직 못 실은 것'으로 보고 방금 발표로 친다. 41일 지난 마이크론(§31)처럼
+# 다음 발표가 한참 뒤인 진짜 옛 실적은 그대로 걸러진다.
+_VENDOR_LAG_MIN_AGE = 60          # 기록상 직전 발표가 이보다 오래돼야 '기록이 밀렸을 수 있다'로 본다
+_CAL_NEAR_BEFORE, _CAL_NEAR_AFTER = 3, 1   # 일정상 발표일이 오늘 기준 [-3일, +1일] 안이면 방금 발표로 본다
+
+
+def _vendor_lag_age(age, calendar_dates, today: date):
+    """기록 나이(age)를 일정(calendar_dates)으로 보정한다. 보정하면 0(방금 발표), 아니면 age 그대로."""
+    if age is not None and age < _VENDOR_LAG_MIN_AGE:
+        return age
+    for d in calendar_dates or []:
+        if -_CAL_NEAR_AFTER <= (today - d).days <= _CAL_NEAR_BEFORE:
+            return 0
+    return age
+
+
+def _calendar_earnings_dates(ticker: str) -> list:
+    """야후 일정(calendar)의 'Earnings Date' — 실패하면 빈 목록."""
+    try:
+        import yfinance as yf
+        raw = (yf.Ticker(ticker).calendar or {}).get("Earnings Date") or []
+        return [d if isinstance(d, date) and not isinstance(d, datetime) else d.date() for d in raw]
+    except Exception as e:
+        print(f"[fetch_news] 실적 일정 조회 실패({ticker}): {e}", file=sys.stderr)
+        return []
+
 
 def _days_since_last_earnings(ticker: str, today: date):
     """yfinance로 ticker의 '가장 최근 과거 실적 발표일'을 조회해 today와의 일수 차를 반환.
-    조회 실패·데이터 없음이면 None(검증 불가 → 상위 로직이 '유지'로 판단)."""
+    조회 실패·데이터 없음이면 None(검증 불가 → 상위 로직이 '유지'로 판단).
+    기록이 묵었는데 일정상 발표가 오늘 언저리면 0을 돌려준다(_vendor_lag_age)."""
     if ticker in _earnings_age_cache:
         return _earnings_age_cache[ticker]
     age = None
@@ -49,6 +79,12 @@ def _days_since_last_earnings(ticker: str, today: date):
                 age = (today - max(past)).days
     except Exception as e:
         print(f"[fetch_news] 어닝일 조회 실패({ticker}): {e}", file=sys.stderr)
+    if age is None or age >= _VENDOR_LAG_MIN_AGE:
+        fixed = _vendor_lag_age(age, _calendar_earnings_dates(ticker), today)
+        if fixed != age:
+            print(f"[fetch_news] {ticker} 실적 기록이 밀림(직전 {age}일 전) — 일정상 발표가 오늘 언저리라 방금 발표로 본다",
+                  file=sys.stderr)
+            age = fixed
     _earnings_age_cache[ticker] = age
     return age
 

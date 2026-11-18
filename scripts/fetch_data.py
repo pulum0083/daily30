@@ -321,6 +321,8 @@ def fetch_kospi_data() -> dict:
                      # 모델에게 미리 주려면 1년치를 읽는 이 경로가 필요하다.
                      "^IXIC", "^DJI",
                      "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY",
+                     # AI 인프라 — 메모리·칩·파운드리·서버·전력. 장 마감 뒤 실적 반응이 코스피 반도체로 이어진다(2026-11-18)
+                     "MU", "AVGO", "TSM", "DELL", "VRT",
                      "DRAM",  # Roundhill Memory & HBM ETF (삼성·하이닉스 연동 선행 지표)
                      # 미 지수선물 — 브리핑 생성 시각(07:25 KST)에 **유일하게 실시간인** 신호.
                      # SOX·나스닥·EWY는 전부 6시간 이상 묵은 미국장 종가다.
@@ -411,6 +413,7 @@ def fetch_kospi_data() -> dict:
         "gold":   macro.get("GC=F", {}),
         "rates":  {"us10y": macro.get("^TNX", {})},
         "bigtech": {t: macro.get(t, {}) for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL"]},
+        "ai_infra": {t: macro[t] for t in ["MU", "AVGO", "TSM", "DELL", "VRT"] if t in macro},
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
         # 투자자별 순매수 (외국인/기관/개인 — 전 거래일 KRX 기준)

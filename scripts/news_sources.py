@@ -60,8 +60,12 @@ def clean_title(title: str, strip_brackets: bool = False) -> str:
 
 
 def fetch_rss(url: str, today: str, max_items: int = 15,
-              strip_brackets: bool = True, log_prefix: str = "news_sources") -> list[dict]:
+              strip_brackets: bool = True, log_prefix: str = "news_sources",
+              since: datetime | None = None) -> list[dict]:
     """RSS URL에서 오늘 날짜(KST) 기사만 수집한다. pub_time(HH:MM) 포함.
+
+    since를 주면 '오늘 날짜' 대신 그 시각 이후 기사를 받는다 — 코스피 아침은 직전 코스피 장 마감
+    뒤(월요일이면 금요일 오후부터)를 봐야 해서 날짜 하나로는 창이 맞지 않는다(2026-11-18).
 
     ⚠️ 여기서 쓰는 pubDate는 **수집 후보를 고르는 용도**일 뿐이다. 채택 판정에는
     verify_real_published_at()으로 원문 실제 발행일을 다시 확인해야 한다 —
@@ -81,7 +85,15 @@ def fetch_rss(url: str, today: str, max_items: int = 15,
             source_el = item.find("source")
             source = (source_el.text or "").strip() if source_el is not None else ""
 
-            if not title or pub_date != today:
+            if not title:
+                continue
+            if since is not None:
+                try:
+                    if parsedate_to_datetime((item.findtext("pubDate") or "").strip()) < since:
+                        continue
+                except Exception:
+                    continue
+            elif pub_date != today:
                 continue
 
             desc = re.sub(r"<[^>]+>", "", desc)[:180].strip()

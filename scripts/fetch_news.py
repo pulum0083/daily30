@@ -341,6 +341,24 @@ def alert_gemini_failure(briefing_type: str, err: Exception) -> None:
         print(f"[fetch_news] 관리자 알림 실패: {e}", file=sys.stderr)
 
 
+def merge_rss_catalysts(summary: dict, rss: dict) -> dict:
+    """코스피 아침 — RSS로 발행 시각까지 확인한 밤사이 기사를 Gemini 결과 앞에 붙인다(2026-11-18).
+
+    06:20 엔비디아 실적이 07:27 Gemini 검색에 하나도 안 잡혔다. 같은 시각 구글 뉴스 RSS엔 실적 기사가
+    한·영 100건 넘게 있었다. Gemini는 국내 트랙(정책·지표·공시·수급)과 key_indicators를 계속 맡고,
+    밤사이 기업 사건은 RSS를 먼저 쓴다. 같은 사건을 다룬 Gemini 항목은 뺀다.
+    """
+    rss_cats = [c for c in ((rss or {}).get("catalysts") or []) if isinstance(c, str) and c]
+    if not rss_cats:
+        return summary
+    out = dict(summary)
+    own = [c for c in (out.get("catalysts") or [])
+           if not any(ns.is_dup_title(str(c), r, threshold=0.4) for r in rss_cats)]
+    out["catalysts"] = rss_cats + own
+    out["catalyst_sources"] = (rss or {}).get("catalyst_sources") or []
+    return out
+
+
 def main():
     parser = argparse.ArgumentParser(description="시장 뉴스 수집·요약")
     parser.add_argument("--type", choices=["kospi", "kospi-close", "us"], required=True)
@@ -391,7 +409,17 @@ def main():
             sys.exit(3)
         else:
             print("[fetch_news] WARN: 빈 뉴스로 계속 진행 (Gemini 일시 장애)", file=sys.stderr)
-        summary = EMPTY_NEWS
+        summary = dict(EMPTY_NEWS)
+
+    # 코스피 아침은 Gemini 검색이 밤사이 기업 실적을 놓친다 — RSS로 확인한 기사를 앞에 붙인다(2026-11-18).
+    # RSS 쪽 실패는 브리핑을 막지 않는다(Gemini 결과만으로 간다). 결제·권한 오류는 위에서 이미 멈췄다.
+    if args.type == "kospi" and args.source == "gemini":
+        try:
+            rss = fetch_and_summarize_rss("kospi")
+            summary = merge_rss_catalysts(summary, rss)
+            print(f"[fetch_news] 밤사이 RSS 기사 {len(rss.get('catalysts') or [])}건을 앞에 붙였다")
+        except Exception as e:
+            print(f"[fetch_news] 밤사이 RSS 수집 실패 — Gemini 결과만 쓴다: {e}", file=sys.stderr)
 
     summary["generated_at"] = datetime.now(KST).isoformat()
     out_path = DATA_DIR / f"news_summary_{args.type}.json"

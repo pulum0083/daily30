@@ -430,6 +430,16 @@ def get_ticker_full(ticker: str) -> dict:
             "sparkline":  [round(float(p), 4) for p in closes.iloc[-20:].tolist()],
         }
 
+        # 미국 종목의 정규장 마감 뒤 움직임 — change_pct는 '어제 종가 대비 지금 시간외 가격'이라 정규장 등락과
+        # 마감 뒤 실적 반응이 한 숫자에 섞인다(2026-11-18: 엔비디아 정규장 하락 + 06:20 실적 뒤 시간외 +3%가
+        # 한 값으로 들어가 실적 반응이 전달되지 않았다). 지금 가격이 마지막 일봉(직전 정규장) 종가와 다를 때만 둔다.
+        if rt is not None and _is_us_equity(ticker) and len(closes) >= 2:
+            reg = float(closes.iloc[-1])
+            if reg > 0 and abs(price / reg - 1) > 1e-4:
+                result["regular_close"] = round(reg, 4)
+                result["regular_change_pct"] = round((reg / float(closes.iloc[-2]) - 1) * 100, 2)
+                result["since_close_pct"] = round((price / reg - 1) * 100, 2)
+
         # 최근 세션 일지 — 사건을 실제로 일어난 날짜에 붙이게 하는 근거(2026-10-26: 목요일 메타 충격을 '지난 금요일'로 씀).
         result["recent_sessions"] = _recent_sessions(closes)
 

@@ -61,7 +61,7 @@ def test_is_recent_window():
 
 
 def test_verify_articles_keeps_only_verified_recent(monkeypatch):
-    news_patch(monkeypatch, "_is_recent", lambda p, now=None: p.year == 2026 and p.month == 11)
+    news_patch(monkeypatch, "_is_recent", lambda p, now=None, hours=None: p.year == 2026 and p.month == 11)
     links = {"a": "https://x.com/a", "b": "https://x.com/b", "c": ""}
     pubs = {"https://x.com/a": datetime(2026, 11, 9, 8, tzinfo=timezone.utc),
             "https://x.com/b": datetime(2026, 6, 25, 8, tzinfo=timezone.utc)}

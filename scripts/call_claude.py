@@ -36,7 +36,7 @@ from claude_prompts import (  # noqa: F401
 )
 from prompt_directives import (  # noqa: F401
     _investor_to_eok, _us_news_session_directive, _session_label_directive, _index_position_directive, _officeholder_directive, _us_session_log_directive,
-    _calendar_tense_directive, _event_when_directive,
+    _calendar_tense_directive, _event_when_directive, _after_hours_directive,
 )
 from analysis_history import (  # noqa: F401
     extract_signal_emojis, load_signal_history, save_signal_to_history, load_sector_history, save_sector_to_history, build_sector_avoidance_hint,
@@ -190,6 +190,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     user_content += _officeholder_directive()
     if briefing_type == "kospi":
         user_content += _us_session_log_directive(date_str, analysis_data)
+        user_content += _after_hours_directive(analysis_data)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"

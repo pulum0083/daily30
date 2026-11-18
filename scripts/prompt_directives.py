@@ -189,6 +189,36 @@ def _us_session_log_directive(date_str: str, analysis_data: dict | None) -> str:
             "직전 미국장보다 앞선 날의 일을 직전 미국장의 일처럼 쓰지 않는다 — 그날을 '목요일'처럼 명시한다.\n\n")
 
 
+_AFTER_HOURS_NAMES = {"NVDA": "엔비디아", "AAPL": "애플", "MSFT": "마이크로소프트", "AMZN": "아마존",
+                      "META": "메타", "GOOGL": "알파벳", "MU": "마이크론", "AVGO": "브로드컴", "TSM": "TSMC",
+                      "DELL": "델", "VRT": "버티브"}
+AFTER_HOURS_MIN_PCT = 1.0   # 마감 뒤 이만큼 넘게 움직인 종목만 적는다
+
+
+def _after_hours_directive(analysis_data: dict | None) -> str:
+    """미국 정규장 마감 뒤(시간외) 움직임을 정규장 등락과 떼어 적는다 — 코스피 아침(2026-11-18 실사고).
+
+    엔비디아가 06:20 KST 실적 발표 뒤 시간외 +3%였는데, 데이터엔 '어제 종가 대비 지금'
+    한 숫자만 있어 브리핑이 정규장 하락 서사('전 CEO 사임 여진')만 썼다. 값은 price_quotes가
+    직전 정규장 종가와 지금 체결가로 계산한 since_close_pct다.
+    """
+    rows = []
+    for grp in ("bigtech", "ai_infra"):
+        for t, d in ((analysis_data or {}).get(grp) or {}).items():
+            pct = (d or {}).get("since_close_pct")
+            if isinstance(pct, (int, float)) and abs(pct) >= AFTER_HOURS_MIN_PCT:
+                reg = d.get("regular_change_pct")
+                reg_txt = f"정규장 {reg:+.2f}% 마감 → " if isinstance(reg, (int, float)) else ""
+                rows.append((abs(pct), f"- {_AFTER_HOURS_NAMES.get(t, t)}({t}): {reg_txt}마감 뒤 시간외 {pct:+.2f}%"))
+    if not rows:
+        return ""
+    rows.sort(reverse=True)
+    return ("## 미국 장 마감 뒤 움직임 (지금 시간외 체결 기준)\n" + "\n".join(r for _, r in rows) +
+            "\n정규장 등락과 마감 뒤 움직임은 서로 다른 사건이다 — 섞지 않는다. 마감 뒤에 크게 움직였으면 그 원인"
+            "(장 마감 뒤 실적·가이던스·발표)을 뉴스 요약에서 찾아 **간밤 정규장 서사보다 먼저** 다룬다. 원인이 뉴스에 없으면"
+            " 원인을 지어내지 말고 '시간외에서 올랐다/내렸다'까지만 쓴다.\n\n")
+
+
 def _calendar_tense_directive(analysis_data: dict | None) -> str:
     """이미 끝난 고영향 경제 이벤트를 예고형으로 쓰지 않도록 발행 시점 시제를 주입한다.
 
