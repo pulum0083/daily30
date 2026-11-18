@@ -132,6 +132,7 @@ def build_methodology() -> dict:
     ma5 = _load(CONFIG_DIR / "monthly_ma5_backtest.json")
     ma5us = _load(CONFIG_DIR / "monthly_ma5_us_backtest.json")
     nq = _load(CONFIG_DIR / "nasdaq_overheat_backtest.json")
+    ah = _load(CONFIG_DIR / "after_hours_signal_backtest.json")
     w = ls.SIGNAL_WEIGHTS
     weights = [
         ("필라델피아 반도체(SOX)", "직전 미국장 등락 — 삼성전자·SK하이닉스와 가장 가깝게 움직여요", w.get("sox")),
@@ -139,6 +140,7 @@ def build_methodology() -> dict:
         ("나스닥100 선물", "07:25 현재 등락", w.get("nq")),
         ("한국 ETF(EWY)", "미국에 상장된 한국 ETF 등락에서 전날 코스피 움직임을 뺀 나머지", w.get("ewy")),
         ("VIX", "미국 변동성 지수 — 오르면 감점", w.get("vix")),
+        ("AI 반도체 시간외", "미국 장 마감 뒤 07:25까지 엔비디아·마이크론·브로드컴·TSMC·AMD 평균 등락 — 장 마감 뒤 실적 반응", w.get("ai_ah")),
     ]
 
     def ma5_pair(d, key):
@@ -159,4 +161,5 @@ def build_methodology() -> dict:
         "ma5": ma5_pair(ma5, "kr") if ma5 else None,
         "ma5us": ma5_pair(ma5us, "us") if ma5us else None,
         "nq": nq if nq and nq.get("warn") else None,
+        "ah": ah if ah and ah.get("hit_with") is not None else None,
     }

@@ -12,7 +12,12 @@ from pathlib import Path
 #  · 원/달러(-0.8)는 뺐다 — 갭 방향 적중 46.7%로 예측력이 없고, 빼도 성적이 같거나 조금 낫다(전체 72.5→72.7%).
 #    값은 계속 수집해 프롬프트·기록에 남긴다(가중 합산에서만 제외).
 #  · EWY는 잔차(EWY − 직전 코스피)를 쓴다. 긴 표본에선 잔차가 원본보다 갭과 더 맞는다(상관 0.53 vs 0.49).
-SIGNAL_WEIGHTS = {"sox": 1.5, "nasdaq": 0.5, "nq": 0.3, "ewy": 0.3, "vix": -0.2}
+#  · ai_ah(2026-11-18 추가) — 미국 장 마감 뒤 07:25까지 AI 반도체(엔비디아·마이크론·브로드컴·TSMC·AMD) 시간외 평균 등락.
+#    scripts/fit_after_hours_signal.py — 704거래일(2023-12~2026-11, 야후 1시간봉 2년치): 전체 72.6→74.0%, Brier 0.1776→0.1739,
+#    빅테크·AI 장 마감 뒤 실적 밤 96일 75.0→80.2%, 시간외 |평균|≥1% 60일 68.3→81.7%. 시기를 앞뒤로 나눠도 두 구간 모두
+#    w=1.0을 고르고 검증 구간이 나아졌다(75.0→75.3%, 70.2→72.7%). 계기: 11/18 엔비디아 실적 밤 예측 하락 57% → 시초가 +2.62%.
+SIGNAL_WEIGHTS = {"sox": 1.5, "nasdaq": 0.5, "nq": 0.3, "ewy": 0.3, "vix": -0.2, "ai_ah": 1.0}
+AH_TICKERS = ("NVDA", "MU", "AVGO", "TSM", "AMD")   # ai_ah 평균 대상 — fit_after_hours_signal.AH_TICKERS와 같아야 한다
 # score → '시초가가 전일 종가보다 높게 열릴' 확률. 로지스틱 P = 1/(1+exp(-(A + B·score))), 713거래일 적합.
 # 2025년까지로 맞춰 2026년(188일)에 검증: 예측 80%↑ 구간 실제 87%, 20%↓ 구간 실제 14%, Brier 0.167(기저율 0.247).
 PROB_A, PROB_B = 0.422, 0.244
@@ -23,6 +28,23 @@ P_MID_UP, P_MID_DN = 0.65, 0.40         # mid — 실제 위로 열림 72.8% / 2
 UP_BAND =  0.3    # score >  UP_BAND → 상승
 DN_BAND = -1.2    # score <  DN_BAND → 하락, 그 사이는 중립
 VIX_CONTRA = 10.0    # 방향과 반대인 VIX 급변동(%) → strong 강등
+
+
+def ai_after_hours(latest: dict):
+    """AI 반도체 5종의 '직전 정규장 종가 대비 지금 시간외' 평균(%) — price_quotes가 낸 since_close_pct.
+
+    since_close_pct가 없는 종목은 마감 뒤 체결이 정규장 종가와 같았다는 뜻이라 0으로 센다(백테스트와 같다).
+    한 종목도 시세가 없으면(예전 데이터 파일·수집 실패) None — 그날 이 신호는 점수에서 빠진다.
+    """
+    pool = {**(latest.get("bigtech") or {}), **(latest.get("ai_infra") or {})}
+    vals = []
+    for t in AH_TICKERS:
+        d = pool.get(t)
+        if not isinstance(d, dict) or "error" in d or d.get("price") is None:
+            continue
+        v = d.get("since_close_pct")
+        vals.append(float(v) if isinstance(v, (int, float)) else 0.0)
+    return round(sum(vals) / len(vals), 3) if vals else None
 
 
 def extract_signals(latest: dict) -> dict:
@@ -46,6 +68,7 @@ def extract_signals(latest: dict) -> dict:
         "nasdaq": from_mdj("nasdaq"),
         "nq":     from_mdj("nq"),
         "ewy":    from_top("ewy"),
+        "ai_ah":  ai_after_hours(latest),   # 미국 장 마감 뒤 AI 반도체 시간외 평균(2026-11-18)
         "vix":    from_top("vix"),
         "usdkrw": from_mdj("usd"),   # market_data_js.usd.chg (원/달러 등락률, 원화 약세=하락 압력)
         # 아래 둘은 가중 합산에 직접 쓰지 않고 EWY 잔차 계산에만 쓴다
@@ -161,8 +184,10 @@ def format_prior_for_prompt(prior: dict) -> str:
            " 근거가 빈약하면 이 값을 그대로 쓴다."]
           if prior.get("up_pct") is not None else []),
         f"- SOX {fmt(sig.get('sox'))} · 나스닥 {fmt(sig.get('nasdaq'))} · NQ선물 {fmt(sig.get('nq'))} "
-        f"· EWY {fmt(sig.get('ewy'))} · 원/달러 {fmt(sig.get('usdkrw'))} · VIX {fmt(sig.get('vix'))}",
-        "- 이 값들은 직전 미국장 종가로, 전일 한국 마감 **이후** 정보를 반영한다.",
+        f"· EWY {fmt(sig.get('ewy'))} · 원/달러 {fmt(sig.get('usdkrw'))} · VIX {fmt(sig.get('vix'))}"
+        f" · AI 반도체 시간외 {fmt(sig.get('ai_ah'))}",
+        "- 이 값들은 직전 미국장 종가로, 전일 한국 마감 **이후** 정보를 반영한다. 단 'AI 반도체 시간외'는 미국 장 마감 뒤"
+        " 지금까지(엔비디아·마이크론·브로드컴·TSMC·AMD 평균) 움직임이라 장 마감 뒤 실적 반응이 여기 들어 있다 — score에 반영돼 있다.",
     ]
     live = [(n, sig.get(k)) for n, k in (("S&P선물", "es"), ("NQ선물", "nq"), ("다우선물", "ym"))
             if sig.get(k) is not None]

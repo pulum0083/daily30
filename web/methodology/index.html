@@ -141,13 +141,14 @@
     <h3>① 밤사이 신호를 점수로 합쳐요</h3>
     <div class="rec-tw"><table>
       <thead><tr><th>신호</th><th>무엇을 보나</th><th>가중치</th></tr></thead>
-      <tbody><tr><td>필라델피아 반도체(SOX)</td><td class="wrap">직전 미국장 등락 — 삼성전자·SK하이닉스와 가장 가깝게 움직여요</td><td class="rec-num">1.5</td></tr><tr><td>나스닥</td><td class="wrap">직전 미국장 등락</td><td class="rec-num">0.5</td></tr><tr><td>나스닥100 선물</td><td class="wrap">07:25 현재 등락</td><td class="rec-num">0.3</td></tr><tr><td>한국 ETF(EWY)</td><td class="wrap">미국에 상장된 한국 ETF 등락에서 전날 코스피 움직임을 뺀 나머지</td><td class="rec-num">0.3</td></tr><tr><td>VIX</td><td class="wrap">미국 변동성 지수 — 오르면 감점</td><td class="rec-num">−0.2</td></tr></tbody>
+      <tbody><tr><td>필라델피아 반도체(SOX)</td><td class="wrap">직전 미국장 등락 — 삼성전자·SK하이닉스와 가장 가깝게 움직여요</td><td class="rec-num">1.5</td></tr><tr><td>나스닥</td><td class="wrap">직전 미국장 등락</td><td class="rec-num">0.5</td></tr><tr><td>나스닥100 선물</td><td class="wrap">07:25 현재 등락</td><td class="rec-num">0.3</td></tr><tr><td>한국 ETF(EWY)</td><td class="wrap">미국에 상장된 한국 ETF 등락에서 전날 코스피 움직임을 뺀 나머지</td><td class="rec-num">0.3</td></tr><tr><td>VIX</td><td class="wrap">미국 변동성 지수 — 오르면 감점</td><td class="rec-num">−0.2</td></tr><tr><td>AI 반도체 시간외</td><td class="wrap">미국 장 마감 뒤 07:25까지 엔비디아·마이크론·브로드컴·TSMC·AMD 평균 등락 — 장 마감 뒤 실적 반응</td><td class="rec-num">1</td></tr></tbody>
     </table></div>
     <p class="rec-fine">원/달러 환율도 넣었었지만, 환율 방향으로 시초가를 맞힌 날이 44.2%로 절반도 안 돼 뺐어요. 값은 기록만 해요. 신호마다 얼마나 맞았는지는 <a href="/guides/kospi-open-us-signals/">해설 글</a>에 정리했어요.</p>
     <h3>② 점수를 확률로 바꿔요</h3>
     <div class="rec-formula">상승 확률 = 1 ÷ (1 + e<sup>−(0.422 + 0.244 × 점수)</sup>)</div>
     
     <p>2023년 11월부터 728거래일로 시험한 결과예요. 나스닥100 선물의 07:25 값은 과거를 되살릴 수 없어 이 시험에선 뺐어요.</p>
+    <p class="rec-fine">AI 반도체 시간외는 미국 장 마감 뒤 시세가 약 2년치만 있어 따로 시험했어요. 2023년 12월부터 704거래일에서 넣기 전 72.6% → 넣은 뒤 74.0%였고, 빅테크·AI 기업이 장 마감 뒤 실적을 낸 96일은 75.0% → 80.2%, 시간외 평균이 1% 넘게 움직인 60일은 68.3% → 81.7%였어요.</p>
     <div class="rec-pair">
       <div><b>72.8%</b><span>전체 기간 시초가 방향 적중 (매일 '상승'이라고 찍었다면 59.6%)</span></div>
       <div><b>76.7%</b><span>2026년 206일만 (매일 '상승'이라고 찍었다면 55.3%)</span></div>

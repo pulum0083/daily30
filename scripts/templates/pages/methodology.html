@@ -36,6 +36,7 @@
     <div class="rec-formula">상승 확률 = 1 ÷ (1 + e<sup>−({{ prob_a }} + {{ prob_b }} × 점수)</sup>)</div>
     {% if kospi %}
     <p>{{ kospi.data_from[:4] }}년 {{ kospi.data_from[5:7]|int }}월부터 {{ kospi.days }}거래일로 시험한 결과예요. 나스닥100 선물의 07:25 값은 과거를 되살릴 수 없어 이 시험에선 뺐어요.</p>
+    {% if ah %}<p class="rec-fine">AI 반도체 시간외는 미국 장 마감 뒤 시세가 약 2년치만 있어 따로 시험했어요. {{ ah.data_from[:4] }}년 {{ ah.data_from[5:7]|int }}월부터 {{ ah.days }}거래일에서 넣기 전 {{ ah.hit_without }}% → 넣은 뒤 {{ ah.hit_with }}%였고, 빅테크·AI 기업이 장 마감 뒤 실적을 낸 {{ ah.earn_nights }}일은 {{ ah.earn_without }}% → {{ ah.earn_with }}%, 시간외 평균이 1% 넘게 움직인 {{ ah.big_move_days }}일은 {{ ah.big_without }}% → {{ ah.big_with }}%였어요.</p>{% endif %}
     <div class="rec-pair">
       <div><b>{{ kospi.hit_pct }}%</b><span>전체 기간 시초가 방향 적중 (매일 '상승'이라고 찍었다면 {{ kospi.base_up_pct }}%)</span></div>
       <div><b>{{ kospi.y2026.hit_pct }}%</b><span>2026년 {{ kospi.y2026.days }}일만 (매일 '상승'이라고 찍었다면 {{ kospi.y2026.base_up_pct }}%)</span></div>

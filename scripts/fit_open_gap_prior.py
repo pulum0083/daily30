@@ -69,6 +69,8 @@ def score(m: pd.DataFrame, weights: dict) -> pd.Series:
     for key, w in weights.items():
         if key == "nq":            # 과거 07:25 선물값은 복원 불가 — 제외
             continue
+        if key not in m:           # ai_ah — 1시간봉이 2년치뿐이라 fit_after_hours_signal.py가 따로 잰다
+            continue
         s = s + w * (m["ewy_resid"] if key == "ewy" else m[key])
     return s
 

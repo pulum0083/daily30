@@ -181,7 +181,7 @@ def build_hero(analysis: dict, target_date: str) -> dict:
 
 
 _PRIOR_SIG_NAMES = [("sox", "SOX"), ("nasdaq", "나스닥"), ("nq", "나스닥 선물"),
-                    ("ewy_resid", "EWY(코스피 반영분 제외)"), ("vix", "VIX")]
+                    ("ewy_resid", "EWY(코스피 반영분 제외)"), ("vix", "VIX"), ("ai_ah", "AI 반도체 시간외")]
 
 
 def build_prior_signals(analysis: dict, market_data: dict, target_date: str) -> dict:

@@ -149,3 +149,37 @@ def test_directive_lists_earnings_candidates_without_moves():
     d = pd_._after_hours_directive({"earnings_near": [{"ticker": "AMD", "calendar_date": "2026-11-18"}]})
     assert "AMD(AMD): 일정 2026-11-18" in d and "발표됐다고 쓰지 않는다" in d
     assert "장 마감 뒤 움직임 (지금" not in d                                 # 움직임이 없으면 그 칸은 없다
+
+
+# ── ⑤ 예측 점수에 AI 반도체 시간외(ai_ah)를 더한다 — fit_after_hours_signal.py 검증 ─────────
+
+def test_ai_after_hours_average():
+    import leading_signal as ls
+    latest = {"bigtech": {"NVDA": {"price": 160.0, "since_close_pct": 3.4}, "AAPL": {"price": 1, "since_close_pct": -5}},
+              "ai_infra": {"MU": {"price": 730, "since_close_pct": 2.5}, "AVGO": {"price": 348, "since_close_pct": 1.9},
+                           "TSM": {"price": 370},                                  # 마감 뒤 체결 = 종가 → 0
+                           "AMD": {"error": "x"}}}                                 # 수집 실패 → 평균에서 뺀다
+    assert ls.ai_after_hours(latest) == round((3.4 + 2.5 + 1.9 + 0) / 4, 3)      # 애플은 대상이 아니다
+    assert ls.ai_after_hours({}) is None
+
+
+def test_incident_morning_flips_to_up():
+    """11/18 아침 실측 — 시간외를 넣기 전 53%(AI가 하락 43%로 냄) → 넣으면 상승 쪽. 실제 시초가 +2.62%."""
+    import leading_signal as ls
+    latest = {"market_data_js": {"sox": {"chg": 0.34}, "nasdaq": {"chg": -0.74}, "nq": {"chg": -0.58}, "kospi": {"chg": -1.0}},
+              "ewy": {"change_pct": 2.3}, "vix": {"change_pct": 11.1305},
+              "bigtech": {"NVDA": {"price": 160.7, "since_close_pct": 3.37}},
+              "ai_infra": {"MU": {"price": 730.4, "since_close_pct": 2.53}, "AVGO": {"price": 348.2, "since_close_pct": 1.93},
+                           "TSM": {"price": 372, "since_close_pct": 2.0}, "AMD": {"price": 250, "since_close_pct": 2.5}}}
+    p = ls.compute_prior(latest)
+    assert p["signals"]["ai_ah"] == 2.466
+    assert p["direction"] == "상승" and p["up_pct"] >= 55
+    no_ah = ls.compute_prior({k: v for k, v in latest.items() if k not in ("bigtech", "ai_infra")})
+    assert no_ah["up_pct"] < 55                                                     # 넣기 전엔 상승 쪽이 아니었다
+
+
+def test_methodology_lists_after_hours_weight():
+    import record_pages as rp
+    m = rp.build_methodology()
+    assert any(w["name"] == "AI 반도체 시간외" and w["w"] == 1.0 for w in m["weights"])
+    assert m["ah"]["hit_with"] > m["ah"]["hit_without"]

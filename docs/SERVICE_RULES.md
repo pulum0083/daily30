@@ -2258,7 +2258,11 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
 라이브 기록 49일(2026-07-28~10-12, 07:25 선물 포함)에서도 prior 부호 73.5% · AI 최종 방향 68.2%(시초가 기준), 확률 Brier는 새 환산 0.194 · AI up_pct 0.207이다.
 
 - **방지 룰(작은 표본의 인상으로 가중치를 고치지 않는다)**: 48일 표본에선 "EWY 원본이 잔차보다 낫다"·"가중치를 다시 맞추면 좋아진다"로 보였지만 713일에선 둘 다 아니었다. 가중치를 바꾸기 전에 더 긴 표본과 **시기를 나눈 검증**으로 확인하고, 이기지 못하면 그대로 둔다.
-- **재점검할 때**: `python3 scripts/fit_open_gap_prior.py`. 선물(NQ·ES)의 07:25 값은 과거를 되살릴 수 없어 백테스트에 없다 — 라이브 성적은 `briefings.json`의 `signals`·`prior_up_pct`로 본다.
+- **재점검할 때**: `python3 scripts/fit_open_gap_prior.py`.
+- **AI 반도체 시간외 신호 추가(2026-11-18, `ai_ah`, 가중 1.0)** — 미국 장 마감 뒤 07:25 KST까지 엔비디아·마이크론·브로드컴·TSMC·AMD의 시간외 평균 등락(`price_quotes`의 `since_close_pct`, `leading_signal.ai_after_hours`). 계기는 11/18 엔비디아 실적 밤 — 나스닥 선물은 마감 뒤 −0.1%로 그대로였는데 AI 반도체가 시간외 +2~4%였고, 예측 하락 57% → 시초가 +2.62%.
+  · `scripts/fit_after_hours_signal.py`(야후 1시간봉 2년치 704거래일): 전체 72.6→74.0%, Brier 0.1776→0.1739, 빅테크·AI 장 마감 뒤 실적 밤 96일 75.0→80.2%, 시간외 평균 |1%| 이상 60일 68.3→81.7%. 시기를 앞뒤로 나눠도 두 쪽 모두 w=1.0을 골랐고 검증 구간이 나아졌다(75.0→75.3%, 70.2→72.7%). 10/26 점검의 'EWY·NQ 마감 뒤 드리프트'는 개선이 없었는데, AI 반도체 개별 종목의 시간외는 실적 반응을 직접 담아 달랐다.
+  · 결과는 `scripts/config/after_hours_signal_backtest.json`(`--write`)에 남고 방법론 페이지가 읽는다. 확률식(PROB_A·B)은 그대로 — 더해도 Brier가 나아져 다시 맞추지 않았다.
+  · 1시간봉이라 07:25 직전 1시간 안의 움직임은 시험에서 빠졌다(보수적). 라이브는 5분봉 체결가라 더 신선하다. `fit_open_gap_prior.py`의 727거래일 시험엔 이 신호가 없다(자료가 2년치뿐). 선물(NQ·ES)의 07:25 값은 과거를 되살릴 수 없어 백테스트에 없다 — 라이브 성적은 `briefings.json`의 `signals`·`prior_up_pct`로 본다.
 
 **prior 구속 게이트(같은 날, `validate_analysis` 4-b·4-c)** — AI가 계산값을 뒤집으면 더 틀렸다(시초가 기준 prior 73.5% vs AI 68.2%).
 
@@ -2951,6 +2955,7 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **시간외 분리** — `price_quotes.get_ticker_full`이 미국 종목의 지금 가격이 직전 정규장 종가와 다르면 `regular_close`·`regular_change_pct`·`since_close_pct`를 함께 낸다. 코스피 아침 데이터에 AI 인프라 `ai_infra`(MU·AVGO·TSM·DELL·VRT)를 더했고, `prompt_directives._after_hours_directive()`가 마감 뒤 1% 넘게 움직인 종목을 "정규장 −0.44% 마감 → 마감 뒤 시간외 +4.09%"처럼 적어 주며, 마감 뒤 원인(실적 등)을 정규장 서사보다 먼저 다루게 한다.
 - 실측 확인(11/18 09:50): 코스피 RSS가 엔비디아 실적·시간외 반응 기사 4건을 맨 앞에 골랐다(06:24 뉴스1 등). 테스트 `scripts/test_overnight_catch.py`.
 
+- **예측 점수에도 넣었다(같은 날)** — 문장만 고쳐서는 방향이 안 바뀐다(방향은 계산식이 정하고 AI는 ±10%p만 조정, §57). AI 반도체 시간외 평균을 점수에 더했다 — 근거와 수치는 §57.
 - **대상 넓히기(같은 날 사용자 요청 — "엔비디아만이 아니라 빅테크 실적 전반이 삼성전자·SK하이닉스와 연동된다")** — 시간외 표시 대상에 AMD·오라클을 더했다(`market_universe.BIGTECH_TICKERS`·`AI_INFRA_TICKERS`, 바꾸면 `_AFTER_HOURS_NAMES`도 함께). `econ_calendar.fetch_earnings_near()`가 이 13개 회사 중 야후 일정상 직전 미국장~오늘 사이 실적 발표 후보를 `earnings_near`로 넘기고, 지시문이 "결과를 뉴스에서 찾아 HBM·메모리 수요로 이어지는 흐름을 먼저 다루되, 뉴스로 확인되지 않으면 발표됐다고 쓰지 않는다"를 붙인다. 야후 일정은 하루 어긋나기도 해서(엔비디아 11/17 발표를 11/18로 적음) 후보로만 쓴다.
 
 **남은 한계**
