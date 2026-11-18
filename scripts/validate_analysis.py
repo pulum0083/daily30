@@ -47,7 +47,7 @@ from gate_superlative import (  # noqa: F401
     clamp_prediction_to_prior, clamp_us_prediction_to_prior, validate_index_superlatives,
 )
 from gate_events import (  # noqa: F401
-    _PREVIEW_TENSE_RE, _EVENT_ACRONYM_RE, _event_keywords, find_event_tense_violations, validate_event_tense, fix_event_day_words,
+    _PREVIEW_TENSE_RE, _EVENT_ACRONYM_RE, _event_keywords, find_event_tense_violations, validate_event_tense, fix_event_day_words, fix_fomc_minutes_month,
     _NO_PREMARKET_INDEX, _SESSION_WORDS, _SENT_SPLIT, find_session_mislabels, _PREMARKET_PHRASE, _PREMARKET_DROP,
     _ISSUE_BODY_MAX_SENT, trim_issue_bodies, _ISSUE_FALL_NOW, _ISSUE_RISE_NOW, _ISSUE_MIN_MOVE, _premarket_opposite,
     fix_issue_premarket_contradictions, _ISSUE_ROSE_PAST, _ISSUE_FELL_PAST, _prev_us_session_str, drop_stale_earnings_issues, fix_issue_side_tickers,
@@ -144,6 +144,7 @@ def validate(analysis, latest, btype):
     # 2-d-2) 이미 끝난 경제 이벤트를 예고형으로 쓴 서술 차단 (§29)
     validate_event_tense(a, (latest or {}).get("economic_calendar"), corrections, warnings, blocks)
     fix_event_day_words(a, (latest or {}).get("economic_calendar"), corrections)   # '오늘 새벽 FOMC' → 실제 KST 날짜
+    fix_fomc_minutes_month(a, (latest or {}).get("economic_calendar"), corrections)   # 'FOMC 11월 의사록' → 회의 달
 
     # 2-e) '간밤' 표기 교정 — 월요일·휴일 다음날 (kospi 전용)
     fix_overnight_labels(a, btype, corrections)

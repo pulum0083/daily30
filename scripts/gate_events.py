@@ -115,6 +115,25 @@ def fix_event_day_words(analysis, calendar, corrections) -> int:
     return n
 
 
+def fix_fomc_minutes_month(analysis, calendar, corrections) -> int:
+    """'FOMC 11월 의사록'(공개 달) → '10월 회의 의사록'(회의 달)으로 고친다(2026-11-18 실사고).
+
+    계산은 event_when.fix_minutes_month 한 곳이다. 프롬프트 지시(_event_when_directive)가 새더라도 발행 직전에 잡는다.
+    """
+    try:
+        from event_when import fix_minutes_month, us_events
+    except Exception as e:
+        print(f"[validate] FOMC 의사록 달 검사 생략: {e}", file=sys.stderr)
+        return 0
+    evs = us_events(calendar)
+    if not evs:
+        return 0
+    n = _walk_strings(analysis, lambda t: fix_minutes_month(t, evs))
+    if n:
+        corrections.append(f"FOMC 의사록 표기 {n}건을 공개 달이 아니라 회의 달로 교정")
+    return n
+
+
 # 프리장·시간외에 거래되지 않는 '지수' — 이 시간대엔 값이 갱신되지 않는다.
 # 뒤에 '선물'이 붙으면 제외한다(지수 선물은 연장시간대에도 거래된다).
 _NO_PREMARKET_INDEX = (

@@ -7,7 +7,7 @@
 그 시각을 브리핑 날짜와 비교해 한국어 상대 표기를 결정론으로 만든다.
 """
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 # 미국 이벤트 제목 조각 → 한국어 본문에서 그 이벤트를 가리키는 말
 _ALIASES = [
@@ -76,6 +76,38 @@ def keywords(title: str) -> set:
         if frag in (title or ""):
             kws.update(words)
     return kws
+
+
+# FOMC 의사록은 회의 3주 뒤에 공개된다 — 공개되는 달로 'N월 의사록'이라 부르면 틀린다(2026-11-18 실사고:
+# 10/27~28 회의 의사록을 11/19 04:00 KST 공개라 "FOMC 11월 의사록"이라고 썼다).
+MINUTES_LAG_DAYS = 21
+_MINUTES_MONTH = re.compile(r"(\d{1,2})월(\s*)(FOMC\s*)?(회의\s*)?의사록")
+
+
+def is_minutes(title: str) -> bool:
+    return "FOMC" in (title or "") and "Minutes" in (title or "")
+
+
+def minutes_meeting_month(dt: datetime) -> int:
+    """의사록 공개 시각(KST) → 그 의사록의 회의 달. 11/19 04:00 KST 공개 → 10월(10/27~28 회의)."""
+    return (dt - timedelta(days=MINUTES_LAG_DAYS)).month
+
+
+def fix_minutes_month(text: str, events: list) -> str:
+    """'FOMC 11월 의사록'처럼 공개 달을 회의 달로 쓴 표기를 '10월 회의 의사록'으로 고친다.
+
+    캘린더에 FOMC 의사록 이벤트가 있을 때만 본다. 이미 회의 달을 쓴 표기('10월 의사록')는 그대로 둔다.
+    """
+    mins = [e for e in events if is_minutes(e.get("title"))]
+    if not text or not mins or "의사록" not in text:
+        return text
+    month = minutes_meeting_month(mins[0]["dt"])
+
+    def repl(m):
+        if int(m.group(1)) == month:
+            return m.group(0)
+        return f"{month}월{m.group(2)}{m.group(3) or ''}회의 의사록"
+    return _MINUTES_MONTH.sub(repl, text)
 
 
 def us_events(calendar) -> list:

@@ -238,7 +238,7 @@ def _event_when_directive(date_str: str, analysis_data: dict | None) -> str:
     사흘 안 미국 이벤트가 없으면 아무것도 넣지 않는다.
     """
     try:
-        from event_when import us_events, when_label
+        from event_when import is_minutes, minutes_meeting_month, us_events, when_label
         today = datetime.strptime(date_str, "%Y-%m-%d").date()
     except Exception:
         return ""
@@ -249,5 +249,10 @@ def _event_when_directive(date_str: str, analysis_data: dict | None) -> str:
     lines = ["## 미국 이벤트 시각 (한국 시간 — 반드시 지킬 것)", "",
              "미국 이벤트는 아래 한국 시간 표기를 그대로 쓴다. 미국 날짜(ET)로 '오늘'이라 쓰지 않는다 — "
              "예를 들어 미국 시간 오늘 오후 2시 FOMC는 한국 시간 '내일 새벽 3시'다."]
-    lines += [f"- {e['title']} ({e['date_kst']}) → '{when_label(e['date_kst'], today)}'" for e in evs]
+    for e in evs:
+        line = f"- {e['title']} ({e['date_kst']}) → '{when_label(e['date_kst'], today)}'"
+        if is_minutes(e["title"]):   # 공개 달이 아니라 회의 달로 부른다(2026-11-18 실사고)
+            line += (f" — {minutes_meeting_month(e['dt'])}월 회의 의사록이다(의사록은 회의 약 3주 뒤 공개). "
+                     f"공개되는 달로 '{e['dt'].month}월 의사록'이라 쓰지 않는다")
+        lines.append(line)
     return "\n".join(lines) + "\n\n"

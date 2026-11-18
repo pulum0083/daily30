@@ -65,3 +65,35 @@ def test_prompt_directive_lists_korean_time():
     assert "FOMC Statement (2026-10-29 03:00 KST) → '내일 새벽 3시'" in d
     assert "BOJ" not in d
     assert cc._event_when_directive("2026-10-28", {"economic_calendar": {}}) == ""
+
+
+# ── FOMC 의사록은 회의 달로 부른다(2026-11-18 실사고) ─────────────────────────────
+MIN_CAL = {"today": [], "upcoming": [
+    {"title": "FOMC Meeting Minutes", "country": "USD", "date_kst": "2026-11-19 04:00 KST"},
+    {"title": "FOMC Member Daly Speaks", "country": "USD", "date_kst": "2026-11-19 02:15 KST"},
+]}
+MIN_EVS = ew.us_events(MIN_CAL)
+INCIDENT = "내일 새벽 4시 FOMC 11월 의사록이 공개돼요. 금리 경로에 대한 힌트가 나오면 환율·외국인 수급 방향이 다시 흔들릴 수 있어요."
+
+
+def test_minutes_month_incident_replay():
+    out = ew.fix_minutes_month(INCIDENT, MIN_EVS)
+    assert out.startswith("내일 새벽 4시 FOMC 10월 회의 의사록이 공개돼요.")
+    assert ew.fix_day_words(out, MIN_EVS, date(2026, 11, 18)) == out    # '내일 새벽'은 맞으니 그대로
+
+
+def test_minutes_month_keeps_meeting_month_and_needs_calendar():
+    assert ew.fix_minutes_month("10월 FOMC 의사록이 나와요.", MIN_EVS) == "10월 FOMC 의사록이 나와요."
+    assert ew.fix_minutes_month("11월 FOMC 의사록이 나와요.", MIN_EVS) == "10월 FOMC 회의 의사록이 나와요."
+    assert ew.fix_minutes_month(INCIDENT, EVS) == INCIDENT                # 의사록 이벤트가 없는 주엔 판단하지 않는다
+    assert ew.minutes_meeting_month(ew._parse_kst("2026-12-31 04:00 KST")) == 12   # 12/8~9 회의 → 12/30 ET 공개
+
+
+def test_minutes_gate_and_directive(monkeypatch):
+    a = {"todays_view": {"outlook": [{"tag": "event", "text": INCIDENT}]}}
+    corrections = []
+    assert va.fix_fomc_minutes_month(a, MIN_CAL, corrections) == 1
+    assert "FOMC 10월 회의 의사록" in a["todays_view"]["outlook"][0]["text"] and corrections
+    d = cc._event_when_directive("2026-11-18", {"economic_calendar": MIN_CAL})
+    assert "FOMC Meeting Minutes (2026-11-19 04:00 KST) → '내일 새벽 4시' — 10월 회의 의사록이다" in d
+    assert "'11월 의사록'이라 쓰지 않는다" in d
