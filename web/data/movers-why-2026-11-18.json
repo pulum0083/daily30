@@ -1,46 +1,56 @@
 {
-  "generated_at": "2026-11-18T10:31:16.420936+09:00",
+  "generated_at": "2026-11-18T11:01:28.807735+09:00",
   "date": "2026-11-18",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 1.79,
-      "surge": 0.33,
-      "events": []
-    },
-    {
-      "code": "000660",
-      "name": "SK하이닉스",
-      "changePct": 4.01,
-      "surge": 0.29,
+      "changePct": 0.16,
+      "surge": 0.43,
       "events": [
-        {
-          "time": "08:09",
-          "headline": "엔비디아 호실적에…프리마켓서 삼전 4%·SK하닉 5% 상승",
-          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFAyMFVVbUxYU1Ewa3YxendQQ1hfMWZ5ZWx1N1ZncWZndUxPNEE0cUJmN05DX2JrOTU5YmstcTFVUk5QZWZEUDBaYnRfOFhFNDVPS1dzNms0NzZLY3R5TTk0N9IBeEFVX3lxTE11cnJwNXBPdGN3NWd1TDVqQ2loLUw0U212Y2pWbkN2elB6WUhtdzh1VXlfblk5MXhuMElpQWdlR0xSUmh1bTBCSkNza2RwQ2NYbWJqNE9oREkzWTVnaHFRbVF5NnFoMnNzaXJYaXVKV0Z2N3RmYzEzcA?oc=5",
-          "source": "뉴시스",
-          "why": "엔비디아의 호실적 발표로 인해 프리마켓에서 삼성전자와 SK하이닉스 주가가 각각 4%, 5% 상승했습니다.",
-          "tier": "why",
-          "sentiment": "pos"
-        },
         {
           "time": "09:15",
           "headline": "삼성전자·하이닉스, 엔비디아 호실적 발표에 반등",
           "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE85c0lYMkFLUVJUdVNLekRyVFE2eXZRVHF1M3E3V3RPbUxQQWd5SkhlUXNtdmlUemMzRnJsNUVCWFhNbkFSd0ZWNFhUSDd4MmNwOXZqY3RPSVdzS1E?oc=5",
           "source": "에너지경제신문",
-          "why": "삼성전자·하이닉스, 엔비디아 호실적 발표에 반등",
-          "tier": "why",
+          "why": "엔비디아의 호실적 발표로 삼성전자와 하이닉스 주가가 반등했다. (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "pos"
+        },
+        {
+          "time": "09:33",
+          "headline": "삼성생명, 삼성전자 주가 하락 반영… 목표가↓-NH",
+          "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE8wa0t4YnM3Rjh1U0JQYVpfbWRKeVA5WG5VMGhBU2RFWm9Cd2kxVkN2NTFVX0g5RzREckREelVPaE9lTXVQck5obXNkOTFQeF8zRW5xdnJjd2RkVHRHdG5HUFd1ZVBZUUl5bmV5dkZ3a3dPWi1yRUE?oc=5",
+          "source": "인포스탁데일리",
+          "why": "삼성생명, 삼성전자 주가 하락 반영… 목표가↓-NH (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
         }
       ]
     },
     {
+      "code": "000660",
+      "name": "SK하이닉스",
+      "changePct": 2.82,
+      "surge": 0.37,
+      "events": []
+    },
+    {
       "code": "005380",
       "name": "현대차",
-      "changePct": -0.58,
-      "surge": 0.18,
-      "events": []
+      "changePct": -1.93,
+      "surge": 0.25,
+      "events": [
+        {
+          "time": "09:59",
+          "headline": "현대차 주가, 11월 18일 장중 259,750원 0.29% 소폭 상승",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBCdFVicFdtM1dfa1M3QlZQUzNOSGZ4eV8xSmtham45bE8wZzA1UzlWU2NMSFVKZWtyM2lRb1A4eG9ua2l3UGZzcXJoWFRVOV9FUFQyV25uMmJEbnlsZlNwaG50UVJZa2lsbDFZUlpETl8tdw?oc=5",
+          "source": "중앙이코노미뉴스",
+          "why": "현대차 주가는 11월 18일 장중 0.29% 소폭 상승한 259,750원을 기록했다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     }
   ]
 }
