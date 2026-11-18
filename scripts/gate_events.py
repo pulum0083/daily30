@@ -279,7 +279,8 @@ def drop_stale_earnings_issues(analysis, corrections, age_fn=None, max_age_days=
     수집 단계 게이트(fetch_news._drop_stale_earnings)는 회사 이름을 티커로 바꾸는 이름표(_NAME_TO_TICKER)에
     기대는데 맥도날드가 없어 검사 없이 통과했다. 이슈 카드는 언제나 ▲▼ 티커를 갖고 있으니 여기서 한 번 더 본다.
     - 실적·어닝·가이던스를 말하지 않는 카드, 발표 전 예고(앞두고·예정·임박 등)는 건드리지 않는다.
-    - 티커 중 하나라도 최근 발표면 둔다(관대한 쪽 — 발행 직전 게이트의 오탐은 이슈 하나를 잃는다).
+    - 제목에 실적의 주어(회사 이름·괄호 티커)가 있으면 그 회사로만 판정하고, 없을 때만 ▲▼ 칩을 본다.
+    - 판정 티커 중 하나라도 최근 발표면 둔다(관대한 쪽 — 발행 직전 게이트의 오탐은 이슈 하나를 잃는다).
     - 발표일을 하나도 못 읽으면 판단하지 않는다(fail-open).
     max_age_days=4: 목요일 장 마감 뒤 발표 → 다음 월요일 브리핑까지가 4일이다.
     """
@@ -302,11 +303,18 @@ def drop_stale_earnings_issues(analysis, corrections, age_fn=None, max_age_days=
         if not _fn._is_earnings_catalyst(blob) or _fn._PREVIEW_RE.search(blob):
             kept.append(it)
             continue
-        tickers = []
-        for side in ("up", "down"):
-            sd = it.get(side)
-            if isinstance(sd, dict):
-                tickers += [t for t in (sd.get("tickers") or []) if isinstance(t, str) and re.fullmatch(r"[A-Z]{1,5}", t)]
+        # 실적의 주어(제목에 나온 회사)가 있으면 그 회사로 판정한다. ▲▼ 칩은 영향 종목이라 주어가 아니다
+        # (2026-11-18 실사고: "엔비디아 매출 전망 상향에 월가 안도"를 칩 MU·KLAC·LRCX·AMAT의 6일 전 실적으로
+        # 판정해 지웠다. 엔비디아 실적은 그날 06:20 KST였다 — §31 방관자 티커와 같은 계열).
+        title = str(it.get("title") or "")
+        tickers = list(dict.fromkeys(
+            [t for t in _fn._PAREN_TICKER_RE.findall(title) if t not in _fn._GENERIC_UPPER]
+            + _fn._resolve_company_tickers(title)))
+        if not tickers:
+            for side in ("up", "down"):
+                sd = it.get(side)
+                if isinstance(sd, dict):
+                    tickers += [t for t in (sd.get("tickers") or []) if isinstance(t, str) and re.fullmatch(r"[A-Z]{1,5}", t)]
         ages = [a for a in (age_fn(t, today) for t in dict.fromkeys(tickers)) if a is not None]
         if ages and min(ages) > max_age_days:
             dropped.append(f"{it.get('title')}({','.join(tickers)} 최근 발표 {min(ages)}일 전)")

@@ -80,3 +80,24 @@ def test_all_claims_kept_when_really_all():
     lat = {"market_breadth": {"up": 900, "down": 0}, "sectors": [{"change_pct": 1.0}, {"change_pct": 2.0}]}
     v.fix_all_claims(a, lat, [])
     assert a["market_title"] == "전 섹터 동반 상승"
+
+
+# ── 실적 주어로 판정(2026-11-18 실사고: 엔비디아 실적 카드를 영향 종목 칩의 6일 전 실적으로 지웠다) ──
+
+def test_stale_earnings_judged_by_title_subject_not_chips():
+    ages = {"NVDA": 1, "MU": 6, "KLAC": 6, "LRCX": 6, "AMAT": 6, "LLY": 20}
+    a = {"generated_at": "2026-11-18T21:17:00+09:00", "issues": [
+        _issue("엔비디아 매출 전망 상향에 월가 안도", ["MU", "KLAC", "LRCX", "AMAT"]),
+        _issue("일라이 릴리, 실적·가이던스 모두 상회했지만 상단은 막혀", ["LLY"]),
+    ]}
+    c = []
+    assert v.drop_stale_earnings_issues(a, c, age_fn=lambda t, d: ages.get(t)) == 1
+    assert [i["title"] for i in a["issues"]] == ["엔비디아 매출 전망 상향에 월가 안도"]
+    assert "LLY" in c[0]
+
+
+def test_stale_earnings_title_subject_old_is_dropped_even_if_chip_fresh():
+    """주어가 오래된 실적이면 칩에 그날 실적 낸 종목이 있어도 뺀다(§31 방관자 티커)."""
+    ages = {"MU": 41, "AMD": 0}
+    a = {"generated_at": "2026-08-04T21:17:00+09:00", "issues": [_issue("마이크론(MU) 실적 서프라이즈", ["AMD"])]}
+    assert v.drop_stale_earnings_issues(a, [], age_fn=lambda t, d: ages.get(t)) == 1
