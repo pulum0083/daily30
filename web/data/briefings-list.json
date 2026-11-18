@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-19": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-19/kospi/",
+        "headline": "수출 역대급인데 외국인은 왜 팔았을까",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-18": {
       "kospi": {
         "state": "ready",
@@ -852,8 +871,7 @@
         "headline": "코스피 3.65% 급락, 두 달 만에 최저치 — 버틴 요인 있었나요?",
         "title": "6,384.24",
         "price": "6,384.24",
-        "time": "",
-        "chg": -3.65
+        "time": ""
       },
       "us": {
         "state": "ready",
@@ -884,36 +902,6 @@
         "pill_text": "▲",
         "title": "상승 우위",
         "time": "21:17"
-      }
-    },
-    "2026-10-08": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-10-08/kospi/",
-        "headline": "삼성전자 실적 발표 전야, 반도체주가 먼저 떨고 있어요",
-        "hit": true,
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:28"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-08/close/",
-        "headline": "삼성전자 호실적에도 차익실현 매물 — 코스피 2.62% 급락",
-        "title": "6,625.93",
-        "price": "6,625.93",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-08/us/",
-        "headline": "10년물 금리 5.3% 재돌파 — 어닝 랠리에 브레이크 걸렸다",
-        "hit": true,
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "21:16"
       }
     }
   }
