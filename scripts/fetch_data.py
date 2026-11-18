@@ -20,8 +20,9 @@ from market_common import (  # noqa: F401
     BASE_DIR, DATA_DIR, KST, UTC,
 )
 from market_universe import (  # noqa: F401
-    SECTOR_FOCUS_STOCKS, US_CANDIDATES, SIDEBAR_TICKERS_KOSPI, SIDEBAR_TICKERS_US,
+    SECTOR_FOCUS_STOCKS, US_CANDIDATES, SIDEBAR_TICKERS_KOSPI, SIDEBAR_TICKERS_US, BIGTECH_TICKERS, AI_INFRA_TICKERS,
 )
+from econ_calendar import fetch_earnings_near  # noqa: E402
 from econ_calendar import (  # noqa: F401
     _bucket_calendar_events, fetch_economic_calendar,
 )
@@ -322,7 +323,7 @@ def fetch_kospi_data() -> dict:
                      "^IXIC", "^DJI",
                      "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY",
                      # AI 인프라 — 메모리·칩·파운드리·서버·전력. 장 마감 뒤 실적 반응이 코스피 반도체로 이어진다(2026-11-18)
-                     "MU", "AVGO", "TSM", "DELL", "VRT",
+                     "MU", "AVGO", "TSM", "DELL", "VRT", "AMD", "ORCL",
                      "DRAM",  # Roundhill Memory & HBM ETF (삼성·하이닉스 연동 선행 지표)
                      # 미 지수선물 — 브리핑 생성 시각(07:25 KST)에 **유일하게 실시간인** 신호.
                      # SOX·나스닥·EWY는 전부 6시간 이상 묵은 미국장 종가다.
@@ -352,6 +353,9 @@ def fetch_kospi_data() -> dict:
     # 5. 경제 지표 캘린더 (ForexFactory)
     print("[fetch_data]   → economic calendar")
     economic_calendar = fetch_economic_calendar()
+    from session_label import prev_us_session
+    _today_kst = datetime.now(KST)
+    _prev_us = prev_us_session(_today_kst.date()) or _today_kst.date()
 
     # 6. 투자자별 순매수 (pykrx — 전 거래일)
     print("[fetch_data]   → investor trading (외국인/기관 순매수)")
@@ -412,8 +416,10 @@ def fetch_kospi_data() -> dict:
         },
         "gold":   macro.get("GC=F", {}),
         "rates":  {"us10y": macro.get("^TNX", {})},
-        "bigtech": {t: macro.get(t, {}) for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL"]},
-        "ai_infra": {t: macro[t] for t in ["MU", "AVGO", "TSM", "DELL", "VRT"] if t in macro},
+        "bigtech": {t: macro.get(t, {}) for t in BIGTECH_TICKERS},
+        "ai_infra": {t: macro[t] for t in AI_INFRA_TICKERS if t in macro},
+        # 직전 미국장~오늘 사이 실적 발표 후보(야후 일정) — 발표 여부는 뉴스로 확인하게 한다(2026-11-18)
+        "earnings_near": fetch_earnings_near(BIGTECH_TICKERS + AI_INFRA_TICKERS, _today_kst.date(), _prev_us),
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
         # 투자자별 순매수 (외국인/기관/개인 — 전 거래일 KRX 기준)

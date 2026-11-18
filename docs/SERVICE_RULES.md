@@ -2951,6 +2951,8 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **시간외 분리** — `price_quotes.get_ticker_full`이 미국 종목의 지금 가격이 직전 정규장 종가와 다르면 `regular_close`·`regular_change_pct`·`since_close_pct`를 함께 낸다. 코스피 아침 데이터에 AI 인프라 `ai_infra`(MU·AVGO·TSM·DELL·VRT)를 더했고, `prompt_directives._after_hours_directive()`가 마감 뒤 1% 넘게 움직인 종목을 "정규장 −0.44% 마감 → 마감 뒤 시간외 +4.09%"처럼 적어 주며, 마감 뒤 원인(실적 등)을 정규장 서사보다 먼저 다루게 한다.
 - 실측 확인(11/18 09:50): 코스피 RSS가 엔비디아 실적·시간외 반응 기사 4건을 맨 앞에 골랐다(06:24 뉴스1 등). 테스트 `scripts/test_overnight_catch.py`.
 
+- **대상 넓히기(같은 날 사용자 요청 — "엔비디아만이 아니라 빅테크 실적 전반이 삼성전자·SK하이닉스와 연동된다")** — 시간외 표시 대상에 AMD·오라클을 더했다(`market_universe.BIGTECH_TICKERS`·`AI_INFRA_TICKERS`, 바꾸면 `_AFTER_HOURS_NAMES`도 함께). `econ_calendar.fetch_earnings_near()`가 이 13개 회사 중 야후 일정상 직전 미국장~오늘 사이 실적 발표 후보를 `earnings_near`로 넘기고, 지시문이 "결과를 뉴스에서 찾아 HBM·메모리 수요로 이어지는 흐름을 먼저 다루되, 뉴스로 확인되지 않으면 발표됐다고 쓰지 않는다"를 붙인다. 야후 일정은 하루 어긋나기도 해서(엔비디아 11/17 발표를 11/18로 적음) 후보로만 쓴다.
+
 **남은 한계**
 - 07:25 이후에 나온 기사·움직임(09시 넘어 VRT·DELL +5.6%)은 발행 시각상 담을 수 없다.
 - 실적 '예고' 기사 게이트(`_drop_preview_after_release`)도 같은 야후 기록을 쓰므로 발표 직후엔 예고 기사를 못 거른다. 고르는 단계 프롬프트("결과 기사를 고른다")에 맡긴다.

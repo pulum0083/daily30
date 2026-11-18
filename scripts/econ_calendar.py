@@ -77,3 +77,28 @@ def fetch_economic_calendar() -> dict:
     except Exception as e:
         print(f"[fetch_data] Economic calendar error: {e}", file=sys.stderr)
         return {"today": [], "upcoming": []}
+
+
+def fetch_earnings_near(tickers: list, today, prev_us) -> list:
+    """야후 실적 일정상 직전 미국장(prev_us)~오늘(today) 사이에 발표했을 수 있는 회사(2026-11-18).
+
+    빅테크·AI 인프라 실적은 장 마감 뒤(한국 새벽)에 나와 코스피 아침 브리핑 직전이다. 야후 일정은 날짜가
+    하루 어긋나기도 하고(11/17 발표한 엔비디아를 11/18로 적었다) 발표 직후엔 실적 기록에도 아직 없다.
+    그래서 '발표했다'고 단정하지 않고 후보로만 넘긴다 — 결과는 뉴스에서 확인하게 한다(§0).
+    """
+    out = []
+    try:
+        import yfinance as yf
+    except Exception:
+        return out
+    for t in tickers:
+        try:
+            raw = (yf.Ticker(t).calendar or {}).get("Earnings Date") or []
+        except Exception as e:
+            print(f"[fetch_data] {t} 실적 일정 조회 실패: {e}", file=sys.stderr)
+            continue
+        days = [d if not isinstance(d, datetime) else d.date() for d in raw]
+        near = [d for d in days if prev_us <= d <= today]
+        if near:
+            out.append({"ticker": t, "calendar_date": near[0].isoformat()})
+    return out

@@ -71,3 +71,9 @@ SIDEBAR_TICKERS_US = {
     "usd":    "USDKRW=X",
     "dxy":    "DX-Y.NYB",
 }
+
+
+# 코스피 아침이 장 마감 뒤 움직임·실적 후보를 보는 미국 종목(2026-11-18) — 빅테크 AI 투자와 AI 반도체·서버·전력.
+# 삼성전자·SK하이닉스 HBM 수요와 직결된다. 바꾸면 prompt_directives._AFTER_HOURS_NAMES도 함께 바꾼다.
+BIGTECH_TICKERS = ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL"]
+AI_INFRA_TICKERS = ["MU", "AVGO", "TSM", "AMD", "ORCL", "DELL", "VRT"]

@@ -129,3 +129,23 @@ def test_after_hours_directive():
     assert "엔비디아(NVDA): 정규장 -0.44% 마감 → 마감 뒤 시간외 +4.09%" in d
     assert "AAPL" not in d                                                  # 1% 미만은 적지 않는다
     assert pd_._after_hours_directive({"bigtech": {"AAPL": {"since_close_pct": 0.3}}}) == ""
+
+
+# ── ④ 실적 후보(야후 일정) — 발표했다고 단정하지 않고 뉴스로 확인하게 한다 ──────────
+
+def test_earnings_near_window(monkeypatch):
+    import econ_calendar as ec
+    import yfinance as yf
+    cal = {"NVDA": [date(2026, 11, 18)], "AMD": [date(2026, 11, 25)], "MU": [date(2026, 11, 17)], "ORCL": []}
+
+    class T:
+        def __init__(self, t): self.calendar = {"Earnings Date": cal.get(t, [])}
+    monkeypatch.setattr(yf, "Ticker", T)
+    got = ec.fetch_earnings_near(["NVDA", "AMD", "MU", "ORCL"], date(2026, 11, 18), date(2026, 11, 17))
+    assert [g["ticker"] for g in got] == ["NVDA", "MU"]
+
+
+def test_directive_lists_earnings_candidates_without_moves():
+    d = pd_._after_hours_directive({"earnings_near": [{"ticker": "AMD", "calendar_date": "2026-11-18"}]})
+    assert "AMD(AMD): 일정 2026-11-18" in d and "발표됐다고 쓰지 않는다" in d
+    assert "장 마감 뒤 움직임 (지금" not in d                                 # 움직임이 없으면 그 칸은 없다

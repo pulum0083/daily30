@@ -191,7 +191,7 @@ def _us_session_log_directive(date_str: str, analysis_data: dict | None) -> str:
 
 _AFTER_HOURS_NAMES = {"NVDA": "엔비디아", "AAPL": "애플", "MSFT": "마이크로소프트", "AMZN": "아마존",
                       "META": "메타", "GOOGL": "알파벳", "MU": "마이크론", "AVGO": "브로드컴", "TSM": "TSMC",
-                      "DELL": "델", "VRT": "버티브"}
+                      "DELL": "델", "VRT": "버티브", "AMD": "AMD", "ORCL": "오라클"}
 AFTER_HOURS_MIN_PCT = 1.0   # 마감 뒤 이만큼 넘게 움직인 종목만 적는다
 
 
@@ -202,6 +202,15 @@ def _after_hours_directive(analysis_data: dict | None) -> str:
     한 숫자만 있어 브리핑이 정규장 하락 서사('전 CEO 사임 여진')만 썼다. 값은 price_quotes가
     직전 정규장 종가와 지금 체결가로 계산한 since_close_pct다.
     """
+    near = [e for e in ((analysis_data or {}).get("earnings_near") or []) if isinstance(e, dict) and e.get("ticker")]
+    near_txt = ""
+    if near:
+        near_txt = ("## 직전 미국장 전후로 실적을 냈을 수 있는 회사 (야후 실적 일정 — 발표 여부 미확인)\n" +
+                    "\n".join(f"- {_AFTER_HOURS_NAMES.get(e['ticker'], e['ticker'])}({e['ticker']}): 일정 {e.get('calendar_date', '')}"
+                               for e in near) +
+                    "\n이 회사들의 실적 결과(매출·가이던스·AI 설비투자)와 발표 뒤 주가 반응을 뉴스 요약에서 찾아, 삼성전자·SK하이닉스"
+                    "(HBM·메모리 수요)로 이어지는 흐름을 먼저 다룬다. 야후 일정은 하루 어긋나거나 아직 발표 전일 수 있다 — 뉴스에서 결과가"
+                    " 확인되지 않으면 발표됐다고 쓰지 않는다.\n\n")
     rows = []
     for grp in ("bigtech", "ai_infra"):
         for t, d in ((analysis_data or {}).get(grp) or {}).items():
@@ -211,9 +220,9 @@ def _after_hours_directive(analysis_data: dict | None) -> str:
                 reg_txt = f"정규장 {reg:+.2f}% 마감 → " if isinstance(reg, (int, float)) else ""
                 rows.append((abs(pct), f"- {_AFTER_HOURS_NAMES.get(t, t)}({t}): {reg_txt}마감 뒤 시간외 {pct:+.2f}%"))
     if not rows:
-        return ""
+        return near_txt
     rows.sort(reverse=True)
-    return ("## 미국 장 마감 뒤 움직임 (지금 시간외 체결 기준)\n" + "\n".join(r for _, r in rows) +
+    return near_txt + ("## 미국 장 마감 뒤 움직임 (지금 시간외 체결 기준)\n" + "\n".join(r for _, r in rows) +
             "\n정규장 등락과 마감 뒤 움직임은 서로 다른 사건이다 — 섞지 않는다. 마감 뒤에 크게 움직였으면 그 원인"
             "(장 마감 뒤 실적·가이던스·발표)을 뉴스 요약에서 찾아 **간밤 정규장 서사보다 먼저** 다룬다. 원인이 뉴스에 없으면"
             " 원인을 지어내지 말고 '시간외에서 올랐다/내렸다'까지만 쓴다.\n\n")
