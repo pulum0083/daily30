@@ -44,6 +44,12 @@
   .mtp-evs p b{flex:none;width:15px;height:15px;border-radius:50%;font-size:9px;line-height:15px;text-align:center;color:#fff;background:var(--p18)}
   .mtp-evs p b.g26{background:var(--ink);color:var(--canvas)}
   .mtp-evs p em{margin-left:auto;font-style:normal;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+  /* 그래프에서 사건 번호 근처를 지나면 그 번호와 아래 목록 줄을 함께 강조한다(2026-11-19) */
+  .mtp-in .evn{transition:transform .12s,box-shadow .12s}.mtp-in .evn.on{transform:translateX(-50%) scale(1.4);z-index:3;box-shadow:0 0 0 2px var(--canvas),0 0 0 3.5px var(--p18)}
+  .mtp-in .evn.g26.on{box-shadow:0 0 0 2px var(--canvas),0 0 0 3.5px var(--ink)}
+  .mtp-in .ev.on{border-left-style:solid;border-color:var(--p18)}.mtp-in .ev.g26.on{border-color:var(--ink)}
+  .mtp-evs p{padding:3px 6px;margin:0 -6px;border-radius:6px;transition:background .12s}.mtp-evs p.on{background:var(--surface-inset,#F1F5F9);font-weight:700}
+  .mtp-evs p.on em{color:var(--ink)}
   .mtp-concl{margin-top:12px;background:var(--surface-soft);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.75;color:var(--ink)}
   .mtp-concl p{margin:0}
   .mtp-bars{position:relative;height:170px;padding-left:34px;margin:24px 0 26px}
@@ -109,8 +115,8 @@
     </div>
     {% endfor %}
     <div class="mtp-evs">
-      <div><h3><i></i>{{ mt.y0 }} ~ {{ mt.y0 + 1 }}</h3>{% for e in mt.events if e.g == 18 %}<p><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
-      <div><h3><i class="k26"></i>{{ mt.y1 }}</h3>{% for e in mt.events if e.g == 26 %}<p><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+      <div><h3><i></i>{{ mt.y0 }} ~ {{ mt.y0 + 1 }}</h3>{% for e in mt.events if e.g == 18 %}<p data-n="{{ e.n }}"><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+      <div><h3><i class="k26"></i>{{ mt.y1 }}</h3>{% for e in mt.events if e.g == 26 %}<p data-n="{{ e.n }}"><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
     </div>
   </section>
 
@@ -140,8 +146,8 @@
     </div>
     {% endfor %}
     <div class="mtp-evs">
-      <div><h3><i></i>1기 {{ mt.tt.start1[:4] }} ~ {{ mt.tt.start1[:4]|int + 4 }}</h3>{% for e in mt.tt.events if e.g == 18 %}<p><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
-      <div><h3><i class="k26"></i>2기 {{ mt.tt.start2[:4] }} ~</h3>{% for e in mt.tt.events if e.g == 26 %}<p><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+      <div><h3><i></i>1기 {{ mt.tt.start1[:4] }} ~ {{ mt.tt.start1[:4]|int + 4 }}</h3>{% for e in mt.tt.events if e.g == 18 %}<p data-n="{{ e.n }}"><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+      <div><h3><i class="k26"></i>2기 {{ mt.tt.start2[:4] }} ~</h3>{% for e in mt.tt.events if e.g == 26 %}<p data-n="{{ e.n }}"><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
     </div>
     <p class="ltp-fine">사건 옆 숫자는 그날 취임 직전 종가 대비 등락이에요. 1기 선은 4년 끝까지 그대로 그린 실제 기록이고, 2기의 앞날을 예측하는 선이 아니에요.</p>
   </section>
@@ -185,6 +191,23 @@
 (function () {
   var MT = {{ mt.data_js | safe }};
   var fmt = function (v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + '%'; };
+  // 사건 번호 강조 — 지나가는 x에서 14px 안의 가장 가까운 번호(같은 자리에 겹친 번호는 함께)와 그 목록 줄
+  function mark(el, x) {
+    var r = el.getBoundingClientRect(), card = el.closest('.ltp-card'), best = 15, hit = [];
+    [].forEach.call(el.querySelectorAll('.evn'), function (n) {
+      var d = Math.abs(r.left + parseFloat(n.style.left) / 100 * r.width - x);
+      if (d < best - 0.5) { best = d; hit = [n]; } else if (Math.abs(d - best) <= 0.5) hit.push(n);
+    });
+    var on = hit.map(function (n) { return n.textContent.trim(); });
+    [].forEach.call(el.querySelectorAll('.evn'), function (n) {
+      var k = hit.indexOf(n) >= 0; n.classList.toggle('on', k);
+      var ln = n.previousElementSibling; if (ln && ln.classList.contains('ev')) ln.classList.toggle('on', k);
+    });
+    [].forEach.call(card.querySelectorAll('.mtp-evs p[data-n]'), function (p) { p.classList.toggle('on', on.indexOf(p.dataset.n) >= 0); });
+  }
+  function unmark(el) {
+    [].forEach.call(el.closest('.ltp-card').querySelectorAll('.on'), function (n) { if (!n.matches('button')) n.classList.remove('on'); });
+  }
   var at = function (arr, d) { var b = null; for (var i = 0; i < arr.length; i++) { if (arr[i][0] <= d) b = arr[i]; else break; } return b; };
   [].forEach.call(document.querySelectorAll('.mtp-in:not([data-k])'), function (el) {
     var cur = el.querySelector('.ltp-cur'), tip = el.querySelector('.ltp-tip'), S = +el.dataset.s, E = +el.dataset.e;
@@ -199,9 +222,9 @@
       cur.style.left = (f * 100) + '%'; cur.hidden = false; tip.hidden = false;
       tip.style.left = Math.min(r.width - 120, Math.max(0, f * r.width + 10)) + 'px'; tip.style.top = '6px';
     }
-    el.addEventListener('mousemove', function (e) { show(e.clientX); });
-    el.addEventListener('touchmove', function (e) { if (e.touches[0]) show(e.touches[0].clientX); }, { passive: true });
-    el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; });
+    el.addEventListener('mousemove', function (e) { show(e.clientX); mark(el, e.clientX); });
+    el.addEventListener('touchmove', function (e) { if (e.touches[0]) { show(e.touches[0].clientX); mark(el, e.touches[0].clientX); } }, { passive: true });
+    el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; unmark(el); });
   });
   {% if mt.tt %}
   var TT = {{ mt.tt.data_js | safe }};
@@ -218,9 +241,9 @@
       cur.style.left = (f * 100) + '%'; cur.hidden = false; tip.hidden = false;
       tip.style.left = Math.min(r.width - 140, Math.max(0, f * r.width + 10)) + 'px'; tip.style.top = '6px';
     }
-    el.addEventListener('mousemove', function (e) { show(e.clientX); });
-    el.addEventListener('touchmove', function (e) { if (e.touches[0]) show(e.touches[0].clientX); }, { passive: true });
-    el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; });
+    el.addEventListener('mousemove', function (e) { show(e.clientX); mark(el, e.clientX); });
+    el.addEventListener('touchmove', function (e) { if (e.touches[0]) { show(e.touches[0].clientX); mark(el, e.touches[0].clientX); } }, { passive: true });
+    el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; unmark(el); });
   });
   {% endif %}
   [].forEach.call(document.querySelectorAll('.mtp-seg button'), function (btn) {
