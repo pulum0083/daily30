@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-11-19T12:01:28.271326+09:00",
+  "generated_at": "2026-11-19T12:31:34.515247+09:00",
   "date": "2026-11-19",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -1.85,
-      "surge": 0.3,
+      "changePct": -1.49,
+      "surge": 0.33,
       "events": [
         {
           "time": "10:25",
@@ -31,51 +31,32 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -1.49,
-      "surge": 0.32,
-      "events": [
-        {
-          "time": "09:18",
-          "headline": "美 대형 로펌, SK하이닉스 주가 급락 '집단소송' 조사 착수…투자자 손실 보상 추진",
-          "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTFBRQXhhdVl2V0s0SDRteVZjWlBfSlNCbVNadXl5a21naVZIamNLdUp4a0ZPbUtKU0l4TUZ1ZHM1MkNNazktaW9mbmJLWTJYZnZXZUdjQjdCd3ZkbWhhWHc?oc=5",
-          "source": "더구루",
-          "why": "미국 대형 로펌이 SK하이닉스 주가 급락과 관련하여 집단소송 조사에 착수하며 투자자 손실 보상을 추진하고 있습니다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neg"
-        },
-        {
-          "time": "09:54",
-          "headline": "\"3년 동안 그 가격 안 옵니다\"…삼전닉스 주주들 '술렁'",
-          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFA4YjV4MkMyRVNJUS1JS3Fabkp5dXhSOUVrdFR2QUhCUG8yZjk4bjBCdUh1cC0xYmdPLXNrZ3h3cUVCOWdZdEVhaFNrQ255NHFpNnVWM1llZWREQQ?oc=5",
-          "source": "한국경제",
-          "why": "\"3년 동안 그 가격 안 옵니다\"…삼전닉스 주주들 '술렁' (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
-        }
-      ]
+      "changePct": -0.79,
+      "surge": 0.35,
+      "events": []
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -2.25,
-      "surge": 0.29,
+      "changePct": -1.69,
+      "surge": 0.33,
       "events": [
+        {
+          "time": "08:24",
+          "headline": "현대차, 금융부문 실적 둔화 우려…로봇 사업은 주가 동력",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE45ekZXU2FNTlROVG05bzZTT0lLdXY5dWRKc3owN3ZUMDR3QlVsOXRfSFVXSFVsYXpscXEzajVrbzdzUUNxRE4wY2JWQVZybDlEUnBUZy1QWmN5QQ?oc=5",
+          "source": "파이낸셜뉴스",
+          "why": "현대차는 금융 부문 실적 둔화 우려에도 불구하고 로봇 사업이 주가 상승 동력이 될 것이라는 전망이 나왔습니다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        },
         {
           "time": "10:22",
           "headline": "현대차 장중 1%대 하락 26만2000원 거래 : 기업주식정보",
           "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE5jQUtESkV3R19DTEpjcUlKMTJkbTV0YkJJRXUyVDZvSjdueGI5X0ZNLXZQTkRXRUFFendlVm5XN2NrMnBDdVppM3Z1aw?oc=5",
           "source": "재경일보",
-          "why": "현대차 장중 1%대 하락 26만2000원 거래 : 기업주식정보",
-          "tier": "why",
-          "sentiment": "neg"
-        },
-        {
-          "time": "10:16",
-          "headline": "현대차 주가, 11월 19일 장중 265,000원 0.75% 하락",
-          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBHRFFBbk5PTmUwVWdQNURhUmdTT1pDbjRkZnYyeWc0My1wdzdpRmpVN2ZGRnhBREFGU0tUSUcyTi1mY24wQzVBcVhiUHFWSHc1Mk5UZFpWYzlxQjJPSTU2bUV3QU85NjNWVDhkdm91SDZPUQ?oc=5",
-          "source": "중앙이코노미뉴스",
-          "why": "현대차 주가, 11월 19일 장중 265,000원 0.75% 하락",
-          "tier": "why",
+          "why": "현대차 장중 1%대 하락 26만2000원 거래 : 기업주식정보 (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "neg"
         }
       ]
