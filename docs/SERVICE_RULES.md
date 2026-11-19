@@ -2914,6 +2914,11 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **홈 줄** — `home-hero.js midtermRow`, 원천 `web/data/midterm-home.json`(페이지를 쓸 때 함께 씀, 2년 곡선은 사흘마다 한 점). 큰 숫자 = 2026 연초 대비, 옆에 2018년 같은 날. 줄 이름은 상세 페이지 타이틀과 같은 '트럼프 1기 중간선거 뒤와 닮았을까?'(2026-11-15 사용자 요청).
 - **갱신** — 평일 07:25 `us-longterm-morning` 잡(나스닥 체크·S&P 200일선과 같은 스텝, 하나가 실패해도 다른 것은 커밋), 토요일 주간 리포트의 `refresh_live_pages`(금요일 종가). sitemap·발행 게이트(`expected_pages`) 대상이다.
 - 2018년 이미지(유튜브 캡처)의 "2018년 10월 10년 금리 첫 3% 돌파"는 틀렸다(첫 3% 종가 4/25) — 화면에 쓰지 않는다.
+- **트럼프 1기 vs 2기 그래프**(2026-11-19 사용자 요청) — '연초 대비 흐름' 카드 바로 아래. S&P 500을 **취임 직전 거래일 종가**(1기 2017-01-19, 2기 2025-01-17 — 1/20은 휴장)를 0%로 두고 **취임 뒤 날수**를 맞춰 겹친다. 1기 선은 4년 끝(2021-01-19)까지 실제 기록이다.
+  · 수집은 같은 스크립트(`midterm_compare.build_terms` → `data/midterm_2018.json`의 `terms`), 화면은 `longterm_pages.terms_context`(기간 버튼 '같은 기간'=2기 지금+60일 · '4년 전체'). 문장은 정해진 틀이다 — 지금 값, 1기 같은 날 값, 두 곡선 상관, 1기 4년 끝 값.
+  · 사건은 `scripts/config/trump_terms_events.json` + 2기 저점·고점(데이터에서 계산). 저점·고점은 S&P 500 일봉, 기준금리 날짜는 FRED로 확인했다. 2026년 사건은 `midterm_events.json`과 같은 확인된 것만.
+  · 2026-11-18 기준: 취임 뒤 667일 2기 +22.1%, 1기 같은 날(18/11/16) +20.9%, 상관 0.91, 1기 4년 끝 +67.8%.
+  · 테스트 `scripts/test_midterm_compare.py`(취임 기준가·같은 날·번호).
 - 테스트 `scripts/test_midterm_compare.py`, `web/assets/home-hero.test.mjs`(midtermRow).
 
 

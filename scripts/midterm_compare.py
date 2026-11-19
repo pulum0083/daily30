@@ -153,6 +153,36 @@ def rate_changes(fed: list, start: str, end: str) -> list:
     return out
 
 
+# 트럼프 1기·2기 취임일 — 취임 직전 거래일 종가를 0%로 두고 날수를 맞춰 겹친다(2026-11-19 사용자 요청).
+# 2025-01-20은 미국 휴장일(마틴 루서 킹 데이)이라 기준이 1/17 종가가 된다. 1기는 4년 끝(퇴임 전날)까지.
+TERMS = (("2017-01-20", "2021-01-19"), ("2025-01-20", None))
+
+
+def term_path(spx: list, start: str, until: str) -> list:
+    """취임 직전 거래일 종가 대비 등락 % — [취임 뒤 날수, %, 날짜], start~until."""
+    base = [c for d, c in spx if d < start]
+    if not base:
+        return []
+    b, d0 = base[-1], date.fromisoformat(start)
+    return [[(date.fromisoformat(d) - d0).days, round((c / b - 1) * 100, 2), d]
+            for d, c in spx if start <= d <= until]
+
+
+def build_terms(spx: list, session: str) -> dict | None:
+    """1기 4년 전체와 2기 지금까지. 2기 마지막 날과 같은 날수의 1기 값·두 선의 상관(날수를 맞춘 짝)."""
+    (s1, e1), (s2, _e2) = TERMS
+    t1, t2 = term_path(spx, s1, e1), term_path(spx, s2, session)
+    if len(t1) < 500 or len(t2) < 20:
+        return None
+    at1 = lambda day: next((p for p in reversed(t1) if p[0] <= day), None)
+    same = at1(t2[-1][0])
+    pairs = [(at1(q[0]), q) for q in t2]
+    pairs = [(a, b) for a, b in pairs if a]
+    return {"starts": [s1, s2], "t1": t1, "t2": t2,
+            "same": {"date": same[2], "pct": same[1], "day": same[0]} if same else None,
+            "corr": corr([a[1] for a, _ in pairs], [b[1] for _, b in pairs])}
+
+
 def build(spx: list, ixic: list, tnx: list, fed: list, session: str) -> dict | None:
     spx = [(d, c) for d, _h, _l, c in spx if d <= session]
     if not spx or spx[-1][0] != session:
@@ -160,6 +190,7 @@ def build(spx: list, ixic: list, tnx: list, fed: list, session: str) -> dict | N
         return None
     ixic = [(d, c) for d, _h, _l, c in ixic if d <= session]
     tnx = [(d, c) for d, _h, _l, c in tnx if d <= session]
+    terms = build_terms(spx, session)
     a, b = ytd_path(spx, Y0), ytd_path(spx, Y1, session)
     if len(b) < 20:
         return None
@@ -192,6 +223,8 @@ def build(spx: list, ixic: list, tnx: list, fed: list, session: str) -> dict | N
     for k, s in (("spx", spx), ("ixic", ixic)):
         out["ret"][k] = {str(y): year_ret(s, y) for y in (Y0, Y0 + 1)}
     out["midterms"], out["base"] = midterm_stats(spx, session)
+    if terms:
+        out["terms"] = terms
     # 진행 중인 중간선거(선거일이 지났고 12개월이 안 찬 것) — 선거일 종가 → 지금. 확정 통계(평균·오른 횟수)에는 넣지 않는다.
     ed = midterm_day(Y1).isoformat()
     p0 = at_or_before(spx, ed)

@@ -114,6 +114,39 @@
     </div>
   </section>
 
+  {% if mt.tt %}
+  {# 트럼프 1기 vs 2기 — 취임 직전 종가를 0%로 두고 취임 뒤 날수를 맞춰 겹친다(2026-11-19). 숫자는 data/midterm_2018.json의 terms 그대로 #}
+  <section class="ltp-card">
+    <div class="mtp-h"><h2>트럼프 1기 vs 2기 · 취임 뒤 흐름</h2><div class="mtp-seg" role="group" aria-label="기간">{% for r in mt.tt.ranges %}<button type="button" data-r="{{ r.key }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ r.label }}</button>{% endfor %}</div></div>
+    <p class="ltp-say">{{ mt.tt.say | safe }}</p>
+    <div class="ltp-leg"><span><i class="k18"></i>1기({{ mt.tt.start1[:4] }}~{{ mt.tt.start1[:4]|int + 4 }})</span><span><i class="k26"></i>2기({{ mt.tt.start2[:4] }}~)</span><span><i class="z"></i>0% = 취임 직전 거래일 종가</span></div>
+    {% for r in mt.tt.ranges %}
+    <div class="mtp-r" data-r="{{ r.key }}"{% if not loop.first %} hidden{% endif %}>
+      <div class="mtp-plot">
+        {% for t in r.ticks %}<span class="ax" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
+        <div class="mtp-in" data-k="tt" data-s="{{ r.s }}" data-e="{{ r.e }}">
+          <svg viewBox="0 0 1000 200" preserveAspectRatio="none" role="img" aria-label="S&amp;P 500 취임 뒤 등락, 트럼프 1기와 2기">
+            {% for t in r.ticks %}<line x1="0" x2="1000" y1="{{ t.y }}" y2="{{ t.y }}" class="{{ 'z' if t.zero else 'g' }}"/>{% endfor %}
+            {% for x in r.yrs %}<line x1="{{ x }}" x2="{{ x }}" y1="0" y2="200" class="yr"/>{% endfor %}
+            {% if r.a1 %}<polyline class="a18" points="{{ r.a1 }}"/>{% endif %}
+            {% if r.b %}<polyline class="b26" points="{{ r.b }}"/>{% endif %}
+          </svg>
+          {% for m in r.marks %}<i class="ev g{{ m.g }}" style="left:{{ m.left }}"></i><b class="evn g{{ m.g }}" style="left:{{ m.left }};{{ 'top' if m.g == 18 else 'bottom' }}:{{ m.off }}px">{{ m.n }}</b>{% endfor %}
+          {% if r.now %}<i class="now" style="left:{{ r.now.left }};top:{{ r.now.top }}"></i><span class="nowl" style="left:{{ r.now.left }};top:{{ r.now.top }}">지금 {{ r.now.s }}%</span>{% endif %}
+          <i class="ltp-cur" hidden></i><div class="ltp-tip" role="status" hidden></div>
+        </div>
+      </div>
+      <div class="mtp-x">{% for m in r.months %}<span style="left:{{ m.left }}">{{ m.label }}</span>{% endfor %}</div>
+    </div>
+    {% endfor %}
+    <div class="mtp-evs">
+      <div><h3><i></i>1기 {{ mt.tt.start1[:4] }} ~ {{ mt.tt.start1[:4]|int + 4 }}</h3>{% for e in mt.tt.events if e.g == 18 %}<p><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+      <div><h3><i class="k26"></i>2기 {{ mt.tt.start2[:4] }} ~</h3>{% for e in mt.tt.events if e.g == 26 %}<p><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+    </div>
+    <p class="ltp-fine">사건 옆 숫자는 그날 취임 직전 종가 대비 등락이에요. 1기 선은 4년 끝까지 그대로 그린 실제 기록이고, 2기의 앞날을 예측하는 선이 아니에요.</p>
+  </section>
+  {% endif %}
+
   <section class="ltp-card">
     <div class="ltp-h"><h2>같은 날 나란히 · {{ mt.same_label }}</h2><small>닮은 점과 다른 점</small></div>
     <table><thead><tr><th></th><th>{{ mt.y0 }}년</th><th>{{ mt.y1 }}년</th></tr></thead><tbody>
@@ -153,7 +186,7 @@
   var MT = {{ mt.data_js | safe }};
   var fmt = function (v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + '%'; };
   var at = function (arr, d) { var b = null; for (var i = 0; i < arr.length; i++) { if (arr[i][0] <= d) b = arr[i]; else break; } return b; };
-  [].forEach.call(document.querySelectorAll('.mtp-in'), function (el) {
+  [].forEach.call(document.querySelectorAll('.mtp-in:not([data-k])'), function (el) {
     var cur = el.querySelector('.ltp-cur'), tip = el.querySelector('.ltp-tip'), S = +el.dataset.s, E = +el.dataset.e;
     function show(x) {
       var r = el.getBoundingClientRect(), f = Math.min(1, Math.max(0, (x - r.left) / r.width)), d = S + f * (E - S);
@@ -170,6 +203,26 @@
     el.addEventListener('touchmove', function (e) { if (e.touches[0]) show(e.touches[0].clientX); }, { passive: true });
     el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; });
   });
+  {% if mt.tt %}
+  var TT = {{ mt.tt.data_js | safe }};
+  [].forEach.call(document.querySelectorAll('.mtp-in[data-k="tt"]'), function (el) {
+    var cur = el.querySelector('.ltp-cur'), tip = el.querySelector('.ltp-tip'), S = +el.dataset.s, E = +el.dataset.e;
+    var dt = function (s) { return s.slice(2, 4) + '/' + (+s.slice(5, 7)) + '/' + (+s.slice(8, 10)); };
+    function show(x) {
+      var r = el.getBoundingClientRect(), f = Math.min(1, Math.max(0, (x - r.left) / r.width)), d = S + f * (E - S);
+      var a = d <= TT.a[TT.a.length - 1][0] ? at(TT.a, d) : null, b = d <= TT.b[TT.b.length - 1][0] ? at(TT.b, d) : null;
+      if (!a && !b) return;
+      tip.innerHTML = '<b>취임 뒤 ' + Math.round(d) + '일</b>' +
+        (a ? '1기 ' + dt(a[2]) + ' <span class="k">' + fmt(a[1]) + '</span>' : '') +
+        (b ? '<br>2기 ' + dt(b[2]) + ' <span class="k">' + fmt(b[1]) + '</span>' : '<br>2기 <span class="k">아직</span>');
+      cur.style.left = (f * 100) + '%'; cur.hidden = false; tip.hidden = false;
+      tip.style.left = Math.min(r.width - 140, Math.max(0, f * r.width + 10)) + 'px'; tip.style.top = '6px';
+    }
+    el.addEventListener('mousemove', function (e) { show(e.clientX); });
+    el.addEventListener('touchmove', function (e) { if (e.touches[0]) show(e.touches[0].clientX); }, { passive: true });
+    el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; });
+  });
+  {% endif %}
   [].forEach.call(document.querySelectorAll('.mtp-seg button'), function (btn) {
     btn.addEventListener('click', function () {
       var card = btn.closest('.ltp-card'), k = btn.dataset.r;

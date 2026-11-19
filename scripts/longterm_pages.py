@@ -430,6 +430,108 @@ def _mt_chart(data: dict, evs: list, S: int, E: int) -> dict:
     }
 
 
+# ── 트럼프 1기 vs 2기 — 취임 뒤 날수를 맞춰 겹친다(2026-11-19 사용자 요청) ─────────────────────────────
+TERMS_EVENTS_PATH = Path(__file__).resolve().parent / "config" / "trump_terms_events.json"
+
+
+def _tt_events(tt: dict, asof: str) -> list:
+    """설정 파일 사건 + 2기 저점·고점(데이터에서 계산). 취임 뒤 날수·그날 값·예정 여부를 붙인다. 1기 먼저 번호를 매긴다."""
+    try:
+        evs = json.loads(TERMS_EVENTS_PATH.read_text(encoding="utf-8")).get("events") or []
+    except Exception:
+        evs = []
+    t2 = tt["t2"]
+    lo, hi = min(t2, key=lambda p: p[1]), max(t2, key=lambda p: p[1])
+    for p, name in ((lo, "2기 저점"), (hi, "2기 고점")):
+        if p is not t2[-1] and not any(e.get("d") == p[2] for e in evs):
+            evs = evs + [{"d": p[2], "label": name}]
+    s1, s2 = tt["starts"]
+    out = []
+    for e in sorted(evs, key=lambda e: e.get("d", "")):
+        d = str(e.get("d") or "")
+        if not d[:4].isdigit() or d < s1:
+            continue
+        g = 2 if d >= s2 else 1
+        src = tt["t2"] if g == 2 else tt["t1"]
+        if g == 1 and d > src[-1][2]:
+            continue
+        later = d > asof
+        v = None if later else next((p[1] for p in src if p[2] >= d), None)
+        out.append({"d": d, "day": (date.fromisoformat(d) - date.fromisoformat(s2 if g == 2 else s1)).days,
+                    "g": 18 if g == 1 else 26, "label": e.get("label", "") + (" (예정)" if later else ""),
+                    "v": v, "v_s": f"{_sg(v)}%" if v is not None else "아직",
+                    "when": f"{d[2:4]}/{int(d[5:7])}/{int(d[8:10])}"})
+    a_ev = [e for e in out if e["g"] == 18]
+    b_ev = [e for e in out if e["g"] == 26]
+    for i, e in enumerate(a_ev + b_ev, 1):
+        e["n"] = i
+    return a_ev + b_ev
+
+
+def _tt_chart(tt: dict, evs: list, S: int, E: int) -> dict:
+    """취임 뒤 [S, E]일만 그린다 — 중간선거 그래프(_mt_chart)와 같은 좌표·표시 규칙."""
+    W = E - S
+    pa = [p for p in tt["t1"] if S <= p[0] <= E]
+    pb = [p for p in tt["t2"] if S <= p[0] <= E]
+    vals = [p[1] for p in pa + pb] + [0]
+    rng = max(vals) - min(vals)
+    step = 5 if rng < 26 else 10 if rng < 60 else 20
+    lo = math.floor((min(vals) - 1) / step) * step
+    hi = math.ceil((max(vals) + 1) / step) * step
+    xx = lambda d: (d - S) / W * 100
+    yy = lambda v: (hi - v) / (hi - lo) * 100
+    pl = lambda ps: " ".join(f"{xx(d) * 10:.1f},{yy(v) * 2:.1f}" for d, v, _ in ps)
+    marks = [dict(e, x=xx(e["day"])) for e in evs if S <= e["day"] <= E]
+    for g in (18, 26):                                   # 번호가 가까우면 줄을 바꿔 엇갈린다
+        last = {}
+        for m in [m for m in marks if m["g"] == g]:
+            r = 0
+            while r in last and m["x"] - last[r] < 5.2:
+                r += 1
+            m["row"], last[r] = r, m["x"]
+            m["off"] = r * 17 if g == 18 else r * 17 - 8
+    half = W <= 900                                      # 짧은 창은 6개월마다, 4년 창은 1년마다
+    xs = []
+    for k in range(0, 9):
+        d = round(k * 182.6)
+        if (half or k % 2 == 0) and S <= d <= E:
+            y, h = divmod(k, 2)
+            xs.append({"left": f"{xx(d):.1f}%", "label": "취임" if k == 0 else (f"{y}년" if y else "") + (" 6개월" if h else "")})
+    yrs = [f"{xx(d) * 10:.1f}" for d in (365, 730, 1096) if S < d < E]
+    now = tt["t2"][-1]
+    return {
+        "s": S, "e": E,
+        "ticks": [{"top": f"{yy(v):.1f}%", "v": f"{_sg(v, 0)}%", "y": f"{yy(v) * 2:.1f}", "zero": v == 0}
+                  for v in range(int(lo), int(hi) + 1, step)],
+        "a1": pl(pa), "b": pl(pb), "yrs": yrs,
+        "now": ({"left": f"{xx(now[0]):.2f}%", "top": f"{yy(now[1]):.2f}%", "s": f"{_sg(now[1])}%"} if S <= now[0] <= E else None),
+        "marks": [{"left": f"{m['x']:.2f}%", "g": m["g"], "n": m["n"], "off": m["off"]} for m in marks],
+        "months": [dict(x, label=x["label"].strip()) for x in xs],
+    }
+
+
+def terms_context(tt: dict, asof: str) -> dict:
+    """data['terms'] → 트럼프 1기 vs 2기 그래프 컨텍스트. 없으면 {}. 문장은 정해진 틀(LLM 없음, §0)."""
+    if not tt or not tt.get("t1") or not tt.get("t2") or not tt.get("same"):
+        return {}
+    now, same, end1 = tt["t2"][-1], tt["same"], tt["t1"][-1]
+    days = now[0]
+    evs = _tt_events(tt, asof)
+    ranges = [("same", "같은 기간", 0, days + 60), ("all", "4년 전체", 0, max(end1[0], days) + 10)]
+    say = (f"취임 뒤 {days}일, 2기 S&amp;P 500은 취임 직전보다 <b>{_sg(now[1])}%</b>예요. "
+           f"1기 같은 날({same['date'][2:4]}/{int(same['date'][5:7])}/{int(same['date'][8:10])})엔 <b>{_sg(same['pct'])}%</b>였어요.")
+    if tt.get("corr") is not None:
+        say += f" 두 곡선이 닮은 정도는 <b>{tt['corr']:.2f}</b>예요(1이면 똑같고 0이면 관계없어요)."
+    say += f" 1기는 4년 끝({end1[2][:4]}년 1월)에 <b>{_sg(end1[1])}%</b>로 마쳤어요."
+    s1, s2 = tt["starts"]
+    return {"tt": {
+        "say": say, "days": days, "now_s": _sg(now[1]), "same_s": _sg(same["pct"]),
+        "start1": s1, "start2": s2, "events": evs,
+        "ranges": [dict(_tt_chart(tt, evs, S, E), key=k, label=l) for k, l, S, E in ranges],
+        "data_js": json.dumps({"a": tt["t1"], "b": tt["t2"]}, ensure_ascii=False, separators=(",", ":")),
+    }}
+
+
 def _moves_text(moves: list) -> str:
     """[[날짜, 값, ±1]] → '3번 올렸어요(3·6·9월)' 같은 짧은 문장. 바뀐 적이 없으면 '그대로 뒀어요'."""
     if not moves:
@@ -533,4 +635,5 @@ def midterm_context(data: dict) -> dict:
         "n_mid": len(mid), "ups": ups, "m_avg": m_avg, "worst": worst,
         "first": mid[0][0] if mid else None, "last": mid[-1][0] if mid else None,
         "data_js": json.dumps({"a": [p[:2] + [p[2]] for p in data["a"]], "b": data["b"]}, ensure_ascii=False, separators=(",", ":")),
+        **terms_context(data.get("terms"), asof),
     }}

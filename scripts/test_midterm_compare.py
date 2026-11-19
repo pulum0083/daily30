@@ -119,3 +119,35 @@ def test_live_midterm_column_is_separate_from_stats():
 def test_no_live_column_before_election_day():
     d = mc.build(_spx(), _spx(), [], [], "2026-11-02")
     assert "midterm_live" not in d
+
+
+# ── 트럼프 1기 vs 2기 — 취임 뒤 날수를 맞춰 겹친다(2026-11-19) ──────────────────────────────
+
+def _spx_terms():
+    from datetime import date, timedelta
+    out, d, v = [], date(2016, 12, 1), 100.0
+    while d <= date(2026, 11, 18):
+        if d.weekday() < 5 and d.isoformat() != "2025-01-20":       # 2025-01-20 휴장(MLK)
+            v *= 1.0003
+            out.append((d.isoformat(), round(v, 4)))
+        d += timedelta(days=1)
+    return out
+
+
+def test_term_path_base_is_close_before_inauguration():
+    spx = [("2025-01-16", 99.0), ("2025-01-17", 100.0), ("2025-01-21", 101.0), ("2025-01-22", 102.0)]
+    p = mc.term_path(spx, "2025-01-20", "2025-12-31")
+    assert p[0] == [1, 1.0, "2025-01-21"] and p[1] == [2, 2.0, "2025-01-22"]
+
+
+def test_build_terms_same_day_and_context():
+    t = mc.build_terms(_spx_terms(), "2026-11-18")
+    assert t["t1"][-1][2] == "2021-01-19" and t["t2"][-1][2] == "2026-11-18"
+    assert t["same"]["day"] <= t["t2"][-1][0] and t["same"]["date"][:4] == "2018"
+    c = lp.terms_context(t, "2026-11-18")["tt"]
+    assert "취임 뒤 667일" in c["say"] and [r["key"] for r in c["ranges"]] == ["same", "all"]
+    g18 = [e for e in c["events"] if e["g"] == 18]
+    g26 = [e for e in c["events"] if e["g"] == 26]
+    assert g18[0]["n"] == 1 and g26[0]["n"] == len(g18) + 1                 # 1기 먼저 번호
+    assert all(e["d"] >= "2025-01-20" for e in g26) and all(e["d"] < "2021-01-20" for e in g18)
+    assert lp.terms_context(None, "2026-11-18") == {}
