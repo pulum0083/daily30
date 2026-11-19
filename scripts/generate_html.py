@@ -153,6 +153,9 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
 
     if internal_type == "close":
         ctx.update(build_close_sections(analysis, market_data, index_name, target_date))
+        from kr_official_closes import session_hours
+        _o, _c, _ = session_hours(target_date.replace("-", ""))   # 수능일은 10:00 ~ 16:30(§91)
+        ctx["close_session_hours"] = f"{_o[:2]}:{_o[2:]} ~ {_c[:2]}:{_c[2:]}"
     elif internal_type == "us":
         # 미국 이슈 중심 브리핑 — 예측 대신 오늘의 관점 + 이슈 카드. 성적표 사이드바 없음.
         ctx.update(build_issues(analysis))

@@ -34,13 +34,26 @@ _UA = {"User-Agent": "Mozilla/5.0"}
 DAY_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/day"
            "?startDateTime={start}&endDateTime={end}")
 MINUTE_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/minute"
-              "?startDateTime={d}0900&endDateTime={d}1539")
+              "?startDateTime={d}0900&endDateTime={d}{last}")
 CLOSE_BAR_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/minute"
-                 "?startDateTime={d}1530&endDateTime={d}1539")
+                 "?startDateTime={d}{close}&endDateTime={d}{last}")
 REGULAR_OPEN_HHMM = "0900"
 REGULAR_CLOSE_HHMM = "1530"
 # 종가 단일가가 연장되면 종가 봉이 이 시각까지 밀린다. 15:40부터는 장후 시간외 종가매매다.
 CLOSE_BAR_LAST_HHMM = "1539"
+# 장 시간이 바뀐 날 — {YYYYMMDD: (개장, 마감, 종가 봉 마지막)}. 수능일은 1시간 늦게 열고 닫는다(10:00~16:30).
+# 바뀐 날만 적는다. 여기 없는 날은 09:00~15:30이다.
+SHIFTED_SESSIONS = {"20261119": ("1000", "1630", "1639")}
+
+
+def session_hours(yyyymmdd):
+    """그날 (개장, 마감, 종가 봉 마지막) HHMM. 수능일처럼 바뀐 날은 SHIFTED_SESSIONS 값."""
+    return SHIFTED_SESSIONS.get(str(yyyymmdd), (REGULAR_OPEN_HHMM, REGULAR_CLOSE_HHMM, CLOSE_BAR_LAST_HHMM))
+
+
+def session_close_hhmm(yyyymmdd):
+    """그날 정규장 마감 HHMM(보통 1530, 수능일 1630)."""
+    return session_hours(yyyymmdd)[1]
 # KRX 애프터마켓 첫날. 이날부터 네이버 일봉 종가·거래량이 애프터장을 포함한다(9/14 20:12 실측).
 AFTERMARKET_START = "20260914"
 CACHE_PATH = Path(__file__).resolve().parents[1] / "data" / "kr_official_closes.json"
@@ -99,11 +112,13 @@ def save_cache(path=None):
 
 
 def closing_bar(bars, yyyymmdd):
-    """그날 종가 봉 — 15:30~15:39 사이 첫 봉(종가 단일가가 연장되면 15:30 봉이 없다). 없으면 None."""
+    """그날 종가 봉 — 15:30~15:39 사이 첫 봉(종가 단일가가 연장되면 15:30 봉이 없다). 없으면 None.
+    수능일처럼 장 시간이 바뀐 날은 그날 마감 시각부터 본다(session_hours)."""
+    _, close_at, last_at = session_hours(yyyymmdd)
     hits = [b for b in (bars if isinstance(bars, list) else [])
             if isinstance(b, dict) and b.get("currentPrice")
             and str(b.get("localDateTime") or "")[:8] == yyyymmdd
-            and REGULAR_CLOSE_HHMM <= str(b.get("localDateTime"))[8:12] <= CLOSE_BAR_LAST_HHMM]
+            and close_at <= str(b.get("localDateTime"))[8:12] <= last_at]
     return min(hits, key=lambda b: str(b["localDateTime"])) if hits else None
 
 
@@ -114,7 +129,7 @@ def regular_session(code, yyyymmdd, fetch=_get_json):
     거래량 필드가 하나도 없으면 volume은 None이다.
     """
     try:
-        bars = fetch(MINUTE_URL.format(code=code, d=yyyymmdd))
+        bars = fetch(MINUTE_URL.format(code=code, d=yyyymmdd, last=session_hours(yyyymmdd)[2]))
     except Exception as e:
         print(f"[official_closes] {code} {yyyymmdd} 정규장 1분봉 조회 실패: {e}", file=sys.stderr)
         return None
@@ -138,7 +153,8 @@ def regular_session(code, yyyymmdd, fetch=_get_json):
 def regular_close(code, yyyymmdd, fetch=_get_json):
     """그날 정규장 공식 종가(15:30~15:39 1분봉만 조회). 없거나 실패하면 None. 거래량이 필요 없을 때 쓴다."""
     try:
-        bars = fetch(CLOSE_BAR_URL.format(code=code, d=yyyymmdd))
+        _, close_at, last_at = session_hours(yyyymmdd)
+        bars = fetch(CLOSE_BAR_URL.format(code=code, d=yyyymmdd, close=close_at, last=last_at))
     except Exception as e:
         print(f"[official_closes] {code} {yyyymmdd} 15:30 1분봉 조회 실패: {e}", file=sys.stderr)
         return None
@@ -157,7 +173,7 @@ def last_closed_session(now=None):
         from holiday_check import check_kospi_open
     now = now or datetime.now(KST)
     d = now.date()
-    if not (check_kospi_open(d) and now.strftime("%H%M") > REGULAR_CLOSE_HHMM):
+    if not (check_kospi_open(d) and now.strftime("%H%M") > session_close_hhmm(d.strftime("%Y%m%d"))):
         d -= timedelta(days=1)
         for _ in range(15):
             if check_kospi_open(d):
@@ -209,7 +225,7 @@ def official_day_rows(code, now=None, days=420, fetch=_get_json):
         return []
     rows = [r for r in (rows if isinstance(rows, list) else []) if isinstance(r, dict)]
     today = now.strftime("%Y%m%d")
-    intraday = now.strftime("%H%M") < REGULAR_CLOSE_HHMM
+    intraday = now.strftime("%H%M") < session_close_hhmm(today)
     out = []
     for r in rows:
         d = str(r.get("localDate"))
@@ -237,7 +253,7 @@ def official_today(code, now=None, fetch=_get_json):
     실시간 1,688,000·-0.53% vs 공식 1,690,000·-0.41%). 마감 뒤 도는 잡이 '오늘 종가·등락률'이 필요하면 이 함수를 쓴다.
     """
     now = now or datetime.now(KST)
-    if now.strftime("%H%M") <= REGULAR_CLOSE_HHMM:
+    if now.strftime("%H%M") <= session_close_hhmm(now.strftime("%Y%m%d")):
         return None
     rows = official_day_rows(code, now=now, days=14, fetch=fetch)
     if len(rows) < 2 or str(rows[-1].get("localDate")) != now.strftime("%Y%m%d"):

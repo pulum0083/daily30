@@ -73,7 +73,8 @@ def fetch_mover_rows(now: datetime | None = None) -> list[dict]:
     """유니버스 41종목의 무버 행 리스트를 만든다(네트워크). 15:30 전엔 네이버 실시간, 뒤엔 정규장 공식 일봉."""
     avg = _load_vol_avg20()
     now = now or datetime.now(KST)
-    after_close = now.strftime("%H%M") > "1530"
+    from kr_official_closes import session_close_hhmm
+    after_close = now.strftime("%H%M") > session_close_hhmm(now.strftime("%Y%m%d"))   # 수능일은 16:30
     if after_close:
         # 장이 닫힌 뒤 실시간 등락률·거래량은 애프터장(16:00~20:00) 체결을 따른다(§48). 9/15 16:04 SK하이닉스
         # 실시간 -0.53%·2,549,066 vs 공식 -0.41%·정규장 2,547,696.

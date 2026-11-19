@@ -123,6 +123,19 @@ def load_investor_time(bizdate: str, out_dir: Path = None) -> list[dict]:
     return sorted(({**r, "date": bizdate} for r in body.get("rows") or []), key=lambda r: r["t"], reverse=True)
 
 
+def regular_window(bizdate: str) -> tuple[str, str]:
+    """그날 정규장 마감 직후 수급 행 창(HHMM) — 보통 15:31~15:40, 수능일처럼 장이 늦게 닫힌 날은 그만큼 민다."""
+    try:
+        from kr_official_closes import session_close_hhmm
+    except ImportError:
+        from scripts.kr_official_closes import session_close_hhmm
+    close = session_close_hhmm(bizdate)
+    if close == "1530":
+        return INVESTOR_REGULAR_FROM, INVESTOR_REGULAR_UNTIL
+    t = datetime.strptime(close, "%H%M")
+    return (t + timedelta(minutes=1)).strftime("%H%M"), (t + timedelta(minutes=10)).strftime("%H%M")
+
+
 def regular_session_investor(bizdate: str, fetch_json=None, out_dir: Path = None, save: bool = True) -> dict:
     """그날 정규장 마감 직후(15:31~15:40) 코스피 투자자별 순매수. 없으면 {}.
 
@@ -141,8 +154,9 @@ def regular_session_investor(bizdate: str, fetch_json=None, out_dir: Path = None
         rows = live
     else:
         rows = load_investor_time(bizdate, out_dir)
-    found = next((r for r in rows if r["t"].replace(":", "") <= INVESTOR_REGULAR_UNTIL), None)
-    if not found or found["t"].replace(":", "") < INVESTOR_REGULAR_FROM:
+    frm, until = regular_window(bizdate)
+    found = next((r for r in rows if r["t"].replace(":", "") <= until), None)
+    if not found or found["t"].replace(":", "") < frm:
         return {}
     return {
         "date": bizdate,

@@ -19,7 +19,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
-from datetime import datetime
+from datetime import datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -47,7 +47,7 @@ STOCKS_UP_URL = f"{M_API}/stocks/up/KOSPI?page=1&pageSize=60"
 QUANT_TOP_URL = f"{M_API}/stocks/quantTop/KOSPI?page=1&pageSize=100"
 STOCK_TREND_URL = M_API + "/stock/{code}/trend?pageSize=20"
 MINUTE_RANGE_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/minute"
-                    "?startDateTime={start}0900&endDateTime={end}1539")
+                    "?startDateTime={start}0900&endDateTime={end}{last}")
 
 # 원천 구조가 바뀌어 목록 자체를 못 읽은 수집기 — fetch_closing_data가 모아 관리자에게 알린다.
 _source_failures: list[str] = []
@@ -79,10 +79,24 @@ def _source_failed(name: str, detail: str) -> None:
 _after_market_skips: list[str] = []
 
 
+def _session_hours(yyyymmdd):
+    """그날 (개장, 마감, 종가 봉 마지막) — 수능일처럼 바뀐 날은 kr_official_closes.SHIFTED_SESSIONS(§91)."""
+    try:
+        from scripts.kr_official_closes import session_hours
+    except ImportError:
+        from kr_official_closes import session_hours
+    return session_hours(yyyymmdd)
+
+
+def _hhmm_plus(hhmm: str, minutes: int) -> str:
+    return (datetime.strptime(hhmm, "%H%M") + timedelta(minutes=minutes)).strftime("%H%M")
+
+
 def list_prices_regular(now=None) -> bool:
     """목록·업종 API 가격이 정규장 값인 시간대(09:00~16:00 KST)인가."""
-    hhmm = (now or datetime.now(KST)).strftime("%H%M")
-    return "0900" <= hhmm < "1600"
+    now = now or datetime.now(KST)
+    hhmm = now.strftime("%H%M")
+    return "0900" <= hhmm < _hhmm_plus(_session_hours(now.strftime("%Y%m%d"))[1], 30)   # 보통 16:00, 수능일 17:00
 
 
 def _after_market_skip(name: str) -> None:
@@ -482,8 +496,9 @@ def fetch_intraday_kospi() -> dict:
     # KST 기준 09:00~15:20 구간만 필터
     try:
         idx = closes.index.tz_convert(KST)
-        mask = (idx.hour > 9) | ((idx.hour == 9) & (idx.minute >= 0))
-        mask &= (idx.hour < 15) | ((idx.hour == 15) & (idx.minute <= 20))
+        open_at, close_at, _ = _session_hours(datetime.now(KST).strftime("%Y%m%d"))   # 수능일은 10:00~16:20
+        hm = idx.hour * 100 + idx.minute
+        mask = (hm >= int(open_at)) & (hm <= int(_hhmm_plus(close_at, -10)))
         closes = closes[mask]
     except Exception:
         pass  # 타임존 변환 실패 시 전체 사용
@@ -613,14 +628,15 @@ def regular_session_rows(code: str, rows: list[dict], fetch=_get_json) -> list[d
     if not recent:
         return rows
     try:
-        bars = fetch(MINUTE_RANGE_URL.format(code=code, start=recent[0], end=recent[-1]))
+        last = max(_session_hours(d)[2] for d in recent)   # 수능일이 끼면 16:39까지 받는다
+        bars = fetch(MINUTE_RANGE_URL.format(code=code, start=recent[0], end=recent[-1], last=last))
     except Exception as e:
         print(f"[fetch_closing] dpick {code} 1분봉 조회 실패: {e}", file=sys.stderr)
         bars = []
     by_date: dict[str, list] = {}
     for b in bars if isinstance(bars, list) else []:
         ts = str(b.get("localDateTime", "")) if isinstance(b, dict) else ""
-        if len(ts) >= 12 and "0900" <= ts[8:12] <= "1539":   # 종가 단일가 연장 봉까지(§48)
+        if len(ts) >= 12 and "0900" <= ts[8:12] <= _session_hours(ts[:8])[2]:   # 종가 단일가 연장 봉까지(§48)
             by_date.setdefault(ts[:8], []).append(b)
 
     def served(url):  # kr_official_closes가 부르는 15:30 1분봉 조회를 이미 받은 봉으로 대신한다
@@ -708,7 +724,7 @@ def _regular_prices_live(now) -> bool:
     2026-09-15 16:04 marketValue 목록의 SK하이닉스는 1,687,000·-0.59%(애프터장), 공식 종가는 1,690,000·-0.41%.
     pykrx 9/14 SK하이닉스 종가도 1,683,000(공식 1,697,000)이었다(§48).
     """
-    return "0900" <= now.strftime("%H%M") <= "1530"
+    return "0900" <= now.strftime("%H%M") <= _session_hours(now.strftime("%Y%m%d"))[1]
 
 
 def fetch_kospi200_top10(now=None) -> list:
@@ -833,7 +849,8 @@ def preserve_same_day(data: dict, old: dict) -> list[str]:
     이미 받은 정규장 값을 빈 값으로 덮어쓰게 된다. 날짜가 다르거나 장중에 만든 파일이면 되살리지 않는다.
     """
     new_at, old_at = str(data.get("generated_at", "")), str((old or {}).get("generated_at", ""))
-    if not old_at or old_at[:10] != new_at[:10] or old_at[11:16].replace(":", "") < PRESERVE_AFTER_HHMM:
+    after = _hhmm_plus(_session_hours(old_at[:10].replace("-", ""))[1], 10) if old_at else PRESERVE_AFTER_HHMM
+    if not old_at or old_at[:10] != new_at[:10] or old_at[11:16].replace(":", "") < after:
         return []
     kept = []
     for k in PRESERVE_KEYS:
@@ -901,6 +918,10 @@ def parse_vs_close(payload, today: str) -> dict:
 
 def fetch_vs_close(now=None, fetch=_get_json) -> dict:
     today = (now or datetime.now(KST)).strftime("%Y-%m-%d")
+    if _session_hours(today.replace("-", ""))[1] != "1530":
+        # 이 API(api/_vs-close.mjs)는 15:30 봉을 종가로 쓴다 — 수능일처럼 장이 늦게 닫힌 날엔 장중 값이 된다(§91)
+        print("[fetch_closing] 어제와 비교: 오늘은 장 마감 시각이 달라 비운다(수능일 등)", file=sys.stderr)
+        return {}
     try:
         out = parse_vs_close(fetch(VS_CLOSE_URL, timeout=60), today)
     except Exception as e:

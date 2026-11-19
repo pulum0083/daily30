@@ -47,8 +47,12 @@ export default {
       return dispatch(env, 'daily_report.yml', { briefing_type: 'kospi', dry_run: 'false' });
     }
 
-    // 코스피 마감: 16:25 KST 월~금
-    if (h === 16 && m === 25 && isWeekday) {
+    // 코스피 마감: 16:25 KST 월~금. 장이 늦게 닫히는 날(수능일 16:30 마감)은 그만큼 미룬다.
+    // 날짜는 scripts/kr_official_closes.py SHIFTED_SESSIONS와 함께 고친다.
+    const ymd = `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+    const CLOSE_AT = { '2026-11-19': [17, 25] };   // 수능일 — 10:00~16:30
+    const [ch, cm] = CLOSE_AT[ymd] || [16, 25];
+    if (h === ch && m === cm && isWeekday) {
       console.log('[cron] → kospi-close briefing');
       return dispatch(env, 'daily_report.yml', { briefing_type: 'kospi-close', dry_run: 'false' });
     }
