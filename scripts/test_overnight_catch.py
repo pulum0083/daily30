@@ -183,3 +183,11 @@ def test_methodology_lists_after_hours_weight():
     m = rp.build_methodology()
     assert any(w["name"] == "AI 반도체 시간외" and w["w"] == 1.0 for w in m["weights"])
     assert m["ah"]["hit_with"] > m["ah"]["hit_without"]
+
+
+# ── ⑥ AI 산업 큰 사건 검색어 — 2026-11-18 밤 앤트로픽 IPO 기사를 다음 날 아침 수집이 못 가져왔다 ──────────
+
+def test_ai_event_queries_in_both_briefings():
+    assert ("앤트로픽", "kr") in nr._KOSPI_RSS_QUERIES and ("Anthropic", "en") in nr._KOSPI_RSS_QUERIES
+    assert ("오픈AI", "kr") in nr._US_RSS_QUERIES
+    assert "AI 산업 큰 사건" in nr._KOSPI_RSS_SELECT_PROMPT and "AI 산업 큰 사건" in nr._RSS_SELECT_PROMPT

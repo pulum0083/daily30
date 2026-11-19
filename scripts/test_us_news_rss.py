@@ -88,7 +88,7 @@ def test_select_prompt_asks_for_more_and_company_news():
     p = fn._RSS_SELECT_PROMPT.format(today="2026-11-09", max_n=fn.RSS_SELECT_MAX, articles="")
     assert "최대 7개" in p and "실적·가이던스" in p
     qs = [q for q, _ in fn._US_RSS_QUERIES]
-    assert "premarket movers stocks" in qs and len(qs) == 10
+    assert "premarket movers stocks" in qs and ("Anthropic", "en") in fn._US_RSS_QUERIES
 
 
 # ── 결제·권한 오류 ──
