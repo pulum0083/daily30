@@ -145,9 +145,13 @@ def test_build_terms_same_day_and_context():
     assert t["t1"][-1][2] == "2021-01-19" and t["t2"][-1][2] == "2026-11-18"
     assert t["same"]["day"] <= t["t2"][-1][0] and t["same"]["date"][:4] == "2018"
     c = lp.terms_context(t, "2026-11-18")["tt"]
-    assert "취임 뒤 667일" in c["say"] and [r["key"] for r in c["ranges"]] == ["same", "all"]
+    assert "취임 뒤 667일" in c["say"] and [r["key"] for r in c["ranges"]] == ["same", "y1", "y2", "all"]
     g18 = [e for e in c["events"] if e["g"] == 18]
     g26 = [e for e in c["events"] if e["g"] == 26]
     assert g18[0]["n"] == 1 and g26[0]["n"] == len(g18) + 1                 # 1기 먼저 번호
     assert all(e["d"] >= "2025-01-20" for e in g26) and all(e["d"] < "2021-01-20" for e in g18)
+    y1 = next(r for r in c["ranges"] if r["key"] == "y1")
+    assert [m["label"] for m in y1["months"]] == ["취임", "2개월", "4개월", "6개월", "8개월", "10개월", "1년"]
+    y2 = next(r for r in c["ranges"] if r["key"] == "y2")
+    assert y2["s"] == 365 and y2["now"] and y2["months"][0]["label"] == "1년"
     assert lp.terms_context(None, "2026-11-18") == {}

@@ -490,13 +490,13 @@ def _tt_chart(tt: dict, evs: list, S: int, E: int) -> dict:
                 r += 1
             m["row"], last[r] = r, m["x"]
             m["off"] = r * 17 if g == 18 else r * 17 - 8
-    half = W <= 900                                      # 짧은 창은 6개월마다, 4년 창은 1년마다
+    step_m = 2 if W <= 420 else 6 if W <= 900 else 12   # 1년 창은 2개월마다, 2년 창은 6개월마다, 4년 창은 1년마다
     xs = []
-    for k in range(0, 9):
-        d = round(k * 182.6)
-        if (half or k % 2 == 0) and S <= d <= E:
-            y, h = divmod(k, 2)
-            xs.append({"left": f"{xx(d):.1f}%", "label": "취임" if k == 0 else (f"{y}년" if y else "") + (" 6개월" if h else "")})
+    for k in range(0, 49, step_m):
+        d = round(k * 30.4375)
+        if S <= d <= E:
+            y, mo = divmod(k, 12)
+            xs.append({"left": f"{xx(d):.1f}%", "label": "취임" if k == 0 else (f"{y}년" if y else "") + (f" {mo}개월" if mo else "")})
     yrs = [f"{xx(d) * 10:.1f}" for d in (365, 730, 1096) if S < d < E]
     now = tt["t2"][-1]
     return {
@@ -517,7 +517,8 @@ def terms_context(tt: dict, asof: str) -> dict:
     now, same, end1 = tt["t2"][-1], tt["same"], tt["t1"][-1]
     days = now[0]
     evs = _tt_events(tt, asof)
-    ranges = [("same", "같은 기간", 0, days + 60), ("all", "4년 전체", 0, max(end1[0], days) + 10)]
+    ranges = [("same", "같은 기간", 0, days + 60), ("y1", "1년차", 0, 365), ("y2", "2년차", 365, max(730, days + 30)),
+              ("all", "4년 전체", 0, max(end1[0], days) + 10)]
     say = (f"취임 뒤 {days}일, 2기 S&amp;P 500은 취임 직전보다 <b>{_sg(now[1])}%</b>예요. "
            f"1기 같은 날({same['date'][2:4]}/{int(same['date'][5:7])}/{int(same['date'][8:10])})엔 <b>{_sg(same['pct'])}%</b>였어요.")
     if tt.get("corr") is not None:
