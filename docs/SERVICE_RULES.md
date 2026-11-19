@@ -2995,6 +2995,7 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 
 - **장 시간 표 한 곳** `kr_official_closes.SHIFTED_SESSIONS = {"20261119": ("1000", "1630", "1639")}` — `session_hours(날짜)`가 (개장, 마감, 종가 봉 마지막)을 준다. 여기 없는 날은 09:00~15:30이다. 장 시간이 바뀌는 날(다음 수능일 등)은 이 표와 아래 워커 표에 날짜를 더한다.
 - 이 표를 따르는 곳: 공식 종가 봉·정규장 거래량(`closing_bar`·`regular_session`·`regular_close`·`last_closed_session`·`official_day_rows`·`official_today`), 마감 수급 창(`investor_flow.regular_window` — 16:31~16:40), 마감 수집(`fetch_closing_kospi` — 목록 가격 정규장 창 마감+30분, 장중 흐름 개장~마감−10분, dpick 1분봉 범위, 같은 날 보존 기준), 무버 수집(`fetch_movers_why`), 마감 페이지 카드의 '10:00 ~ 16:30 정규장' 표기.
+- **장중 그래프는 네이버 지수 1분봉**(개장 ~ 마감 10분 전, 5분마다 한 점)이다. 야후 5분봉은 바뀐 장 시간을 따르지 않아 수능일 14:55에서 끊겼다(막판 상승이 빠졌다). 야후는 네이버를 못 받았을 때만 쓴다. 그래프 아래 시각도 그날 장 시간에서 만든다(`sections_close.intraday_axis` — 평일 09:00 · 10:30 · 12:00 · 13:30 · 15:20, 수능일 10:00 · 11:30 · 13:00 · 14:30 · 16:20). 11/19 발행본은 그래프 숫자·눈금만 고쳤다.
 - **'어제와 비교' 카드는 그날 뺀다** — 그 값을 만드는 `api/_vs-close.mjs`는 15:30 봉을 종가로 쓴다. 서버 쪽은 고치지 않았다.
 - **실행 시각** — Cloudflare 워커(`workers/cron/src/worker.js`)의 `CLOSE_AT` 표에 있는 날은 16:25 대신 그 시각(17:25)에 마감 잡을 부른다. 워커는 `cd workers/cron && npx wrangler deploy`로 따로 배포해야 한다.
 - **고치지 않은 것(그날 하루)**: 종목 홈의 장중·마감 판정(`api/_market-calendar.mjs`·`_kr-regular-session.mjs`·대결판)은 09:00~15:30 고정이라 그날 15:30~16:30엔 장이 닫힌 것처럼 보인다. 아침 브리핑(07:25)은 영향이 없다.

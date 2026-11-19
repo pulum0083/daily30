@@ -217,6 +217,20 @@ def build_close_leaders(rows: list) -> list:
     return out
 
 
+def intraday_axis(target_date: str) -> list:
+    """장중 그래프 아래 시각 5개 — 그날 개장 ~ 마감 10분 전(수능일은 10:00 ~ 16:20, §91).
+    가운데 세 칸은 30분 단위로 내린다(평일 09:00 · 10:30 · 12:00 · 13:30 · 15:20)."""
+    try:
+        from kr_official_closes import session_hours
+    except ImportError:
+        from scripts.kr_official_closes import session_hours
+    o, c, _ = session_hours(target_date.replace("-", ""))
+    start = int(o[:2]) * 60 + int(o[2:])
+    end = int(c[:2]) * 60 + int(c[2:]) - 10
+    marks = [start] + [start + (end - start) * k // 4 // 30 * 30 for k in (1, 2, 3)] + [end]
+    return [f"{m // 60:02d}:{m % 60:02d}" for m in marks]
+
+
 def build_close_sections(analysis: dict, market: dict, index_name: str, target_date: str) -> dict:
     """마감 전용 섹션 컨텍스트 (있는 데이터만)."""
     ctx = {}
@@ -253,7 +267,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             "vol_val": ta.get("formatted") or "—",
             "intraday_prices": prices,
             "prev_close": round(price - ca, 2),
-            "intraday_axis": ["09:00", "10:30", "12:00", "13:30", "15:20"],
+            "intraday_axis": intraday_axis(target_date),
             "sub_indices": subs,
         })
 

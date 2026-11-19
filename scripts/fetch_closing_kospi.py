@@ -472,41 +472,59 @@ def _despike_intraday(prices: list, threshold: float = 0.015) -> list:
     return out
 
 
-def fetch_intraday_kospi() -> dict:
-    """당일 KOSPI 5분봉 데이터를 반환한다.
+INDEX_MINUTE_URL = ("https://api.stock.naver.com/chart/domestic/index/KOSPI/minute"
+                    "?startDateTime={d}{start}&endDateTime={d}{end}")
 
-    Returns:
-        {
-          "prices":    [float, ...],   # 9:00~15:20 종가 리스트
-          "high":      float,
-          "high_idx":  int,
-          "low":       float,
-          "low_idx":   int,
-        }
-    """
+
+def _intraday_naver(now, fetch) -> list:
+    """네이버 코스피 지수 1분봉에서 5분마다 한 점 — 개장 ~ 마감 10분 전(동시호가 전).
+    야후 5분봉은 장 시간이 바뀐 날(2026-11-19 수능일 10:00~16:30)을 따르지 않고 14:55에서 끊겼다(§91)."""
+    d = now.strftime("%Y%m%d")
+    open_at, close_at, _ = _session_hours(d)
+    end = _hhmm_plus(close_at, -10)
+    try:
+        bars = fetch(INDEX_MINUTE_URL.format(d=d, start=open_at, end=end)) or []
+    except Exception as e:
+        print(f"[fetch_closing] intraday: 네이버 1분봉 실패 {e}", file=sys.stderr)
+        return []
+    out = []
+    for b in bars:
+        t = str(b.get("localDateTime") or "")
+        p = b.get("currentPrice")
+        if t[:8] == d and open_at <= t[8:12] <= end and int(t[10:12]) % 5 == 0 and isinstance(p, (int, float)):
+            out.append(round(float(p), 2))
+    return out
+
+
+def _intraday_yahoo(now) -> list:
     hist = _yf_history("^KS11", period="1d", interval="5m")
     if hist is None or hist.empty:
-        print("[fetch_closing] intraday: no data", file=sys.stderr)
-        return {}
-
+        return []
     closes = hist["Close"].dropna()
-    if len(closes) == 0:
-        return {}
-
-    # KST 기준 09:00~15:20 구간만 필터
     try:
         idx = closes.index.tz_convert(KST)
-        open_at, close_at, _ = _session_hours(datetime.now(KST).strftime("%Y%m%d"))   # 수능일은 10:00~16:20
+        open_at, close_at, _ = _session_hours(now.strftime("%Y%m%d"))
         hm = idx.hour * 100 + idx.minute
-        mask = (hm >= int(open_at)) & (hm <= int(_hhmm_plus(close_at, -10)))
-        closes = closes[mask]
+        closes = closes[(hm >= int(open_at)) & (hm <= int(_hhmm_plus(close_at, -10)))]
     except Exception:
         pass  # 타임존 변환 실패 시 전체 사용
+    return [round(float(p), 2) for p in closes.tolist()]
 
-    if len(closes) == 0:
+
+def fetch_intraday_kospi(now=None, fetch=_get_json) -> dict:
+    """당일 KOSPI 장중 흐름 — 개장 ~ 마감 10분 전, 5분마다 한 점.
+    네이버 지수 1분봉이 1순위, 못 받으면 야후 5분봉(§91).
+
+    Returns:
+        {"prices": [float, ...], "high": float, "high_idx": int, "low": float, "low_idx": int}
+    """
+    now = now or datetime.now(KST)
+    prices = _intraday_naver(now, fetch)
+    if len(prices) < 10:
+        prices = _intraday_yahoo(now)
+    if not prices:
+        print("[fetch_closing] intraday: no data", file=sys.stderr)
         return {}
-
-    prices = [round(float(p), 2) for p in closes.tolist()]
     prices = _despike_intraday(prices)   # 장 시작 오틱 등 반전 스파이크 보정
     high_val = max(prices)
     low_val  = min(prices)
