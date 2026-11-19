@@ -40,7 +40,15 @@
 <!-- 구글 애드센스 로더(2026-10-27) — 광고 단위(<ins class="adsbygoogle">)는 각 템플릿 본문에 둔다 -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
 
-</head>
+<style>/* 간밤 미국장 카드 — 열을 맞춘 표(휴대폰 2열·넓은 화면 4열, 2026-11-19) */
+.ic-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;margin-top:14px}
+.ic-col-h{font-size:11.5px;font-weight:700;color:var(--muted);padding-bottom:4px;border-bottom:1px solid var(--hairline);margin-bottom:2px}
+.ic-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 0;font-size:13px}
+.ic-row>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ic-row>b{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.ic-row>b.up{color:var(--up)}.ic-row>b.dn{color:var(--dn)}
+@media(min-width:720px){.ic-cols{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:14px}}
+</style></head>
 <body>
 
 
@@ -101,14 +109,40 @@
       <div class="ic-title">지수는 혼조, 안에서는 크게 갈렸어요</div>
       <div class="ic-body">
         <p>AI 칩은 엔비디아·마이크론이 내리고 AMD·브로드컴이 올랐어요. 섹터는 보안이 가장 많이 오르고 에너지가 가장 많이 내렸어요.</p>
-        <div class="ic-tks">
-          <span class="ic-tks-l">지수</span><span class="ic-tk dn">S&P500 <b>−0.23%</b></span><span class="ic-tk up">나스닥 <b>+0.42%</b></span><span class="ic-tk dn">다우 <b>−1.11%</b></span><span class="ic-tk up">반도체 <b>+0.10%</b></span></div><div class="ic-tks">
-          <span class="ic-tks-l">AI 칩</span><span class="ic-tk up">AMD <b>+5.31%</b></span><span class="ic-tk up">브로드컴 <b>+3.64%</b></span><span class="ic-tk up">TSMC <b>+0.81%</b></span><span class="ic-tk dn">오라클 <b>−0.97%</b></span><span class="ic-tk dn">마이크론 <b>−1.00%</b></span><span class="ic-tk dn">엔비디아 <b>−2.89%</b></span></div><div class="ic-tks">
-          <span class="ic-tks-l">빅테크</span><span class="ic-tk up">아마존 <b>+3.82%</b></span><span class="ic-tk up">테슬라 <b>+0.95%</b></span><span class="ic-tk up">알파벳 <b>+0.80%</b></span><span class="ic-tk up">마이크로소프트 <b>+0.40%</b></span><span class="ic-tk up">애플 <b>+0.15%</b></span><span class="ic-tk dn">메타 <b>−0.40%</b></span></div><div class="ic-tks">
-          <span class="ic-tks-l">오른 섹터</span><span class="ic-tk up">보안 <b>+4.72%</b></span><span class="ic-tk up">경기소비재 <b>+1.79%</b></span><span class="ic-tk up">소프트웨어 <b>+1.25%</b></span></div><div class="ic-tks">
-          <span class="ic-tks-l">내린 섹터</span><span class="ic-tk dn">에너지 <b>−3.27%</b></span><span class="ic-tk dn">헬스케어 <b>−2.20%</b></span><span class="ic-tk dn">금융 <b>−1.14%</b></span></div>
+        
+        <div class="ic-cols"><div class="ic-col">
+          <div class="ic-col-h">지수</div>
+          <div class="ic-row"><span>S&P500</span><b class="dn">−0.23%</b></div>
+          <div class="ic-row"><span>나스닥</span><b class="up">+0.42%</b></div>
+          <div class="ic-row"><span>다우</span><b class="dn">−1.11%</b></div>
+          <div class="ic-row"><span>반도체</span><b class="up">+0.10%</b></div>
+        </div><div class="ic-col">
+          <div class="ic-col-h">AI 칩</div>
+          <div class="ic-row"><span>AMD</span><b class="up">+5.31%</b></div>
+          <div class="ic-row"><span>브로드컴</span><b class="up">+3.64%</b></div>
+          <div class="ic-row"><span>TSMC</span><b class="up">+0.81%</b></div>
+          <div class="ic-row"><span>오라클</span><b class="dn">−0.97%</b></div>
+          <div class="ic-row"><span>마이크론</span><b class="dn">−1.00%</b></div>
+          <div class="ic-row"><span>엔비디아</span><b class="dn">−2.89%</b></div>
+        </div><div class="ic-col">
+          <div class="ic-col-h">빅테크</div>
+          <div class="ic-row"><span>아마존</span><b class="up">+3.82%</b></div>
+          <div class="ic-row"><span>테슬라</span><b class="up">+0.95%</b></div>
+          <div class="ic-row"><span>알파벳</span><b class="up">+0.80%</b></div>
+          <div class="ic-row"><span>MS</span><b class="up">+0.40%</b></div>
+          <div class="ic-row"><span>애플</span><b class="up">+0.15%</b></div>
+          <div class="ic-row"><span>메타</span><b class="dn">−0.40%</b></div>
+        </div><div class="ic-col">
+          <div class="ic-col-h">섹터</div>
+          <div class="ic-row"><span>보안</span><b class="up">+4.72%</b></div>
+          <div class="ic-row"><span>경기소비재</span><b class="up">+1.79%</b></div>
+          <div class="ic-row"><span>소프트웨어</span><b class="up">+1.25%</b></div>
+          <div class="ic-row"><span>금융</span><b class="dn">−1.14%</b></div>
+          <div class="ic-row"><span>헬스케어</span><b class="dn">−2.20%</b></div>
+          <div class="ic-row"><span>에너지</span><b class="dn">−3.27%</b></div>
+        </div></div>
       </div>
-      <div class="ic-foot">섹터는 미국 섹터 ETF(보안 CIBR · 소프트웨어 IGV 포함) 등락이에요.</div>
+      <div class="ic-foot">섹터는 미국 섹터 ETF(보안 CIBR · 소프트웨어 IGV 포함) 중 많이 오른 3개·많이 내린 3개예요.</div>
     </div>
     
     

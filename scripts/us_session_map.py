@@ -13,7 +13,7 @@ from __future__ import annotations
 
 INDICES = [("^GSPC", "S&P500"), ("^IXIC", "나스닥"), ("^DJI", "다우"), ("^SOX", "반도체")]
 AI_CHIPS = [("NVDA", "엔비디아"), ("AMD", "AMD"), ("AVGO", "브로드컴"), ("MU", "마이크론"), ("TSM", "TSMC"), ("ORCL", "오라클")]
-BIGTECH = [("AAPL", "애플"), ("MSFT", "마이크로소프트"), ("AMZN", "아마존"), ("META", "메타"), ("GOOGL", "알파벳"),
+BIGTECH = [("AAPL", "애플"), ("MSFT", "MS"), ("AMZN", "아마존"), ("META", "메타"), ("GOOGL", "알파벳"),
            ("TSLA", "테슬라")]
 # 미국 섹터 ETF 11개 + 테마 2개(보안 CIBR · 소프트웨어 IGV)
 SECTORS = [("XLK", "기술"), ("XLC", "커뮤니케이션"), ("XLY", "경기소비재"), ("XLP", "필수소비재"), ("XLE", "에너지"),
@@ -104,9 +104,10 @@ def card(m: dict | None) -> dict | None:
     if not isinstance(m, dict) or len(m.get("indices") or []) < 2:
         return None
     m = {**{k: [r for r in (m.get(k) or []) if isinstance(r.get("pct"), (int, float))] for k, _ in GROUPS}, "session": m.get("session")}
-    groups = [("지수", m["indices"]), ("AI 칩", _sorted(m["ai"])), ("빅테크", _sorted(m["bigtech"])),
-              ("오른 섹터", _sorted([r for r in m["sectors"] if r["pct"] > 0])[:SECTOR_SHOW]),
-              ("내린 섹터", _sorted([r for r in m["sectors"] if r["pct"] < 0], reverse=False)[:SECTOR_SHOW])]
+    # 섹터는 많이 오른 3개와 많이 내린 3개를 한 열에 — 화면은 열 4개(지수·AI 칩·빅테크·섹터)로 맞춘다(2026-11-19)
+    sec = (_sorted([r for r in m["sectors"] if r["pct"] > 0])[:SECTOR_SHOW]
+           + _sorted([r for r in m["sectors"] if r["pct"] < 0])[-SECTOR_SHOW:])
+    groups = [("지수", m["indices"]), ("AI 칩", _sorted(m["ai"])), ("빅테크", _sorted(m["bigtech"])), ("섹터", sec)]
     return {"title": title_of(m), "check_line": line_of(m), "session": m["session"],
             "groups": [{"label": lb, "marks": [{"name": r["name"], "pct": r["pct"]} for r in rows]}
                        for lb, rows in groups if rows]}

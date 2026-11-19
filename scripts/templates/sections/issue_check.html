@@ -15,14 +15,15 @@
       <div class="ic-title">{{ us_map.title }}</div>
       <div class="ic-body">
         {% if us_map.check_line %}<p>{{ us_map.check_line }}</p>{% endif %}
-        {% for g in us_map.groups %}<div class="ic-tks">
-          <span class="ic-tks-l">{{ g.label }}</span>
-          {%- for m in g.marks -%}
-          <span class="ic-tk {% if m.pct > 0 %}up{% elif m.pct < 0 %}dn{% endif %}">{{ m.name }} <b>{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</b></span>
-          {%- endfor -%}
-        </div>{% endfor %}
+        {# 열을 맞춘 표 — 첫 페이지 'AI 인프라 주식'처럼 이름 왼쪽·등락 오른쪽(사용자 요청 2026-11-19) #}
+        <div class="ic-cols">{% for g in us_map.groups %}<div class="ic-col">
+          <div class="ic-col-h">{{ g.label }}</div>
+          {%- for m in g.marks %}
+          <div class="ic-row"><span>{{ m.name }}</span><b class="{% if m.pct > 0 %}up{% elif m.pct < 0 %}dn{% endif %}">{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</b></div>
+          {%- endfor %}
+        </div>{% endfor %}</div>
       </div>
-      <div class="ic-foot">섹터는 미국 섹터 ETF(보안 CIBR · 소프트웨어 IGV 포함) 등락이에요.</div>
+      <div class="ic-foot">섹터는 미국 섹터 ETF(보안 CIBR · 소프트웨어 IGV 포함) 중 많이 오른 3개·많이 내린 3개예요.</div>
     </div>
     {% endif %}
     {% for c in ic_us_cards %}

@@ -26,8 +26,9 @@ def test_incident_card():
                                "섹터는 보안이 가장 많이 오르고 에너지가 가장 많이 내렸어요.")
     g = {x["label"]: [(r["name"], r["pct"]) for r in x["marks"]] for x in c["groups"]}
     assert g["AI 칩"][0] == ("AMD", 5.31) and g["AI 칩"][-1] == ("엔비디아", -2.89)
-    assert g["오른 섹터"] == [("보안", 4.72), ("경기소비재", 1.79), ("소프트웨어", 1.25)]
-    assert g["내린 섹터"] == [("에너지", -3.27), ("헬스케어", -2.2), ("금융", -1.14)]
+    assert g["섹터"] == [("보안", 4.72), ("경기소비재", 1.79), ("소프트웨어", 1.25),
+                        ("금융", -1.14), ("헬스케어", -2.2), ("에너지", -3.27)]
+    assert list(g) == ["지수", "AI 칩", "빅테크", "섹터"]
 
 
 def test_other_day_bars_are_dropped():
@@ -70,5 +71,5 @@ def test_template_uses_existing_card_format():
     html = gh.make_env().get_template("sections/issue_check.html").render(us_map=c, us_issue_label="간밤")
     assert '<div class="ic-card ic-card--us">' in html and "지수는 혼조, 안에서는 크게 갈렸어요" in html
     assert "간밤 미국 · 실측" in html and "ET 2026-11-18 정규장 종가" in html
-    assert '<span class="ic-tk dn">엔비디아 <b>−2.89%</b></span>' in html
+    assert '<div class="ic-row"><span>엔비디아</span><b class="dn">−2.89%</b></div>' in html
     json.dumps(c, ensure_ascii=False)                                   # 스냅샷에 저장할 수 있어야 한다
