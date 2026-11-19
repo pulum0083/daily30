@@ -234,6 +234,24 @@ def build_prev_supply(analysis: dict, market_data: dict, target_date: str) -> di
     return {"prev_supply": {"label": f"{int(d[4:6])}월 {int(d[6:8])}일", "rows": rows}}
 
 
+def build_us_session_map(analysis: dict, market_data: dict, target_date: str) -> dict:
+    """이슈 점검의 '간밤 미국장' 카드 — 직전 미국 정규장 지수·AI 칩·빅테크·섹터 실측(us_session_map, 2026-11-19).
+
+    스냅샷 1순위, 없으면 그날 시장 데이터에서 만든다(날짜가 브리핑 날짜와 같을 때만, §14). 기존 카드 형식 그대로.
+    """
+    import us_session_map as usm
+    saved = analysis.get("us_session_map")
+    if not isinstance(saved, dict):
+        if not _market_data_is_for(market_data, target_date):
+            return {}
+        saved = (market_data or {}).get("us_session_map")
+        if not isinstance(saved, dict):
+            return {}
+        analysis["us_session_map"] = saved      # 스냅샷에 함께 저장된다
+    c = usm.card(saved)
+    return {"us_map": c} if c else {}
+
+
 def _issue_title(title: str) -> str:
     """'메타 실적 — 반응은 극과 극'에서 대시 뒤 부제를 뗀다. 남는 게 짧으면 원문(§45 retitle과 같은 기준)."""
     head = re.sub(r"\s*—.*$", "", title or "").strip()

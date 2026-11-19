@@ -1,13 +1,29 @@
 {# 오늘의 이슈 점검 — 간밤 미국(실측) · 국내(뉴스) · 외국계(뉴스) · 오늘 볼 것(AI 해석). 코스피 아침 전용(3단 구조, 2026-10-26).
    카드마다 데이터가 없으면 그 카드만 빠지고, 전부 없으면 섹션째 빠진다(§0). 미국 카드엔 코스피 영향 판정을 붙이지 않는다(§45). #}
 {% set outlook = (todays_view.outlook if todays_view and todays_view.outlook else []) %}
-{% if ic_us_cards or prev_supply or domestic_issues or ib_korea_views or outlook %}
+{% if us_map or ic_us_cards or prev_supply or domestic_issues or ib_korea_views or outlook %}
 <div class="open-section ic-section">
   <div class="ic-h"><h2>오늘의 이슈 점검</h2><span>{{ us_issue_label | default('간밤') }} 미국 · 국내 · 오늘 볼 것</span></div>
   <div class="ic-list">
-    {% if ic_us_cards %}
+    {% if us_map or ic_us_cards %}
     {# 미국 카드는 태그를 묶음 위에 한 번만 단다 — 카드마다 같은 태그가 반복됐다(2026-10-26) #}
-    <div class="ic-grp-h"><span class="ic-tag fact">{{ us_issue_label | default('간밤') }} 미국 · 실측</span>{% if us_issue_session %}<span class="ic-grp-sub">ET {{ us_issue_session }} 정규장 종가</span>{% endif %}</div>
+    <div class="ic-grp-h"><span class="ic-tag fact">{{ us_issue_label | default('간밤') }} 미국 · 실측</span>{% if us_issue_session or us_map %}<span class="ic-grp-sub">ET {{ us_issue_session or us_map.session }} 정규장 종가</span>{% endif %}</div>
+    {% endif %}
+    {% if us_map %}
+    {# 간밤 미국장 — 지수 뒤 종목·섹터 자금 이동(실측, 문장도 규칙으로 만든다 — us_session_map.py, 2026-11-19) #}
+    <div class="ic-card ic-card--us">
+      <div class="ic-title">{{ us_map.title }}</div>
+      <div class="ic-body">
+        {% if us_map.check_line %}<p>{{ us_map.check_line }}</p>{% endif %}
+        {% for g in us_map.groups %}<div class="ic-tks">
+          <span class="ic-tks-l">{{ g.label }}</span>
+          {%- for m in g.marks -%}
+          <span class="ic-tk {% if m.pct > 0 %}up{% elif m.pct < 0 %}dn{% endif %}">{{ m.name }} <b>{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</b></span>
+          {%- endfor -%}
+        </div>{% endfor %}
+      </div>
+      <div class="ic-foot">섹터는 미국 섹터 ETF(보안 CIBR · 소프트웨어 IGV 포함) 등락이에요.</div>
+    </div>
     {% endif %}
     {% for c in ic_us_cards %}
     <div class="ic-card ic-card--us">

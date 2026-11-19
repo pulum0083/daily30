@@ -23,6 +23,7 @@ from market_universe import (  # noqa: F401
     SECTOR_FOCUS_STOCKS, US_CANDIDATES, SIDEBAR_TICKERS_KOSPI, SIDEBAR_TICKERS_US, BIGTECH_TICKERS, AI_INFRA_TICKERS,
 )
 from econ_calendar import fetch_earnings_near  # noqa: E402
+import us_session_map  # noqa: E402
 from econ_calendar import (  # noqa: F401
     _bucket_calendar_events, fetch_economic_calendar,
 )
@@ -420,6 +421,8 @@ def fetch_kospi_data() -> dict:
         "ai_infra": {t: macro[t] for t in AI_INFRA_TICKERS if t in macro},
         # 직전 미국장~오늘 사이 실적 발표 후보(야후 일정) — 발표 여부는 뉴스로 확인하게 한다(2026-11-18)
         "earnings_near": fetch_earnings_near(BIGTECH_TICKERS + AI_INFRA_TICKERS, _today_kst.date(), _prev_us),
+        # 직전 미국 정규장 지도 — 지수·AI 칩·빅테크·섹터 ETF 정규장 등락(이슈 점검 '간밤 미국장' 카드, 2026-11-19)
+        "us_session_map": us_session_map.collect(_prev_us.isoformat(), fetch_regular_session_changes),
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
         # 투자자별 순매수 (외국인/기관/개인 — 전 거래일 KRX 기준)

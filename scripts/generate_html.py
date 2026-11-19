@@ -53,7 +53,7 @@ from sections_close import (  # noqa: F401
 )
 from sections_kospi import (  # noqa: F401
     _ISSUE_NUM_PATTERNS, _strip_issue_numbers, _prev_us_session_label, build_us_issue_results, _read_us_issue_results, ISSUE_RELATED_KR,
-    _prev_label, build_prev_prediction, build_hero, _PRIOR_SIG_NAMES, build_prior_signals, build_prev_supply,
+    _prev_label, build_prev_prediction, build_hero, _PRIOR_SIG_NAMES, build_prior_signals, build_prev_supply, build_us_session_map,
     _issue_title, build_issue_check, _abs_time_label, _domestic_card_title, build_reasons, build_ib_korea_views,
     build_domestic_issues,
 )
@@ -190,6 +190,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_issue_check(ctx.get("us_issue_cards")))
         ctx.update(build_prior_signals(analysis, market_data, target_date))   # 예측 근거 신호 한 줄
         ctx.update(build_prev_supply(analysis, market_data, target_date))     # 전일 수급 카드
+        ctx.update(build_us_session_map(analysis, market_data, target_date))  # 간밤 미국장 카드
         uls = analysis.get("us_linked_story") or {}
         if uls.get("title"):
             ctx["us_linked_title"] = uls["title"]

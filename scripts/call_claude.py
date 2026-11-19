@@ -47,6 +47,7 @@ from telegram_messages import (  # noqa: F401
     get_web_base_url, _today_kospi_prediction, _cumulative_kospi_accuracy, _ma5_telegram_lines, _sp500_lines, _nasdaq_change_lines,
     save_telegram_message, save_closing_telegram_message,
 )
+import us_session_map  # noqa: E402
 
 
 def get_anthropic_api_key() -> str:
@@ -191,6 +192,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     if briefing_type == "kospi":
         user_content += _us_session_log_directive(date_str, analysis_data)
         user_content += _after_hours_directive(analysis_data)
+        user_content += us_session_map.directive((analysis_data or {}).get("us_session_map"))   # 지수 뒤 자금 이동(2026-11-19)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"

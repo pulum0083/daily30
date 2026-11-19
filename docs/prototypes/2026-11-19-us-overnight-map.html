@@ -1,0 +1,132 @@
+<!doctype html>
+<!-- 코스피 아침 '지난밤 미국장 지도' 카드 시안 — 2026-11-18(ET) 정규장 실측으로 그린 세 안 -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>지난밤 미국장 지도 시안</title>
+<link href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+:root{--canvas:#fff;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;--hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+--primary:#006EFF;--primary-bg:#E8F4FF;--up:#F33942;--dn:#006EFF;--bar-up:#E86464;--bar-dn:#5D97F1;--r-lg:16px}
+*{box-sizing:border-box}
+body{margin:0;background:#F3F4F6;font-family:Pretendard,system-ui,sans-serif;color:var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}
+.lead{color:var(--muted);font-size:13px;margin:0 0 20px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+@media(max-width:1000px){.grid{grid-template-columns:1fr;max-width:560px}}
+.opt-h{font-size:14px;font-weight:800;margin:0 0 4px}
+.opt-d{font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.page{background:var(--canvas);border-radius:12px;padding:18px 14px}
+/* 이슈 점검 공통(사이트 style.css 그대로) */
+.ic-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ic-h h2{font-size:18px;font-weight:800;letter-spacing:-.3px;margin:0}
+.ic-h span{font-size:12px;color:var(--muted)}
+.ic-card{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:18px 16px 16px;background:var(--canvas)}
+.ic-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ic-tag{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--surface-inset)}
+.ic-sub{font-size:11px;color:var(--muted)}
+.ic-title{font-size:16.5px;font-weight:800;letter-spacing:-.3px;line-height:1.35;margin-top:8px}
+.ic-foot{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5}
+.next{margin-top:10px;border:1px dashed var(--hairline);border-radius:var(--r-lg);padding:14px 16px;color:var(--muted);font-size:12.5px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+b{font-variant-numeric:tabular-nums}
+/* A — 묶음별 문장 목록 */
+.a-idx{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;margin-top:10px;padding-bottom:12px;border-bottom:1px solid var(--hairline)}
+.a-idx span{color:var(--muted)}
+.a-row{padding:11px 0;border-bottom:1px solid var(--hairline)}
+.a-row:last-of-type{border-bottom:0;padding-bottom:0}
+.a-k{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.a-t{font-size:14.5px;line-height:1.55}
+.a-n{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.6}
+.a-n b{font-weight:600}
+/* B — 막대 */
+.b-sec{margin-top:14px}
+.b-sec>p{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 6px}
+.b-row{display:grid;grid-template-columns:76px 1fr 54px;align-items:center;gap:8px;height:22px;font-size:12.5px}
+.b-track{position:relative;height:10px}
+.b-track::before{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;border-left:1px solid #D1D5DB}
+.b-bar{position:absolute;top:0;height:10px;border-radius:2px}
+.b-v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+/* C — 한 줄 요약 + 칩 */
+.c-say{font-size:14.5px;line-height:1.6;margin-top:10px}
+.c-say b{font-weight:700}
+.c-grp{margin-top:12px}
+.c-grp>p{font-size:11.5px;color:var(--muted);margin:0 0 5px;font-weight:700}
+.c-tks{display:flex;flex-wrap:wrap;gap:5px}
+.c-tk{font-size:12px;border-radius:6px;padding:3px 8px;background:var(--surface-soft);border:1px solid var(--hairline)}
+.c-tk b{margin-left:3px}
+</style></head><body><div class="wrap">
+<h1>지난밤 미국장 지도 — 시안 3안</h1>
+<p class="lead">코스피 아침 브리핑 '오늘의 이슈 점검' 맨 위에 들어가는 카드예요. 숫자는 모두 2026-11-18(미국 동부) 정규장 종가 실측이고, 문장도 숫자에서 정해진 규칙으로 만들어요(AI 문장 없음).
+지금 있는 '간밤 미국 · 실측'(어제 이슈 채점) 카드는 그 아래로 내려가요.</p>
+<div class="grid">
+
+<!-- A -->
+<section>
+<p class="opt-h">A안 · 묶음별 문장</p>
+<p class="opt-d">첫 이미지처럼 묶음마다 "누가 내리고 누가 올랐는지"를 한 문장으로. 숫자는 그 아래 작게.</p>
+<div class="page">
+<div class="ic-h"><h2>오늘의 이슈 점검</h2><span>간밤 미국 · 국내 · 오늘 볼 것</span></div>
+<div class="ic-card">
+ <div class="ic-top"><span class="ic-tag">간밤 미국장 지도 · 실측</span><span class="ic-sub">ET 11/18 정규장 종가</span></div>
+ <div class="ic-title">지수는 혼조, 안에서는 크게 갈렸어요</div>
+ <div class="a-idx"><span>S&amp;P500</span><b class="dn">−0.23%</b><span>나스닥</span><b class="up">+0.42%</b><span>다우</span><b class="dn">−1.11%</b><span>반도체</span><b class="up">+0.10%</b></div>
+ <div class="a-row"><div class="a-k">AI 칩</div><div class="a-t">엔비디아는 <b class="dn">내리고</b>, AMD·브로드컴은 <b class="up">올랐어요</b></div>
+  <div class="a-n">엔비디아 <b class="dn">−2.89%</b> · AMD <b class="up">+5.31%</b> · 브로드컴 <b class="up">+3.64%</b> · TSMC <b class="up">+0.81%</b> · 마이크론 <b class="dn">−1.00%</b></div></div>
+ <div class="a-row"><div class="a-k">빅테크</div><div class="a-t">아마존이 가장 많이 <b class="up">올랐어요</b></div>
+  <div class="a-n">아마존 <b class="up">+3.82%</b> · 알파벳 <b class="up">+0.80%</b> · 마이크로소프트 <b class="up">+0.40%</b> · 애플 <b class="up">+0.15%</b> · 메타 <b class="dn">−0.40%</b></div></div>
+ <div class="a-row"><div class="a-k">많이 오른 쪽</div><div class="a-t">보안·경기소비재·소프트웨어</div>
+  <div class="a-n">보안 <b class="up">+4.72%</b> · 경기소비재 <b class="up">+1.79%</b> · 소프트웨어 <b class="up">+1.25%</b></div></div>
+ <div class="a-row"><div class="a-k">많이 내린 쪽</div><div class="a-t">에너지·헬스케어·금융</div>
+  <div class="a-n">에너지 <b class="dn">−3.27%</b> · 헬스케어 <b class="dn">−2.20%</b> · 금융 <b class="dn">−1.14%</b> · 유가(WTI) <b class="dn">−4.74%</b></div></div>
+ <div class="ic-foot">섹터는 미국 섹터 ETF(보안 CIBR · 소프트웨어 IGV) 등락이에요.</div>
+</div>
+<div class="next">▼ 그 아래 · 어제 미국 이슈 채점 · 국내 수급 · 국내 뉴스 · 오늘 볼 것</div>
+</div>
+</section>
+
+<!-- B -->
+<section>
+<p class="opt-h">B안 · 막대 지도</p>
+<p class="opt-d">AI 칩·빅테크와 섹터를 같은 눈금의 막대로. 한눈에 어디로 돈이 갔는지 보여요. 문장은 제목 한 줄.</p>
+<div class="page">
+<div class="ic-h"><h2>오늘의 이슈 점검</h2><span>간밤 미국 · 국내 · 오늘 볼 것</span></div>
+<div class="ic-card" id="cardB">
+ <div class="ic-top"><span class="ic-tag">간밤 미국장 지도 · 실측</span><span class="ic-sub">ET 11/18 정규장 종가</span></div>
+ <div class="ic-title">엔비디아는 내리고 AMD·브로드컴은 올랐어요</div>
+ <div class="a-idx"><span>S&amp;P500</span><b class="dn">−0.23%</b><span>나스닥</span><b class="up">+0.42%</b><span>다우</span><b class="dn">−1.11%</b><span>반도체</span><b class="up">+0.10%</b></div>
+</div>
+<div class="next">▼ 그 아래 · 어제 미국 이슈 채점 · 국내 수급 · 국내 뉴스 · 오늘 볼 것</div>
+</div>
+</section>
+
+<!-- C -->
+<section>
+<p class="opt-h">C안 · 요약 두 줄 + 칩</p>
+<p class="opt-d">맨 위에 규칙으로 만든 두 문장, 아래는 지금 카드와 같은 칩. 가장 짧아요.</p>
+<div class="page">
+<div class="ic-h"><h2>오늘의 이슈 점검</h2><span>간밤 미국 · 국내 · 오늘 볼 것</span></div>
+<div class="ic-card">
+ <div class="ic-top"><span class="ic-tag">간밤 미국장 지도 · 실측</span><span class="ic-sub">ET 11/18 정규장 종가</span></div>
+ <div class="ic-title">지수는 혼조, 안에서는 크게 갈렸어요</div>
+ <p class="c-say">AI 칩은 엔비디아 <b class="dn">−2.89%</b>, AMD <b class="up">+5.31%</b>·브로드컴 <b class="up">+3.64%</b>로 엇갈렸어요.<br>보안 <b class="up">+4.72%</b>가 가장 많이 오르고 에너지 <b class="dn">−3.27%</b>가 가장 많이 내렸어요.</p>
+ <div class="c-grp"><p>지수</p><div class="c-tks"><span class="c-tk">S&amp;P500<b class="dn">−0.23%</b></span><span class="c-tk">나스닥<b class="up">+0.42%</b></span><span class="c-tk">다우<b class="dn">−1.11%</b></span><span class="c-tk">반도체<b class="up">+0.10%</b></span></div></div>
+ <div class="c-grp"><p>AI 칩 · 빅테크</p><div class="c-tks"><span class="c-tk">AMD<b class="up">+5.31%</b></span><span class="c-tk">아마존<b class="up">+3.82%</b></span><span class="c-tk">브로드컴<b class="up">+3.64%</b></span><span class="c-tk">TSMC<b class="up">+0.81%</b></span><span class="c-tk">알파벳<b class="up">+0.80%</b></span><span class="c-tk">메타<b class="dn">−0.40%</b></span><span class="c-tk">마이크론<b class="dn">−1.00%</b></span><span class="c-tk">엔비디아<b class="dn">−2.89%</b></span></div></div>
+ <div class="c-grp"><p>섹터</p><div class="c-tks"><span class="c-tk">보안<b class="up">+4.72%</b></span><span class="c-tk">경기소비재<b class="up">+1.79%</b></span><span class="c-tk">소프트웨어<b class="up">+1.25%</b></span><span class="c-tk">금융<b class="dn">−1.14%</b></span><span class="c-tk">헬스케어<b class="dn">−2.20%</b></span><span class="c-tk">에너지<b class="dn">−3.27%</b></span></div></div>
+ <div class="ic-foot">섹터는 미국 섹터 ETF 등락이에요. 위 3개·아래 3개만 보여요.</div>
+</div>
+<div class="next">▼ 그 아래 · 어제 미국 이슈 채점 · 국내 수급 · 국내 뉴스 · 오늘 볼 것</div>
+</div>
+</section>
+</div></div>
+<script>
+// B안 막대 — 실측값으로 그린다(같은 눈금)
+const groups=[["AI 칩 · 빅테크",[["AMD",5.31],["아마존",3.82],["브로드컴",3.64],["TSMC",0.81],["알파벳",0.80],["메타",-0.40],["마이크론",-1.00],["엔비디아",-2.89]]],
+ ["섹터",[["보안",4.72],["경기소비재",1.79],["소프트웨어",1.25],["기술",0.34],["유틸리티",0.30],["커뮤니케이션",0.30],["부동산",0.07],["산업재",-0.05],["필수소비재",-0.31],["소재",-0.75],["금융",-1.14],["헬스케어",-2.20],["에너지",-3.27]]]];
+const max=6,card=document.getElementById("cardB");
+for(const [t,rows] of groups){const s=document.createElement("div");s.className="b-sec";s.innerHTML=`<p>${t}</p>`;
+ for(const [n,v] of rows){const w=Math.min(Math.abs(v)/max,1)*50;const r=document.createElement("div");r.className="b-row";
+  r.innerHTML=`<span>${n}</span><span class="b-track"><span class="b-bar" style="${v>=0?`left:50%;width:${w}%;background:var(--bar-up)`:`left:${50-w}%;width:${w}%;background:var(--bar-dn)`}"></span></span><span class="b-v ${v>=0?"up":"dn"}">${v>=0?"+":"−"}${Math.abs(v).toFixed(2)}%</span>`;s.appendChild(r)}
+ card.appendChild(s)}
+const f=document.createElement("div");f.className="ic-foot";f.textContent="섹터는 미국 섹터 ETF(11개 + 보안·소프트웨어) 등락이에요.";card.appendChild(f);
+</script>
+</body></html>
