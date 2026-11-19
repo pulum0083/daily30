@@ -39,3 +39,14 @@ def test_other_days_periods_and_amounts_are_left_alone():
 def test_no_measured_supply_no_change():
     a = {"x": "외국인이 1조 1485억원을 샀어요."}
     assert va.fix_supply_amounts(a, {}, [], []) == 0 and a["x"] == "외국인이 1조 1485억원을 샀어요."
+
+
+def test_korean_digit_amount_is_one_amount():
+    """2026-11-19 코스피 아침 실사고 — "1조 4천억원"에서 '1조'만 바꿔 "3,338억 4천억원"으로 깨졌다."""
+    import gate_close as gc
+    latest = {"investor_trading": {"foreign": {"net": -333800}, "institution": {"net": 511200}, "individual": {"net": -637700}}}
+    a, c, w = {"x": "외국인은 코스피에서 <b>1조 4천억원</b> 넘게 순매도하며 3거래일 연속 매도 우위를 이어갔어요."}, [], []
+    gc.fix_supply_amounts(a, latest, c, w, skip=gc._SUPPLY_SKIP_MORNING)
+    assert a["x"] == "외국인은 코스피에서 <b>3,338억원</b> 넘게 순매도하며 3거래일 연속 매도 우위를 이어갔어요."
+    for s, v in [("4천억", 4000), ("4천5백억", 4500), ("1조 4천억", 14000), ("1조 4천 520억", 14520), ("3백억", 300)]:
+        assert gc._amount_value(gc._SUPPLY_AMOUNT_RE.search(s)) == v

@@ -102,7 +102,11 @@ def _extract_eok_values(text):
 # ('어제'·'3일간'·'누적' 등)나 다른 금액(거래대금·실적 등)이 끼면 건드리지 않는다.
 _SUPPLY_ACTORS = (("외국인", "foreign"), ("외인", "foreign"), ("기관", "institution"), ("개인", "individual"))
 # '백만원'도 금액으로 본다(2026-11-10 — 코스피 아침 "외국인 6,895백만원"이 실제 6,895억원이었다).
-_SUPPLY_AMOUNT_RE = re.compile(r"(?<![\d.])(?:([\d,]+)\s*조\s*([\d,]+)\s*억|(\d+(?:\.\d+)?)\s*조|([\d,]+)\s*억|([\d,]+)\s*백만)")
+# 억 앞 숫자는 '4천'·'4천5백'처럼 한글 자릿수가 섞일 수 있다(2026-11-19 실사고 — 모델의 "1조 4천억원"에서
+# '1조'만 금액으로 읽어 "3,338억 4천억원"으로 깨졌다).
+_EOK_NUM = r"(?:\d+\s*천(?:\s*\d+\s*백)?(?:\s*\d+)?|\d+\s*백(?:\s*\d+)?|[\d,]+)"
+_SUPPLY_AMOUNT_RE = re.compile(r"(?<![\d.])(?:([\d,]+)\s*조\s*(" + _EOK_NUM + r")\s*억|(\d+(?:\.\d+)?)\s*조|("
+                               + _EOK_NUM + r")\s*억|([\d,]+)\s*백만)")
 _SUPPLY_SKIP = re.compile(r"어제|전일|지난|일간|일째|누적|주간|이번\s*주|연속|거래대금|시가총액|시총|목표|매출|영업이익|순이익|\d+\s*일")
 # 코스피 아침 브리핑은 실측 자체가 전 거래일 수급이라 '전일·어제·지난'을 건너뛰면 아무것도 못 고친다.
 # 대신 다른 날을 가리키는 말(요일·지난주·날짜)이 끼면 건드리지 않는다 — 그 금액은 실측(전 거래일)과 다른 날 얘기다.
@@ -115,14 +119,23 @@ def _fmt_eok(v):
     return f"{v // 10000}조 {v % 10000:,}억" if v >= 10000 else f"{v:,}억"
 
 
+def _eok_value(s):
+    """'4,000'·'4천'·'4천5백'·'4천 520' → 억 단위 정수."""
+    s = re.sub(r"[\s,]", "", s)
+    m = re.fullmatch(r"(?:(\d+)천)?(?:(\d+)백)?(\d*)", s)
+    if not m:
+        return int(s)
+    return int(m.group(1) or 0) * 1000 + int(m.group(2) or 0) * 100 + int(m.group(3) or 0)
+
+
 def _amount_value(m):
     if m.group(1):
-        return int(m.group(1).replace(",", "")) * 10000 + int(m.group(2).replace(",", ""))
+        return int(m.group(1).replace(",", "")) * 10000 + _eok_value(m.group(2))
     if m.group(3):
         return float(m.group(3)) * 10000
     if m.group(5):
         return int(m.group(5).replace(",", "")) / 100     # 백만원 → 억원
-    return int(m.group(4).replace(",", ""))
+    return _eok_value(m.group(4))
 
 
 def fix_supply_amounts(analysis, latest, corrections, warnings, window=24, skip=None):
