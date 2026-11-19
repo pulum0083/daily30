@@ -516,3 +516,42 @@ test('장중엔 지금 미국을 섹터 아래·장기 신호 위에 둔다', ()
   assert.match(css, /#home\.slot-intraday #us-evening\{order:8\}/);
   assert.match(css, /#home\.slot-intraday \.sbx-block\{order:4\}/);
 });
+
+// ── 메인 페이지 클릭·스크롤 계측(2026-11-19) — 이탈한 사람이 어디까지 보고 무엇을 눌렀는지 ──
+function fakeEl(matches, attrs = {}) {
+  return { closest: (sel) => (matches.includes(sel) ? {} : null), getAttribute: (k) => attrs[k] ?? null, textContent: attrs.text || '' };
+}
+
+test('home 계측: 누른 곳이 속한 블록 이름을 고른다', () => {
+  const { sectionOf } = loadWindow().__homeTrack;
+  assert.equal(sectionOf(fakeEl(['#home-hero'])), 'hero');
+  assert.equal(sectionOf(fakeEl(['.sbx-block'])), 'sector_bars');
+  assert.equal(sectionOf(fakeEl(['#recent-briefings'])), 'recent_briefings');
+  assert.equal(sectionOf(fakeEl([])), null);                 // 홈 블록 밖이면 보내지 않는다
+  assert.equal(sectionOf(null), null);
+});
+
+test('home 계측: 스크롤 25·50·75·90%를 한 번씩만', () => {
+  const { scrollMarks } = loadWindow().__homeTrack;
+  assert.deepEqual([...scrollMarks(0, 800, 4000, {})], []);
+  assert.deepEqual([...scrollMarks(1300, 800, 4000, {})], [25, 50]);
+  assert.deepEqual([...scrollMarks(1300, 800, 4000, { 25: 1 })], [50]);   // 이미 보낸 건 다시 안 보낸다
+  assert.deepEqual([...scrollMarks(3200, 800, 4000, { 25: 1, 50: 1 })], [75, 90]);
+  assert.deepEqual([...scrollMarks(0, 800, 0, {})], []);
+});
+
+test('home 계측: 클릭하면 home_click을 블록·주소와 함께 보낸다(텔레그램 카드는 빼고)', () => {
+  let clickHandler = null;
+  const w = loadWindow({ hooks: { onDocListener: (type, fn) => { if (type === 'click') clickHandler = fn; } } });
+  const sent = [];
+  w.gtag = (...a) => sent.push(a);
+  assert.ok(clickHandler, '문서 click 리스너가 없다');
+  const link = { closest: (sel) => (sel === 'a[href],button,[onclick]' ? link : sel === '#home-hero' ? {} : null),
+    getAttribute: () => '/briefings/2026-11-19/us/', textContent: ' 미국 브리핑 보기 → ' };
+  clickHandler({ target: { closest: link.closest } });
+  assert.deepEqual(JSON.parse(JSON.stringify(sent.at(-1))), ['event', 'home_click', { section: 'hero', link_url: '/briefings/2026-11-19/us/', link_text: '미국 브리핑 보기 →' }]);
+  const tg = { closest: (sel) => (sel === 'a[href],button,[onclick]' ? tg : sel === '#tg-sub' ? {} : null), getAttribute: () => 'https://t.me/x' };
+  const n = sent.length;
+  clickHandler({ target: { closest: tg.closest } });
+  assert.equal(sent.length, n);
+});

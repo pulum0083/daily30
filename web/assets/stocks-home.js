@@ -578,6 +578,47 @@ function dsTrackEvent(name,params){
   if(typeof gtag!=='function')return;
   gtag('event',name,params||{});
 }
+// 메인 페이지 클릭·스크롤 계측(2026-11-19 사용자 요청) — 이탈한 사람이 어디까지 보고 무엇을 눌렀는지 보려고.
+// home_click: 링크·버튼을 누르면 그 블록 이름(section)과 이동 경로(link_url, 주소만)를 보낸다.
+// home_scroll: 홈 화면에서 25·50·75·90%까지 내려가면 한 번씩. 텔레그램 클릭은 main.js가 따로 보낸다.
+(function(){
+  var SECTIONS=[['#home-hero','hero'],['#idx-card','live_index'],['#vs-root','vs_yesterday'],
+    ['#us-evening','us_now'],['#us-linked-widget','kospi_leaders'],['#struct-sig','longterm'],
+    ['.sbx-block','sector_bars'],['#sig-block','signals'],['#recent-briefings','recent_briefings'],['#ds-subnav','subnav']];
+  function sectionOf(el){
+    if(!el||!el.closest)return null;
+    for(var i=0;i<SECTIONS.length;i++){if(el.closest(SECTIONS[i][0]))return SECTIONS[i][1];}
+    return null;
+  }
+  function scrollMarks(y,vh,h,sent){
+    if(!(h>0))return [];
+    var pct=(y+vh)/h*100,out=[];
+    [25,50,75,90].forEach(function(m){if(pct>=m&&!sent[m])out.push(m);});
+    return out;
+  }
+  window.__homeTrack={sectionOf:sectionOf,scrollMarks:scrollMarks};
+  document.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest?e.target.closest('a[href],button,[onclick]'):null;
+    if(!t||t.closest('#tg-sub'))return;
+    var sec=sectionOf(t);if(!sec)return;
+    var href=t.getAttribute&&t.getAttribute('href');
+    var path='';
+    if(href&&href.charAt(0)!=='#'){try{var u=new URL(href,location.href);path=u.origin===location.origin?u.pathname:u.hostname;}catch(_){}}
+    dsTrackEvent('home_click',{section:sec,link_url:path||(href||''),link_text:(t.textContent||'').trim().slice(0,40)});
+  },true);
+  var sent={},ticking=false;
+  window.addEventListener('scroll',function(){
+    if(ticking)return;ticking=true;
+    requestAnimationFrame(function(){
+      ticking=false;
+      var home=document.getElementById('home');
+      if(!home||!home.classList.contains('on'))return;
+      scrollMarks(window.scrollY,window.innerHeight,document.documentElement.scrollHeight,sent).forEach(function(m){
+        sent[m]=1;dsTrackEvent('home_scroll',{percent:m});
+      });
+    });
+  },{passive:true});
+})();
 function go(id,noHistory){
   const el=document.getElementById(id);if(!el||!el.classList.contains('screen'))return;
   if(!noHistory){const cur=document.querySelector('.screen.on');if(cur&&cur.id!==id)navHistory.push(cur.id);}
