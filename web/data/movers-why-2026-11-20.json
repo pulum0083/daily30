@@ -1,19 +1,38 @@
 {
-  "generated_at": "2026-11-20T13:01:24.055643+09:00",
+  "generated_at": "2026-11-20T13:31:28.037736+09:00",
   "date": "2026-11-20",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -6.2,
-      "surge": 0.55,
-      "events": []
+      "changePct": -6.75,
+      "surge": 0.6,
+      "events": [
+        {
+          "time": "11:08",
+          "headline": "삼성전자 주가 장중 5%대 SK하이닉스 6%대 내려, 미국 AI·반도체주 약세 영향",
+          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE85Q0NlYlJyNnJVaDVQd3J2WjlKNTBzNEEtSE1mNU03R0tJSlFTS2M5TUpJdVdfcDVJcDBObXRCdVJpdVNIaVNfM0xBWU9uNGNoc29lb19QMnV1dzVTMXBDWFh1dC0wcFdLSmN1Nkl0UWRVWVU?oc=5",
+          "source": "비즈니스포스트",
+          "why": "미국 AI·반도체주 약세의 영향으로 삼성전자와 SK하이닉스 주가가 장중 각각 5%대와 6%대 하락했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "08:16",
+          "headline": "“본격 폭락 시작도 안 했다”…삼성전자 7만원·하이닉스 20만원 경고한 전문가",
+          "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE1kQklaal9SbnoycHR2VDdpdml3X1B1WlZTLWJlRnB1OE16Y2xibGFNVkRXend6YkpSWmJwZUVkOFQxN2VjY1J5NmprYVR4ZWNpTHIzcmJSNkhVeC1KcUtqRlhHWExMSmw2eDVn?oc=5",
+          "source": "TWIG",
+          "why": "“본격 폭락 시작도 안 했다”…삼성전자 7만원·하이닉스 20만원 경고한 전문가",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -6.09,
-      "surge": 0.47,
+      "changePct": -6.59,
+      "surge": 0.52,
       "events": [
         {
           "time": "11:08",
@@ -38,15 +57,15 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -4.3,
-      "surge": 0.33,
+      "changePct": -4.67,
+      "surge": 0.36,
       "events": [
         {
           "time": "10:08",
           "headline": "현대차 주가, 11월 20일 장중 258,750원 3.27% 하락",
           "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE1ZaW1iMXpxSENsM2x4bVlsV1B1YXBzeDVWMGt1aVJOY3Z1bjVXMUhNSnc3YjdMQlFpSGRXME1JaVZtM2wyRTU5TFk0QUdNVDV2TmF0WGpxMHlxRG5JYnVIb202aTg0OXZxZmNyY1dCY0IxZw?oc=5",
           "source": "중앙이코노미뉴스",
-          "why": "현대차 주가가 11월 20일 장중 3.27% 하락한 258,750원을 기록했다.",
+          "why": "현대차 주가가 11월 20일 장중 3.27% 하락하며 258,750원을 기록했다.",
           "tier": "why",
           "sentiment": "neg"
         },
