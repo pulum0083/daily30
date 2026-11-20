@@ -85,12 +85,9 @@
       var vs=ST.vs&&ST.vs.status==='ok'&&Array.isArray(ST.vs.leaders)?ST.vs:null, by={};
       (vs?vs.leaders:[]).forEach(function(l){ by[l.code]=l; });
       var rel=vs&&vs.prev?vs.prev.rel:'어제', tm=vs?vs.time:'';
-      // 어제 장 시간이 달랐으면(수능일 10:00 개장) 어제 칸은 개장 뒤 같은 시각이다 — 서버가 prev.time·prev.open을 준다(§91).
-      var ytm=vs&&vs.prev&&vs.prev.time?vs.prev.time:tm, shifted=!!(vs&&vs.prev&&vs.prev.open);
-      L={sub:vs?rel+'('+String(vs.prev.label||'').replace(/\(.\)$/,'')+') '+ytm+'와 비교'+(shifted?' · '+vs.prev.open+' 개장':''):'어제 같은 시각과 비교',
-         now:'지금 · 실시간', t:vs?'오늘 '+tm:'오늘', y:vs?rel+' '+ytm:'어제',
-         mk:rel+(shifted?' 개장 뒤 같은 시각보다':' 이 시각보다')+(tm?' · '+tm:''),
-         foot:vs?(shifted?'차이는 개장 뒤 같은 시각 기준 — 오늘 '+tm+'와 '+rel+' '+ytm+'('+vs.prev.open+' 개장)의 등락 차이예요.':'차이는 '+tm+' 기준 — 오늘과 '+rel+'의 같은 시각 등락 차이예요.'):''};
+      L={sub:vs?rel+'('+String(vs.prev.label||'').replace(/\(.\)$/,'')+') '+tm+'와 비교':'어제 같은 시각과 비교',
+         now:'지금 · 실시간', t:vs?'오늘 '+tm:'오늘', y:vs?rel+' '+tm:'어제',
+         mk:rel+' 이 시각보다'+(tm?' · '+tm:''), foot:vs?'차이는 '+tm+' 기준 — 오늘과 '+rel+'의 같은 시각 등락 차이예요.':''};
       CODES.forEach(function(c){ var l=by[c]; ST.cmp[c]=l&&l.t!=null&&l.y!=null&&l.diff!=null?{t:l.t,y:l.y,diff:l.diff}:null; });
     } else {
       var head=null;

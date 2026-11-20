@@ -184,8 +184,8 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
     status: 'ok',
     time: hm(at),
     today: { date: dash, label: labelFromYmd(dash) },
-    // time — 어제 칸이 실제로 고른 시각. 장 시간이 같은 날은 오늘 time과 같다. open은 장 시간이 다를 때만 붙인다.
-    prev: { date: yDash, label: labelFromYmd(yDash), rel, time: hm(toY(at)), ...(shift ? { open: hm(openY) } : {}) },
+    // 장 시간이 달랐던 어제도 같은 시각에 시작한 것처럼 맞댄 값이라, 화면엔 오늘과 같은 시각으로 보인다(2026-11-20 사용자 결정).
+    prev: { date: yDash, label: labelFromYmd(yDash), rel },
     verdict: verdict({ yLabel: rel, kospiDiff: kospi.diff, foreignDiff: flow ? flow.foreignDiff : null, kospiT: kospi.t, kospiY: kospi.y }),
     kospi, flow, leaders, avg, issues, axes,
   };

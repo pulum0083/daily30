@@ -52,7 +52,7 @@ test('11/20 09:37 장중 비교 — 어제는 개장 뒤 같은 시각(10:35)과
   const d = await buildIntradayVs({ now: kst('2026-11-20T09:37:30'), fetchJson: async (u) => fetchJson(u) });
   assert.equal(d.status, 'ok');
   assert.equal(d.time, '09:35');
-  assert.deepEqual({ time: d.prev.time, open: d.prev.open }, { time: '10:35', open: '10:00' });
+  assert.equal(d.prev.time, undefined);   // 화면엔 평소처럼 오늘과 같은 시각으로 보인다
   const s = d.leaders.find((l) => l.code === '005930');
   assert.equal(s.t, -4.93);          // 187,200 ÷ 196,900(11/19 공식 종가)
   assert.equal(s.y, -2.16);          // 190,500 ÷ 194,700(11/18 공식 종가)
@@ -63,7 +63,6 @@ test('11/20 09:37 장중 비교 — 어제는 개장 뒤 같은 시각(10:35)과
 test('11/20 마감 뒤 — 어제 값은 16:30 종가로(+2.0%), 15:30 장중 값이 아니다', async () => {
   const c = await buildCloseVs({ now: kst('2026-11-20T16:00:00'), fetchJson: async (u) => fetchJson(u) });
   assert.equal(c.status, 'ok');
-  assert.equal(c.prev.time, '16:30');
   assert.equal(c.kospi.y, 2);
   assert.equal(c.kospi.t, -1.5);
 });
