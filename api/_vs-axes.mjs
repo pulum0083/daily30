@@ -44,8 +44,8 @@ export function flowAxis(rowT, rowY) {
   };
 }
 
-export function heatAxis(barsT, barsY, baseT, baseY, at) {
-  const T = upto(barsT, at), Y = upto(barsY, at);
+export function heatAxis(barsT, barsY, baseT, baseY, at, atY = at) {
+  const T = upto(barsT, at), Y = upto(barsY, atY);   // atY — 장 시간이 다른 날은 개장 뒤 같은 시각(§91)
   const vt = sumVol(T), vy = sumVol(Y);
   const at_ = amplitude(T, baseT), ay = amplitude(Y, baseY);
   // 진폭 차이는 미반올림 값으로 계산한 후 반올림, t·y는 각각 반올림해 표시

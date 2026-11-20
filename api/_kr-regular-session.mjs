@@ -17,14 +17,23 @@ const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/'
 // 그날 15:30~15:39 사이 첫 봉을 종가 봉으로 본다. 파이썬 kr_official_closes.closing_bar와 같은 규칙이다(§30).
 export const CLOSE_BAR_FROM = '1530';
 export const CLOSE_BAR_TO = '1539';
-export const isCloseWindow = (hm) => hm >= CLOSE_BAR_FROM && hm <= CLOSE_BAR_TO;
+// 장 시간이 바뀐 날(2026-11-19 수능일 10:00~16:30) — scripts/kr_official_closes.py SHIFTED_SESSIONS와 같은 표다(§91·§30).
+// 날짜를 더할 땐 두 곳과 workers/cron CLOSE_AT을 함께 고친다. [개장, 마감(종가 봉 시작), 종가 봉 마지막]
+export const SHIFTED_SESSIONS = { '20261119': ['1000', '1630', '1639'] };
+export const sessionHours = (ymd) => SHIFTED_SESSIONS[String(ymd || '')] || ['0900', CLOSE_BAR_FROM, CLOSE_BAR_TO];
+export const hhmmAdd = (hhmm, m) => {
+  const t = Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(2, 4)) + m;
+  return String(Math.floor(t / 60)).padStart(2, '0') + String(t % 60).padStart(2, '0');
+};
+// ymd를 주면 그날 장 시간으로 판정한다 — 수능일의 15:30 봉은 장중 가격이다(종가 봉은 16:30~16:39).
+export const isCloseWindow = (hm, ymd) => { const [, c, e] = sessionHours(ymd); return hm >= c && hm <= e; };
 
 export function regularSessionFromBars(bars) {
   const rows = (Array.isArray(bars) ? bars : [])
     .filter((b) => b && typeof b.localDateTime === 'string' && b.localDateTime.length >= 12);
   const closeBars = new Map();   // 날짜 → 그날 종가 봉(15:30~15:39 사이 첫 봉)
   for (const b of rows) {
-    if (!isCloseWindow(b.localDateTime.slice(8, 12))) continue;
+    if (!isCloseWindow(b.localDateTime.slice(8, 12), b.localDateTime.slice(0, 8))) continue;
     const d = b.localDateTime.slice(0, 8), cur = closeBars.get(d);
     if (!cur || b.localDateTime < cur.localDateTime) closeBars.set(d, b);
   }
@@ -35,7 +44,7 @@ export function regularSessionFromBars(bars) {
   const end = closeBar.localDateTime.slice(8, 12);
   const sess = rows.filter((b) => {
     const hm = b.localDateTime.slice(8, 12);
-    return b.localDateTime.slice(0, 8) === day && hm >= '0900' && hm <= end;
+    return b.localDateTime.slice(0, 8) === day && hm >= sessionHours(day)[0] && hm <= end;
   });
   const highs = sess.map((b) => toNum(b.highPrice)).filter((v) => v != null);
   const lows = sess.map((b) => toNum(b.lowPrice)).filter((v) => v != null);
@@ -62,7 +71,7 @@ export async function fetchClosedSession(code, now = new Date()) {
   try {
     const start = ymd(new Date(now.getTime() - 7 * 86400000));   // 주말·연휴를 넘겨 직전 거래일까지
     const r = await fetch(
-      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${start}0900&endDateTime=${ymd(now)}${CLOSE_BAR_TO}`,
+      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${start}0900&endDateTime=${ymd(now)}${sessionHours(ymd(now))[2]}`,
       { headers: HDR, signal: AbortSignal.timeout(6000) },
     );
     if (!r.ok) return null;
@@ -95,7 +104,8 @@ export function lastClosedSessions(now = new Date()) {
   const k = new Date(now.getTime() + 9 * 3600000);
   const today = k.toISOString().slice(0, 10);
   const min = k.getUTCHours() * 60 + k.getUTCMinutes();
-  const session = !isKospiHoliday(k) && min > 15 * 60 + 30 ? today : lastTradingDay(dayBefore(today));
+  const [, c] = sessionHours(today.replace(/-/g, ''));
+  const session = !isKospiHoliday(k) && min > Number(c.slice(0, 2)) * 60 + Number(c.slice(2)) ? today : lastTradingDay(dayBefore(today));
   const prev = lastTradingDay(dayBefore(session));
   return { session: session.replace(/-/g, ''), prev: prev.replace(/-/g, '') };
 }
@@ -112,7 +122,7 @@ export async function fetchLastRegularSession(code, now = new Date()) {
   if (sessionCache.has(code)) return sessionCache.get(code);
   try {
     const r = await fetch(
-      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${prev}1530&endDateTime=${session}${CLOSE_BAR_TO}`,
+      `https://api.stock.naver.com/chart/domestic/item/${code}/minute?startDateTime=${prev}${sessionHours(prev)[1]}&endDateTime=${session}${sessionHours(session)[2]}`,
       { headers: HDR, signal: AbortSignal.timeout(6000) },
     );
     if (!r.ok) return null;

@@ -4,7 +4,7 @@ import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
 import { prevTradingDay, relLabel, atOrBefore, pct, round2, judge, TH, verdict } from './_vs-core.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
 import { liveFlowAt, storedFlowAt } from './_vs-flow.mjs';
-import { CLOSE_BAR_TO, isCloseWindow } from './_kr-regular-session.mjs';
+import { isCloseWindow, sessionHours, hhmmAdd } from './_kr-regular-session.mjs';
 import { heatAxis, flowAxis } from './_vs-axes.mjs';
 import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 
@@ -22,10 +22,10 @@ export function indexFinal(bars, at = CLOSE_AT) {
 
 // 종목 봉에서 15:30~15:39 사이 첫 봉(종가 단일가가 연장되면 15:30 봉이 없고 15:32 등에 찍힌다, 2026-11-12)을
 // 15:30 자리의 종가로 둔다. 그 뒤 봉(15:40 시간외 종가·애프터장)은 버린다.
-export function itemFinal(bars, at = CLOSE_AT) {
+export function itemFinal(bars, at = CLOSE_AT, ymd = '') {
   const all = bars || [];
   const out = all.filter((b) => b.t < at).map((b) => ({ ...b }));
-  const close = all.find((b) => isCloseWindow(b.t));
+  const close = all.find((b) => isCloseWindow(b.t, ymd));
   if (close) out.push({ ...close, t: at });
   return out;
 }
@@ -61,11 +61,13 @@ export function regularFlowRow(rows) {
 
 // 15:40 이하 가장 최근 행이 실제로 15:31~15:40 구간 안인지 확인한다. 더 이른 행이 나오면(아직 15:31 전까지만
 // 있으면) 확정 전이라 null. 오늘은 네이버 원천, 어제는 마감 잡이 저장한 파일에서 읽는다(§56).
+// 장 시간이 바뀐 날(수능일)은 마감 뒤 1~10분(16:31~16:40) 행이다 — 파이썬 investor_flow.regular_window와 같다(§91).
 async function regularFlowOf(ymd, fetchJson, stored) {
-  const row = await (stored ? storedFlowAt : liveFlowAt)(ymd, '1540', fetchJson);
+  const c = sessionHours(ymd)[1], from = hhmmAdd(c, 1), to = hhmmAdd(c, 10);
+  const row = await (stored ? storedFlowAt : liveFlowAt)(ymd, to, fetchJson);
   if (!row) return null;
   const t = normTime(row.t);
-  return t >= '1531' && t <= '1540' ? row : null;
+  return t >= from && t <= to ? row : null;
 }
 
 const settle = (pr, fb) => pr.then((v) => v, () => fb);
@@ -75,29 +77,32 @@ export async function buildCloseVs({ now = Date.now(), fetchJson }) {
   const dash = k.toISOString().slice(0, 10);
   const hhmm = k.toISOString().slice(11, 16).replace(':', '');
   if (isKospiHoliday(k)) return { status: 'closed' };
-  if (hhmm < '1530') return { status: 'closed' };   // 장중은 vs=intraday가 담당
-  if (hhmm < '1540') return { status: 'early' };    // 확정 수급 행이 아직 없다
+  const T = dash.replace(/-/g, '');
+  const [openT, at] = sessionHours(T);   // 오늘 마감 — 평일 15:30
+  if (hhmm < at) return { status: 'closed' };   // 장중은 vs=intraday가 담당
+  if (hhmm < hhmmAdd(at, 10)) return { status: 'early' };    // 확정 수급 행이 아직 없다
 
   const yDash = prevTradingDay(dash);
-  const T = dash.replace(/-/g, ''), Y = yDash.replace(/-/g, '');
-  const at = CLOSE_AT;
+  const Y = yDash.replace(/-/g, '');
+  // 어제 장 시간이 달랐으면(2026-11-19 수능일 10:00~16:30) 어제 값은 어제 마감 봉으로 고른다 — 15:30은 그날 장중이었다.
+  const [openY, atY] = sessionHours(Y);
 
   // 한 종목/지수의 오늘·어제 정규장 봉과 기준가. 기준가는 직전 거래일 15:30 1분봉이다(§48).
   // 지수는 15:30 봉 뒤에 최종 종가가 찍히는 날이 있다(2026-11-09 코스피 15:30 봉 5,019.78 → 15:32 봉 5,018.85 = 공식 종가).
   // 지수엔 애프터장이 없으니 15:35까지 받아 마지막 봉 값을 15:30 봉에 얹는다(indexFinal).
   const load = async (kind, code) => {
-    const to = kind === 'index' ? INDEX_FINAL_UNTIL : CLOSE_BAR_TO;
-    const fix = kind === 'index' ? (b) => indexFinal(b, at) : (b) => itemFinal(b, at);
+    const to = (ymd, c) => (kind === 'index' ? hhmmAdd(c, 5) : sessionHours(ymd)[2]);   // 평일 지수 15:35·종목 15:39
+    const fix = (ymd, c) => (kind === 'index' ? (b) => indexFinal(b, c) : (b) => itemFinal(b, c, ymd));
     const [bT, bY, pT, pY] = await Promise.all([
-      settle(minuteBars(kind, code, T, fetchJson, '0900', to).then(fix), []),
-      settle(minuteBars(kind, code, Y, fetchJson, '0900', to).then(fix), []),
+      settle(minuteBars(kind, code, T, fetchJson, '0900', to(T, at)).then(fix(T, at)), []),
+      settle(minuteBars(kind, code, Y, fetchJson, '0900', to(Y, atY)).then(fix(Y, atY)), []),
       settle(prevClose(kind, code, T, fetchJson), null),
       settle(prevClose(kind, code, Y, fetchJson), null),
     ]);
     return { bT, bY, pT: isNum(pT) ? pT : null, pY: isNum(pY) ? pY : null };
   };
   const rate = (o) => {
-    const tb = atOrBefore(o.bT, at), yb = atOrBefore(o.bY, at);
+    const tb = atOrBefore(o.bT, at), yb = atOrBefore(o.bY, atY);
     const t = tb ? pct(tb.v, o.pT) : null, y = yb ? pct(yb.v, o.pY) : null;
     const d = t != null && y != null ? round2(t - y) : null;
     return { t, y, diff: d, judge: d == null ? null : judge(d, TH.pctPoint) };
@@ -113,22 +118,22 @@ export async function buildCloseVs({ now = Date.now(), fetchJson }) {
   const fY = fT ? await settle(regularFlowOf(Y, fetchJson, true), null) : null;
 
   const kospi = rate(ks);
-  kospi.curveT = curve(ks.bT, ks.pT, at);
-  kospi.curveY = curve(ks.bY, ks.pY, at);
+  kospi.curveT = curve(ks.bT, ks.pT, at, openT);
+  kospi.curveY = curve(ks.bY, ks.pY, atY, openY);
 
   const byCode = Object.fromEntries(sectorLoaded.map(([c, r]) => [c, { t: r.t, y: r.y }]));
   const foreignDiff = fT && fY ? fT.외국인 - fY.외국인 : null;
 
   return {
     status: 'ok',
-    time: '15:30',
+    time: at.slice(0, 2) + ':' + at.slice(2),
     today: { date: dash, label: labelFromYmd(dash) },
-    prev: { date: yDash, label: labelFromYmd(yDash), rel: relLabel(yDash, dash) },
+    prev: { date: yDash, label: labelFromYmd(yDash), rel: relLabel(yDash, dash), time: atY.slice(0, 2) + ':' + atY.slice(2) },
     verdict: verdict({ yLabel: relLabel(yDash, dash), kospiDiff: kospi.diff, foreignDiff, kospiT: kospi.t, kospiY: kospi.y, done: true }),
     kospi,
     flow: fT && fY ? { t: fT, y: fY, time: fT.t, foreignDiff, judge: judge(foreignDiff, TH.eok) } : null,
     axes: {
-      heat: heatAxis(ks.bT, ks.bY, ks.pT, ks.pY, at),
+      heat: heatAxis(ks.bT, ks.bY, ks.pT, ks.pY, at, atY),
       market: { kosdaq: rate(kq), kospi200: rate(k2) },
       sectors: sectorRows(byCode),
       flow: flowAxis(fT, fY),

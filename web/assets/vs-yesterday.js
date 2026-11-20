@@ -147,7 +147,7 @@
     var dTxt = k.diff == null ? '' : k.diff > 0 ? '오늘이 더 높아요' : k.diff < 0 ? '오늘이 더 낮아요' : '같아요';
     return '<div class="vs-kpis">' +
       '<div class="vs-kpi"><span class="l">오늘</span><b class="' + cls(k.t) + '">' + f2(k.t) + '%</b><span class="s">' + esc(d.time) + ' 기준</span></div>' +
-      '<div class="vs-kpi"><span class="l">' + rel + ' 같은 시각</span><b class="y">' + (k.y != null ? f2(k.y) + '%' : '—') + '</b><span class="s">' + esc(d.prev.label || '') + '</span></div>' +
+      '<div class="vs-kpi"><span class="l">' + rel + (d.prev.open ? ' 개장 뒤 같은 시각' : ' 같은 시각') + '</span><b class="y">' + (k.y != null ? f2(k.y) + '%' : '—') + '</b><span class="s">' + esc(d.prev.label || '') + (d.prev.open ? ' ' + esc(d.prev.time) : '') + '</span></div>' +
       '<div class="vs-kpi"><span class="l">차이</span><b>' + (k.diff != null ? f2(k.diff) + '%p' : '—') + '</b><span class="s">' + dTxt + '</span></div></div>';
   }
 
@@ -414,7 +414,7 @@
     var rel = esc(d.prev.rel), html = '';
     if (has('hero')) {
       if (d.verdict) {
-        html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time +
+        html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + esc((d.prev && d.prev.time) || d.time) + ' vs 오늘 ' + d.time +
           '<button type="button" class="help-q vs-help" aria-label="어제랑 비교해서 설명 보기">?</button></p>' +
           '<h2 class="' + (d.verdict.tone != null ? d.verdict.tone : d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
           '<p class="vs-sub">' + esc(d.verdict.sub) + '</p></div>';

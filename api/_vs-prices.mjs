@@ -1,6 +1,6 @@
 // 네이버 지수·종목 1분봉과 직전 거래일 종가 — 날짜 고정 조회(설계 §6·§45)
 import { pct, prevTradingDay } from './_vs-core.mjs';
-import { CLOSE_BAR_TO, isCloseWindow } from './_kr-regular-session.mjs';
+import { isCloseWindow, sessionHours } from './_kr-regular-session.mjs';
 
 const BASE = 'https://api.stock.naver.com/chart/domestic';
 const path = (kind, code) => (kind === 'index' ? `index/${code}` : `item/${code}`);
@@ -13,7 +13,8 @@ function shiftYmd(ymd, days) {
 const toDash = (ymd) => `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`;
 const toYmd = (dash) => dash.replace(/-/g, '');
 
-export async function minuteBars(kind, code, ymd, fetchJson, from = '0900', to = '1530') {
+export async function minuteBars(kind, code, ymd, fetchJson, from = '0900', to = null) {
+  to = to || sessionHours(ymd)[1];   // 그날 마감까지 — 수능일은 16:30
   const rows = await fetchJson(`${BASE}/${path(kind, code)}/minute?startDateTime=${ymd}${from}&endDateTime=${ymd}${to}`);
   return (Array.isArray(rows) ? rows : [])
     .filter((r) => String(r.localDateTime).slice(0, 8) === ymd && typeof r.currentPrice === 'number')
@@ -35,10 +36,11 @@ export async function minuteBars(kind, code, ymd, fetchJson, from = '0900', to =
 export async function prevClose(kind, code, ymd, fetchJson) {
   const target = toYmd(prevTradingDay(toDash(ymd)));
   if (kind === 'item') {
-    const rows = await fetchJson(`${BASE}/${path(kind, code)}/minute?startDateTime=${target}1530&endDateTime=${target}${CLOSE_BAR_TO}`);
+    const [, c, e] = sessionHours(target);   // 그날 종가 봉 창 — 수능일 11/19는 16:30~16:39(§91)
+    const rows = await fetchJson(`${BASE}/${path(kind, code)}/minute?startDateTime=${target}${c}&endDateTime=${target}${e}`);
     const bar = (Array.isArray(rows) ? rows : [])
       .filter((r) => typeof r.currentPrice === 'number'
-        && String(r.localDateTime).slice(0, 8) === target && isCloseWindow(String(r.localDateTime).slice(8, 12)))
+        && String(r.localDateTime).slice(0, 8) === target && isCloseWindow(String(r.localDateTime).slice(8, 12), target))
       .sort((x, y) => (String(x.localDateTime) < String(y.localDateTime) ? -1 : 1))[0];
     return bar ? bar.currentPrice : null;
   }
@@ -49,12 +51,13 @@ export async function prevClose(kind, code, ymd, fetchJson) {
   return String(last.localDate) === target ? last.closePrice : null;
 }
 
-const minFrom0900 = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(2)) - 540;
+const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(2));
 
-export function curve(bars, base, untilHHMM) {
+// x = 그날 개장 뒤 분. 평일은 09:00부터라 예전과 같고, 개장이 늦은 날(수능일 10:00)은 개장 뒤 같은 시각끼리 겹친다.
+export function curve(bars, base, untilHHMM, open = '0900') {
   const pts = (bars || []).filter((b) => b.t <= untilHHMM);
   return pts
     .filter((b, i) => Number(b.t.slice(2)) % 5 === 0 || i === pts.length - 1)
-    .map((b) => [minFrom0900(b.t), pct(b.v, base)])
+    .map((b) => [toMin(b.t) - toMin(open), pct(b.v, base)])
     .filter((p) => p[1] != null);
 }

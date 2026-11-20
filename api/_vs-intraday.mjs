@@ -7,6 +7,7 @@ import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 // _vs-issues.mjs(issuesUntil·keywordDiff)는 지금 쓰지 않는다 — 아래 issues:null 주석 참고(C2). 계산 코드·사전은
 // 남겨둔다(설계 남기기 — 불변 장중 기록이 생기면 다시 켠다).
 import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
+import { sessionHours, hhmmAdd } from './_kr-regular-session.mjs';
 
 export const LEADERS = [['005930', '삼성전자'], ['000660', 'SK하이닉스'], ['005380', '현대차']];
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
@@ -45,6 +46,7 @@ function remember(map, key, make, keep) {
 const hasRows = (v) => Array.isArray(v) && v.length > 0;
 const isNum = (v) => typeof v === 'number';
 const toMin = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(2, 4));
+const hm = (hhmm) => hhmm.slice(0, 2) + ':' + hhmm.slice(2, 4);
 // 지금 분의 봉은 아직 만들어지는 중이다 — 그 값을 확정된 어제 봉과 맞대면 최대 1분 어긋난다(9/15 10:11 실측:
 // 진행 중 −0.02% vs 확정 −0.16%). 막 끝난 분의 봉도 바로 굳지 않는다 — 9/15 13:30 봉을 5초 간격으로 다시 읽으니
 // 끝난 뒤 약 1분 동안 응답마다 값이 오갔고(코스피 6,627.19↔6,632.57, SK하이닉스 1,694,000→1,695,000) 그 뒤에 멈췄다.
@@ -56,10 +58,17 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
   const k = new Date(now + 9 * 3600 * 1000);
   const dash = k.toISOString().slice(0, 10);
   const hhmm = k.toISOString().slice(11, 16).replace(':', '');
-  if (isKospiHoliday(k) || hhmm < '0901' || hhmm > '1530') return { status: 'closed' };
+  const T = dash.replace(/-/g, '');
+  const [openT, closeT] = sessionHours(T);
+  if (isKospiHoliday(k) || hhmm < hhmmAdd(openT, 1) || hhmm > closeT) return { status: 'closed' };
 
   const yDash = prevTradingDay(dash);
-  const T = dash.replace(/-/g, ''), Y = yDash.replace(/-/g, '');
+  const Y = yDash.replace(/-/g, '');
+  // 어제 장 시간이 달랐으면(2026-11-19 수능일 10:00 개장) 시계 시각이 아니라 '개장 뒤 같은 시각'끼리 맞댄다 —
+  // 그날은 09:00~09:59 봉이 없어 어제 칸이 통째로 비었다(2026-11-20). 평일끼리는 shift가 0이라 예전과 같다.
+  const openY = sessionHours(Y)[0];
+  const shift = toMin(openY) - toMin(openT);
+  const toY = (h) => (shift ? hhmmAdd(h, shift) : h);
   const rel = relLabel(yDash, dash);
   const memoJ = memoFor(fetchJson, T);
   const once = (key, make, keep) => remember(memoJ, key, make, keep);
@@ -103,21 +112,21 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
   const fT = await settle(liveFlowAt(T, at, fetchJson), null);
   const flowOk = !!fT && fresh(fT.t.replace(':', ''), at);
   if (flowOk && fT.t.replace(':', '') < at) at = fT.t.replace(':', '');
-  const fY = flowOk ? await settle(storedFlowAt(Y, at, jsonY), null) : null;
+  const fY = flowOk ? await settle(storedFlowAt(Y, toY(at), jsonY), null) : null;
   const flow = flowOk && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
   if (flow) flow.judge = judge(flow.foreignDiff, TH.eok);
 
-  const kb = atOrBefore(kT, at), kyAt = atOrBefore(kY, at);
+  const kb = atOrBefore(kT, at), kyAt = atOrBefore(kY, toY(at));
   const kospi = { t: kb ? pct(kb.v, baseT) : null, y: kyAt ? pct(kyAt.v, baseY) : null };
   kospi.diff = kospi.t != null && kospi.y != null ? round2(kospi.t - kospi.y) : null;
   kospi.judge = judge(kospi.diff, TH.pctPoint);
-  kospi.curveT = curve(kT, baseT, at);
-  kospi.curveY = curve(kY, baseY, at);
+  kospi.curveT = curve(kT, baseT, at, openT);
+  kospi.curveY = curve(kY, baseY, toY(at), openY);
 
   const leaders = leadersRaw.map((l) => {
     // 늦은 종목은 비교하지 않는다(t·y·diff 모두 null). 오늘 봉을 고른 뒤 어제는 그 봉의 시각으로 고른다(I3).
     const tb = l.fresh ? atOrBefore(l.bT, at) : null;
-    const yb = tb ? atOrBefore(l.bY, tb.t) : null;
+    const yb = tb ? atOrBefore(l.bY, toY(tb.t)) : null;
     const t = tb ? pct(tb.v, l.pT) : null, y = yb ? pct(yb.v, l.pY) : null;
     return {
       code: l.code, name: l.name, t, y, diff: t != null && y != null ? round2(t - y) : null,
@@ -143,7 +152,7 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
       settle(once(`iBT:${code}`, () => prevClose('index', code, T, fetchJson), isNum), null),
       settle(once(`iBY:${code}`, () => prevClose('index', code, Y, fetchJson), isNum), null),
     ]);
-    const tb = atOrBefore(completed(bT, hhmm), at), yb = atOrBefore(bY, at);
+    const tb = atOrBefore(completed(bT, hhmm), at), yb = atOrBefore(bY, toY(at));
     const t = tb ? pct(tb.v, pT) : null, y = yb ? pct(yb.v, pY) : null;
     return { t, y, diff: t != null && y != null ? round2(t - y) : null,
              judge: t != null && y != null ? judge(round2(t - y), TH.pctPoint) : null };
@@ -159,13 +168,13 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
         settle(once(`sPT:${code}`, () => prevClose('item', code, T, fetchJson), isNum), null),
         settle(once(`sPY:${code}`, () => prevClose('item', code, Y, fetchJson), isNum), null),
       ]);
-      const tb = atOrBefore(completed(bT, hhmm), at), yb = tb ? atOrBefore(bY, tb.t) : null;
+      const tb = atOrBefore(completed(bT, hhmm), at), yb = tb ? atOrBefore(bY, toY(tb.t)) : null;
       return [code, { t: tb ? pct(tb.v, pT) : null, y: yb ? pct(yb.v, pY) : null }];
     })),
   ]);
 
   const axes = {
-    heat: heatAxis(kT, kY, baseT, baseY, at),
+    heat: heatAxis(kT, kY, baseT, baseY, at, toY(at)),
     market: { kosdaq, kospi200 },
     sectors: sectorRows(Object.fromEntries(sectorPairs)),
     flow: flow ? flowAxis(flow.t, flow.y) : null,
@@ -173,9 +182,10 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
 
   return {
     status: 'ok',
-    time: at.slice(0, 2) + ':' + at.slice(2),
+    time: hm(at),
     today: { date: dash, label: labelFromYmd(dash) },
-    prev: { date: yDash, label: labelFromYmd(yDash), rel },
+    // time — 어제 칸이 실제로 고른 시각. 장 시간이 같은 날은 오늘 time과 같다. open은 장 시간이 다를 때만 붙인다.
+    prev: { date: yDash, label: labelFromYmd(yDash), rel, time: hm(toY(at)), ...(shift ? { open: hm(openY) } : {}) },
     verdict: verdict({ yLabel: rel, kospiDiff: kospi.diff, foreignDiff: flow ? flow.foreignDiff : null, kospiT: kospi.t, kospiY: kospi.y }),
     kospi, flow, leaders, avg, issues, axes,
   };
