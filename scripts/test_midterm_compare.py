@@ -155,3 +155,28 @@ def test_build_terms_same_day_and_context():
     y2 = next(r for r in c["ranges"] if r["key"] == "y2")
     assert y2["s"] == 365 and y2["now"] and y2["months"][0]["label"] == "1년"
     assert lp.terms_context(None, "2026-11-18") == {}
+
+
+def test_zoomed_tabs_show_more_events_and_2y_keeps_base():
+    """2년 탭은 tabs 없는 기본 사건만, 선거 해·선거 전후는 그 창의 사건을 더 자세히(2026-11-20 사용자 요청)."""
+    c = lp.midterm_context(_data())["mt"]
+    r = {x["key"]: x for x in c["ranges"]}
+    base = [e["label"] for e in c["events"]]
+    assert [e["label"] for e in r["2y"]["events"]] == base
+    assert "연중 저점" not in [e["label"] for e in r["2y"]["events"] if e["g"] == 26]
+    assert "1월 고점 · 조정 직전" in [e["label"] for e in r["y1"]["events"]]
+    assert "하루 +5.0% 반등" in [e["label"] for e in r["mid"]["events"]]
+    assert "하루 +5.0% 반등" not in [e["label"] for e in r["y1"]["events"]]
+    for k in ("y1", "mid"):
+        evs = r[k]["events"]
+        assert all(r[k]["s"] <= e["day"] <= r[k]["e"] for e in evs)             # 창 밖 사건은 목록에도 없다
+        assert [e["n"] for e in evs] == list(range(1, len(evs) + 1))
+        assert [m["n"] for m in r[k]["marks"]] == [e["n"] for e in evs]          # 그래프 번호 = 목록 번호
+    assert all("%" not in x["now"]["s"] for x in c["ranges"] if x["now"])       # '지금 +4.8%%' 방지
+
+
+def test_zoom_events_config_dates_are_real_days():
+    cfg = json.loads(lp.MIDTERM_EVENTS_PATH.read_text(encoding="utf-8"))["events"]
+    for e in cfg:
+        date.fromisoformat(e["d"])
+        assert set(e.get("tabs") or []) <= {"y1", "mid"}

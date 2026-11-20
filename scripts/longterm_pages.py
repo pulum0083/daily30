@@ -346,17 +346,24 @@ def _sg(v: float, d: int = 1) -> str:
     return ("+" if v > 0 else "−" if v < 0 else "") + f"{abs(v):.{d}f}"
 
 
-def _mt_events(data: dict) -> list:
-    """설정 파일 사건 + 2026년 연중 고점(데이터에서 계산). 일(그해 1월 1일 = 0)·그날 값·예정 여부를 붙인다."""
+def _mt_events(data: dict, tab: str = "2y", window: tuple | None = None) -> list:
+    """설정 파일 사건 + 2026년 연중 고점(데이터에서 계산). 일(그해 1월 1일 = 0)·그날 값·예정 여부를 붙인다.
+    tab — 'tabs'가 있는 사건은 그 탭에서만, 2026년 연중 저점은 확대 탭(2년이 아닌 탭)에서만 넣는다(2026-11-20).
+    window — (S, E)를 주면 그 창 안의 사건만 남기고 번호를 다시 매긴다."""
     y0, y1 = data["years"]
     try:
         evs = json.loads(MIDTERM_EVENTS_PATH.read_text(encoding="utf-8")).get("events") or []
     except Exception:
         evs = []
+    evs = [e for e in evs if not e.get("tabs") or tab in e["tabs"]]
     b_year = [p for p in data["b"] if p[2][:4] == str(y1)]
     if b_year:
         top = max(b_year, key=lambda p: p[1])
         evs = evs + [{"d": top[2], "label": "연중 고점"}]
+        if tab != "2y":
+            low = min(b_year, key=lambda p: p[1])
+            if low[1] < 0:
+                evs = evs + [{"d": low[2], "label": "연중 저점"}]
     out = []
     for e in sorted(evs, key=lambda e: e.get("d", "")):
         d = str(e.get("d") or "")
@@ -371,6 +378,8 @@ def _mt_events(data: dict) -> list:
         out.append({"d": d, "day": day, "g": 18 if grp == y0 else 26, "label": e.get("label", "") + (" (예정)" if later else ""),
                     "v": v, "v_s": f"{_sg(v)}%" if v is not None else "아직",
                     "when": (f"{int(d[5:7])}/{int(d[8:10])}" if yr == grp else f"{d[2:4]}/{int(d[5:7])}/{int(d[8:10])}")})
+    if window:
+        out = [e for e in out if window[0] <= e["day"] <= window[1]]
     a_ev = [e for e in out if e["g"] == 18]
     b_ev = [e for e in out if e["g"] == 26]
     for i, e in enumerate(a_ev + b_ev, 1):
@@ -424,7 +433,7 @@ def _mt_chart(data: dict, evs: list, S: int, E: int) -> dict:
         "yr": f"{xx(365) * 10:.1f}" if S < 365 < E else "",
         "labs": ([{"left": f"{xx((S + 365) / 2):.1f}%", "t": f"{y0i} · {y1i}"},
                   {"left": f"{xx((365 + E) / 2):.1f}%", "t": f"{y0i + 1} · {y1i + 1}"}] if S < 365 < E else []),
-        "now": ({"left": f"{xx(now[0]):.2f}%", "top": f"{yy(now[1]):.2f}%", "s": f"{_sg(now[1])}%"} if S <= now[0] <= E else None),
+        "now": ({"left": f"{xx(now[0]):.2f}%", "top": f"{yy(now[1]):.2f}%", "s": _sg(now[1]), "flip": xx(now[0]) > 72} if S <= now[0] <= E else None),
         "marks": [{"left": f"{m['x']:.2f}%", "g": m["g"], "n": m["n"], "off": m["off"]} for m in marks],
         "months": months,
     }
@@ -504,7 +513,7 @@ def _tt_chart(tt: dict, evs: list, S: int, E: int) -> dict:
         "ticks": [{"top": f"{yy(v):.1f}%", "v": f"{_sg(v, 0)}%", "y": f"{yy(v) * 2:.1f}", "zero": v == 0}
                   for v in range(int(lo), int(hi) + 1, step)],
         "a1": pl(pa), "b": pl(pb), "yrs": yrs,
-        "now": ({"left": f"{xx(now[0]):.2f}%", "top": f"{yy(now[1]):.2f}%", "s": f"{_sg(now[1])}%"} if S <= now[0] <= E else None),
+        "now": ({"left": f"{xx(now[0]):.2f}%", "top": f"{yy(now[1]):.2f}%", "s": _sg(now[1]), "flip": xx(now[0]) > 72} if S <= now[0] <= E else None),
         "marks": [{"left": f"{m['x']:.2f}%", "g": m["g"], "n": m["n"], "off": m["off"]} for m in marks],
         "months": [dict(x, label=x["label"].strip()) for x in xs],
     }
@@ -570,7 +579,10 @@ def midterm_context(data: dict) -> dict:
     asof = data["asof"]
     same = data["same"]
     evs = _mt_events(data)
-    ranges = [dict(_mt_chart(data, evs, S, E), key=k, label=l) for k, l, S, E in MT_RANGES]
+    ranges = []
+    for k, l, S, E in MT_RANGES:   # 2년 탭은 기본 사건 그대로, 확대 탭은 그 창의 사건을 더 자세히(2026-11-20)
+        ev_k = evs if k == "2y" else _mt_events(data, k, (S, E))
+        ranges.append(dict(_mt_chart(data, ev_k, S, E), key=k, label=l, events=ev_k))
     mid = data.get("midterms") or []
     base = data.get("base") or {}
     ups = sum(1 for _, v in mid if v > 0)

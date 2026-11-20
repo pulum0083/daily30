@@ -34,6 +34,7 @@
   .mtp-in .evn.g26{background:var(--ink);color:var(--canvas)}
   .mtp-in .now{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--primary);border:2px solid var(--canvas);box-shadow:0 0 0 1px var(--primary);pointer-events:none}
   .mtp-in .nowl{position:absolute;transform:translate(8px,-130%);font-size:11px;font-weight:800;color:var(--primary);white-space:nowrap;pointer-events:none}
+  .mtp-in .nowl.l{transform:translate(calc(-100% - 8px),-130%)}   /* 점이 오른쪽 끝에 가까우면 글자를 왼쪽에 — 휴대폰에서 카드 밖으로 넘쳤다 */
   .mtp-in .yrl{position:absolute;top:18px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#94A3B8;pointer-events:none}
   .mtp-x{position:relative;height:16px;margin:12px 0 0 40px;font-size:10px;color:var(--muted)}
   .mtp-x span{position:absolute;transform:translateX(-50%)}.mtp-x span:first-child{transform:none}
@@ -106,18 +107,18 @@
             {% if r.b %}<polyline class="b26" points="{{ r.b }}"/>{% endif %}
           </svg>
           {% for m in r.marks %}<i class="ev g{{ m.g }}" style="left:{{ m.left }}"></i><b class="evn g{{ m.g }}" style="left:{{ m.left }};{{ 'top' if m.g == 18 else 'bottom' }}:{{ m.off }}px">{{ m.n }}</b>{% endfor %}
-          {% if r.now %}<i class="now" style="left:{{ r.now.left }};top:{{ r.now.top }}"></i><span class="nowl" style="left:{{ r.now.left }};top:{{ r.now.top }}">지금 {{ r.now.s }}%</span>{% endif %}
+          {% if r.now %}<i class="now" style="left:{{ r.now.left }};top:{{ r.now.top }}"></i><span class="nowl{{ ' l' if r.now.flip }}" style="left:{{ r.now.left }};top:{{ r.now.top }}">지금 {{ r.now.s }}%</span>{% endif %}
           {% for l in r.labs %}<span class="yrl" style="left:{{ l.left }}">{{ l.t }}</span>{% endfor %}
           <i class="ltp-cur" hidden></i><div class="ltp-tip" role="status" hidden></div>
         </div>
       </div>
       <div class="mtp-x">{% for m in r.months %}<span style="left:{{ m.left }}">{{ m.label }}</span>{% endfor %}</div>
+      <div class="mtp-evs">
+        <div><h3><i></i>{{ mt.y0 }} ~ {{ mt.y0 + 1 }}</h3>{% for e in r.events if e.g == 18 %}<p data-n="{{ e.n }}"><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+        <div><h3><i class="k26"></i>{{ mt.y1 }}</h3>{% for e in r.events if e.g == 26 %}<p data-n="{{ e.n }}"><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
+      </div>
     </div>
     {% endfor %}
-    <div class="mtp-evs">
-      <div><h3><i></i>{{ mt.y0 }} ~ {{ mt.y0 + 1 }}</h3>{% for e in mt.events if e.g == 18 %}<p data-n="{{ e.n }}"><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
-      <div><h3><i class="k26"></i>{{ mt.y1 }}</h3>{% for e in mt.events if e.g == 26 %}<p data-n="{{ e.n }}"><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
-    </div>
   </section>
 
   {% if mt.tt %}
@@ -138,7 +139,7 @@
             {% if r.b %}<polyline class="b26" points="{{ r.b }}"/>{% endif %}
           </svg>
           {% for m in r.marks %}<i class="ev g{{ m.g }}" style="left:{{ m.left }}"></i><b class="evn g{{ m.g }}" style="left:{{ m.left }};{{ 'top' if m.g == 18 else 'bottom' }}:{{ m.off }}px">{{ m.n }}</b>{% endfor %}
-          {% if r.now %}<i class="now" style="left:{{ r.now.left }};top:{{ r.now.top }}"></i><span class="nowl" style="left:{{ r.now.left }};top:{{ r.now.top }}">지금 {{ r.now.s }}%</span>{% endif %}
+          {% if r.now %}<i class="now" style="left:{{ r.now.left }};top:{{ r.now.top }}"></i><span class="nowl{{ ' l' if r.now.flip }}" style="left:{{ r.now.left }};top:{{ r.now.top }}">지금 {{ r.now.s }}%</span>{% endif %}
           <i class="ltp-cur" hidden></i><div class="ltp-tip" role="status" hidden></div>
         </div>
       </div>
@@ -203,7 +204,8 @@
       var k = hit.indexOf(n) >= 0; n.classList.toggle('on', k);
       var ln = n.previousElementSibling; if (ln && ln.classList.contains('ev')) ln.classList.toggle('on', k);
     });
-    [].forEach.call(card.querySelectorAll('.mtp-evs p[data-n]'), function (p) { p.classList.toggle('on', on.indexOf(p.dataset.n) >= 0); });
+    var box = el.closest('.mtp-r'), scope = box && box.querySelector('.mtp-evs') ? box : card;
+    [].forEach.call(scope.querySelectorAll('.mtp-evs p[data-n]'), function (p) { p.classList.toggle('on', on.indexOf(p.dataset.n) >= 0); });
   }
   function unmark(el) {
     [].forEach.call(el.closest('.ltp-card').querySelectorAll('.on'), function (n) { if (!n.matches('button')) n.classList.remove('on'); });
