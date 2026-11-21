@@ -526,19 +526,165 @@ def terms_context(tt: dict, asof: str) -> dict:
     now, same, end1 = tt["t2"][-1], tt["same"], tt["t1"][-1]
     days = now[0]
     evs = _tt_events(tt, asof)
+    s1, s2 = tt["starts"]
+    # 같은 기간 · 1~4년차 · 4년 전체(2026-11-21 3·4년차 추가). 2기가 아직 오지 않은 해는 1기 선만 보인다.
     ranges = [("same", "같은 기간", 0, days + 60), ("y1", "1년차", 0, 365), ("y2", "2년차", 365, max(730, days + 30)),
+              ("y3", "3년차", 730, max(1096, days + 30)), ("y4", "4년차", 1096, max(end1[0], days) + 10),
               ("all", "4년 전체", 0, max(end1[0], days) + 10)]
     say = (f"취임 뒤 {days}일, 2기 S&amp;P 500은 취임 직전보다 <b>{_sg(now[1])}%</b>예요. "
            f"1기 같은 날({same['date'][2:4]}/{int(same['date'][5:7])}/{int(same['date'][8:10])})엔 <b>{_sg(same['pct'])}%</b>였어요.")
     if tt.get("corr") is not None:
         say += f" 두 곡선이 닮은 정도는 <b>{tt['corr']:.2f}</b>예요(1이면 똑같고 0이면 관계없어요)."
     say += f" 1기는 4년 끝({end1[2][:4]}년 1월)에 <b>{_sg(end1[1])}%</b>로 마쳤어요."
-    s1, s2 = tt["starts"]
     return {"tt": {
         "say": say, "days": days, "now_s": _sg(now[1]), "same_s": _sg(same["pct"]),
         "start1": s1, "start2": s2, "events": evs,
-        "ranges": [dict(_tt_chart(tt, evs, S, E), key=k, label=l) for k, l, S, E in ranges],
+        # 사건 목록은 탭마다 그 기간 사건만(번호는 모든 탭에서 같다, 2026-11-21)
+        "ranges": [dict(_tt_chart(tt, evs, S, E), key=k, label=l, events=[e for e in evs if S <= e["day"] <= E],
+                        ahead=(f"2기는 아직 {k[1]}년차에 들어서지 않았어요({int(s2[:4]) + int(k[1]) - 1}-01-20부터). 지금은 1기 선만 보여요."
+                               if k in ("y3", "y4") and days < S else ""))
+                   for k, l, S, E in ranges],
         "data_js": json.dumps({"a": tt["t1"], "b": tt["t2"]}, ensure_ascii=False, separators=(",", ":")),
+    }}
+
+
+# ── 트럼프 1기 vs 2기 S&P500 비교 페이지(/stocks/trump-terms/, 2026-11-21) ──────────────────────────────
+SHORT = {"러셀 2000(소형주)": "소형주", "필라델피아 반도체": "반도체", "원/달러 환율": "원/달러", "WTI 유가": "유가"}
+
+
+def _under(path: list) -> list:
+    """[날수, %, 날짜] → 취임 뒤 가장 높았던 종가 대비 [날수, %, 날짜]."""
+    peak, out = -1e9, []
+    for d, v, ds in path:
+        lvl = 1 + v / 100
+        peak = max(peak, lvl)
+        out.append([d, round((lvl / peak - 1) * 100, 2), ds])
+    return out
+
+
+def year_ends(path: list, limit_day: int | None = None) -> list:
+    """취임 뒤 1·2·3·4년 끝(365·730·1096·1461일) 값. 그 날수에 닿지 않은 해는 넣지 않는다. 4년째는 마지막 점(퇴임 전날)."""
+    out = []
+    for k, d in enumerate((365, 730, 1096, 1461), 1):
+        if path[-1][0] < d - 5 and not (k == 4 and path[-1][0] >= 1450):
+            break
+        p = [q for q in path if q[0] <= d][-1]
+        out.append(p[1])
+    return out
+
+
+def _asset_table(rows: list) -> list:
+    mx = max([abs(v) for r in rows for v in (r["t1"], r["t2"])] + [1])
+    w = lambda v: f"{min(abs(v), mx) / mx * 50:.1f}"
+    l = lambda v: f"{50 if v >= 0 else 50 - min(abs(v), mx) / mx * 50:.1f}"
+    return [dict(r, t1_s=_sg(r["t1"]), t2_s=_sg(r["t2"]), end1_s=_sg(r["end1"]),
+                 a_l=l(r["t1"]), a_w=w(r["t1"]), b_l=l(r["t2"]), b_w=w(r["t2"])) for r in rows]
+
+
+def _ieyo(word: str) -> str:
+    ch = word[-1] if word else ""
+    has = not ("가" <= ch <= "힣") or (ord(ch) - 0xAC00) % 28 != 0
+    return word + ("이에요" if has else "예요")
+
+
+def _ymd(d: str) -> str:
+    return f"{d[2:4]}/{int(d[5:7])}/{int(d[8:10])}"
+
+
+def _us_say(rows: list) -> str:
+    """미국 증시 표 위 문장 — S&P 500 비교 + 1기 같은 날보다 3%p 넘게 낮은·높은 지수."""
+    sp = next((r for r in rows if r["k"] == "S&P 500"), None)
+    out = []
+    if sp:
+        d = sp["t2"] - sp["t1"]
+        word = "비슷해요" if abs(d) < 3 else "높아요" if d > 0 else "낮아요"
+        out.append(f"지금 2기의 S&amp;P 500은 1기 같은 날과 {word}(<b>{_sg(sp['t2'])}%</b> vs {_sg(sp['t1'])}%).")
+    rest = [r for r in rows if r["k"] != "S&P 500"]
+    lo = "·".join(SHORT.get(r["k"], r["k"]) for r in rest if r["t2"] < r["t1"] - 3)
+    hi_rows = [r for r in rest if r["t2"] > r["t1"] + 3]
+    hi = "·".join(SHORT.get(r["k"], r["k"]) for r in hi_rows)
+    gap = ""
+    if hi_rows:
+        top = max(hi_rows, key=lambda r: r["t2"] - r["t1"])
+        gap = f"({SHORT.get(top['k'], top['k'])} <b>{_sg(top['t2'])}%</b> vs {_sg(top['t1'])}%)"
+    if lo and hi:
+        out.append(f"{_eun(lo)} 1기 같은 날보다 낮고, {_eun(hi)} 높아요{gap}.")
+    elif lo:
+        out.append(f"{_eun(lo)} 1기 같은 날보다 낮아요.")
+    elif hi:
+        out.append(f"{_eun(hi)} 1기 같은 날보다 높아요{gap}.")
+    return " ".join(out)
+
+
+def _kr_say(rows: list) -> str:
+    """코스피·달러·금 표 위 문장 — 두 임기가 가장 크게 갈린 자산 + 달러 방향."""
+    if not rows:
+        return ""
+    top = max(rows, key=lambda r: abs(r["t2"] - r["t1"]))
+    out = (f"두 임기가 가장 크게 갈린 건 {_ieyo(SHORT.get(top['k'], top['k']))} — 1기 같은 날 {_sg(top['t1'])}%, "
+           f"2기 지금 <b>{_sg(top['t2'])}%</b>.")
+    dx = next((r for r in rows if r["k"] == "달러 지수"), None)
+    if dx and dx["t1"] < 0 and dx["t2"] < 0:
+        out += " 달러는 두 임기 모두 약해졌어요."
+    elif dx and dx["t1"] > 0 and dx["t2"] > 0:
+        out += " 달러는 두 임기 모두 강해졌어요."
+    return out
+
+
+def trump_context(data: dict) -> dict:
+    """data/trump_terms.json → /stocks/trump-terms/ 컨텍스트. 없으면 {}. 문장은 정해진 틀(LLM 없음, §0)."""
+    base = terms_context(data, data.get("asof", "")) if data else {}
+    if not base:
+        return {}
+    tt = base["tt"]
+    asof = data["asof"]
+    t1, t2 = data["t1"], data["t2"]
+    now, same = t2[-1], data["same"]
+    days = now[0]
+    # 고점에서 얼마나 빠졌나 — 취임 뒤 가장 높았던 종가 대비
+    u1, u2 = _under(t1), _under(t2)
+    E = max(t1[-1][0], days) + 10
+    uw = _tt_chart({"t1": u1, "t2": u2}, [], 0, E)
+    w2 = min(u2, key=lambda p: p[1])
+    pk2 = max(t2, key=lambda p: p[1])
+    u1s = [p for p in u1 if p[0] <= days][-1]
+    after = [p for p in u1 if days < p[0] <= days + 92]
+    deeper = min(after, key=lambda p: p[1]) if after else None
+    w1 = min(u1, key=lambda p: p[1])
+    uw_say = f"2기 지금은 취임 뒤 고점({_ymd(pk2[2])})보다 <b>{abs(u2[-1][1]):.1f}%</b> 아래예요." if u2[-1][1] < 0 else "2기 지금은 취임 뒤 가장 높은 곳이에요."
+    if w2 is not u2[-1]:
+        uw_say += f" 2기에서 가장 깊었던 건 {_ymd(w2[2])}의 <b>{_sg(w2[1])}%</b>예요."
+    uw_say += f" 1기 같은 날엔 고점보다 {abs(u1s[1]):.1f}% 아래였고"
+    uw_say += (f", 그 뒤 {_ymd(deeper[2])}까지 {abs(deeper[1]):.1f}% 아래로 더 깊어졌어요." if deeper and deeper[1] < u1s[1] - 1 else "요.").replace("였고요.", "였어요.")
+    uw_say += f" 1기 4년 중 가장 깊었던 건 {_ymd(w1[2])}의 {_sg(w1[1])}%예요."
+    # 역대 임기
+    pres = [p for p in data.get("pres") or [] if p.get("same") is not None]
+    pm = max([abs(p["same"]) for p in pres] + [1])
+    prs = [dict(p, same_s=_sg(p["same"]), end_s=(_sg(p["end"]) + "%") if p.get("end") is not None else "진행 중",
+                l=f"{50 if p['same'] >= 0 else 50 - abs(p['same']) / pm * 50:.1f}", w=f"{abs(p['same']) / pm * 50:.1f}",
+                cls="t1" if p["y"] == 2017 else "t2" if p["y"] == 2025 else "")
+           for p in sorted(pres, key=lambda p: -p["same"])]
+    past = [p for p in pres if p["y"] != 2025]
+    ends = [p["end"] for p in data.get("pres") or [] if p.get("end") is not None]
+    assets = data.get("assets") or []
+    us = _asset_table([a for a in assets if a["group"] == "us"])
+    kr = _asset_table([a for a in assets if a["group"] == "kr"])
+    fwd = data.get("fwd") or {}
+    fwd_boxes = []
+    for key, lab in (("low3m", "3개월 안 가장 낮았을 때"), ("m6", "6개월 뒤"), ("m12", "1년 뒤"), ("end", "4년 끝까지")):
+        f = fwd.get(key)
+        if f:
+            fwd_boxes.append({"k": lab, "v": f["pct"], "v_s": _sg(f["pct"]), "when": _ymd(f["date"])})
+    return {"tr": {
+        **tt, "asof": asof, "asof_label": f"{int(asof[5:7])}/{int(asof[8:10])}", "dow": DOW[date.fromisoformat(asof).weekday()],
+        "now_md": _ymd(now[2]), "same_md": _ymd(same["date"]), "corr": data.get("corr"),
+        "us": us, "kr": kr, "us_say": _us_say(us), "kr_say": _kr_say(kr),
+        "uw": uw, "uw_say": uw_say,
+        "uw_js": json.dumps({"a": u1, "b": u2}, ensure_ascii=False, separators=(",", ":")),
+        "fwd": fwd_boxes, "pres": prs, "pres_n": len(past),
+        "pres_higher": sum(1 for p in past if p["same"] > now[1]),
+        "ends_n": len(ends), "ends_up": sum(1 for e in ends if e > 0),
+        "y1": year_ends(t1), "y2": year_ends(t2), "end1_s": _sg(t1[-1][1]),
     }}
 
 
@@ -648,5 +794,4 @@ def midterm_context(data: dict) -> dict:
         "n_mid": len(mid), "ups": ups, "m_avg": m_avg, "worst": worst,
         "first": mid[0][0] if mid else None, "last": mid[-1][0] if mid else None,
         "data_js": json.dumps({"a": [p[:2] + [p[2]] for p in data["a"]], "b": data["b"]}, ensure_ascii=False, separators=(",", ":")),
-        **terms_context(data.get("terms"), asof),
     }}

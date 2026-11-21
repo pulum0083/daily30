@@ -178,11 +178,29 @@ test('장기 신호 · 중간선거 해 비교 — 2026 연초 대비·2018년 �
   assert.equal(api.midtermRow(null, '2026-11-15'), '');
 });
 
+// ── 트럼프 1기 vs 2기 S&P500 비교(2026-11-21) ──────────────────────────────
+const TR = { asof: '2026-11-20', days: 669, now: 15.24, same: { date: '2018-11-20', pct: 16.71 }, end1: 67.82,
+  y1: [24.15, 17.98, 46.7, 67.82], y2: [13.34] };
+test('장기 신호 · 트럼프 1기 vs 2기 — 이름·값, 해마다 막대(1년 칸에도 2기 끝 값, 2년 칸은 2기 지금 빗금)', () => {
+  const h = api.trumpRow(TR, '2026-11-21');
+  assert.match(h, /href="\/stocks\/trump-terms\/"/);
+  assert.match(h, /트럼프 1기 vs 2기 S&amp;P500 비교/);
+  assert.match(h, /\+15\.2%<small>1기 같은 날 \+16\.7%<\/small>/);
+  assert.match(h, /취임 뒤 669일 · 1기는 4년 끝에 \+67\.8%로 마쳤어요/);
+  assert.equal((h.match(/class="p1"/g) || []).length, 4);             // 1기 1~4년 끝
+  assert.match(h, /title="2기 1년 끝 \+13\.3%"/);                    // 1년 칸에도 2기 값(2026-11-21 사용자 지적)
+  assert.match(h, /class="p2 cur"[^>]*title="2기 지금 \+15\.2%"/);     // 진행 중인 2년 칸
+  assert.equal((h.match(/class="p2/g) || []).length, 2);              // 3·4년 칸엔 2기 막대가 없다
+  assert.ok(!/class="p18"/.test(h));                                  // 중간선거 줄과 다른 그래프(선이 아님)
+  assert.equal(api.trumpRow(TR, '2026-12-05'), '');                   // 10일 넘게 멈춘 값
+  assert.equal(api.trumpRow(null, '2026-11-21'), '');
+});
+
 test('장기 신호 블록 — 나스닥 → S&P 500 → 중간선거 → 월봉 순, 코스피 체크 없음, 주간 리포트 링크, 줄이 없으면 블록째 뺀다', () => {
   const m5 = { items: [{ name: '삼성화재', streak: 6, strip: [] }] };
-  const h = api.structHtml({ gap_pct: 48.9 }, SPH, m5, '2026-11-06', '2026-11-08', { ...MT, asof: '2026-11-06' });
+  const h = api.structHtml({ gap_pct: 48.9 }, SPH, m5, '2026-11-06', '2026-11-08', { ...MT, asof: '2026-11-06' }, { ...TR, asof: '2026-11-06' });
   const at = (s) => h.indexOf(s);
-  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('트럼프 1기') && at('트럼프 1기') < at('월봉 5개월선'));
+  assert.ok(at('나스닥 체크') < at('S&amp;P 500') && at('S&amp;P 500') < at('트럼프 1기 중간선거') && at('트럼프 1기 중간선거') < at('트럼프 1기 vs 2기') && at('트럼프 1기 vs 2기') < at('월봉 5개월선'));
   assert.match(h, /장기 신호/);
   assert.match(h, /07:30 갱신/);
   assert.match(h, /href="\/weekly\/">주간 장기 리포트 ›/);

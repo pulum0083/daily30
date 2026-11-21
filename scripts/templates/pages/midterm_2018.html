@@ -6,76 +6,7 @@
 {% block og_desc %}{{ mt.y1 }}년 S&P 500을 같은 대통령의 첫 중간선거 해였던 {{ mt.y0 }}년과 겹쳐 봐요. 지금 연초 대비 {{ mt.now_s }}%, {{ mt.y0 }}년 같은 날 {{ mt.same_s }}%. 1950년 이후 중간선거 {{ mt.n_mid }}번의 선거일 뒤 12개월도 함께 봐요.{% endblock %}
 {% block head_extra %}
 {% include "pages/_lt_css.html" %}
-<style>
-  .mtp{--p18:#E8909A}
-  .mtp-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-  .mtp-h h2{font-size:15px;font-weight:800;color:var(--ink);margin:0;display:inline-flex;align-items:center;gap:8px}
-  .mtp-h h2::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
-  .mtp-seg{display:inline-flex;background:var(--surface-soft);border:1px solid var(--hairline);border-radius:9px;padding:2px;gap:2px}
-  .mtp-seg button{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:none;border:0;border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap}
-  .mtp-seg button:hover{color:var(--ink)}
-  .mtp-seg button[aria-pressed="true"]{background:var(--canvas);color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.12)}
-  html.dark .mtp-seg button[aria-pressed="true"]{background:rgba(255,255,255,.12)}
-  .mtp .ltp-leg i.k18{border-top:2px solid var(--p18)}.mtp .ltp-leg i.k19{border-top:2px solid var(--p18);opacity:.45}
-  .mtp .ltp-leg i.k26{border-top:2px solid var(--ink)}
-  .mtp-plot{position:relative;height:240px;padding-left:40px;margin-top:6px}
-  .mtp-plot .ax{position:absolute;left:0;width:34px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .mtp-in{position:relative;height:100%;cursor:crosshair;touch-action:pan-y}
-  .mtp-in svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-  .mtp-in .g{stroke:var(--hairline);stroke-width:1;vector-effect:non-scaling-stroke}
-  .mtp-in .z{stroke:#94A3B8;stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
-  .mtp-in .yr{stroke:#CBD5E1;stroke-width:1;vector-effect:non-scaling-stroke}
-  .mtp-in .a18{fill:none;stroke:var(--p18);stroke-width:1.8;vector-effect:non-scaling-stroke}
-  .mtp-in .a19{fill:none;stroke:var(--p18);stroke-width:1.6;opacity:.45;vector-effect:non-scaling-stroke}
-  .mtp-in .b26{fill:none;stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke}
-  .mtp-in .ev{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #CBD5E1;pointer-events:none}
-  .mtp-in .ev.g26{border-color:#94A3B8}
-  .mtp-in .evn{position:absolute;transform:translateX(-50%);width:15px;height:15px;border-radius:50%;font-size:9px;font-weight:800;line-height:15px;text-align:center;color:#fff;background:var(--p18);pointer-events:none}
-  .mtp-in .evn.g26{background:var(--ink);color:var(--canvas)}
-  .mtp-in .now{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--primary);border:2px solid var(--canvas);box-shadow:0 0 0 1px var(--primary);pointer-events:none}
-  .mtp-in .nowl{position:absolute;transform:translate(8px,-130%);font-size:11px;font-weight:800;color:var(--primary);white-space:nowrap;pointer-events:none}
-  .mtp-in .nowl.l{transform:translate(calc(-100% - 8px),-130%)}   /* 점이 오른쪽 끝에 가까우면 글자를 왼쪽에 — 휴대폰에서 카드 밖으로 넘쳤다 */
-  .mtp-in .yrl{position:absolute;top:18px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#94A3B8;pointer-events:none}
-  .mtp-x{position:relative;height:16px;margin:12px 0 0 40px;font-size:10px;color:var(--muted)}
-  .mtp-x span{position:absolute;transform:translateX(-50%)}.mtp-x span:first-child{transform:none}
-  .mtp-evs{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin-top:14px;border-top:1px solid var(--hairline);padding-top:10px}
-  .mtp-evs h3{font-size:12px;font-weight:800;margin:0 0 4px;display:flex;align-items:center;gap:6px;color:var(--ink)}
-  .mtp-evs h3 i{display:inline-block;width:14px;border-top:2px solid var(--p18)}.mtp-evs h3 i.k26{border-color:var(--ink)}
-  .mtp-evs p{display:flex;align-items:center;gap:6px;font-size:12px;line-height:1.5;padding:3px 0;margin:0;color:var(--ink)}
-  .mtp-evs p b{flex:none;width:15px;height:15px;border-radius:50%;font-size:9px;line-height:15px;text-align:center;color:#fff;background:var(--p18)}
-  .mtp-evs p b.g26{background:var(--ink);color:var(--canvas)}
-  .mtp-evs p em{margin-left:auto;font-style:normal;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
-  /* 그래프에서 사건 번호 근처를 지나면 그 번호와 아래 목록 줄을 함께 강조한다(2026-11-19) */
-  .mtp-in .evn{transition:transform .12s,box-shadow .12s}.mtp-in .evn.on{transform:translateX(-50%) scale(1.4);z-index:3;box-shadow:0 0 0 2px var(--canvas),0 0 0 3.5px var(--p18)}
-  .mtp-in .evn.g26.on{box-shadow:0 0 0 2px var(--canvas),0 0 0 3.5px var(--ink)}
-  .mtp-in .ev.on{border-left-style:solid;border-color:var(--p18)}.mtp-in .ev.g26.on{border-color:var(--ink)}
-  .mtp-evs p{padding:3px 6px;margin:0 -6px;border-radius:6px;transition:background .12s}.mtp-evs p.on{background:var(--surface-inset,#F1F5F9);font-weight:700}
-  .mtp-evs p.on em{color:var(--ink)}
-  .mtp-concl{margin-top:12px;background:var(--surface-soft);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.75;color:var(--ink)}
-  .mtp-concl p{margin:0}
-  .mtp-bars{position:relative;height:170px;padding-left:34px;margin:24px 0 26px}
-  .mtp-bars .ax{position:absolute;left:0;width:28px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted)}
-  .mtb-in{position:relative;height:100%;display:flex;gap:4px}
-  .mtb-zero{position:absolute;left:0;right:0;border-top:1px solid #94A3B8}
-  .mtb-base{position:absolute;left:0;right:0;border-top:1px dashed var(--primary);z-index:2;pointer-events:none}
-  .mtb-base span{position:absolute;left:4px;top:-16px;font-size:10.5px;font-weight:700;color:var(--primary);background:var(--canvas);padding:0 4px}
-  .mtb{flex:1;position:relative}
-  .mtb i{position:absolute;left:18%;right:18%;background:#CBD5E1;border-radius:2px}
-  .mtb.hl i{background:var(--p18)}
-  .mtb em{position:absolute;left:-6px;right:-6px;text-align:center;font-style:normal;font-size:9.5px;font-weight:700;color:var(--muted)}
-  .mtb.hl em{color:#C2410C}
-  .mtb span{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-size:9.5px;color:var(--muted)}
-  .mtb.hl span{font-weight:800;color:var(--ink)}
-  /* 진행 중 칸 — 칸 전체를 옅은 빗금으로(값을 부풀리지 않는다), 실제 값은 검은 작은 막대 */
-  .mtb.live::before{content:'';position:absolute;top:0;bottom:0;left:12%;right:12%;border-radius:3px;
-    background:repeating-linear-gradient(135deg,rgba(148,163,184,.22) 0 3px,transparent 3px 7px)}
-  .mtb.live i{background:var(--ink);min-height:2px}
-  .mtb.live em{left:auto;right:-2px;white-space:nowrap;color:var(--ink)}
-  .mtb.live em.lt{top:-16px;font-size:9.5px;font-weight:800}
-  .mtb.live span{font-weight:800;color:var(--ink)}
-  @media(max-width:560px){.mtp-seg button{padding:5px 8px;font-size:11.5px}.mtp-plot{height:200px;padding-left:32px}.mtp-plot .ax{width:28px}.mtp-x{margin-left:32px}
-    .mtp-evs{grid-template-columns:1fr}.mtp-in .yrl{display:none}.mtb em{display:none}.mtb.hl em,.mtb.live em{display:block}}
-</style>
+{% include "pages/_mtp_css.html" %}
 {% endblock %}
 {% block body %}
 <main class="ltp mtp">
@@ -121,38 +52,6 @@
     {% endfor %}
   </section>
 
-  {% if mt.tt %}
-  {# 트럼프 1기 vs 2기 — 취임 직전 종가를 0%로 두고 취임 뒤 날수를 맞춰 겹친다(2026-11-19). 숫자는 data/midterm_2018.json의 terms 그대로 #}
-  <section class="ltp-card">
-    <div class="mtp-h"><h2>트럼프 1기 vs 2기 · 취임 뒤 흐름</h2><div class="mtp-seg" role="group" aria-label="기간">{% for r in mt.tt.ranges %}<button type="button" data-r="{{ r.key }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ r.label }}</button>{% endfor %}</div></div>
-    <p class="ltp-say">{{ mt.tt.say | safe }}</p>
-    <div class="ltp-leg"><span><i class="k18"></i>1기({{ mt.tt.start1[:4] }}~{{ mt.tt.start1[:4]|int + 4 }})</span><span><i class="k26"></i>2기({{ mt.tt.start2[:4] }}~)</span><span><i class="z"></i>0% = 취임 직전 거래일 종가</span></div>
-    {% for r in mt.tt.ranges %}
-    <div class="mtp-r" data-r="{{ r.key }}"{% if not loop.first %} hidden{% endif %}>
-      <div class="mtp-plot">
-        {% for t in r.ticks %}<span class="ax" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
-        <div class="mtp-in" data-k="tt" data-s="{{ r.s }}" data-e="{{ r.e }}">
-          <svg viewBox="0 0 1000 200" preserveAspectRatio="none" role="img" aria-label="S&amp;P 500 취임 뒤 등락, 트럼프 1기와 2기">
-            {% for t in r.ticks %}<line x1="0" x2="1000" y1="{{ t.y }}" y2="{{ t.y }}" class="{{ 'z' if t.zero else 'g' }}"/>{% endfor %}
-            {% for x in r.yrs %}<line x1="{{ x }}" x2="{{ x }}" y1="0" y2="200" class="yr"/>{% endfor %}
-            {% if r.a1 %}<polyline class="a18" points="{{ r.a1 }}"/>{% endif %}
-            {% if r.b %}<polyline class="b26" points="{{ r.b }}"/>{% endif %}
-          </svg>
-          {% for m in r.marks %}<i class="ev g{{ m.g }}" style="left:{{ m.left }}"></i><b class="evn g{{ m.g }}" style="left:{{ m.left }};{{ 'top' if m.g == 18 else 'bottom' }}:{{ m.off }}px">{{ m.n }}</b>{% endfor %}
-          {% if r.now %}<i class="now" style="left:{{ r.now.left }};top:{{ r.now.top }}"></i><span class="nowl{{ ' l' if r.now.flip }}" style="left:{{ r.now.left }};top:{{ r.now.top }}">지금 {{ r.now.s }}%</span>{% endif %}
-          <i class="ltp-cur" hidden></i><div class="ltp-tip" role="status" hidden></div>
-        </div>
-      </div>
-      <div class="mtp-x">{% for m in r.months %}<span style="left:{{ m.left }}">{{ m.label }}</span>{% endfor %}</div>
-    </div>
-    {% endfor %}
-    <div class="mtp-evs">
-      <div><h3><i></i>1기 {{ mt.tt.start1[:4] }} ~ {{ mt.tt.start1[:4]|int + 4 }}</h3>{% for e in mt.tt.events if e.g == 18 %}<p data-n="{{ e.n }}"><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
-      <div><h3><i class="k26"></i>2기 {{ mt.tt.start2[:4] }} ~</h3>{% for e in mt.tt.events if e.g == 26 %}<p data-n="{{ e.n }}"><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>
-    </div>
-    <p class="ltp-fine">사건 옆 숫자는 그날 취임 직전 종가 대비 등락이에요. 1기 선은 4년 끝까지 그대로 그린 실제 기록이고, 2기의 앞날을 예측하는 선이 아니에요.</p>
-  </section>
-  {% endif %}
 
   <section class="ltp-card">
     <div class="ltp-h"><h2>같은 날 나란히 · {{ mt.same_label }}</h2><small>닮은 점과 다른 점</small></div>
@@ -183,6 +82,7 @@
     <p>두 해가 닮았다는 사실이 {{ mt.y1 + 1 }}년 흐름을 알려 주지는 않아요. 투자 권유가 아니에요.</p>
   </section>
   <div class="ltp-links">
+    <a href="/stocks/trump-terms/">트럼프 1기 vs 2기 S&amp;P500 비교 →</a>
     <a href="/stocks/nasdaq-check/">나스닥 체크 →</a>
     <a href="/stocks/sp500-200/">S&amp;P 500 200일선 →</a>
     <a href="/weekly/">주간 장기 리포트 →</a>
@@ -228,26 +128,6 @@
     el.addEventListener('touchmove', function (e) { if (e.touches[0]) { show(e.touches[0].clientX); mark(el, e.touches[0].clientX); } }, { passive: true });
     el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; unmark(el); });
   });
-  {% if mt.tt %}
-  var TT = {{ mt.tt.data_js | safe }};
-  [].forEach.call(document.querySelectorAll('.mtp-in[data-k="tt"]'), function (el) {
-    var cur = el.querySelector('.ltp-cur'), tip = el.querySelector('.ltp-tip'), S = +el.dataset.s, E = +el.dataset.e;
-    var dt = function (s) { return s.slice(2, 4) + '/' + (+s.slice(5, 7)) + '/' + (+s.slice(8, 10)); };
-    function show(x) {
-      var r = el.getBoundingClientRect(), f = Math.min(1, Math.max(0, (x - r.left) / r.width)), d = S + f * (E - S);
-      var a = d <= TT.a[TT.a.length - 1][0] ? at(TT.a, d) : null, b = d <= TT.b[TT.b.length - 1][0] ? at(TT.b, d) : null;
-      if (!a && !b) return;
-      tip.innerHTML = '<b>취임 뒤 ' + Math.round(d) + '일</b>' +
-        (a ? '1기 ' + dt(a[2]) + ' <span class="k">' + fmt(a[1]) + '</span>' : '') +
-        (b ? '<br>2기 ' + dt(b[2]) + ' <span class="k">' + fmt(b[1]) + '</span>' : '<br>2기 <span class="k">아직</span>');
-      cur.style.left = (f * 100) + '%'; cur.hidden = false; tip.hidden = false;
-      tip.style.left = Math.min(r.width - 140, Math.max(0, f * r.width + 10)) + 'px'; tip.style.top = '6px';
-    }
-    el.addEventListener('mousemove', function (e) { show(e.clientX); mark(el, e.clientX); });
-    el.addEventListener('touchmove', function (e) { if (e.touches[0]) { show(e.touches[0].clientX); mark(el, e.touches[0].clientX); } }, { passive: true });
-    el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; unmark(el); });
-  });
-  {% endif %}
   [].forEach.call(document.querySelectorAll('.mtp-seg button'), function (btn) {
     btn.addEventListener('click', function () {
       var card = btn.closest('.ltp-card'), k = btn.dataset.r;

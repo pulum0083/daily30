@@ -822,6 +822,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .lt-g>i{position:absolute;right:-3px;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:#2775ED}
 #struct-sig .lt-g .p18{fill:none;stroke:#E8909A;stroke-width:1.2;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 #struct-sig .lt-g.mt>i{right:auto;margin-left:-3.5px}  /* 중간선거 비교 — 점이 오른쪽 끝이 아니라 2026년 마지막 날 자리 */
+/* 트럼프 1기 vs 2기(2026-11-21, C3안) — 막대 클래스는 p1·p2(.lt-g .a는 S&P 줄 면 채우기라 겹친다) — 1·2·3·4년 칸마다 1기 끝 값(분홍)·2기 끝 값(검정), 진행 중인 해의 2기 지금은 빗금 */
+#struct-sig .lt-g.tb4{display:flex;gap:6px;height:34px;margin-bottom:12px}
+#struct-sig .tb4 .c{position:relative;flex:1}
+#struct-sig .tb4 .c i{position:absolute;width:42%;border-radius:2px 2px 0 0}
+#struct-sig .tb4 .c i.p1{left:6%;background:#E8909A}
+#struct-sig .tb4 .c i.p2{right:6%;background:#0F172A}
+#struct-sig .tb4 .c i.p2.cur{background:repeating-linear-gradient(135deg,#0F172A 0 2px,#64748B 2px 4px)}
+#struct-sig .tb4 small{position:absolute;left:-4px;right:-4px;bottom:-13px;text-align:center;font-size:9.5px;color:var(--muted)}
 #struct-sig .lt-gg{display:flex;flex-direction:column;justify-content:center}
 #struct-sig .lt-gg .t{position:relative;display:block;height:6px;background:#F1F5F9;border-radius:3px}
 #struct-sig .lt-gg .t i{position:absolute;top:0;bottom:0}

@@ -590,6 +590,7 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/stocks/nasdaq-check/",          "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/stocks/sp500-200/",             "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/stocks/midterm-2018/",          "changefreq": "daily",   "priority": "0.6"},
+        {"loc": f"{BASE}/stocks/trump-terms/",           "changefreq": "daily",   "priority": "0.6"},
         {"loc": f"{BASE}/weekly/",                       "changefreq": "weekly",  "priority": "0.7"},
         {"loc": f"{BASE}/accuracy/",                     "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/methodology/",                  "changefreq": "monthly", "priority": "0.6"},

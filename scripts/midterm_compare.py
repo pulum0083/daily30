@@ -154,6 +154,7 @@ def rate_changes(fed: list, start: str, end: str) -> list:
 
 
 # 트럼프 1기·2기 취임일 — 취임 직전 거래일 종가를 0%로 두고 날수를 맞춰 겹친다(2026-11-19 사용자 요청).
+# 2026-11-21부터 /stocks/trump-terms/(trump_terms.py)가 이 함수들을 쓴다 — 중간선거 페이지에서는 뺐다.
 # 2025-01-20은 미국 휴장일(마틴 루서 킹 데이)이라 기준이 1/17 종가가 된다. 1기는 4년 끝(퇴임 전날)까지.
 TERMS = (("2017-01-20", "2021-01-19"), ("2025-01-20", None))
 
@@ -190,7 +191,6 @@ def build(spx: list, ixic: list, tnx: list, fed: list, session: str) -> dict | N
         return None
     ixic = [(d, c) for d, _h, _l, c in ixic if d <= session]
     tnx = [(d, c) for d, _h, _l, c in tnx if d <= session]
-    terms = build_terms(spx, session)
     a, b = ytd_path(spx, Y0), ytd_path(spx, Y1, session)
     if len(b) < 20:
         return None
@@ -223,8 +223,6 @@ def build(spx: list, ixic: list, tnx: list, fed: list, session: str) -> dict | N
     for k, s in (("spx", spx), ("ixic", ixic)):
         out["ret"][k] = {str(y): year_ret(s, y) for y in (Y0, Y0 + 1)}
     out["midterms"], out["base"] = midterm_stats(spx, session)
-    if terms:
-        out["terms"] = terms
     # 진행 중인 중간선거(선거일이 지났고 12개월이 안 찬 것) — 선거일 종가 → 지금. 확정 통계(평균·오른 횟수)에는 넣지 않는다.
     ed = midterm_day(Y1).isoformat()
     p0 = at_or_before(spx, ed)

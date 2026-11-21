@@ -135,6 +135,7 @@ def expected_pages() -> list:
     pages = [(WEB_DIR / "stocks" / "nasdaq-check" / "index.html", f"{SITE_BASE}/stocks/nasdaq-check/"),
              (WEB_DIR / "stocks" / "sp500-200" / "index.html", f"{SITE_BASE}/stocks/sp500-200/"),
              (WEB_DIR / "stocks" / "midterm-2018" / "index.html", f"{SITE_BASE}/stocks/midterm-2018/"),   # 중간선거 해 비교(2026-11-15)
+             (WEB_DIR / "stocks" / "trump-terms" / "index.html", f"{SITE_BASE}/stocks/trump-terms/"),     # 트럼프 1기 vs 2기(2026-11-21)
              (WEB_DIR / "accuracy" / "index.html", f"{SITE_BASE}/accuracy/"),        # 예측 성적표(2026-11-05, §80)
              (WEB_DIR / "methodology" / "index.html", f"{SITE_BASE}/methodology/")]
     universe = CONFIG_DIR / "stock_universe.json"

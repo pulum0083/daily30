@@ -65,7 +65,7 @@ from sections_us import (  # noqa: F401
 )
 from standalone_pages import (  # noqa: F401
     NASDAQ_PAGE_URL, build_nasdaq_page, write_nasdaq_page, write_nasdaq_home, SP500_PAGE_URL, MIDTERM_PAGE_URL,
-    _write_lt_page, write_sp500_page, write_midterm_page, RECORD_PAGES, write_record_pages,
+    _write_lt_page, write_sp500_page, write_midterm_page, write_trump_page, RECORD_PAGES, write_record_pages,
 )
 from sector_pages import (  # noqa: F401
     _fmt_krw, _fmt_pct, _pct_cls, _SECTOR_EMOJI, _SECTOR_COPY_PATH, _sector_copy,
@@ -337,6 +337,8 @@ def main():
                         help="--date 날짜의 data/nasdaq_overheat.json으로 /stocks/nasdaq-check/ 상세 페이지만 다시 쓴다")
     parser.add_argument("--midterm-page", dest="midterm_page", action="store_true",
                         help="--date(KST) 직전 미국장 기준 data/midterm_2018.json으로 /stocks/midterm-2018/ 상세 페이지만 다시 쓴다")
+    parser.add_argument("--trump-page", dest="trump_page", action="store_true",
+                        help="--date(KST) 직전 미국장 기준 data/trump_terms.json으로 /stocks/trump-terms/ 상세 페이지만 다시 쓴다")
     parser.add_argument("--sp500-page", dest="sp500_page", action="store_true",
                         help="--date 날짜의 data/sp500_ma200.json으로 /stocks/sp500-200/ 상세 페이지만 다시 쓴다")
     parser.add_argument("--record-pages", dest="record_pages", action="store_true",
@@ -357,10 +359,10 @@ def main():
         _finish_page_build(written)
         return
 
-    if args.sp500_page or args.midterm_page:
+    if args.sp500_page or args.midterm_page or args.trump_page:
         if not args.date:
-            parser.error("--sp500-page·--midterm-page 는 --date 가 필요합니다")
-        (write_midterm_page if args.midterm_page else write_sp500_page)(args.date)
+            parser.error("--sp500-page·--midterm-page·--trump-page 는 --date 가 필요합니다")
+        (write_trump_page if args.trump_page else write_midterm_page if args.midterm_page else write_sp500_page)(args.date)
         write_sitemap_xml()
         _finish_page_build([])
         return

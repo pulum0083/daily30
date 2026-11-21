@@ -176,7 +176,7 @@ def collect(end: date) -> dict:
 
 
 def refresh_live_pages(end: date) -> None:
-    """금요일 종가로 나스닥 체크·S&P 500 200일선·중간선거 해 비교 상세 페이지와 홈 줄 파일을 다시 쓴다. 이번 주 리포트를 만들 때만 부른다.
+    """금요일 종가로 나스닥 체크·S&P 500 200일선·중간선거 해 비교·트럼프 1기 vs 2기 상세 페이지와 홈 줄 파일을 다시 쓴다. 이번 주 리포트를 만들 때만 부른다.
     S&P는 collect()가 방금 돌린 sp500_ma200.py 결과(date = 토요일)를, 나스닥은 지금 받은 일봉을 쓴다.
     실패해도 리포트는 계속한다 — 직전 페이지가 남을 뿐이다."""
     import generate_html as gh
@@ -184,9 +184,11 @@ def refresh_live_pages(end: date) -> None:
     sat = (end + timedelta(days=1)).isoformat()
     subprocess.run([sys.executable, str(ROOT / "scripts" / "nasdaq_overheat.py")], check=False)
     subprocess.run([sys.executable, str(ROOT / "scripts" / "midterm_compare.py"), "--date", sat], check=False)
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "trump_terms.py"), "--date", sat], check=False)
     for name, fn, d in (("나스닥 체크", gh.write_nasdaq_page, today),
                         ("S&P 500 200일선", gh.write_sp500_page, sat),
-                        ("중간선거 해 비교", gh.write_midterm_page, sat)):
+                        ("중간선거 해 비교", gh.write_midterm_page, sat),
+                        ("트럼프 1기 vs 2기", gh.write_trump_page, sat)):
         try:
             if not fn(d):
                 print(f"[weekly] {name} 상세 페이지를 다시 쓰지 못함 — 직전 페이지가 남는다", file=sys.stderr)

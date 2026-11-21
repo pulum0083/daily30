@@ -1,0 +1,217 @@
+{# 트럼프 1기 vs 2기 S&P500 비교 상세 페이지(/stocks/trump-terms/, 2026-11-21 시안 docs/prototypes/2026-11-21-trump-terms-page.html).
+   숫자는 전부 data/trump_terms.json 그대로다(§0). 문장도 정해진 틀이다(longterm_pages.trump_context). #}
+{% extends "base.html" %}
+{% block title %}트럼프 1기 vs 2기 S&P500 비교 — 취임 뒤 {{ tr.days }}일 | 더블샷(Double-Shot){% endblock %}
+{% block og_title %}트럼프 1기 vs 2기 S&P500 비교 — 취임 뒤 {{ tr.days }}일{% endblock %}
+{% block og_desc %}트럼프 2기 S&P 500은 취임 뒤 {{ tr.days }}일 {{ tr.now_s }}%, 1기 같은 날은 {{ tr.same_s }}%였어요. 두 임기를 취임 직전 종가 기준으로 겹치고, 코스피·달러·금과 역대 대통령 임기도 함께 봐요.{% endblock %}
+{% block head_extra %}
+{% include "pages/_lt_css.html" %}
+{% include "pages/_mtp_css.html" %}
+<style>
+  .trp-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .trp-kpi div{background:var(--surface-soft);border-radius:10px;padding:10px 12px}
+  .trp-kpi span{display:block;font-size:11.5px;font-weight:700;color:var(--muted)}
+  .trp-kpi b{display:block;font-size:24px;font-weight:900;letter-spacing:-.5px;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .trp-kpi b.up{color:#E03131}.trp-kpi b.dn{color:#2775ED}
+  .trp-kpi em{font-style:normal;font-size:11.5px;color:var(--muted)}
+  .ltp .trp-t{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;margin-top:8px}
+  .ltp .trp-t th{font-size:11.5px;color:var(--muted);font-weight:700;text-align:right;padding:6px 4px;border-bottom:1px solid var(--hairline);line-height:1.35}
+  .ltp .trp-t th:first-child{text-align:left}
+  .ltp .trp-t td{padding:8px 4px;border-bottom:1px solid var(--hairline);text-align:right;white-space:nowrap}
+  .ltp .trp-t td:first-child{text-align:left;font-weight:700;white-space:normal}
+  .ltp .trp-t td.up{color:#E03131}.ltp .trp-t td.dn{color:#2775ED}.ltp .trp-t td.end{color:var(--muted)}
+  .trp-t .bar{width:32%}
+  .trp-pb{position:relative;height:16px}
+  .trp-pb i{position:absolute;height:6px;border-radius:3px}.trp-pb i.a{top:1px;background:var(--p18)}.trp-pb i.b{top:9px;background:var(--ink)}
+  .trp-pb u{position:absolute;top:-2px;bottom:-2px;left:50%;width:1px;background:var(--hairline)}
+  .trp-four{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+  .trp-four div{background:var(--surface-soft);border-radius:10px;padding:10px 12px}
+  .trp-four span{display:block;font-size:11.5px;color:var(--muted);font-weight:700}
+  .trp-four b{display:block;font-size:20px;font-weight:900;margin-top:2px;font-variant-numeric:tabular-nums}
+  .trp-four b.up{color:#E03131}.trp-four b.dn{color:#2775ED}
+  .trp-four em{font-style:normal;font-size:11px;color:var(--muted)}
+  .trp-warn{margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:9px 12px;font-size:12.5px;color:#9A3412;line-height:1.55}
+  html.dark .trp-warn{background:rgba(234,88,12,.12);border-color:rgba(234,88,12,.35);color:#FDBA74}
+  .trp-pr,.trp-prh{display:grid;grid-template-columns:96px 1fr 56px 64px;gap:8px;align-items:center;font-size:12.5px;font-variant-numeric:tabular-nums}
+  .trp-prh{font-size:11px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--hairline);padding-bottom:4px;margin:10px 0 4px}
+  .trp-prh span:nth-child(n+3){text-align:right}
+  .trp-pr{padding:3px 4px;margin:0 -4px;border-radius:6px}
+  .trp-pr .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}.trp-pr .nm small{color:var(--muted);font-weight:500}
+  .trp-pr .tr{position:relative;height:12px}.trp-pr .tr i{position:absolute;top:2px;height:8px;border-radius:2px;background:#CBD5E1}
+  .trp-pr .tr u{position:absolute;top:-2px;bottom:-2px;left:50%;width:1px;background:#94A3B8}
+  .trp-pr.t1 .tr i{background:var(--p18)}.trp-pr.t2{background:var(--surface-inset,#F1F5F9)}.trp-pr.t2 .tr i{background:var(--ink)}
+  .trp-pr .v{text-align:right;font-weight:800}.trp-pr .v.up{color:#E03131}.trp-pr .v.dn{color:#2775ED}
+  .trp-pr .e{text-align:right;color:var(--muted);font-size:11.5px}
+  .mtp-r .ltp-fine.ahead{margin:4px 0 0}
+  @media(max-width:560px){
+    .trp-kpi b{font-size:19px}.trp-t .bar{display:none}
+    .trp-four{grid-template-columns:repeat(2,1fr)}
+    .trp-pr,.trp-prh{grid-template-columns:84px 1fr 52px 58px;gap:6px}
+    .mtp-seg{flex-wrap:wrap}
+  }
+</style>
+{% endblock %}
+{% block body %}
+<main class="ltp mtp">
+  <div class="ltp-crumb">
+    <button class="ltp-back" onclick="if(history.length>1)history.back();else location.href='/stocks/'" aria-label="뒤로 가기"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <span><a href="/stocks/">종목 홈</a> › 트럼프 1기 vs 2기</span>
+  </div>
+  <h1 class="ltp-title">트럼프 1기 vs 2기 S&amp;P500 비교</h1>
+  <p class="ltp-lead">같은 대통령의 두 임기를 <b>취임 직전 거래일 종가 = 0%</b>로 맞추고, 취임 뒤 날수를 나란히 놓아 비교해요. 1기 선은 4년 끝까지 그대로 그린 실제 기록이고, 2기의 앞날을 예측하는 선이 아니에요.</p>
+
+  <section class="ltp-card">
+    <div class="trp-kpi">
+      <div><span>2기 지금 · 취임 뒤 {{ tr.days }}일</span><b class="{{ 'up' if tr.now_s[0] == '+' else 'dn' }}">{{ tr.now_s }}%</b><em>{{ tr.asof_label }}({{ tr.dow }}) 종가</em></div>
+      <div><span>1기 같은 날</span><b class="{{ 'up' if tr.same_s[0] == '+' else 'dn' }}">{{ tr.same_s }}%</b><em>{{ tr.same_md }}</em></div>
+      {% if tr.corr is not none %}<div><span>두 곡선 닮은 정도</span><b>{{ '%.2f' % tr.corr }}</b><em>1이면 똑같아요</em></div>{% endif %}
+    </div>
+  </section>
+
+  <section class="ltp-card">
+    <div class="mtp-h"><h2>취임 뒤 흐름 · S&amp;P 500</h2><div class="mtp-seg" role="group" aria-label="기간">{% for r in tr.ranges %}<button type="button" data-r="{{ r.key }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ r.label }}</button>{% endfor %}</div></div>
+    <p class="ltp-say">{{ tr.say | safe }}</p>
+    <div class="ltp-leg"><span><i class="k18"></i>1기({{ tr.start1[:4] }}~{{ tr.start1[:4]|int + 4 }})</span><span><i class="k26"></i>2기({{ tr.start2[:4] }}~)</span><span><i class="z"></i>0% = 취임 직전 거래일 종가</span></div>
+    {% for r in tr.ranges %}
+    <div class="mtp-r" data-r="{{ r.key }}"{% if not loop.first %} hidden{% endif %}>
+      <div class="mtp-plot">
+        {% for t in r.ticks %}<span class="ax" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
+        <div class="mtp-in" data-k="tt" data-s="{{ r.s }}" data-e="{{ r.e }}">
+          <svg viewBox="0 0 1000 200" preserveAspectRatio="none" role="img" aria-label="S&amp;P 500 취임 뒤 등락, 트럼프 1기와 2기">
+            {% for t in r.ticks %}<line x1="0" x2="1000" y1="{{ t.y }}" y2="{{ t.y }}" class="{{ 'z' if t.zero else 'g' }}"/>{% endfor %}
+            {% for x in r.yrs %}<line x1="{{ x }}" x2="{{ x }}" y1="0" y2="200" class="yr"/>{% endfor %}
+            {% if r.a1 %}<polyline class="a18" points="{{ r.a1 }}"/>{% endif %}
+            {% if r.b %}<polyline class="b26" points="{{ r.b }}"/>{% endif %}
+          </svg>
+          {% for m in r.marks %}<i class="ev g{{ m.g }}" style="left:{{ m.left }}"></i><b class="evn g{{ m.g }}" style="left:{{ m.left }};{{ 'top' if m.g == 18 else 'bottom' }}:{{ m.off }}px">{{ m.n }}</b>{% endfor %}
+          {% if r.now %}<i class="now" style="left:{{ r.now.left }};top:{{ r.now.top }}"></i><span class="nowl{{ ' l' if r.now.flip }}" style="left:{{ r.now.left }};top:{{ r.now.top }}">지금 {{ r.now.s }}%</span>{% endif %}
+          <i class="ltp-cur" hidden></i><div class="ltp-tip" role="status" hidden></div>
+        </div>
+      </div>
+      <div class="mtp-x">{% for m in r.months %}<span style="left:{{ m.left }}">{{ m.label }}</span>{% endfor %}</div>
+      {% if r.ahead %}<p class="ltp-fine ahead">{{ r.ahead }}</p>{% endif %}
+      {% if r.events %}<div class="mtp-evs">
+        {% set a = r.events | selectattr('g', 'equalto', 18) | list %}{% set b = r.events | selectattr('g', 'equalto', 26) | list %}
+        {% if a %}<div><h3><i></i>1기 {{ tr.start1[:4] }} ~ {{ tr.start1[:4]|int + 4 }}</h3>{% for e in a %}<p data-n="{{ e.n }}"><b>{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>{% endif %}
+        {% if b %}<div><h3><i class="k26"></i>2기 {{ tr.start2[:4] }} ~</h3>{% for e in b %}<p data-n="{{ e.n }}"><b class="g26">{{ e.n }}</b>{{ e.when }} {{ e.label }}<em>{{ e.v_s }}</em></p>{% endfor %}</div>{% endif %}
+      </div>{% endif %}
+    </div>
+    {% endfor %}
+    <p class="ltp-fine">사건 옆 숫자는 그날 취임 직전 종가 대비 등락이에요. 번호는 모든 탭에서 같고, 목록은 고른 기간의 사건만 보여요. 그래프를 짚으면 가까운 사건 번호와 목록 줄이 함께 강조돼요.</p>
+  </section>
+
+  {% for grp in [('us', '미국 증시', tr.us, tr.us_say, '1기 4년 끝은 2021-01-19 종가예요.'), ('kr', '코스피·달러·금', tr.kr, tr.kr_say, '원/달러 환율이 −면 원화가 강해진 거예요(1달러에 드는 원이 줄었어요).')] if grp[2] %}
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>{{ grp[1] }} · 취임 뒤 같은 날</h2><small>취임 직전 거래일 종가 대비</small></div>
+    <p class="ltp-say">{{ grp[3] | safe }}</p>
+    <table class="trp-t"><thead><tr><th></th><th class="bar"><span style="color:var(--p18)">■</span> 1기 <span style="color:var(--ink)">■</span> 2기</th><th>1기 같은 날<br>{{ tr.same_md }}</th><th>2기 지금<br>{{ tr.now_md }}</th><th>1기 4년 끝</th></tr></thead><tbody>
+      {% for r in grp[2] %}<tr><td>{{ r.k }}</td><td class="bar"><div class="trp-pb"><u></u><i class="a" style="left:{{ r.a_l }}%;width:{{ r.a_w }}%"></i><i class="b" style="left:{{ r.b_l }}%;width:{{ r.b_w }}%"></i></div></td>
+        <td class="{{ 'up' if r.t1 > 0 else 'dn' if r.t1 < 0 }}">{{ r.t1_s }}%</td><td class="{{ 'up' if r.t2 > 0 else 'dn' if r.t2 < 0 }}"><b>{{ r.t2_s }}%</b></td><td class="end">{{ r.end1_s }}%</td></tr>{% endfor %}
+    </tbody></table>
+    <p class="ltp-fine">{{ grp[4] }}</p>
+  </section>
+  {% endfor %}
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>고점에서 얼마나 빠졌나</h2><small>취임 뒤 가장 높았던 종가 대비</small></div>
+    <p class="ltp-say">{{ tr.uw_say | safe }}</p>
+    <div class="ltp-leg"><span><i class="k18"></i>1기</span><span><i class="k26"></i>2기</span></div>
+    <div class="mtp-r">
+      <div class="mtp-plot" style="height:190px">
+        {% for t in tr.uw.ticks %}<span class="ax" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
+        <div class="mtp-in" data-k="uw" data-s="{{ tr.uw.s }}" data-e="{{ tr.uw.e }}">
+          <svg viewBox="0 0 1000 200" preserveAspectRatio="none" role="img" aria-label="취임 뒤 고점 대비 하락, 트럼프 1기와 2기">
+            {% for t in tr.uw.ticks %}<line x1="0" x2="1000" y1="{{ t.y }}" y2="{{ t.y }}" class="{{ 'z' if t.zero else 'g' }}"/>{% endfor %}
+            {% for x in tr.uw.yrs %}<line x1="{{ x }}" x2="{{ x }}" y1="0" y2="200" class="yr"/>{% endfor %}
+            <polyline class="a18" points="{{ tr.uw.a1 }}"/><polyline class="b26" points="{{ tr.uw.b }}"/>
+          </svg>
+          {% if tr.uw.now %}<i class="now" style="left:{{ tr.uw.now.left }};top:{{ tr.uw.now.top }}"></i><span class="nowl{{ ' l' if tr.uw.now.flip }}" style="left:{{ tr.uw.now.left }};top:{{ tr.uw.now.top }}">지금 {{ tr.uw.now.s }}%</span>{% endif %}
+          <i class="ltp-cur" hidden></i><div class="ltp-tip" role="status" hidden></div>
+        </div>
+      </div>
+      <div class="mtp-x">{% for m in tr.uw.months %}<span style="left:{{ m.left }}">{{ m.label }}</span>{% endfor %}</div>
+    </div>
+  </section>
+
+  {% if tr.fwd %}
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>1기는 같은 날 뒤에 어떻게 됐나</h2><small>{{ tr.same_md }} 종가 기준</small></div>
+    <div class="trp-four">{% for f in tr.fwd %}<div><span>{{ f.k }}</span><b class="{{ 'up' if f.v > 0 else 'dn' if f.v < 0 }}">{{ f.v_s }}%</b><em>{{ f.when }}</em></div>{% endfor %}</div>
+    <div class="trp-warn">1기는 한 번뿐인 사례예요. 이 숫자가 2기에도 그대로 나온다는 뜻이 아니에요.</div>
+  </section>
+  {% endif %}
+
+  {% if tr.pres %}
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>역대 대통령 임기 · 취임 뒤 {{ tr.days }}일</h2><small>S&amp;P 500, 1953년 이후</small></div>
+    <p class="ltp-say">취임 뒤 {{ tr.days }}일 시점으로 보면 2기 {{ tr.now_s }}%는 <b>지난 {{ tr.pres_n }}번 중 {{ tr.pres_higher }}번이 이보다 높았어요</b>. 끝난 임기 {{ tr.ends_n }}번 중 {{ tr.ends_up }}번이 4년 끝에 취임 때보다 높았어요.</p>
+    <div class="trp-prh"><span>임기</span><span></span><span>{{ tr.days }}일</span><span>4년 끝</span></div>
+    {% for p in tr.pres %}<div class="trp-pr {{ p.cls }}"><span class="nm">{{ p.name }} <small>{{ p.y }}</small></span><span class="tr"><u></u><i style="left:{{ p.l }}%;width:{{ p.w }}%"></i></span><span class="v {{ 'up' if p.same > 0 else 'dn' if p.same < 0 }}">{{ p.same_s }}%</span><span class="e">{{ p.end_s }}</span></div>{% endfor %}
+    <p class="ltp-fine">임기는 1월 20일 시작으로 맞췄어요. 케네디·존슨, 닉슨·포드처럼 중간에 대통령이 바뀐 임기는 한 칸으로 봤어요. 4년 끝은 다음 취임 전날 종가예요.</p>
+  </section>
+  {% endif %}
+
+  <section class="ltp-sec">
+    <h2>어떻게 계산하나요</h2>
+    <p>S&amp;P 500·나스닥·다우·러셀 2000·필라델피아 반도체·코스피·원/달러·달러 지수·금·WTI 유가의 일별 종가(야후 파이낸스)를 취임일 직전 거래일 종가({{ tr.start1[:4] }}-01-19, {{ tr.start2[:4] }}-01-17)와 비교해요. 두 곡선이 닮은 정도는 같은 날수끼리 짝지은 상관계수예요. 사건 날짜는 실제 기록이고, 아직 오지 않은 사건엔 '(예정)'을 붙여요. 평일 아침과 토요일에 직전 미국장 종가로 다시 계산해요.</p>
+    <p>두 임기가 닮았다는 사실이 앞으로의 흐름을 알려 주지는 않아요. 투자 권유가 아니에요.</p>
+  </section>
+  <div class="ltp-links">
+    <a href="/stocks/midterm-2018/">중간선거 해 비교 →</a>
+    <a href="/stocks/sp500-200/">S&amp;P 500 200일선 →</a>
+    <a href="/weekly/">주간 장기 리포트 →</a>
+  </div>
+</main>
+<script>
+(function () {
+  var D = { tt: {{ tr.data_js | safe }}, uw: {{ tr.uw_js | safe }} };
+  var fmt = function (v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + '%'; };
+  var dt = function (s) { return s.slice(2, 4) + '/' + (+s.slice(5, 7)) + '/' + (+s.slice(8, 10)); };
+  var at = function (arr, d) { var b = null; for (var i = 0; i < arr.length; i++) { if (arr[i][0] <= d) b = arr[i]; else break; } return b; };
+  // 사건 번호 강조 — 지나가는 x에서 14px 안의 가장 가까운 번호(같은 자리에 겹친 번호는 함께)와 그 탭의 목록 줄
+  function mark(el, x) {
+    var r = el.getBoundingClientRect(), best = 15, hit = [];
+    [].forEach.call(el.querySelectorAll('.evn'), function (n) {
+      var d = Math.abs(r.left + parseFloat(n.style.left) / 100 * r.width - x);
+      if (d < best - 0.5) { best = d; hit = [n]; } else if (Math.abs(d - best) <= 0.5) hit.push(n);
+    });
+    var on = hit.map(function (n) { return n.textContent.trim(); });
+    [].forEach.call(el.querySelectorAll('.evn'), function (n) {
+      var k = hit.indexOf(n) >= 0; n.classList.toggle('on', k);
+      var ln = n.previousElementSibling; if (ln && ln.classList.contains('ev')) ln.classList.toggle('on', k);
+    });
+    var box = el.closest('.mtp-r');
+    if (box) [].forEach.call(box.querySelectorAll('.mtp-evs p[data-n]'), function (p) { p.classList.toggle('on', on.indexOf(p.dataset.n) >= 0); });
+  }
+  function unmark(el) {
+    var box = el.closest('.mtp-r') || el;
+    [].forEach.call(box.querySelectorAll('.on'), function (n) { n.classList.remove('on'); });
+  }
+  [].forEach.call(document.querySelectorAll('.mtp-in[data-k]'), function (el) {
+    var cur = el.querySelector('.ltp-cur'), tip = el.querySelector('.ltp-tip'), S = +el.dataset.s, E = +el.dataset.e;
+    var src = D[el.dataset.k], lab = el.dataset.k === 'uw' ? '고점 대비' : '취임 직전보다';
+    function show(x) {
+      var r = el.getBoundingClientRect(), f = Math.min(1, Math.max(0, (x - r.left) / r.width)), d = S + f * (E - S);
+      var a = d <= src.a[src.a.length - 1][0] ? at(src.a, d) : null, b = d <= src.b[src.b.length - 1][0] ? at(src.b, d) : null;
+      if (!a && !b) return;
+      tip.innerHTML = '<b>취임 뒤 ' + Math.round(d) + '일 · ' + lab + '</b>' +
+        (a ? '1기 ' + dt(a[2]) + ' <span class="k">' + fmt(a[1]) + '</span>' : '') +
+        (b ? '<br>2기 ' + dt(b[2]) + ' <span class="k">' + fmt(b[1]) + '</span>' : '<br>2기 <span class="k">아직</span>');
+      cur.style.left = (f * 100) + '%'; cur.hidden = false; tip.hidden = false;
+      tip.style.left = (f > 0.6 ? Math.max(0, f * r.width - tip.offsetWidth - 10) : f * r.width + 10) + 'px'; tip.style.top = '6px';
+    }
+    el.addEventListener('mousemove', function (e) { show(e.clientX); mark(el, e.clientX); });
+    el.addEventListener('touchstart', function (e) { if (e.touches[0]) { show(e.touches[0].clientX); mark(el, e.touches[0].clientX); } }, { passive: true });
+    el.addEventListener('touchmove', function (e) { if (e.touches[0]) { show(e.touches[0].clientX); mark(el, e.touches[0].clientX); } }, { passive: true });
+    el.addEventListener('mouseleave', function () { cur.hidden = true; tip.hidden = true; unmark(el); });
+  });
+  [].forEach.call(document.querySelectorAll('.mtp-seg button'), function (btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('.ltp-card'), k = btn.dataset.r;
+      [].forEach.call(card.querySelectorAll('.mtp-seg button'), function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+      [].forEach.call(card.querySelectorAll('.mtp-r[data-r]'), function (r) { r.hidden = r.dataset.r !== k; });
+    });
+  });
+})();
+</script>
+{% endblock %}

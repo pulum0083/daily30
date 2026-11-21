@@ -92,6 +92,7 @@ def write_nasdaq_home(data: dict) -> None:
 
 SP500_PAGE_URL = f"{SITE_BASE}/stocks/sp500-200/"
 MIDTERM_PAGE_URL = f"{SITE_BASE}/stocks/midterm-2018/"
+TRUMP_PAGE_URL = f"{SITE_BASE}/stocks/trump-terms/"
 
 
 def _write_lt_page(tpl: str, ctx: dict, rel: str, url: str, name: str) -> bool:
@@ -155,6 +156,33 @@ def write_midterm_page(target_date: str) -> bool:
     (WEB_DIR / "data").mkdir(parents=True, exist_ok=True)
     (WEB_DIR / "data" / "midterm-home.json").write_text(json.dumps(home, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     return _write_lt_page("pages/midterm_2018.html", ctx, "/stocks/midterm-2018/", MIDTERM_PAGE_URL, "중간선거 해 비교")
+
+
+def write_trump_page(target_date: str) -> bool:
+    """data/trump_terms.json(trump_terms.py)으로 /stocks/trump-terms/와 홈 줄 파일을 쓴다(2026-11-21).
+    기준일이 target_date(KST)의 직전 미국장이 아니면 쓰지 않는다 — 직전 페이지가 남는다(§14·§20)."""
+    import longterm_pages as lp
+    from session_label import prev_us_session
+    try:
+        data = json.loads((DATA_DIR / "trump_terms.json").read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] 트럼프 1기 vs 2기 페이지 생략 — 데이터 없음({e})")
+        return False
+    want = prev_us_session(date.fromisoformat(target_date))
+    if not want or data.get("asof") != want.isoformat():
+        print(f"[generate_html] 트럼프 1기 vs 2기 페이지 생략 — 기준일 불일치({data.get('asof')} ≠ {want})")
+        return False
+    ctx = lp.trump_context(data)
+    if not ctx:
+        print("[generate_html] 트럼프 1기 vs 2기 페이지 생략 — 비교할 기록이 없음")
+        return False
+    # 종목 홈 '장기 신호' 넷째 줄용 작은 파일 — 페이지와 같은 값. 막대는 1기·2기의 해마다 끝 값과 2기 지금(C3안).
+    tr = ctx["tr"]
+    home = {"asof": data["asof"], "days": tr["days"], "now": data["t2"][-1][1], "same": data["same"],
+            "end1": data["t1"][-1][1], "y1": tr["y1"], "y2": tr["y2"]}
+    (WEB_DIR / "data").mkdir(parents=True, exist_ok=True)
+    (WEB_DIR / "data" / "trump-home.json").write_text(json.dumps(home, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    return _write_lt_page("pages/trump_terms.html", ctx, "/stocks/trump-terms/", TRUMP_PAGE_URL, "트럼프 1기 vs 2기")
 
 
 RECORD_PAGES = (("accuracy", "pages/accuracy.html", "예측 성적표"),

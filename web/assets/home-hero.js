@@ -334,6 +334,40 @@
       sg1(mt.now) + '%' + (same == null ? '' : '<small>' + y0 + '년 같은 날 ' + sg1(same) + '%</small>'), desc, midSpark(mt.a, mt.b));
   }
 
+  // 트럼프 1기 vs 2기 S&P500 비교(2026-11-21, /stocks/trump-terms/) — 취임 직전 종가 대비, 2기 지금과 1기 같은 날.
+  //   작은 그래프는 C3안 — 1·2·3·4년 칸마다 1기 그해 끝 값(분홍)과 2기 그해 끝 값(검정), 진행 중인 해는 2기 지금(빗금 검정).
+  //   중간선거 줄(선 두 개)과 헷갈리지 않게 막대로 그린다. 원천은 미국 장기 지표 아침 갱신이 쓰는 /data/trump-home.json.
+  function trumpBars(y1, y2, now) {
+    var cols = [1, 2, 3, 4].map(function (k) {
+      var a = typeof y1[k - 1] === 'number' ? y1[k - 1] : null;
+      var b = typeof y2[k - 1] === 'number' ? y2[k - 1] : (k === y2.length + 1 ? now : null);
+      return { k: k, a: a, b: b, cur: typeof y2[k - 1] !== 'number' && k === y2.length + 1 };
+    });
+    var vals = [0];
+    cols.forEach(function (c) { if (c.a != null) vals.push(c.a); if (c.b != null) vals.push(c.b); });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if (hi === lo) hi = lo + 1;
+    var Y = function (v) { return (hi - v) / (hi - lo) * 100; };
+    var bar = function (v, cls, tip) {
+      if (v == null) return '';
+      var t = Math.min(Y(v), Y(0)), h = Math.max(Math.abs(Y(v) - Y(0)), 3);
+      return '<i class="' + cls + '" style="top:' + t.toFixed(1) + '%;height:' + h.toFixed(1) + '%" title="' + tip + '"></i>';
+    };
+    return '<span class="lt-g tb4">' + cols.map(function (c) {
+      return '<span class="c">' + bar(c.a, 'p1', '1기 ' + c.k + '년 끝 ' + sg1(c.a) + '%') +
+        bar(c.b, 'p2' + (c.cur ? ' cur' : ''), '2기 ' + (c.cur ? '지금' : c.k + '년 끝') + ' ' + sg1(c.b) + '%') +
+        '<small>' + c.k + '년</small></span>';
+    }).join('') + '</span>';
+  }
+  function trumpRow(tr, today) {
+    if (!tr || typeof tr.now !== 'number' || !/^\d{4}-\d{2}-\d{2}$/.test(tr.asof || '') || !Array.isArray(tr.y1) || !Array.isArray(tr.y2)) return '';
+    if (daysBetween(tr.asof, today) > STRUCT_MAX_AGE) return '';   // 수집이 멈췄으면 옛 값을 보여주지 않는다(§20)
+    var same = tr.same && typeof tr.same.pct === 'number' ? tr.same.pct : null;
+    var desc = '취임 뒤 ' + tr.days + '일' + (typeof tr.end1 === 'number' ? ' · 1기는 4년 끝에 ' + sg1(tr.end1) + '%로 마쳤어요' : '');
+    return ltRow('/stocks/trump-terms/', '트럼프 1기 vs 2기 S&amp;P500 비교', md(tr.asof) + '(' + dowOf(tr.asof) + ') 종가',
+      sg1(tr.now) + '%' + (same == null ? '' : '<small>1기 같은 날 ' + sg1(same) + '%</small>'), desc, trumpBars(tr.y1, tr.y2, tr.now));
+  }
+
   // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 줄을 뺀다.
   function ma5Row(m5, ymd, today) {
     if (!m5 || !Array.isArray(m5.items)) return '';
@@ -357,8 +391,8 @@
       '<em>월말 종가 ÷ 5개월 평균' + (now ? ' · ' + now : '') + '</em></a>';
   }
 
-  function structHtml(nq, sp, m5, m5Date, today, mt) {
-    var rows = nasdaqRow(nq, today) + sp500Row(sp, today) + midtermRow(mt, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
+  function structHtml(nq, sp, m5, m5Date, today, mt, tr) {
+    var rows = nasdaqRow(nq, today) + sp500Row(sp, today) + midtermRow(mt, today) + trumpRow(tr, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
     return rows ? '<div class="block__h"><span class="block__t"><span class="ic">📐</span>장기 신호</span><span class="block__s">07:30 갱신</span></div>' +
       rows + '<div class="lt-f"><span>매주 토요일 한 주 정리</span><a href="/weekly/">주간 장기 리포트 ›</a></div>' : '';
   }
@@ -370,8 +404,8 @@
     var usD = latestReady(slots, 'us', today), krD = latestReady(slots, 'kospi', today);
     var snap = function (d, t) { return d ? json('/briefings/' + d + '/' + t + '/analysis_snapshot.json') : Promise.resolve(null); };
     return Promise.all([snap(usD, 'us'), snap(krD, 'kospi'), json('/data/sp500-home.json'),
-                        json('/data/nasdaq-home.json'), json('/data/midterm-home.json')]).then(function (r) {
-      var html = structHtml(pickNasdaq(r[3], r[0] && r[0].nasdaq_overheat), r[2], r[1] && r[1].monthly_ma5, krD, today, r[4]);
+                        json('/data/nasdaq-home.json'), json('/data/midterm-home.json'), json('/data/trump-home.json')]).then(function (r) {
+      var html = structHtml(pickNasdaq(r[3], r[0] && r[0].nasdaq_overheat), r[2], r[1] && r[1].monthly_ma5, krD, today, r[4], r[5]);
       structEl.innerHTML = html;
       structEl.hidden = !html;
     });
@@ -462,7 +496,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, pickNasdaq: pickNasdaq, sp500Row: sp500Row, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, midtermRow: midtermRow, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, pickNasdaq: pickNasdaq, sp500Row: sp500Row, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, midtermRow: midtermRow, trumpRow: trumpRow, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);
