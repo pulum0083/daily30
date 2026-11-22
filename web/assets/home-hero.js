@@ -197,12 +197,13 @@
           '<em class="' + (up ? 'up' : 'dn') + '" style="top:calc(' + (up ? top.toFixed(2) + '% - 13px' : (top + h).toFixed(2) + '% + 1px') + ')">' + sg(c.pct, 1) + '</em>' +
           (i < 4 ? '<u style="top:' + Y(c.b).toFixed(2) + '%"></u>' : '') + '</div>';
       }).join('');
-      return '<div class="uwk-r"><div class="uwk-n">' + esc(r.name) + '<small>' + f2(r.from) + ' → ' + f2(r.to) + '</small></div>' +
-        '<div class="uwk-s" style="--z:' + Y(0).toFixed(2) + '%">' + cells + '</div>' +
-        '<div class="uwk-t ' + cls(r.wk) + '">' + sg(r.wk, 2) + '%</div></div>';
+      // 한 주 등락률은 이름 아래(A안, 2026-11-22) — 오른쪽 칸을 없애 그래프를 끝까지 쓴다. 폰에서 숫자가 두 줄로 꺾였다.
+      return '<div class="uwk-r"><div class="uwk-n">' + esc(r.name) + '<b class="uwk-t ' + cls(r.wk) + '">' + sg(r.wk, 2) + '%</b>' +
+        '<small>' + f2(r.from) + ' → ' + f2(r.to) + '</small></div>' +
+        '<div class="uwk-s" style="--z:' + Y(0).toFixed(2) + '%">' + cells + '</div></div>';
     }).join('');
     return '<div class="uwk"><div class="uwk-h">미국 지수 · 이번 주<span>점선 = 지난주 금요일 종가</span></div>' + html +
-      '<div class="uwk-x"><span></span><div><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div></div>';
+      '<div class="uwk-x"><span></span><div><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div></div></div>';
   }
 
   function cardWeekend(summary, ymd, today, holiday, wk) {

@@ -31,11 +31,11 @@
   .st-x .on b{font-size:12px;color:var(--ink)}
   .uwk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:800;color:var(--ink);margin-top:16px;padding-top:12px;border-top:1px solid var(--hairline)}
   .uwk-h span{font-size:11px;font-weight:500;color:var(--muted)}
-  .wf{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)}
+  .wf{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)}
   .wf .nm{font-size:13px;font-weight:800;line-height:1.35;color:var(--ink)}
   .wf .nm small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
-  .wf .tot{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
-  .wf .tot small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
+  .wf .tot{display:block;margin:3px 0 2px;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+  .wf .tot small{display:inline;margin-left:4px;font-size:10.5px;font-weight:600;color:var(--muted)}
   .stp{position:relative;height:112px;margin:16px 0;display:flex;gap:4px}
   .stp::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed var(--muted);opacity:.7}
   .stp div{flex:1;position:relative}
@@ -44,7 +44,7 @@
   .stp em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
   .stp u{position:absolute;left:50%;right:calc(-50% - 4px);border-top:1px solid var(--hairline);z-index:0}
   .stp .off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
-  .dayax{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;margin-top:2px}
+  .dayax{display:grid;grid-template-columns:96px 1fr;gap:10px;margin-top:2px}
   .dayax .ds{display:flex;gap:4px}
   .dayax .ds span{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
   .lt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -67,7 +67,7 @@
   .ma4 .h{font-size:11px;font-weight:700;color:var(--muted)}
   .ma4 b{font-weight:800}
   .ma4 .x{font-size:11.5px;color:var(--muted);margin-top:2px}
-  @media(max-width:560px){.wf .tot{font-size:13.5px}.wf,.dayax{grid-template-columns:66px 1fr 64px;gap:8px}.wf .nm small{display:none}.stp em{font-size:9px}.lt{grid-template-columns:1fr}}
+  @media(max-width:560px){.wf .nm{font-size:12.5px}.wf .tot{font-size:15px}.wf,.dayax{grid-template-columns:74px 1fr;gap:8px}.wf .nm small{display:none}.stp em{font-size:9px}.lt{grid-template-columns:1fr}}
 </style>
 {% endblock %}
 {% block body %}
@@ -95,11 +95,10 @@
     <div class="st-x" style="grid-template-columns:repeat({{ k.n }},1fr)"><span><b>지난주</b>종가</span>{% for c in k.cols %}<span class="on"><b>{{ c.dow }}</b>{{ c.md }}</span>{% endfor %}<span><b>이번 주</b>종가</span></div>
 
     {% if wk.rows %}<div class="uwk-h">미국 지수<span>점선 = 지난주 금요일 종가 · 막대 위·아래 숫자 = 그날 등락</span></div>
-    {% for r in wk.rows %}<div class="wf"><div class="nm">{{ r.name }}<small>{{ '{:,.2f}'.format(r.from) }} → {{ '{:,.2f}'.format(r.to) }}</small></div>
-      <div class="stp" style="--z:{{ r.z }}">{% for c in r.cells %}<div>{% if c %}<i class="{{ 'u' if c.up else 'd' }}" style="top:{{ c.top }};height:{{ c.h }}"></i><em class="{{ 'up' if c.up else 'dn' }}" style="top:{{ c.lab_top }}">{{ c.lab }}</em>{% if not loop.last %}<u style="top:{{ c.end }}"></u>{% endif %}{% else %}<span class="off">휴장</span>{% endif %}</div>{% endfor %}</div>
-      <div class="tot {{ 'up' if r.wk >= 0 else 'dn' }}">{{ r.wk_s }}%<small>한 주</small></div></div>
+    {% for r in wk.rows %}<div class="wf"><div class="nm">{{ r.name }}<b class="tot {{ 'up' if r.wk >= 0 else 'dn' }}">{{ r.wk_s }}%<small>한 주</small></b><small>{{ '{:,.2f}'.format(r.from) }} → {{ '{:,.2f}'.format(r.to) }}</small></div>
+      <div class="stp" style="--z:{{ r.z }}">{% for c in r.cells %}<div>{% if c %}<i class="{{ 'u' if c.up else 'd' }}" style="top:{{ c.top }};height:{{ c.h }}"></i><em class="{{ 'up' if c.up else 'dn' }}" style="top:{{ c.lab_top }}">{{ c.lab }}</em>{% if not loop.last %}<u style="top:{{ c.end }}"></u>{% endif %}{% else %}<span class="off">휴장</span>{% endif %}</div>{% endfor %}</div></div>
     {% endfor %}
-    <div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div>{% endif %}
+    <div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div></div>{% endif %}
   </section>
 
   {% if wk.cards or wk.ma_rows %}

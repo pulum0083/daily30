@@ -26,7 +26,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"주간 장기 리포트","item":"https://doubleshot.space/weekly/"},{"@type":"ListItem","position":3,"name":"11월 첫째 주","item":"https://doubleshot.space/weekly/2026-11-06/"}]}</script>
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=20261113">
+<link rel="stylesheet" href="/assets/style.css?v=20261119">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0F172A">
@@ -144,11 +144,11 @@
   .st-x .on b{font-size:12px;color:var(--ink)}
   .uwk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:800;color:var(--ink);margin-top:16px;padding-top:12px;border-top:1px solid var(--hairline)}
   .uwk-h span{font-size:11px;font-weight:500;color:var(--muted)}
-  .wf{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)}
+  .wf{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)}
   .wf .nm{font-size:13px;font-weight:800;line-height:1.35;color:var(--ink)}
   .wf .nm small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
-  .wf .tot{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
-  .wf .tot small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
+  .wf .tot{display:block;margin:3px 0 2px;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+  .wf .tot small{display:inline;margin-left:4px;font-size:10.5px;font-weight:600;color:var(--muted)}
   .stp{position:relative;height:112px;margin:16px 0;display:flex;gap:4px}
   .stp::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed var(--muted);opacity:.7}
   .stp div{flex:1;position:relative}
@@ -157,7 +157,7 @@
   .stp em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
   .stp u{position:absolute;left:50%;right:calc(-50% - 4px);border-top:1px solid var(--hairline);z-index:0}
   .stp .off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
-  .dayax{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;margin-top:2px}
+  .dayax{display:grid;grid-template-columns:96px 1fr;gap:10px;margin-top:2px}
   .dayax .ds{display:flex;gap:4px}
   .dayax .ds span{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
   .lt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -180,7 +180,7 @@
   .ma4 .h{font-size:11px;font-weight:700;color:var(--muted)}
   .ma4 b{font-weight:800}
   .ma4 .x{font-size:11.5px;color:var(--muted);margin-top:2px}
-  @media(max-width:560px){.wf .tot{font-size:13.5px}.wf,.dayax{grid-template-columns:66px 1fr 64px;gap:8px}.wf .nm small{display:none}.stp em{font-size:9px}.lt{grid-template-columns:1fr}}
+  @media(max-width:560px){.wf .nm{font-size:12.5px}.wf .tot{font-size:15px}.wf,.dayax{grid-template-columns:74px 1fr;gap:8px}.wf .nm small{display:none}.stp em{font-size:9px}.lt{grid-template-columns:1fr}}
 </style>
 
 </head>
@@ -215,20 +215,16 @@
     <div class="st-x" style="grid-template-columns:repeat(7,1fr)"><span><b>지난주</b>종가</span><span class="on"><b>월</b>11/2</span><span class="on"><b>화</b>11/3</span><span class="on"><b>수</b>11/4</span><span class="on"><b>목</b>11/5</span><span class="on"><b>금</b>11/6</span><span><b>이번 주</b>종가</span></div>
 
     <div class="uwk-h">미국 지수<span>점선 = 지난주 금요일 종가 · 막대 위·아래 숫자 = 그날 등락</span></div>
-    <div class="wf"><div class="nm">반도체(SOX)<small>10,688.80 → 9,390.25</small></div>
-      <div class="stp" style="--z:9.68%"><div><i class="d" style="top:9.68%;height:17.33%"></i><em class="dn" style="top:calc(27.01% + 1px)">−3.4</em><u style="top:27.01%"></u></div><div><i class="u" style="top:13.93%;height:13.08%"></i><em class="up" style="top:calc(13.93% - 13px)">+2.6</em><u style="top:13.93%"></u></div><div><i class="d" style="top:13.93%;height:15.95%"></i><em class="dn" style="top:calc(29.87% + 1px)">−3.1</em><u style="top:29.87%"></u></div><div><i class="d" style="top:29.87%;height:60.45%"></i><em class="dn" style="top:calc(90.32% + 1px)">−12.2</em><u style="top:90.32%"></u></div><div><i class="u" style="top:72.10%;height:18.22%"></i><em class="up" style="top:calc(72.10% - 13px)">+4.2</em></div></div>
-      <div class="tot dn">−12.15%<small>한 주</small></div></div>
-    <div class="wf"><div class="nm">나스닥<small>25,437.00 → 24,579.43</small></div>
-      <div class="stp" style="--z:26.67%"><div><i class="d" style="top:26.67%;height:15.47%"></i><em class="dn" style="top:calc(42.14% + 1px)">−1.1</em><u style="top:42.14%"></u></div><div><i class="u" style="top:30.36%;height:11.78%"></i><em class="up" style="top:calc(30.36% - 13px)">+0.8</em><u style="top:30.36%"></u></div><div><i class="u" style="top:9.68%;height:20.68%"></i><em class="up" style="top:calc(9.68% - 13px)">+1.4</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:80.65%"></i><em class="dn" style="top:calc(90.32% + 1px)">−5.5</em><u style="top:90.32%"></u></div><div><i class="u" style="top:75.32%;height:15.00%"></i><em class="up" style="top:calc(75.32% - 13px)">+1.1</em></div></div>
-      <div class="tot dn">−3.37%<small>한 주</small></div></div>
-    <div class="wf"><div class="nm">S&P 500<small>7,580.07 → 7,376.86</small></div>
-      <div class="stp" style="--z:35.82%"><div><i class="d" style="top:35.82%;height:9.31%"></i><em class="dn" style="top:calc(45.13% + 1px)">−0.5</em><u style="top:45.13%"></u></div><div><i class="u" style="top:38.50%;height:6.63%"></i><em class="up" style="top:calc(38.50% - 13px)">+0.4</em><u style="top:38.50%"></u></div><div><i class="u" style="top:9.68%;height:28.83%"></i><em class="up" style="top:calc(9.68% - 13px)">+1.6</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:80.65%"></i><em class="dn" style="top:calc(90.32% + 1px)">−4.4</em><u style="top:90.32%"></u></div><div><i class="u" style="top:84.75%;height:5.57%"></i><em class="up" style="top:calc(84.75% - 13px)">+0.3</em></div></div>
-      <div class="tot dn">−2.68%<small>한 주</small></div></div>
-    <div class="wf"><div class="nm">다우<small>51,770.31 → 51,285.73</small></div>
-      <div class="stp" style="--z:71.45%"><div><i class="u" style="top:63.12%;height:8.32%"></i><em class="up" style="top:calc(63.12% - 13px)">+0.4</em><u style="top:63.12%"></u></div><div><i class="d" style="top:63.12%;height:7.68%"></i><em class="dn" style="top:calc(70.81% + 1px)">−0.4</em><u style="top:70.81%"></u></div><div><i class="u" style="top:9.68%;height:61.13%"></i><em class="up" style="top:calc(9.68% - 13px)">+3.0</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:71.40%"></i><em class="dn" style="top:calc(81.08% + 1px)">−3.4</em><u style="top:81.08%"></u></div><div><i class="d" style="top:81.08%;height:9.24%"></i><em class="dn" style="top:calc(90.32% + 1px)">−0.5</em></div></div>
-      <div class="tot dn">−0.94%<small>한 주</small></div></div>
+    <div class="wf"><div class="nm">반도체(SOX)<b class="tot dn">−12.15%<small>한 주</small></b><small>10,688.80 → 9,390.25</small></div>
+      <div class="stp" style="--z:9.68%"><div><i class="d" style="top:9.68%;height:17.33%"></i><em class="dn" style="top:calc(27.01% + 1px)">−3.4</em><u style="top:27.01%"></u></div><div><i class="u" style="top:13.93%;height:13.08%"></i><em class="up" style="top:calc(13.93% - 13px)">+2.6</em><u style="top:13.93%"></u></div><div><i class="d" style="top:13.93%;height:15.95%"></i><em class="dn" style="top:calc(29.87% + 1px)">−3.1</em><u style="top:29.87%"></u></div><div><i class="d" style="top:29.87%;height:60.45%"></i><em class="dn" style="top:calc(90.32% + 1px)">−12.2</em><u style="top:90.32%"></u></div><div><i class="u" style="top:72.10%;height:18.22%"></i><em class="up" style="top:calc(72.10% - 13px)">+4.2</em></div></div></div>
+    <div class="wf"><div class="nm">나스닥<b class="tot dn">−3.37%<small>한 주</small></b><small>25,437.00 → 24,579.43</small></div>
+      <div class="stp" style="--z:26.67%"><div><i class="d" style="top:26.67%;height:15.47%"></i><em class="dn" style="top:calc(42.14% + 1px)">−1.1</em><u style="top:42.14%"></u></div><div><i class="u" style="top:30.36%;height:11.78%"></i><em class="up" style="top:calc(30.36% - 13px)">+0.8</em><u style="top:30.36%"></u></div><div><i class="u" style="top:9.68%;height:20.68%"></i><em class="up" style="top:calc(9.68% - 13px)">+1.4</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:80.65%"></i><em class="dn" style="top:calc(90.32% + 1px)">−5.5</em><u style="top:90.32%"></u></div><div><i class="u" style="top:75.32%;height:15.00%"></i><em class="up" style="top:calc(75.32% - 13px)">+1.1</em></div></div></div>
+    <div class="wf"><div class="nm">S&P 500<b class="tot dn">−2.68%<small>한 주</small></b><small>7,580.07 → 7,376.86</small></div>
+      <div class="stp" style="--z:35.82%"><div><i class="d" style="top:35.82%;height:9.31%"></i><em class="dn" style="top:calc(45.13% + 1px)">−0.5</em><u style="top:45.13%"></u></div><div><i class="u" style="top:38.50%;height:6.63%"></i><em class="up" style="top:calc(38.50% - 13px)">+0.4</em><u style="top:38.50%"></u></div><div><i class="u" style="top:9.68%;height:28.83%"></i><em class="up" style="top:calc(9.68% - 13px)">+1.6</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:80.65%"></i><em class="dn" style="top:calc(90.32% + 1px)">−4.4</em><u style="top:90.32%"></u></div><div><i class="u" style="top:84.75%;height:5.57%"></i><em class="up" style="top:calc(84.75% - 13px)">+0.3</em></div></div></div>
+    <div class="wf"><div class="nm">다우<b class="tot dn">−0.94%<small>한 주</small></b><small>51,770.31 → 51,285.73</small></div>
+      <div class="stp" style="--z:71.45%"><div><i class="u" style="top:63.12%;height:8.32%"></i><em class="up" style="top:calc(63.12% - 13px)">+0.4</em><u style="top:63.12%"></u></div><div><i class="d" style="top:63.12%;height:7.68%"></i><em class="dn" style="top:calc(70.81% + 1px)">−0.4</em><u style="top:70.81%"></u></div><div><i class="u" style="top:9.68%;height:61.13%"></i><em class="up" style="top:calc(9.68% - 13px)">+3.0</em><u style="top:9.68%"></u></div><div><i class="d" style="top:9.68%;height:71.40%"></i><em class="dn" style="top:calc(81.08% + 1px)">−3.4</em><u style="top:81.08%"></u></div><div><i class="d" style="top:81.08%;height:9.24%"></i><em class="dn" style="top:calc(90.32% + 1px)">−0.5</em></div></div></div>
     
-    <div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div>
+    <div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div></div>
   </section>
 
   
@@ -285,6 +281,7 @@
   <div class="site-footer__links">
     <a href="/accuracy/">예측 성적표</a>
     <a href="/methodology/">방법론</a>
+    <a href="/guides/">해설 글</a>
     <a href="/legal/disclaimer/">면책 고지</a>
     <a href="/legal/privacy/">개인정보처리방침</a>
     <a href="/legal/terms/">이용약관</a>
@@ -293,7 +290,7 @@
   <div class="site-footer__base">© 2026 더블샷(Double-Shot)</div>
 </footer>
 
-<script src="/assets/main.js?v=20261113"></script>
+<script src="/assets/main.js?v=20261119"></script>
 <script>
 window.addEventListener('load', function() {
   if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
