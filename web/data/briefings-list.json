@@ -1,10 +1,30 @@
 {
   "slots": {
+    "2026-11-23": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-23/kospi/",
+        "headline": "미 지수선물이 여전히 급락 중이에요.",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-20": {
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-11-20/kospi/",
         "headline": "1조 달러 수출 자랑하던 날, 뉴욕은 AI를 의심했다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -23,6 +43,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-20/us/",
         "headline": "VIX 30 터치 — AI 랠리의 엔진이 전부 식었다",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -883,8 +904,7 @@
         "headline": "반도체 대형주 패닉셀, 코스피 6000선 붕괴",
         "title": "6,035.35",
         "price": "6,035.35",
-        "time": "",
-        "chg": -5.46
+        "time": ""
       },
       "us": {
         "state": "ready",
@@ -895,36 +915,6 @@
         "pill_text": "▼",
         "title": "하락 우위",
         "time": "21:17"
-      }
-    },
-    "2026-10-12": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-10-12/kospi/",
-        "headline": "수출은 역대 최고, 반도체는 숨고르기 — 엇갈린 신호 속 출발",
-        "hit": false,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:28"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-12/close/",
-        "headline": "코스피 3.65% 급락, 두 달 만에 최저치 — 버틴 요인 있었나요?",
-        "title": "6,384.24",
-        "price": "6,384.24",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-12/us/",
-        "headline": "어닝시즌의 첫 관문, 월가 은행이 분위기를 정한다",
-        "hit": false,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:16"
       }
     }
   }
