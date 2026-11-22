@@ -638,46 +638,6 @@ function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||(location.hash.slice(1)||'home');go(id,true);});
 // 진입 시 해시(#signals-all 등)가 있으면 해당 화면 복원 — standalone에서 돌아올 때 사용
 (function(){const h=location.hash.slice(1);if(!h){dsTrackPageview();return;}document.getElementById(h)?go(h,true):go('home',true);})();
-function switchTab(hero,tab,el){
-  const prefix=hero+'-';
-  document.querySelectorAll('#hero-'+hero+' .ctabs a').forEach(a=>a.classList.remove('on'));
-  el.classList.add('on');
-  ['5d','1m','3m','1y'].forEach(t=>{
-    const p=document.getElementById(prefix+t);
-    if(p) p.classList.toggle('hidden',t!==tab);
-  });
-}
-
-/* 차트 툴팁 */
-const CHART_DATA={
-  'etf-5d':{dates:['06-06','06-09','06-10','06-11','06-12'],prices:[36150,36250,36380,36500,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
-  'etf-1m':{dates:['05-14','05-21','05-28','06-04','06-12'],prices:[34800,35200,35600,36100,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
-  'etf-3m':{dates:['03-14','04-04','04-25','05-16','06-12'],prices:[33200,34000,34800,35600,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
-  'etf-1y':{dates:['25.06','25.09','25.12','26.03','26.06'],prices:[29800,31000,33500,34200,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
-};
-document.querySelectorAll('.chart-wrap').forEach(wrap=>{
-  const tt=document.createElement('div');tt.className='chart-tt';
-  const cross=document.createElement('div');cross.className='chart-cross';
-  wrap.appendChild(tt);wrap.appendChild(cross);
-  wrap.addEventListener('mousemove',e=>{
-    const svg=wrap.querySelector('.chart-svg');if(!svg)return;
-    const svgRect=svg.getBoundingClientRect();
-    const wrapRect=wrap.getBoundingClientRect();
-    const frac=Math.max(0,Math.min(1,(e.clientX-svgRect.left)/svgRect.width));
-    const pane=wrap.closest('.cpane');if(!pane||pane.classList.contains('hidden'))return;
-    const d=CHART_DATA[pane.id];if(!d)return;
-    const n=d.dates.length;
-    const idx=Math.min(n-1,Math.max(0,Math.round(frac*(n-1))));
-    tt.innerHTML=`<div class="ttd">${d.dates[idx]}</div>${d.fmt(d.prices[idx])}`;
-    const xInWrap=e.clientX-wrapRect.left;
-    tt.style.left=xInWrap+'px';
-    tt.style.display='block';
-    cross.style.left=xInWrap+'px';
-    cross.style.display='block';
-  });
-  wrap.addEventListener('mouseleave',()=>{tt.style.display='none';cross.style.display='none';});
-});
-
 /* 특이 신호 화면 상태 */
 let SIGNALS_HOME=[];  // 홈 특이신호 (정렬 재적용용)
 let SIGNALS_ALL=[];   // 특이 신호 전체(더보기 화면용) — /api/signals.signalsAll

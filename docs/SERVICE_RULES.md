@@ -3024,3 +3024,13 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **갱신** — 평일 07:25 `us-longterm-morning` 잡(다른 장기 지표와 같은 스텝, 하나가 실패해도 다른 것은 커밋), 토요일 주간 리포트의 `refresh_live_pages`(금요일 종가). sitemap·발행 게이트(`expected_pages`) 대상이다.
 - 테스트 `scripts/test_trump_terms.py`, `scripts/test_midterm_compare.py`(탭·탭별 사건), `web/assets/home-hero.test.mjs`(trumpRow).
 
+
+
+### 93. 종목 홈에 남아 있던 KODEX 200 예시 화면 제거 (2026-11-22)
+
+외부 지적으로 `/stocks/` HTML 안에 2026-06에 손으로 박아 둔 **KODEX 200 ETF 상세 화면(`#etf-detail`)**이 남아 있는 걸 확인했다. 진입 링크는 없었지만 `/stocks/#etf-detail`로 열렸고, 크롤러도 그 글을 읽었다.
+
+- 값이 전부 예시였다 — '06-12 종가', 가격 곡선, 총보수 연 0.0099%(운용사 자료는 연 0.150%), 건전성 '원금 잠식이 없어요'(지수형 ETF도 원금 손실이 날 수 있다). §0·§20 위반이다.
+- 화면 HTML, 그 화면만 쓰던 `stocks-home.js`의 차트 탭·툴팁(`switchTab`·`CHART_DATA`)과 `stocks-home.css` 규칙(차트 탭·도넛·보유 종목·상품 정보 표)을 함께 지웠다. 그 화면 안의 `go('income')` 링크도 이미 없는 화면을 가리키고 있었다.
+- 옛 주소 `/stocks/#etf-detail`는 없는 화면이라 홈으로 열린다(`ds-subnav.test.mjs`가 이 동작을 지킨다).
+- **방지 룰**: 시안 단계에서 페이지에 박아 둔 화면은 실데이터로 바꾸지 않을 거면 그날 지운다. 진입 링크가 없어도 주소 해시·크롤러로 열린다(§20·§36과 같은 계열).
