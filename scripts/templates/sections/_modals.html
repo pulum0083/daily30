@@ -106,7 +106,28 @@
         <li><strong style="color:#B91C1C">75~100</strong> : 극단적 탐욕 — 과열 신호</li>
       </ul>
       <br>
-      <p style="color:var(--muted); font-size:12px;">※ 미국 정규장 기준으로 갱신돼요. 점수 옆 숫자는 전 거래일 대비 점수 변화(p)예요.</p>
+      <p style="color:var(--muted); font-size:12px;">※ 미국 정규장 기준으로 갱신돼요. 빈 점은 전 거래일 점수, 검은 점은 지금 점수예요. 상태 옆 숫자는 그 사이 점수 변화(p)예요.</p>
+    </div>
+  </div>
+</div>
+
+{# 미국 하이일드 스프레드 #}
+<div class="info-modal-backdrop" id="hy-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="hy-modal-title">
+    <button class="info-modal__close" data-modal-close="hy-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="hy-modal-title">미국 하이일드 회사채 스프레드</div>
+    <div class="info-modal__body">
+      <p>신용등급이 낮은(투기 등급) 미국 기업의 회사채가 같은 만기 국채보다 얼마나 더 높은 이자를 주는지(%p)예요. 기업이 돈을 빌리기 어려워질수록 벌어져요. ICE BofA US High Yield 지수의 옵션 조정 스프레드(OAS)를 씁니다.</p>
+      <br>
+      <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
+        <li><strong style="color:#16A34A">확대 없음</strong> : 10거래일 동안 +0.50%p 미만</li>
+        <li><strong style="color:#CA8A04">경고</strong> : 10거래일 동안 +0.50%p 이상 벌어짐</li>
+        <li><strong style="color:#DC2626">강한 경고</strong> : 5%p 이상 수준에서 계속 벌어짐</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ 막대는 10거래일 변화예요. 빈 점은 전 관측일, 검은 점은 최신 관측일이에요. 원천(FRED)은 하루 이틀 늦게 올라와 기준 날짜를 따로 적어요. 7일 넘게 갱신이 멈추면 표시하지 않아요.</p>
     </div>
   </div>
 </div>

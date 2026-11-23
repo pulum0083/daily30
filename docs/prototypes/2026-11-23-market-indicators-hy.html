@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<!-- 브리핑 사이드바 '시장 지표' — 공포·탐욕 다이얼(다시 그린 세 안) + VIX·하이일드 A안 줄 (2026-11-23, 실측 숫자) -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시장 지표 시안</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{--ink:#13151A;--muted:#6B7280;--sub:#374151;--hair:#E5E7EB;--soft:#F3F4F6;--up:#E03131;--dn:#2775ED;
+  --g:#16A34A;--gbg:#DCFCE7;--y:#CA8A04;--ybg:#FEF9C3;--r:#DC2626;--rbg:#FEE2E2}
+*{box-sizing:border-box}
+body{margin:0;background:#F5F6F8;color:var(--ink);font-family:'Pretendard Variable',Pretendard,-apple-system,system-ui,sans-serif;font-size:14px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+.intro{font-size:13px;color:var(--muted);max-width:760px}
+.intro b{color:var(--ink)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-top:18px;align-items:start}
+.lab{font-size:12px;font-weight:800;color:#7C3AED;margin:0 0 8px}
+.lab small{display:block;font-weight:500;color:var(--muted);margin-top:2px}
+.panel{background:#fff;border:1px solid var(--hair);border-radius:14px;overflow:hidden;max-width:320px}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 11px;border-bottom:1px solid var(--hair)}
+.ph b{font-size:13px}.ph span{font-size:11.5px;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.q{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid #CBD5E1;color:var(--muted);font-size:10px;font-weight:700;margin-left:4px;vertical-align:1px}
+.bd{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.bd.g{background:var(--gbg);color:var(--g)}.bd.y{background:var(--ybg);color:var(--y)}.bd.r{background:var(--rbg);color:var(--r)}
+.mean{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.55}
+.mean b{color:var(--sub);font-weight:600}
+.when{font-size:11px;color:#9CA3AF;margin:3px 0 0}
+.zone{position:relative;height:8px;border-radius:999px;display:flex;overflow:hidden;margin-top:9px}
+.zone i{display:block;height:100%}
+.zwrap{position:relative}
+.zmk{position:absolute;top:-3px;width:3px;height:14px;margin-left:-1.5px;background:var(--ink);border-radius:2px}
+.zlab{position:relative;height:14px;font-size:10px;color:#9CA3AF;margin-top:3px}
+.zlab span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.a-it{padding:14px 16px;border-top:1px solid var(--hair)}
+.a-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--sub)}
+.a-val{display:flex;align-items:baseline;gap:8px;margin-top:3px}
+.a-val strong{font-size:24px;font-weight:800;letter-spacing:-.3px}
+.a-val small{font-size:12px;color:var(--muted)}
+/* 다이얼 블록 */
+.dial{padding:14px 16px 14px;text-align:center}
+.dial .top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--sub);text-align:left}
+.dial svg{display:block;width:100%;max-width:230px;margin:6px auto 0;overflow:visible}
+.dial .mean{text-align:center}
+.dial .chg{font-size:12px;color:var(--muted);margin-top:4px}
+.old svg{max-width:190px}
+.old .sc{font-size:28px;font-weight:800;line-height:1;margin-top:-6px}
+.notes{margin-top:30px;background:#fff;border:1px solid var(--hair);border-radius:12px;padding:14px 18px;font-size:13px;max-width:900px}
+.notes li{margin:3px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="intro">B안 구성 그대로(공포·탐욕 다이얼 위, 아래 두 줄)에 VIX·하이일드 줄은 A안 모양을 가져왔어요. 다이얼만 세 가지로 다시 그렸어요. 숫자는 실측이에요 — 공포·탐욕 9.7(전일 18.7), VIX 35.89, 하이일드 스프레드 3.52%(11/19).</p>
+<div class="cols">
+
+<div>
+<p class="lab">지금 다이얼<small>비교용 — 바늘·회전축이 크고 숫자가 아치 밖 아래에 떨어져 있어요</small></p>
+<div class="panel"><div class="ph"><b>시장 지표</b><span>21:15 KST</span></div>
+<div class="dial old">
+  <div class="top"><span>공포·탐욕 지수<span class="q">?</span></span></div>
+  <svg viewBox="0 0 200 116"><g fill="none" stroke-width="13">
+    <path d="M18 100 A82 82 0 0 1 42 42" stroke="#FCA5A5"/><path d="M42 42 A82 82 0 0 1 87.2 19" stroke="#FDE68A"/>
+    <path d="M87.2 19 A82 82 0 0 1 112.8 19" stroke="#86EFAC"/><path d="M112.8 19 A82 82 0 0 1 158 42" stroke="#FDE68A"/>
+    <path d="M158 42 A82 82 0 0 1 182 100" stroke="#FCA5A5"/></g>
+    <path d="M100 100 L100 42" stroke="#13151A" stroke-width="3" stroke-linecap="round" transform="rotate(-72.6 100 100)"/>
+    <circle cx="100" cy="100" r="5.5" fill="#13151A"/></svg>
+  <div class="sc num">10</div>
+  <div style="margin-top:6px"><span class="bd r">극단적 공포</span></div>
+  <p class="chg num">전일 18.7 · −9.0p</p>
+  <p class="mean">낮을수록 겁먹은 시장이에요.</p>
+</div>
+<div class="a-it">
+    <div class="a-top"><span>VIX 공포지수<span class="q">?</span></span><span class="bd r">불안</span></div>
+    <div class="a-val"><strong class="num">35.89</strong><small class="num">하루 +26.2%</small></div>
+    <div class="zwrap"><div class="zone" data-z="vix"></div><span class="zmk" style="left:71.8%"></span></div>
+    <div class="zlab"><span style="left:30%">15</span><span style="left:40%">20</span><span style="left:60%">30</span><span style="left:80%">40</span></div>
+    <p class="mean">S&amp;P 500이 앞으로 30일 얼마나 흔들릴지 옵션 값으로 잰 거예요. <b>30을 넘으면 불안 구간</b>이에요.</p>
+  </div>
+  <div class="a-it">
+    <div class="a-top"><span>하이일드 스프레드<span class="q">?</span></span><span class="bd g">확대 없음</span></div>
+    <div class="a-val"><strong class="num">3.52%</strong><small class="num">10거래일 +0.04%p</small></div>
+    <div class="zwrap"><div class="zone" data-z="hy"></div><span class="zmk" style="left:4%"></span></div>
+    <div class="zlab"><span style="left:0;transform:none">0</span><span style="left:50%">+0.50%p 경고</span><span style="right:0;left:auto;transform:none">+1.0</span></div>
+    <p class="mean">신용이 낮은 미국 기업이 국채보다 더 얹어 내는 이자예요. <b>10거래일에 0.5%p 넘게 벌어지면 돈줄이 마른다는 경고</b>예요.</p>
+    <p class="when">11/19 기준 · 3년 중 위에서 8% 수준</p>
+  </div>
+</div></div>
+
+<div>
+<p class="lab">다이얼 1 · 구간 사이 틈 + 아치 위 점<small>바늘을 빼고 지금 위치를 아치 위 흰 테두리 점으로. 숫자·상태는 아치 안 가운데</small></p>
+<div class="panel"><div class="ph"><b>시장 지표</b><span>21:15 KST</span></div>
+<div class="dial"><div class="top"><span>공포·탐욕 지수<span class="q">?</span></span></div><svg id="d1"></svg>
+  <p class="chg num">전일 18.7 · −9.0p</p><p class="mean">낮을수록 겁먹은 시장이에요.</p></div>
+<div class="a-it">
+    <div class="a-top"><span>VIX 공포지수<span class="q">?</span></span><span class="bd r">불안</span></div>
+    <div class="a-val"><strong class="num">35.89</strong><small class="num">하루 +26.2%</small></div>
+    <div class="zwrap"><div class="zone" data-z="vix"></div><span class="zmk" style="left:71.8%"></span></div>
+    <div class="zlab"><span style="left:30%">15</span><span style="left:40%">20</span><span style="left:60%">30</span><span style="left:80%">40</span></div>
+    <p class="mean">S&amp;P 500이 앞으로 30일 얼마나 흔들릴지 옵션 값으로 잰 거예요. <b>30을 넘으면 불안 구간</b>이에요.</p>
+  </div>
+  <div class="a-it">
+    <div class="a-top"><span>하이일드 스프레드<span class="q">?</span></span><span class="bd g">확대 없음</span></div>
+    <div class="a-val"><strong class="num">3.52%</strong><small class="num">10거래일 +0.04%p</small></div>
+    <div class="zwrap"><div class="zone" data-z="hy"></div><span class="zmk" style="left:4%"></span></div>
+    <div class="zlab"><span style="left:0;transform:none">0</span><span style="left:50%">+0.50%p 경고</span><span style="right:0;left:auto;transform:none">+1.0</span></div>
+    <p class="mean">신용이 낮은 미국 기업이 국채보다 더 얹어 내는 이자예요. <b>10거래일에 0.5%p 넘게 벌어지면 돈줄이 마른다는 경고</b>예요.</p>
+    <p class="when">11/19 기준 · 3년 중 위에서 8% 수준</p>
+  </div>
+</div></div>
+
+<div>
+<p class="lab">다이얼 2 · 지금 구간만 진하게<small>다섯 구간에 이름을 달고, 지금 구간만 색을 채우고 나머지는 옅게. 작은 삼각 표시로 위치</small></p>
+<div class="panel"><div class="ph"><b>시장 지표</b><span>21:15 KST</span></div>
+<div class="dial"><div class="top"><span>공포·탐욕 지수<span class="q">?</span></span></div><svg id="d2"></svg>
+  <p class="chg num">전일 18.7 · −9.0p</p><p class="mean">낮을수록 겁먹은 시장이에요.</p></div>
+<div class="a-it">
+    <div class="a-top"><span>VIX 공포지수<span class="q">?</span></span><span class="bd r">불안</span></div>
+    <div class="a-val"><strong class="num">35.89</strong><small class="num">하루 +26.2%</small></div>
+    <div class="zwrap"><div class="zone" data-z="vix"></div><span class="zmk" style="left:71.8%"></span></div>
+    <div class="zlab"><span style="left:30%">15</span><span style="left:40%">20</span><span style="left:60%">30</span><span style="left:80%">40</span></div>
+    <p class="mean">S&amp;P 500이 앞으로 30일 얼마나 흔들릴지 옵션 값으로 잰 거예요. <b>30을 넘으면 불안 구간</b>이에요.</p>
+  </div>
+  <div class="a-it">
+    <div class="a-top"><span>하이일드 스프레드<span class="q">?</span></span><span class="bd g">확대 없음</span></div>
+    <div class="a-val"><strong class="num">3.52%</strong><small class="num">10거래일 +0.04%p</small></div>
+    <div class="zwrap"><div class="zone" data-z="hy"></div><span class="zmk" style="left:4%"></span></div>
+    <div class="zlab"><span style="left:0;transform:none">0</span><span style="left:50%">+0.50%p 경고</span><span style="right:0;left:auto;transform:none">+1.0</span></div>
+    <p class="mean">신용이 낮은 미국 기업이 국채보다 더 얹어 내는 이자예요. <b>10거래일에 0.5%p 넘게 벌어지면 돈줄이 마른다는 경고</b>예요.</p>
+    <p class="when">11/19 기준 · 3년 중 위에서 8% 수준</p>
+  </div>
+</div></div>
+
+<div>
+<p class="lab">다이얼 3 · 어제에서 오늘로<small>얇은 아치에 어제 점(빈 원)과 오늘 점을 잇는 호 — 하루 사이 어느 쪽으로 움직였는지가 보여요</small></p>
+<div class="panel"><div class="ph"><b>시장 지표</b><span>21:15 KST</span></div>
+<div class="dial"><div class="top"><span>공포·탐욕 지수<span class="q">?</span></span></div><svg id="d3"></svg>
+  <p class="mean">낮을수록 겁먹은 시장이에요.</p></div>
+<div class="a-it">
+    <div class="a-top"><span>VIX 공포지수<span class="q">?</span></span><span class="bd r">불안</span></div>
+    <div class="a-val"><strong class="num">35.89</strong><small class="num">하루 +26.2%</small></div>
+    <div class="zwrap"><div class="zone" data-z="vix"></div><span class="zmk" style="left:71.8%"></span></div>
+    <div class="zlab"><span style="left:30%">15</span><span style="left:40%">20</span><span style="left:60%">30</span><span style="left:80%">40</span></div>
+    <p class="mean">S&amp;P 500이 앞으로 30일 얼마나 흔들릴지 옵션 값으로 잰 거예요. <b>30을 넘으면 불안 구간</b>이에요.</p>
+  </div>
+  <div class="a-it">
+    <div class="a-top"><span>하이일드 스프레드<span class="q">?</span></span><span class="bd g">확대 없음</span></div>
+    <div class="a-val"><strong class="num">3.52%</strong><small class="num">10거래일 +0.04%p</small></div>
+    <div class="zwrap"><div class="zone" data-z="hy"></div><span class="zmk" style="left:4%"></span></div>
+    <div class="zlab"><span style="left:0;transform:none">0</span><span style="left:50%">+0.50%p 경고</span><span style="right:0;left:auto;transform:none">+1.0</span></div>
+    <p class="mean">신용이 낮은 미국 기업이 국채보다 더 얹어 내는 이자예요. <b>10거래일에 0.5%p 넘게 벌어지면 돈줄이 마른다는 경고</b>예요.</p>
+    <p class="when">11/19 기준 · 3년 중 위에서 8% 수준</p>
+  </div>
+</div></div>
+
+</div>
+<div class="notes"><ul>
+<li>'전일 18.7 · −9.0p'와 뜻 한 줄은 줄을 나눴어요(줄표는 뺐어요).</li>
+<li>다이얼 3은 어제 값이 없는 날(CNN이 아직 새 세션을 안 올린 시간)엔 어제 점과 호가 빠지고 오늘 점만 남아요.</li>
+</ul></div>
+</div>
+<script>
+var S=9.7, P=18.7, CX=110, CY=104, R=82;
+var BANDS=[[0,25,'#F87171','극단적 공포'],[25,45,'#FBBF24','공포'],[45,55,'#4ADE80','중립'],[55,75,'#FBBF24','탐욕'],[75,100,'#F87171','극단적 탐욕']];
+function pt(s,r){var a=Math.PI*(1-s/100);return [CX+r*Math.cos(a),CY-r*Math.sin(a)]}
+function arc(s0,s1,r){var a=pt(s0,r),b=pt(s1,r);return 'M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' A'+r+' '+r+' 0 0 1 '+b[0].toFixed(1)+' '+b[1].toFixed(1)}
+function svg(id,inner,h){var e=document.getElementById(id);e.setAttribute('viewBox','0 0 220 '+(h||122));e.innerHTML=inner}
+var C='font-family="Pretendard Variable,Pretendard,sans-serif"';
+// 1
+(function(){
+  var g='';BANDS.forEach(function(b){g+='<path d="'+arc(b[0]+0.9,b[1]-0.9,R)+'" fill="none" stroke="'+b[2]+'" stroke-opacity=".85" stroke-width="12" stroke-linecap="round"/>'});
+  var p=pt(S,R);
+  g+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="9" fill="#fff" stroke="#13151A" stroke-width="3"/>';
+  g+='<text x="'+CX+'" y="'+(CY-14)+'" text-anchor="middle" font-size="38" font-weight="800" fill="#13151A" '+C+'>10</text>';
+  g+='<rect x="'+(CX-34)+'" y="'+(CY-6)+'" width="68" height="19" rx="9.5" fill="#FEE2E2"/><text x="'+CX+'" y="'+(CY+7.5)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#DC2626" '+C+'>극단적 공포</text>';
+  g+='<text x="'+(CX-R)+'" y="'+(CY+22)+'" text-anchor="middle" font-size="10" fill="#9CA3AF" '+C+'>0</text><text x="'+(CX+R)+'" y="'+(CY+22)+'" text-anchor="middle" font-size="10" fill="#9CA3AF" '+C+'>100</text>';
+  svg('d1',g,130);
+})();
+// 2
+(function(){
+  var g='',cur=BANDS.filter(function(b){return S>=b[0]&&S<b[1]})[0];
+  BANDS.forEach(function(b){var on=b===cur;
+    g+='<path d="'+arc(b[0]+0.7,b[1]-0.7,R)+'" fill="none" stroke="'+b[2]+'" stroke-opacity="'+(on?1:.22)+'" stroke-width="'+(on?16:12)+'"/>';
+    var m=pt((b[0]+b[1])/2,R+20);
+    g+='<text x="'+m[0].toFixed(1)+'" y="'+(m[1]+3).toFixed(1)+'" text-anchor="middle" font-size="9.5" font-weight="'+(on?800:500)+'" fill="'+(on?'#13151A':'#9CA3AF')+'" '+C+'>'+b[3].replace('극단적 ','극')+'</text>'});
+  var a=Math.PI*(1-S/100),i=pt(S,R-14),l=pt(S,R-24),q=[Math.cos(a+Math.PI/2)*5,-Math.sin(a+Math.PI/2)*5];
+  g+='<path d="M'+i[0].toFixed(1)+' '+i[1].toFixed(1)+' L'+(l[0]+q[0]).toFixed(1)+' '+(l[1]+q[1]).toFixed(1)+' L'+(l[0]-q[0]).toFixed(1)+' '+(l[1]-q[1]).toFixed(1)+'Z" fill="#13151A"/>';
+  g+='<text x="'+CX+'" y="'+(CY-12)+'" text-anchor="middle" font-size="38" font-weight="800" fill="#13151A" '+C+'>10</text>';
+  g+='<text x="'+CX+'" y="'+(CY+8)+'" text-anchor="middle" font-size="12" font-weight="700" fill="#DC2626" '+C+'>극단적 공포</text>';
+  svg('d2',g,118);
+})();
+// 3
+(function(){
+  var g='<path d="'+arc(0,100,R)+'" fill="none" stroke="#EEF1F5" stroke-width="10" stroke-linecap="round"/>';
+  BANDS.forEach(function(b){g+='<path d="'+arc(b[0],b[1],R)+'" fill="none" stroke="'+b[2]+'" stroke-opacity=".35" stroke-width="10"/>'});
+  [25,45,55,75].forEach(function(s){var a=pt(s,R-9),b=pt(s,R+9);g+='<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="#fff" stroke-width="2"/>'});
+  g+='<path d="'+arc(S,P,R)+'" fill="none" stroke="#13151A" stroke-width="4" stroke-linecap="round"/>';
+  var y=pt(P,R),t=pt(S,R);
+  g+='<circle cx="'+y[0].toFixed(1)+'" cy="'+y[1].toFixed(1)+'" r="6" fill="#fff" stroke="#9CA3AF" stroke-width="2.5"/>';
+  g+='<circle cx="'+t[0].toFixed(1)+'" cy="'+t[1].toFixed(1)+'" r="7.5" fill="#13151A" stroke="#fff" stroke-width="2"/>';
+  var yl=pt(P,R+12);g+='<text x="'+yl[0].toFixed(1)+'" y="'+(yl[1]-2).toFixed(1)+'" text-anchor="'+(yl[0]<CX?'end':'start')+'" font-size="10" fill="#9CA3AF" '+C+'>어제 18.7</text>';
+  g+='<text x="'+CX+'" y="'+(CY-16)+'" text-anchor="middle" font-size="38" font-weight="800" fill="#13151A" '+C+'>10</text>';
+  g+='<text x="'+CX+'" y="'+(CY+3)+'" text-anchor="middle" font-size="12" font-weight="700" fill="#DC2626" '+C+'>극단적 공포 · −9.0p</text>';
+  g+='<text x="'+(CX-R)+'" y="'+(CY+20)+'" text-anchor="middle" font-size="10" fill="#9CA3AF" '+C+'>0 공포</text><text x="'+(CX+R)+'" y="'+(CY+20)+'" text-anchor="middle" font-size="10" fill="#9CA3AF" '+C+'>탐욕 100</text>';
+  svg('d3',g,128);
+})();
+function zone(el,parts){el.innerHTML=parts.map(function(p){return '<i style="width:'+p[0]+'%;background:'+p[1]+'"></i>'}).join('')}
+document.querySelectorAll('[data-z=vix]').forEach(function(e){zone(e,[[30,'#86EFAC'],[10,'#D9F99D'],[20,'#FDE68A'],[20,'#FCA5A5'],[20,'#F87171']])});
+document.querySelectorAll('[data-z=hy]').forEach(function(e){zone(e,[[50,'#86EFAC'],[50,'#FDE68A']])});
+</script>
+</body>
+</html>

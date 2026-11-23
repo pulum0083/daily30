@@ -1,52 +1,38 @@
 {# 시장 지표 사이드바 패널 (코스피·미국 공유).
-   공포·탐욕 지수는 반원 다이얼, VIX는 아래 한 줄. 뱃지 없는 항목은 스파크라인을 그린다.
-   다이얼 아치 좌표는 반지름 82 · 중심(100,100) 고정값 — 경계는 25/45/55/75점. #}
+   맨 위 공포·탐욕 다이얼(어제 점 → 오늘 점), 아래 VIX·하이일드 스프레드 줄(큰 숫자·뱃지·구간 막대·뜻 한 줄).
+   아치 좌표는 sections_shared.build_fng_dial()이 계산한다(중심 110,104 · 반지름 82). #}
 <div class="right-panel" id="market-data-panel">
   <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">{{ generated_time }} KST</span></div>
   {% if fng_dial %}
-  <div class="fng-dial">
-    <span class="fng-dial-name">공포·탐욕 지수<button class="info-icon-btn" data-modal-open="fng-modal">?</button></span>
-    <svg viewBox="0 0 200 116" role="img" aria-label="공포·탐욕 지수 {{ fng_dial.score }}점, {{ fng_dial.state }}">
-      <g fill="none" stroke-width="13" stroke-linecap="butt">
-        <path d="M18.0 100.0 A82 82 0 0 1 42.0 42.0" stroke="#FCA5A5"/>
-        <path d="M42.0 42.0 A82 82 0 0 1 87.2 19.0" stroke="#FDE68A"/>
-        <path d="M87.2 19.0 A82 82 0 0 1 112.8 19.0" stroke="#86EFAC"/>
-        <path d="M112.8 19.0 A82 82 0 0 1 158.0 42.0" stroke="#FDE68A"/>
-        <path d="M158.0 42.0 A82 82 0 0 1 182.0 100.0" stroke="#FCA5A5"/>
-      </g>
-      <path class="fng-needle" d="M100 100 L100 42" stroke-width="3" stroke-linecap="round"
-            transform="rotate({{ fng_dial.needle_deg }} 100 100)"/>
-      <circle class="fng-pivot" cx="100" cy="100" r="5.5"/>
-      <text class="fng-tick" x="14" y="112">0 공포</text>
-      <text class="fng-tick" x="150" y="112">탐욕 100</text>
-    </svg>
-    <div class="fng-score">{{ fng_dial.score }}</div>
-    <div class="fng-state {{ fng_dial.state_cls }}">{{ fng_dial.state }}</div>
-    {% if fng_dial.sub %}<div class="fng-sub">{{ fng_dial.sub }}</div>{% endif %}
-  </div>
-  {% endif %}
-  {% if market_items %}
-  <div class="mkt-list">
-    {% for item in market_items %}
-    <div class="mkt-row">
-      <div class="mkt-row-info">
-        <span class="mkt-name"{% if item.info_modal %} style="display:flex;align-items:center;gap:4px"{% endif %}>{{ item.name }}{% if item.info_modal %}<button class="info-icon-btn" data-modal-open="{{ item.info_modal }}">?</button>{% endif %}</span>
-        <div class="mkt-vals"><div class="mkt-val">{{ item.val }}</div><div class="mkt-chg {{ item.chg_cls }}">{{ item.chg }}</div></div>
-      </div>
-      {% if item.badge %}
-      <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge {{ item.badge_cls }}">{{ item.badge }}</span></div>
-      {% else %}
-      <div class="mkt-spark"><canvas id="{{ item.spark_id }}"></canvas></div>
+  <div class="fgd">
+    <div class="mk-top"><span>공포·탐욕 지수<button class="info-icon-btn" data-modal-open="fng-modal">?</button></span></div>
+    <svg viewBox="0 0 220 128" role="img" aria-label="공포·탐욕 지수 {{ fng_dial.score }}점, {{ fng_dial.state }}{% if fng_dial.prev %}, {{ fng_dial.prev.label }}{% endif %}">
+      <path d="{{ fng_dial.track }}" fill="none" class="fgd-track" stroke-width="10" stroke-linecap="round"/>
+      {% for b in fng_dial.bands %}<path d="{{ b.d }}" fill="none" stroke="{{ b.color }}" stroke-opacity=".35" stroke-width="10"/>{% endfor %}
+      {% for t in fng_dial.ticks %}<line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" class="fgd-gap" stroke-width="2"/>{% endfor %}
+      {% if fng_dial.prev %}
+      <path d="{{ fng_dial.prev.move }}" fill="none" class="fgd-move" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="{{ fng_dial.prev.x }}" cy="{{ fng_dial.prev.y }}" r="6" class="fgd-prev" stroke-width="2.5"/>
+      <text x="{{ fng_dial.prev.lx }}" y="{{ fng_dial.prev.ly }}" text-anchor="{{ fng_dial.prev.anchor }}" class="fgd-tick">{{ fng_dial.prev.label }}</text>
       {% endif %}
-    </div>
-    {% endfor %}
+      <circle cx="{{ fng_dial.today.x }}" cy="{{ fng_dial.today.y }}" r="7.5" class="fgd-now" stroke-width="2"/>
+      <text x="110" y="88" text-anchor="middle" class="fgd-score">{{ fng_dial.score }}</text>
+      <text x="110" y="107" text-anchor="middle" class="fgd-state {{ fng_dial.state_cls }}">{{ fng_dial.state }}{% if fng_dial.delta %} · {{ fng_dial.delta }}{% endif %}</text>
+      <text x="28" y="124" text-anchor="middle" class="fgd-tick">0 공포</text>
+      <text x="192" y="124" text-anchor="middle" class="fgd-tick">탐욕 100</text>
+    </svg>
+    <p class="mk-mean" style="text-align:center">낮을수록 겁먹은 시장이에요.</p>
   </div>
   {% endif %}
-</div>
-<script>
-window.addEventListener('load', function () {
-  {% for item in market_items if item.spark_id %}
-  drawSparkline('{{ item.spark_id }}', {{ item.spark_data | tojson }}, '{{ item.spark_color }}');
+  {% for item in market_items %}
+  <div class="mk-it">
+    <div class="mk-top"><span>{{ item.name }}{% if item.info_modal %}<button class="info-icon-btn" data-modal-open="{{ item.info_modal }}">?</button>{% endif %}</span><span class="mk-bd {{ item.badge_cls }}">{{ item.badge }}</span></div>
+    <div class="mk-val"><strong>{{ item.val }}</strong>{% if item.chg %}<small>{{ item.chg }}</small>{% endif %}</div>
+    {% if item.prev_pos is not none %}<div class="mk-pl"><span style="left:{{ item.prev_pos }}%" class="{% if item.prev_pos < 15 %}l{% elif item.prev_pos > 85 %}r{% endif %}">{{ item.prev_label }}</span></div>{% endif %}
+    <div class="mk-zw"><div class="mk-zone">{% for w, c in item.zone %}<i style="width:{{ w }}%;background:{{ c }}"></i>{% endfor %}</div>{% if item.prev_pos is not none %}<span class="mk-move" style="left:{{ [item.prev_pos, item.marker] | min }}%;width:{{ ((item.prev_pos - item.marker) | abs) | round(1) }}%"></span><span class="mk-prev" style="left:{{ item.prev_pos }}%" title="{{ item.prev_label }}"></span>{% endif %}<span class="mk-mk" style="left:{{ item.marker }}%"></span></div>
+    <div class="mk-zl">{% for pos, t in item.ticks %}<span class="{% if pos == 0 %}l{% elif pos == 100 %}r{% endif %}" style="left:{{ pos }}%">{{ t }}</span>{% endfor %}</div>
+    <p class="mk-mean">{{ item.mean | safe }}</p>
+    {% if item.when %}<p class="mk-when">{{ item.when }}</p>{% endif %}
+  </div>
   {% endfor %}
-});
-</script>
+</div>

@@ -537,6 +537,54 @@ html.dark .fng-state.calm{color:#4ADE80;}
 html.dark .fng-state.normal{color:#A3E635;}
 html.dark .fng-state.elevated{color:#FACC15;}
 html.dark .fng-state.high{color:#F87171;}
+/* 공포·탐욕 다이얼 — 어제 점 → 오늘 점(2026-11-23). 위 .fng-* 규칙은 이미 발행된 브리핑이 쓴다 — 지우지 말 것 */
+.fgd{padding:14px 16px 12px;border-bottom:1px solid var(--hairline);}
+.fgd svg{display:block;width:100%;max-width:230px;height:auto;margin:6px auto 0;overflow:visible;}
+.fgd-track{stroke:var(--surface-inset);}
+.fgd-gap{stroke:var(--canvas);}
+.fgd-move{stroke:var(--ink);}
+.fgd-prev{fill:var(--canvas);stroke:#9CA3AF;}
+.fgd-now{fill:var(--ink);stroke:var(--canvas);}
+.fgd-tick{fill:var(--muted);font-size:10px;}
+.fgd-score{fill:var(--ink);font-size:38px;font-weight:800;font-variant-numeric:tabular-nums;}
+.fgd-state{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;}
+.fgd-state.calm{fill:#16A34A;}
+.fgd-state.normal{fill:#65A30D;}
+.fgd-state.elevated{fill:#CA8A04;}
+.fgd-state.high{fill:#E03131;}
+html.dark .fgd-state.calm{fill:#4ADE80;}
+html.dark .fgd-state.normal{fill:#A3E635;}
+html.dark .fgd-state.elevated{fill:#FACC15;}
+html.dark .fgd-state.high{fill:#F87171;}
+/* 시장 지표 줄 — VIX·하이일드(2026-11-23) */
+.mk-it{padding:14px 16px;border-top:1px solid var(--hairline);}
+.fgd+.mk-it{border-top:0;}
+.mk-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink-soft,var(--muted));}
+.mk-top>span:first-child{display:inline-flex;align-items:center;gap:4px;}
+.mk-bd{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap;}
+.mk-bd.g{background:#DCFCE7;color:#16A34A;}
+.mk-bd.y{background:#FEF9C3;color:#CA8A04;}
+.mk-bd.r{background:#FEE2E2;color:#DC2626;}
+.mk-val{display:flex;align-items:baseline;gap:8px;margin-top:3px;}
+.mk-val strong{font-size:24px;font-weight:800;letter-spacing:-.3px;color:var(--ink);font-variant-numeric:tabular-nums;}
+.mk-val small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.mk-zw{position:relative;}
+.mk-zone{height:8px;border-radius:999px;display:flex;overflow:hidden;margin-top:9px;}
+.mk-zone i{display:block;height:100%;}
+.mk-mk{position:absolute;top:-3px;width:3px;height:14px;margin-left:-1.5px;background:var(--ink);border-radius:2px;}
+.mk-move{position:absolute;top:2.5px;height:3px;background:var(--ink);border-radius:2px;}
+.mk-prev{position:absolute;top:-1px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--canvas);border:2px solid #9CA3AF;box-sizing:border-box;}
+.mk-pl{position:relative;height:13px;font-size:10px;color:var(--muted);margin-top:8px;margin-bottom:-6px;}
+.mk-pl span{position:absolute;transform:translateX(-50%);white-space:nowrap;}
+.mk-pl span.l{transform:none;}
+.mk-pl span.r{transform:translateX(-100%);}
+.mk-zl{position:relative;height:14px;font-size:10px;color:var(--muted);margin-top:3px;}
+.mk-zl span{position:absolute;transform:translateX(-50%);white-space:nowrap;}
+.mk-zl span.l{transform:none;}
+.mk-zl span.r{transform:translateX(-100%);}
+.mk-mean{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.55;}
+.mk-mean b{color:var(--ink);font-weight:600;}
+.mk-when{font-size:11px;color:var(--muted);opacity:.8;margin:3px 0 0;}
 
 /* ── 실시간 시장 지표 패널 (장 중 전환) ── */
 .mkt-section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:7px 14px 3px;background:var(--surface-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}

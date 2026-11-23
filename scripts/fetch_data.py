@@ -85,6 +85,66 @@ def get_fear_greed() -> dict:
         return {}
 
 
+# 미국 하이일드 회사채 스프레드 — ICE BofA US High Yield OAS(FRED BAMLH0A0HYM2).
+# 신용이 낮은 미국 기업이 국채보다 더 얹어 내는 이자(%p). 빠르게 벌어지면 기업의 돈줄이 마른다는 신호다.
+# FRED는 이 시리즈를 최근 3년치만 주고 하루 이틀 늦게 올린다 — 날짜(asof)를 함께 저장한다(§20).
+_HY_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2"
+
+
+def parse_hy_csv(text: str) -> dict:
+    """FRED CSV → 최신값·10거래일 변화·3년 분포 위치. 관측이 11개 미만이면 빈 dict."""
+    rows = []
+    for line in text.strip().splitlines()[1:]:
+        parts = line.strip().split(",")
+        if len(parts) != 2 or parts[1] in ("", "."):
+            continue
+        try:
+            rows.append((parts[0], float(parts[1])))
+        except ValueError:
+            continue
+    if len(rows) < 11:
+        return {}
+    date, val = rows[-1]
+    base_date, base = rows[-11]
+    vals = [v for _, v in rows]
+    return {
+        "value": val,
+        "asof": date,
+        "chg10": round(val - base, 2),
+        "base_date": base_date,
+        "pct_above": round(sum(v > val for v in vals) / len(vals) * 100),   # 3년 중 지금보다 높았던 날 비율
+        # 직전 관측일 — 막대에 '어제' 점을 찍는다(10거래일 변화도 그날 기준으로 다시 잰다)
+        "prev_value": rows[-2][1] if len(rows) >= 12 else None,
+        "prev_date": rows[-2][0] if len(rows) >= 12 else None,
+        "prev_chg10": round(rows[-2][1] - rows[-12][1], 2) if len(rows) >= 12 else None,
+        "source": "fred:BAMLH0A0HYM2",
+    }
+
+
+def get_hy_spread() -> dict:
+    """하이일드 스프레드 실측. 실패하면 빈 dict(행 생략, §0)."""
+    text = ""
+    try:
+        req = urllib.request.Request(_HY_URL, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            text = resp.read().decode()
+    except Exception as e:
+        # 파이썬 urllib이 FRED에 붙지 못하는 경로가 있다(§86) — curl로 한 번 더
+        try:
+            import subprocess
+            text = subprocess.run(["curl", "-s", "--max-time", "30", _HY_URL],
+                                  capture_output=True, text=True, check=True).stdout
+        except Exception as e2:
+            print(f"[fetch_data] HY spread error: {e} / {e2}", file=sys.stderr)
+            return {}
+    out = parse_hy_csv(text)
+    if out:
+        print(f"[fetch_data] HY spread: {out['value']:.2f}% asof={out['asof']} 10일 {out['chg10']:+.2f}%p")
+    else:
+        print("[fetch_data] HY spread: 관측값 부족 — 생략", file=sys.stderr)
+    return out
+
+
 def build_sidebar_market_data(sidebar_map: dict) -> dict:
     """
     Build the window.MARKET_DATA object for sidebar injection.
@@ -347,6 +407,9 @@ def fetch_kospi_data() -> dict:
     fng = get_fear_greed()
     if fng:
         market_data_js["fng"] = fng
+    hy = get_hy_spread()
+    if hy:
+        market_data_js["hy"] = hy
 
     # 4. (2026-10-25 제거) 국내 켈로그 20일선 후보 — 코스피 아침의 상승 모멘텀 종목 코너를 뺐다.
     #    그 자리의 월봉 5개월선 안착 종목은 scripts/monthly_ma5.py가 따로 판정한다.
@@ -486,6 +549,9 @@ def fetch_us_data() -> dict:
     fng = get_fear_greed()
     if fng:
         market_data_js["fng"] = fng
+    hy = get_hy_spread()
+    if hy:
+        market_data_js["hy"] = hy
 
     # 4. US stock candidates
     print("[fetch_data]   → US candidates")

@@ -1,4 +1,4 @@
-# 시장 지표 사이드바(VIX + 공포·탐욕 지수) 구성 테스트 — 2026-08-31 2개 항목 축소.
+# 시장 지표 사이드바(공포·탐욕 다이얼 + VIX·하이일드 스프레드 줄) 구성 테스트.
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -6,6 +6,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from generate_html import (build_market_items, build_fng_dial,  # noqa: E402
                            _fng_is_fresh, _fng_label)
+from sections_shared import hy_state, _hy_is_fresh  # noqa: E402
+from fetch_data import parse_hy_csv  # noqa: E402
+from datetime import date
 
 # 실행 시점 기준으로 잡는다. 고정 시각을 쓰면 며칠 뒤 스스로 썩는다 —
 # build_fng_dial()이 내부에서 부르는 _fng_is_fresh()는 now 인자 없이 실제 벽시계와
@@ -27,16 +30,22 @@ def _fresh_fng(**over):
     return d
 
 
-def test_only_vix_row_remains():
-    """지수·선물 행은 데이터가 있어도 더 이상 그리지 않는다(공포·탐욕은 다이얼로 분리)."""
+def _fresh_hy(**over):
+    d = {"value": 3.52, "asof": (NOW + timedelta(hours=9)).date().isoformat(), "chg10": 0.04,
+         "pct_above": 8, "prev_value": 3.47, "prev_chg10": 0.15}
+    d.update(over)
+    return d
+
+
+def test_rows_are_vix_then_hy():
+    """지수·선물 행은 데이터가 있어도 그리지 않는다. 줄은 VIX → 하이일드 순."""
     md = _md(
         nasdaq={"base": 26541.35, "chg": 1.57, "data": [1, 2]},
-        sox={"base": 11882.17, "chg": 2.33, "data": [1, 2]},
-        nq={"base": 29622.25, "chg": 1.14, "data": [1, 2]},
         vix={"price": 14.51, "change_pct": -4.6},
+        hy=_fresh_hy(),
         fng=_fresh_fng(),
     )
-    assert [i["name"] for i in build_market_items(md, "kospi", "07:26")] == ["VIX 공포지수"]
+    assert [i["key"] for i in build_market_items(md, "kospi", "07:26")] == ["vix", "hy"]
     assert build_fng_dial(md, "kospi")["score"] == "54"
 
 
@@ -45,20 +54,57 @@ def test_fng_dial_values():
     assert d["score"] == "54"
     assert d["state"] == "중립"
     assert d["state_cls"] == "calm"
-    assert d["sub"] == "전일 58.2 · -3.7p"   # 58.17 → 54.43
-    # 0점=왼쪽(-90°), 50점=위(0°), 100점=오른쪽(+90°)
-    assert d["needle_deg"] == 7.97
-    assert build_fng_dial(_md(fng=_fresh_fng(score=0.0)), "us")["needle_deg"] == -90.0
-    assert build_fng_dial(_md(fng=_fresh_fng(score=50.0)), "us")["needle_deg"] == 0.0
-    assert build_fng_dial(_md(fng=_fresh_fng(score=100.0)), "us")["needle_deg"] == 90.0
+    assert d["delta"] == "−3.7p"            # 58.17 → 54.43
+    assert d["prev"]["label"] == "어제 58.2"
+    # 0점=왼쪽 끝(28,104), 50점=꼭대기(110,22), 100점=오른쪽 끝(192,104)
+    assert build_fng_dial(_md(fng=_fresh_fng(score=0.0)), "us")["today"] == {"x": "28.0", "y": "104.0"}
+    assert build_fng_dial(_md(fng=_fresh_fng(score=50.0)), "us")["today"] == {"x": "110.0", "y": "22.0"}
+    assert build_fng_dial(_md(fng=_fresh_fng(score=100.0)), "us")["today"] == {"x": "192.0", "y": "104.0"}
 
 
-def test_vix_row_unchanged():
-    items = build_market_items(_md(vix={"price": 14.51, "change_pct": -4.6}), "kospi", "07:26")
-    assert items == [{
-        "name": "VIX 공포지수", "info_modal": "vix-modal", "val": "14.51",
-        "chg": "-4.60%", "chg_cls": "down", "badge": "안정", "badge_cls": "calm",
-    }]
+def test_vix_row():
+    it = build_market_items(_md(vix={"price": 35.89, "change_pct": 26.1955}), "kospi", "07:26")[0]
+    assert it["val"] == "35.89" and it["badge"] == "불안" and it["badge_cls"] == "r"
+    assert it["chg"] == "전일 28.44 · 하루 +26.2%"     # 전일 = 가격 ÷ (1 + 등락률)
+    assert it["marker"] == 71.8                       # 0~50 막대
+    assert it["prev_pos"] == 56.9 and it["prev_label"] == "어제 28.44"
+    assert build_market_items(_md(vix={"price": 14.51, "change_pct": -4.6}), "kospi", "07:26")[0]["badge"] == "안정"
+
+
+def test_hy_row():
+    it = build_market_items(_md(hy=_fresh_hy()), "us", "21:15")[0]
+    assert it["val"] == "3.52%" and it["badge"] == "확대 없음" and it["badge_cls"] == "g"
+    assert it["chg"] == "전일 3.47% · 10거래일 +0.04%p"
+    assert it["marker"] == 4.0 and it["prev_pos"] == 15.0 and it["prev_label"] == "전일 +0.15%p"
+    assert it["when"].endswith("지난 3년 중 이보다 높았던 날 8%")
+    # 줄어든 날은 0에 붙인다(막대는 0~+1.0%p)
+    assert build_market_items(_md(hy=_fresh_hy(chg10=-0.2)), "us", "21:15")[0]["marker"] == 0.0
+
+
+def test_hy_state_rules():
+    assert hy_state(3.5, 0.49) == ("확대 없음", "g")
+    assert hy_state(3.5, 0.50) == ("경고", "y")
+    assert hy_state(5.2, 0.10) == ("강한 경고", "r")   # 5%p 이상에서 계속 벌어짐
+    assert hy_state(5.2, -0.10) == ("확대 없음", "g")  # 5%p 위여도 줄어드는 중이면 아님
+
+
+def test_hy_stale_dropped():
+    today = date(2026, 11, 23)
+    assert _hy_is_fresh({"asof": "2026-11-19"}, today=today) is True
+    assert _hy_is_fresh({"asof": "2026-11-10"}, today=today) is False
+    assert _hy_is_fresh({"asof": "어제"}, today=today) is False
+    old = _fresh_hy(asof="2020-01-01")
+    assert build_market_items(_md(hy=old), "us", "21:15") == []
+
+
+def test_parse_hy_csv():
+    rows = ["observation_date,BAMLH0A0HYM2"] + [f"2026-11-{d:02d},{3.00 + d / 100:.2f}" for d in range(1, 13)]
+    rows.insert(5, "2026-10-31,.")             # 빈 값(.)은 건너뛴다
+    out = parse_hy_csv("\n".join(rows))
+    assert out["value"] == 3.12 and out["asof"] == "2026-11-12"
+    assert out["chg10"] == 0.10 and out["base_date"] == "2026-11-02"
+    assert out["prev_value"] == 3.11 and out["prev_chg10"] == 0.10
+    assert parse_hy_csv("observation_date,BAMLH0A0HYM2\n2026-11-01,3.0") == {}
 
 
 def test_missing_data_omits_row():
@@ -68,6 +114,7 @@ def test_missing_data_omits_row():
     # 마감 브리핑은 이 패널 자체를 쓰지 않는다.
     assert build_fng_dial(_md(fng=_fresh_fng()), "close") == {}
     assert build_market_items(_md(vix={"price": 14.51, "change_pct": -4.6}), "close", "16:25") == []
+    assert build_market_items(_md(hy=_fresh_hy()), "close", "16:25") == []
 
 
 def test_stale_fng_dial_dropped():
@@ -92,8 +139,9 @@ def test_broken_fng_dropped():
 
 
 def test_prev_close_missing_leaves_sub_blank():
-    """전일 값이 없으면 0.0p로 채우지 않고 비운다 — 보합이라는 틀린 주장 방지."""
-    assert build_fng_dial(_md(fng=_fresh_fng(prev_close=None)), "us")["sub"] == ""
+    """전일 값이 없으면 0.0p로 채우지 않고 비운다 — 보합이라는 틀린 주장 방지. 어제 점도 뺀다."""
+    d = build_fng_dial(_md(fng=_fresh_fng(prev_close=None)), "us")
+    assert d["delta"] == "" and d["prev"] is None
 
 
 def test_session_rollover_leaves_sub_blank():
@@ -104,12 +152,11 @@ def test_session_rollover_leaves_sub_blank():
     그대로 두면 '+0.0p'(보합)라는 틀린 주장이 매일 발행된다.
     """
     same = _fresh_fng(score=54.4285714285714, prev_close=54.4285714285714)
-    assert build_fng_dial(_md(fng=same), "us")["sub"] == ""
+    assert build_fng_dial(_md(fng=same), "us")["delta"] == ""
     # 표시상 0.0p로 반올림되는 미세 변화도 같은 이유로 비운다.
-    assert build_fng_dial(_md(fng=_fresh_fng(score=54.43, prev_close=54.40)), "us")["sub"] == ""
+    assert build_fng_dial(_md(fng=_fresh_fng(score=54.43, prev_close=54.40)), "us")["prev"] is None
     # 0.1p부터는 정상 표시한다(오제거 방지).
-    assert build_fng_dial(_md(fng=_fresh_fng(score=54.5, prev_close=54.4)), "us")["sub"] \
-        == "전일 54.4 · +0.1p"
+    assert build_fng_dial(_md(fng=_fresh_fng(score=54.5, prev_close=54.4)), "us")["delta"] == "+0.1p"
 
 
 def test_label_falls_back_to_score_band():

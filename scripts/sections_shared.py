@@ -1,8 +1,9 @@
 # 여러 브리핑이 함께 쓰는 섹션 컨텍스트 — 월봉 5개월선·예측 카드·시장 지표·성적표
 
 import json
+import math
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -189,11 +190,10 @@ def _chg_cell(chg) -> dict:
 
 
 def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> list:
-    """시장 지표 사이드바 — VIX와 공포·탐욕 지수 두 항목만 표시한다.
+    """시장 지표 사이드바 줄 — VIX와 미국 하이일드 스프레드(공포·탐욕은 위 다이얼).
 
-    2026-08-31에 나스닥·필라델피아 반도체·나스닥100 선물 행을 화면에서 뺐다(수집은 유지 —
-    분석 프롬프트와 다른 위젯이 계속 소비한다). 이 패널은 '지수 시세'가 아니라 '투자 심리'를
-    보여주는 자리다. 데이터가 없으면 그 행을 그리지 않는다(§0 — 없으면 비운다).
+    줄마다 큰 숫자·상태 뱃지·구간 막대·뜻 한 줄을 둔다(2026-11-23, 시안
+    docs/prototypes/2026-11-23-market-indicators-hy.html). 데이터가 없으면 그 줄을 그리지 않는다(§0).
     """
     if internal_type not in ("kospi", "us"):
         return []
@@ -201,31 +201,128 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
     if "vix" not in mdj and market_data.get("vix"):
         mdj["vix"] = market_data["vix"]
     items = []
-
-    # VIX — S&P500 30일 내재변동성
-    vix = mdj.get("vix")
-    if isinstance(vix, dict) and vix.get("price") is not None:
-        p = vix["price"]
-        lvls = [(15, "안정", "calm"), (20, "보통", "normal"), (30, "경계", "elevated"),
-                (40, "불안", "high"), (10 ** 9, "극단", "high")]
-        _, lbl, cls = next(x for x in lvls if p < x[0])
-        cp = vix.get("change_pct", 0)
-        items.append({
-            "name": "VIX 공포지수", "info_modal": "vix-modal",
-            "val": f"{p:.2f}",
-            "chg": f"{'+' if cp >= 0 else ''}{cp:.2f}%",
-            "chg_cls": "up" if cp >= 0 else "down",
-            "badge": lbl, "badge_cls": cls,
-        })
+    vix = _vix_item(mdj.get("vix"))
+    if vix:
+        items.append(vix)
+    hy = _hy_item(mdj.get("hy"))
+    if hy:
+        items.append(hy)
     return items
+
+
+def _prev_mark(prev, prev_pos, now_val, label: str) -> dict:
+    """막대 위 '어제' 빈 점 — 다이얼처럼 어제 → 오늘을 잇는다. 어제 값이 없거나 같으면 뺀다."""
+    if prev is None or prev_pos is None or abs(float(prev) - float(now_val)) < 0.005:
+        return {"prev_pos": None, "prev_label": ""}
+    return {"prev_pos": round(prev_pos, 1), "prev_label": label}
+
+
+# 구간 막대 색 — 다이얼 아치와 같은 파스텔
+_Z_G, _Z_G2, _Z_Y, _Z_R, _Z_R2 = "#86EFAC", "#D9F99D", "#FDE68A", "#FCA5A5", "#F87171"
+
+
+def _vix_item(vix) -> dict:
+    """VIX — S&P500 30일 내재변동성. 막대는 0~50, 15·20·30·40 경계."""
+    if not isinstance(vix, dict) or not isinstance(vix.get("price"), (int, float)):
+        return {}
+    p = float(vix["price"])
+    lvls = [(15, "안정", "g"), (20, "보통", "g"), (30, "경계", "y"), (40, "불안", "r"), (10 ** 9, "극단", "r")]
+    _, lbl, cls = next(x for x in lvls if p < x[0])
+    cp = vix.get("change_pct")
+    prev = p / (1 + cp / 100) if isinstance(cp, (int, float)) and cp > -100 else None
+    return {
+        "key": "vix", "name": "VIX 공포지수", "info_modal": "vix-modal",
+        "val": f"{p:.2f}",
+        "chg": f"전일 {prev:.2f} · 하루 {'+' if cp >= 0 else '−'}{abs(cp):.1f}%" if prev is not None else "",
+        "badge": lbl, "badge_cls": cls,
+        "zone": [(30, _Z_G), (10, _Z_G2), (20, _Z_Y), (20, _Z_R), (20, _Z_R2)],
+        "marker": round(max(0.0, min(50.0, p)) / 50 * 100, 1),
+        "ticks": [(30, "15"), (40, "20"), (60, "30"), (80, "40")],
+        **_prev_mark(prev, max(0.0, min(50.0, prev)) / 50 * 100 if prev is not None else None,
+                     p, f"어제 {prev:.2f}" if prev is not None else ""),
+        "mean": "S&amp;P 500이 앞으로 30일 얼마나 흔들릴지 옵션 값으로 잰 거예요. <b>30을 넘으면 불안 구간</b>이에요.",
+        "when": "",
+    }
+
+
+HY_WARN_CHG = 0.50    # 10거래일 확대 경고(%p)
+HY_STRONG_LEVEL = 5.0  # 이 수준 위에서 더 벌어지면 강한 경고(%p)
+
+
+def hy_state(value: float, chg10: float) -> tuple:
+    """(라벨, 색) — 10거래일 +0.50%p 이상 경고, 5%p 이상에서 계속 벌어지면 강한 경고."""
+    if value >= HY_STRONG_LEVEL and chg10 > 0:
+        return "강한 경고", "r"
+    if chg10 >= HY_WARN_CHG:
+        return "경고", "y"
+    return "확대 없음", "g"
+
+
+def _hy_is_fresh(hy: dict, max_age_days: int = 7, today=None) -> bool:
+    """FRED는 하루 이틀 늦게 올린다 — 7일 넘게 멈추면 수집이 죽은 것으로 보고 뺀다(§20)."""
+    try:
+        d = datetime.strptime(str(hy.get("asof")), "%Y-%m-%d").date()
+    except ValueError:
+        return False
+    ref = today or datetime.now(timezone(timedelta(hours=9))).date()
+    if (ref - d).days > max_age_days:
+        print(f"[generate_html] ⚠️ 하이일드 스프레드가 {(ref - d).days}일 지났습니다 — 표시 생략.", file=sys.stderr)
+        return False
+    return True
+
+
+def _hy_item(hy) -> dict:
+    if not isinstance(hy, dict) or not isinstance(hy.get("value"), (int, float)) \
+            or not isinstance(hy.get("chg10"), (int, float)) or not _hy_is_fresh(hy):
+        return {}
+    v, c = float(hy["value"]), float(hy["chg10"])
+    lbl, cls = hy_state(v, c)
+    m, d = str(hy["asof"])[5:7], str(hy["asof"])[8:10]
+    when = f"{int(m)}/{int(d)} 기준"
+    if isinstance(hy.get("pct_above"), (int, float)):
+        when += f" · 지난 3년 중 이보다 높았던 날 {hy['pct_above']:.0f}%"
+    return {
+        "key": "hy", "name": "하이일드 스프레드", "info_modal": "hy-modal",
+        "val": f"{v:.2f}%",
+        "chg": (f"전일 {hy['prev_value']:.2f}% · " if isinstance(hy.get("prev_value"), (int, float)) else "")
+               + f"10거래일 {'+' if c >= 0 else '−'}{abs(c):.2f}%p",
+        "badge": lbl, "badge_cls": cls,
+        "zone": [(50, _Z_G), (50, _Z_Y)],
+        "marker": round(max(0.0, min(1.0, c)) * 100, 1),
+        "ticks": [(0, "0"), (50, "+0.50%p 경고"), (100, "+1.0")],
+        **_prev_mark(hy.get("prev_chg10"),
+                     max(0.0, min(1.0, float(hy["prev_chg10"]))) * 100
+                     if isinstance(hy.get("prev_chg10"), (int, float)) else None,
+                     c, (f"전일 {'+' if hy['prev_chg10'] >= 0 else '−'}{abs(hy['prev_chg10']):.2f}%p")
+                     if isinstance(hy.get("prev_chg10"), (int, float)) else ""),
+        "mean": "신용이 낮은 미국 기업이 국채보다 더 얹어 내는 이자예요. "
+                "<b>10거래일에 0.5%p 넘게 벌어지면 돈줄이 마른다는 경고</b>예요.",
+        "when": when,
+    }
+
+
+# 공포·탐욕 다이얼 — 얇은 아치 위에 어제 점(빈 원)과 오늘 점을 잇는 호(2026-11-23 다이얼 3안).
+_DIAL_CX, _DIAL_CY, _DIAL_R = 110, 104, 82
+_FNG_BANDS = [(0, 25, "#F87171"), (25, 45, "#FBBF24"), (45, 55, "#4ADE80"), (55, 75, "#FBBF24"), (75, 100, "#F87171")]
+
+
+def _dial_pt(score: float, r: float) -> tuple:
+    a = math.pi * (1 - score / 100)
+    return (_DIAL_CX + r * math.cos(a), _DIAL_CY - r * math.sin(a))
+
+
+def _dial_arc(s0: float, s1: float, r: float = _DIAL_R) -> str:
+    """s0→s1 점수 구간의 호(작은 점수 → 큰 점수, 시계 방향)."""
+    lo, hi = min(s0, s1), max(s0, s1)
+    a, b = _dial_pt(lo, r), _dial_pt(hi, r)
+    return f"M{a[0]:.1f} {a[1]:.1f} A{r} {r} 0 0 1 {b[0]:.1f} {b[1]:.1f}"
 
 
 def build_fng_dial(market_data: dict, internal_type: str) -> dict:
     """공포·탐욕 지수 반원 다이얼. 데이터가 없거나 낡았으면 빈 dict → 섹션 생략(§0).
 
-    아치 좌표는 반지름 82 · 중심 (100,100)의 고정값이라 템플릿에 상수로 두고,
-    여기서는 바늘 각도만 계산한다. 0점=왼쪽(-90°), 100점=오른쪽(+90°)이므로
-    각도 = (점수 - 50) × 1.8.
+    어제 점과 오늘 점을 아치 위에 찍고 그 사이를 호로 잇는다 — 하루 사이 어느 쪽으로
+    움직였는지가 보인다. 어제 값이 없거나 사실상 같으면(아래) 오늘 점만 남긴다.
     """
     if internal_type not in ("kospi", "us"):
         return {}
@@ -233,28 +330,44 @@ def build_fng_dial(market_data: dict, internal_type: str) -> dict:
     fng = mdj.get("fng")
     if not isinstance(fng, dict) or not _fng_is_fresh(fng):
         return {}
-    score = fng["score"]
+    score = float(fng["score"])
     label, cls = _fng_label(score, fng.get("rating"))
     prev = fng.get("prev_close")
-    sub = ""
+    s = max(0.0, min(100.0, score))
+    dial = {
+        "score": f"{score:.0f}",
+        "state": label,
+        "state_cls": cls,
+        "delta": "",
+        "track": _dial_arc(0, 100),
+        "bands": [{"d": _dial_arc(a, b), "color": c} for a, b, c in _FNG_BANDS],
+        "ticks": [],
+        "today": {"x": f"{_dial_pt(s, _DIAL_R)[0]:.1f}", "y": f"{_dial_pt(s, _DIAL_R)[1]:.1f}"},
+        "prev": None,
+    }
+    for t in (25, 45, 55, 75):
+        a, b = _dial_pt(t, _DIAL_R - 9), _dial_pt(t, _DIAL_R + 9)
+        dial["ticks"].append({"x1": f"{a[0]:.1f}", "y1": f"{a[1]:.1f}", "x2": f"{b[0]:.1f}", "y2": f"{b[1]:.1f}"})
     if isinstance(prev, (int, float)):
-        # 0~100 점수라 등락'률'이 아니라 포인트 차이로 보여준다.
         d = score - prev
         # 표시상 0.0p가 되는 구간은 아예 비운다 — '보합'이라는 틀린 주장을 막기 위함(§0).
         # CNN은 미국 정규장이 열리기 전에 이미 직전 종가를 previous_close로 넘기는데,
         # 새 세션 값은 아직 없어 score와 previous_close가 **완전히 같아진다**. 미국 브리핑은
         # 21:15 KST(= 프리마켓)에 나가므로 이 구간에 정확히 걸리고, 비우지 않으면 매일
-        # '+0.0p'가 찍힌다(2026-08-31 확인). 소수 13자리가 우연히 일치할 일은 없으므로
-        # 이 조건은 사실상 '아직 갱신 안 됨'만 잡는다.
+        # '+0.0p'가 찍힌다(2026-08-31 확인).
         if abs(d) >= 0.05:
-            sub = f"전일 {prev:.1f} · {'+' if d >= 0 else ''}{d:.1f}p"
-    return {
-        "score": f"{score:.0f}",
-        "needle_deg": round((max(0.0, min(100.0, score)) - 50) * 1.8, 2),
-        "state": label,
-        "state_cls": cls,
-        "sub": sub,
-    }
+            ps = max(0.0, min(100.0, float(prev)))
+            pp = _dial_pt(ps, _DIAL_R)
+            lp = _dial_pt(ps, _DIAL_R + 12)
+            dial["delta"] = f"{'+' if d >= 0 else '−'}{abs(d):.1f}p"
+            dial["prev"] = {
+                "x": f"{pp[0]:.1f}", "y": f"{pp[1]:.1f}",
+                "move": _dial_arc(ps, s),
+                "lx": f"{lp[0]:.1f}", "ly": f"{lp[1] - 2:.1f}",
+                "anchor": "end" if lp[0] < _DIAL_CX else "start",
+                "label": f"어제 {prev:.1f}",
+            }
+    return dial
 
 
 # CNN 등급 → 한국어 라벨. 뱃지 색은 기존 vix-badge 팔레트를 재사용한다 —
