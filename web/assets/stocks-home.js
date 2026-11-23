@@ -21,7 +21,7 @@
     })();
 
 /* ── 블록 2 — 코스피 주도주 (2026-11-04 B안, SERVICE_RULES §79) ──
-   세 종목을 한 줄씩: 지금 가격 · 오늘 · 어제 · 차이. 아래는 세 종목 섞은 관련 뉴스 7개.
+   세 종목을 한 줄씩: 큰 숫자 하나 + 어제와 비교 한 문장(2026-11-23 A안). 아래는 세 종목 섞은 관련 뉴스 7개.
    지금 가격 — 장중 09:00~15:30 실시간(/api/stocks-live) → 15:31~15:59 종가(시간외 종가 매매라 움직이지 않는다)
              → 16:00~20:00 KRX 애프터장 실시간(같은 API의 after)
              → 20:00~다음 날 09:00·휴장일 하이퍼리퀴드 24h 추정가(/api/hl-night).
@@ -79,15 +79,34 @@
 
   var ST={ph:null, now:{}, cmp:{}, labels:null, vs:null, closedAt:0};
 
+  // 비교 한마디 — 같은 시각(장중)·종가(마감 뒤)의 오늘 t와 비교 대상 y. ±0.5%p 안이면 '비슷해요'.
+  // 빨강·파랑을 쓰지 않는다(§49) — 회색 칩.
+  function cmpWord(t,y){
+    if(t==null||y==null) return '';
+    if(Math.abs(t-y)<0.5) return '비슷해요';
+    if(t>=0&&y>=0) return t>y?'더 올랐어요':'덜 올랐어요';
+    if(t<0&&y<0) return t>y?'덜 빠졌어요':'더 빠졌어요';
+    return t>=0?'그때와 달리 올랐어요':'그때와 달리 내렸어요';
+  }
+  var DOW='일월화수목금토';
+  function mdw(y8){ var s=String(y8||''); if(s.length!==8) return '';
+    var d=new Date(Date.UTC(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8))); return md8(s)+'('+DOW[d.getUTCDay()]+')'; }
+  window.__leaders.cmpWord=cmpWord;
+
+  // 2026-11-23 A안 — 종목마다 큰 숫자 하나 + 비교 한 문장.
+  //   장중: 큰 숫자 = 지금 실시간 등락. 문장 = '지난 금요일 12:48엔 −5.87%' + 한마디(같은 확정 분끼리 비교).
+  //   마감 뒤: 큰 숫자 = 그 세션 정규장 종가 등락. 문장 = '11/20(금) 종가엔 −5.10%' + 한마디(종가끼리).
+  //           애프터장 체결가·하이퍼리퀴드 추정가는 큰 숫자가 아니라 이름 아래 작은 줄(표시와 함께)로 둔다 —
+  //           기준(그날 종가)이 다른 숫자를 같은 자리에 섞지 않는다.
   function model(){
     var ph=ST.ph, L={};
     if(ph==='open'){
       var vs=ST.vs&&ST.vs.status==='ok'&&Array.isArray(ST.vs.leaders)?ST.vs:null, by={};
       (vs?vs.leaders:[]).forEach(function(l){ by[l.code]=l; });
       var rel=vs&&vs.prev?vs.prev.rel:'어제', tm=vs?vs.time:'';
-      L={sub:vs?rel+'('+String(vs.prev.label||'').replace(/\(.\)$/,'')+') '+tm+'와 비교':'어제 같은 시각과 비교',
-         now:'지금 · 실시간', t:vs?'오늘 '+tm:'오늘', y:vs?rel+' '+tm:'어제',
-         mk:rel+' 이 시각보다'+(tm?' · '+tm:''), foot:vs?'차이는 '+tm+' 기준 — 오늘과 '+rel+'의 같은 시각 등락 차이예요.':''};
+      L={sub:vs?rel+'('+String(vs.prev.label||'').replace(/\(.\)$/,'')+') 같은 시각과 비교':'어제 같은 시각과 비교',
+         ref:vs?rel+' '+tm+'엔':'', tag:'<span class="ldl-pill live">실시간</span>',
+         foot:vs?'큰 숫자는 지금 실시간 등락이에요. 한마디는 '+tm+' 확정 1분봉끼리 비교했어요(오늘 '+tm+' vs '+rel+' '+tm+').':''};
       CODES.forEach(function(c){ var l=by[c]; ST.cmp[c]=l&&l.t!=null&&l.y!=null&&l.diff!=null?{t:l.t,y:l.y,diff:l.diff}:null; });
     } else {
       var head=null;
@@ -95,40 +114,37 @@
       // 세션 날짜가 다른 종목은 같은 칸에 놓지 않는다.
       CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&head&&(x.date!==head.date||x.prevDate!==head.prevDate)) ST.cmp[c]=null; });
       // 15:31~15:59는 애프터장 전이라 지금 가격이 곧 종가다(서버도 16:00부터 after를 붙인다).
-      var pre=ph==='after'&&afterPre(Date.now());
-      L={sub:ph==='after'?(pre?'정규장 마감 · 애프터장 실시간은 16:00부터':'애프터장 실시간 · 비교는 종가 기준'):'하이퍼리퀴드 24h 추정가 · 실제 체결가 아님',
-         now:ph==='after'?(pre?'지금 · 종가':'지금 · 애프터장'):'지금 · 추정',
-         t:head?md8(head.date)+' 종가':'종가', y:head?md8(head.prevDate)+' 종가':'전날 종가',
-         mk:'전날보다', foot:head?'차이 = '+md8(head.date)+' 종가 등락 − '+md8(head.prevDate)+' 종가 등락이에요.':''};
+      var pre=ph==='after'&&afterPre(Date.now()), d=head?mdw(head.date):'', pd=head?mdw(head.prevDate):'';
+      L={sub:head?d+' 종가 · '+pd+' 종가와 비교':'종가 비교',
+         ref:head?pd+' 종가엔':'', tag:head?'<span class="ldl-pill cls">'+d+' 종가</span>':'',
+         foot:!head?'':ph==='after'
+           ?(pre?'큰 숫자는 '+d+' 정규장 종가 등락이에요. 애프터장 체결가는 16:00부터 이름 아래에 보여요.'
+                :'큰 숫자는 '+d+' 정규장 종가 등락이에요. 이름 아래 애프터는 지금 애프터장 체결가(오늘 종가 대비)예요.')
+           :'큰 숫자는 '+d+' 정규장 종가 등락이에요. 이름 아래 추정은 종가에 하이퍼리퀴드 야간 변동을 실은 값이라 실제 체결가가 아니에요.'};
     }
     return L;
   }
 
   function render(){
     var box=document.getElementById('ld-list'); if(!box) return;
-    var L=model();
+    var L=model(), open=ST.ph==='open';
     var sub=document.getElementById('ld-sub'); if(sub) sub.textContent=L.sub;
-    var max=0; CODES.forEach(function(c){ var x=ST.cmp[c]; if(x) max=Math.max(max,Math.abs(x.diff)); });
-    var open=ST.ph==='open';
     var rows=CODES.map(function(c){
       var n=ST.now[c]||{}, x=ST.cmp[c];
+      var big=open?(n.pc!=null?n.pc:null):(x?x.t:null);
       var pill=n.pill?'<span class="ldl-pill '+n.pill[0]+'" title="'+esc(n.pill[2])+'">'+esc(n.pill[1])+'</span>':'';
-      var w=x&&max?Math.abs(x.diff)/max*50:0;
-      var bar=x?'<span class="ldl-trk"><i style="'+(x.diff>=0?'left:50%':'right:50%')+';width:'+w.toFixed(1)+'%"></i></span>':'';
-      return '<div class="ldl-row"><div class="ldl-nm"><b>'+NAMES[c]+'</b><small class="num">'+won(n.px)+
-          (n.pc!=null?' <span class="'+cls(n.pc)+'">'+f2(n.pc)+'%</span>':'')+pill+'</small></div>'+
-        '<div class="ldl-c t num '+cls(x&&x.t)+'">'+(x?f2(x.t)+'%':'—')+'</div>'+
-        '<div class="ldl-c y num '+cls(x&&x.y)+'">'+(x?f2(x.y)+'%':'—')+'</div>'+
-        '<div class="ldl-d">'+bar+'<em class="num">'+(x?f2(x.diff)+'%p':'—')+'</em></div>'+
-        // 모바일(M1 문장형) — 한 줄에 숫자 3개, '오늘' 등락은 한 번만.
-        // 장중: 가격 · 지금 등락 / 어제 이 시각보다 차이. 마감 뒤: 가격 · 그 가격 등락 · 표시 / 그날 종가 등락 · 전날보다 차이.
-        '<div class="ldl-m"><div class="m1"><b>'+NAMES[c]+'</b><span class="px num">'+won(n.px)+
-          (n.pc!=null?' <span class="'+cls(n.pc)+'">'+f2(n.pc)+'%</span>':'')+pill+'</span></div>'+
-        '<div class="m2"><span>'+(open?esc(L.mk):esc(L.t)+' <b class="num '+cls(x&&x.t)+'">'+(x?f2(x.t)+'%':'—')+'</b> · '+esc(L.mk))+'</span>'+
-          bar+'<em class="num">'+(x?f2(x.diff)+'%p':'—')+'</em></div></div></div>';
+      // 이름 아래 작은 줄 — 장중·종가는 가격만, 애프터·추정은 표시 + 가격 + 종가 대비 등락
+      var px=n.pill&&n.pill[0]!=='cls'
+        ? pill+' '+won(n.px)+(n.pc!=null?' <span class="'+cls(n.pc)+'">'+f2(n.pc)+'%</span>':'')
+        : won(n.px)+(n.px!=null?'원':'');
+      var w=x?cmpWord(x.t,x.y):'';
+      var say=x&&L.ref?esc(L.ref)+' <b class="num '+cls(x.y)+'">'+f2(x.y)+'%</b>'+
+        (w?' <span class="ldl-chip" title="차이 '+f2(x.diff)+'%p">'+w+'</span>':''):'';
+      return '<div class="ldl-row"><div class="ldl-nm"><b>'+NAMES[c]+'</b><small class="num">'+px+'</small></div>'+
+        '<div class="ldl-r"><div class="ldl-now num '+cls(big)+'">'+L.tag+(big!=null?f2(big)+'%':'—')+'</div>'+
+        (say?'<div class="ldl-say">'+say+'</div>':'')+'</div></div>';
     }).join('');
-    box.innerHTML='<div class="ldl-row ldl-hd"><span>종목 · '+esc(L.now)+'</span><span>'+esc(L.t)+'</span><span>'+esc(L.y)+'</span><span>차이</span></div>'+rows+
-      (L.foot?'<div class="ldl-foot">'+esc(L.foot)+'</div>':'');
+    box.innerHTML=rows+(L.foot?'<div class="ldl-foot">'+esc(L.foot)+'</div>':'');
   }
 
   function json(u){ return fetch(u,{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); }

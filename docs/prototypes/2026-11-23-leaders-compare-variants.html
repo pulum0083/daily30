@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!-- 종목 홈 '코스피 주도주' 어제 비교 표를 더 쉽게 — 세 가지 시안(2026-11-23, 11/23 12:48 화면 숫자) -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주도주 비교 시안</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{--ink:#13151A;--muted:#6B7280;--hair:#E5E7EB;--soft:#F3F4F6;--up:#E03131;--dn:#2775ED;--blue:#2563EB}
+*{box-sizing:border-box}
+body{margin:0;background:#F5F6F8;color:var(--ink);font-family:'Pretendard Variable',Pretendard,-apple-system,system-ui,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:880px;margin:0 auto;padding:16px}
+.lab{font-size:12px;font-weight:800;color:#7C3AED;margin:26px 0 8px}
+.lab small{font-weight:500;color:var(--muted);margin-left:6px}
+.block{background:#fff;border:1px solid var(--hair);border-radius:12px;padding:14px 16px}
+.bh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.bt{font-size:15px;font-weight:800;border-left:3px solid var(--blue);padding-left:9px}
+.bs{font-size:12px;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.dn{color:var(--dn)} .up{color:var(--up)} .mu{color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+/* 기존 */
+.old{border:1px solid #EEF1F5;border-radius:10px;overflow:hidden}
+.old .r{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.4fr;align-items:center;padding:10px 14px;border-top:1px solid #EEF1F5;font-size:14px}
+.old .r:first-child{border-top:0;background:#F8FAFC;font-size:12px;color:var(--muted)}
+.old .r>*:not(:first-child){text-align:right}
+/* A 문장형 */
+.a-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--hair)}
+.a-row:first-child{border-top:0}
+.a-nm{flex:none;white-space:nowrap}.a-nm b{font-size:16px}.a-nm small{display:block;font-size:13px;color:var(--muted)}
+.a-r{text-align:right}
+.a-now{font-size:20px;font-weight:800}
+.a-say{font-size:13px;color:#374151}
+.chip{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--soft);color:#334155;margin-left:4px}
+/* B 두 점 */
+.b-row{display:grid;grid-template-columns:110px 1fr 96px;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--hair)}
+.b-row:first-child{border-top:0}
+.b-nm b{font-size:15px;display:block}.b-nm small{font-size:12.5px;color:var(--muted)}
+.trk{position:relative;height:36px}
+.trk .ax{position:absolute;top:6px;bottom:6px;width:0;border-left:1px dashed #CBD5E1}
+.trk .ln{position:absolute;top:17px;height:2px;background:#94A3B8}
+.trk .pt{position:absolute;top:12px;width:12px;height:12px;margin-left:-6px;border-radius:50%}
+.trk .pt.y{background:#fff;border:2px solid #94A3B8}
+.trk .pt.t{background:var(--ink)}
+.trk .tl{position:absolute;top:-2px;font-size:11px;transform:translateX(-50%);white-space:nowrap}
+.trk .tl.y{color:#94A3B8}.trk .tl.t{color:var(--ink);font-weight:700}
+.b-r{text-align:right;font-size:13px}
+.b-r b{display:block;font-size:14px}
+.b-leg{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.b-leg i{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:-1px;margin-right:5px}
+.b-scale{display:grid;grid-template-columns:110px 1fr 96px;gap:12px;font-size:11px;color:var(--muted)}
+.b-scale div{position:relative;height:14px}
+.b-scale span{position:absolute;transform:translateX(-50%)}
+/* C 두 칸 카드 */
+.c-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.c-card{border:1px solid var(--hair);border-radius:12px;padding:12px}
+.c-card b.n{font-size:15px}
+.c-now{font-size:22px;font-weight:800;margin:2px 0 8px}
+.c-two{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted)}
+.c-two div{background:var(--soft);border-radius:8px;padding:6px 8px}
+.c-two b{display:block;font-size:15px;color:var(--ink)}
+.c-say{margin-top:8px;font-size:12.5px;font-weight:700;color:#334155}
+@media(max-width:560px){
+  .old .r{grid-template-columns:1.3fr .9fr .9fr 1fr;padding:9px 10px;font-size:13px}
+  .b-row,.b-scale{grid-template-columns:78px 1fr 72px;gap:8px}
+  .c-grid{grid-template-columns:1fr}
+  .a-row{align-items:flex-start}.a-say{font-size:12.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p style="font-size:13px;color:var(--muted)">숫자는 11/23(월) 12:48 화면 그대로예요. 비교 대상은 지난 금요일(11/20) 같은 시각이에요. 어제 대비 판정은 빨강·파랑을 쓰지 않아요(오르내림과 헷갈려서).</p>
+
+<div class="lab">지금 화면<small>숫자 다섯 개가 한 줄에 — 지금 −3.71%와 12:48 −3.50%가 따로 있어 헷갈려요</small></div>
+<div class="block"><div class="old">
+  <div class="r"><span>종목 · 지금 · 실시간</span><span>오늘 12:48</span><span>지난 금요일 12:48</span><span>차이</span></div>
+  <div class="r"><span><b>삼성전자</b><br><small class="num">176,300 <span class="dn">−3.71%</span></small></span><span class="num dn">−3.50%</span><span class="num dn">−5.87%</span><span class="num">+2.37%p</span></div>
+  <div class="r"><span><b>SK하이닉스</b><br><small class="num">1,069,000 <span class="dn">−3.95%</span></small></span><span class="num dn">−3.95%</span><span class="num dn">−5.58%</span><span class="num">+1.63%p</span></div>
+  <div class="r"><span><b>현대차</b><br><small class="num">245,000 <span class="dn">−3.92%</span></small></span><span class="num dn">−4.31%</span><span class="num dn">−3.93%</span><span class="num">−0.38%p</span></div>
+</div></div>
+
+<div class="lab">A안 · 문장으로<small>지금 숫자 하나 + 지난 금요일과 비교 한 문장</small></div>
+<div class="block">
+  <div class="bh"><span class="bt">📈 코스피 주도주</span><span class="bs">지난 금요일 같은 시각과 비교</span></div>
+  <div class="a-row"><div class="a-nm"><b>삼성전자</b><small class="num">176,300원</small></div>
+    <div class="a-r"><div class="a-now num dn">−3.71%</div><div class="a-say">지난 금요일 이 시각엔 −5.87% <span class="chip">덜 빠졌어요</span></div></div></div>
+  <div class="a-row"><div class="a-nm"><b>SK하이닉스</b><small class="num">1,069,000원</small></div>
+    <div class="a-r"><div class="a-now num dn">−3.95%</div><div class="a-say">지난 금요일 이 시각엔 −5.58% <span class="chip">덜 빠졌어요</span></div></div></div>
+  <div class="a-row"><div class="a-nm"><b>현대차</b><small class="num">245,000원</small></div>
+    <div class="a-r"><div class="a-now num dn">−3.92%</div><div class="a-say">지난 금요일 이 시각엔 −3.93% <span class="chip">비슷해요</span></div></div></div>
+  <p class="note">비교는 12:48 확정 1분봉 기준이에요. ±0.5%p 안이면 '비슷해요'.</p>
+</div>
+
+<div class="lab">B안 · 두 점으로<small>0% 선 위에 금요일(빈 점)과 오늘(검은 점) — 어느 쪽으로 움직였는지 위치로 보여요</small></div>
+<div class="block">
+  <div class="bh"><span class="bt">📈 코스피 주도주</span><span class="bs">12:48 기준</span></div>
+  <div class="b-leg"><span><i style="border:2px solid #94A3B8"></i>지난 금요일 같은 시각</span><span><i style="background:#13151A"></i>오늘</span></div>
+  <div id="b-rows"></div>
+  <div class="b-scale"><i></i><div id="b-scale"></div><i></i></div>
+  <p class="note">오른쪽으로 갈수록 덜 빠졌거나 더 오른 거예요.</p>
+</div>
+
+<div class="lab">C안 · 종목 카드<small>지금을 크게, 아래 두 칸에 오늘·지난 금요일 같은 시각</small></div>
+<div class="block">
+  <div class="bh"><span class="bt">📈 코스피 주도주</span><span class="bs">12:48 기준 비교</span></div>
+  <div class="c-grid">
+    <div class="c-card"><b class="n">삼성전자</b><div class="c-now num dn">−3.71%</div>
+      <div class="c-two"><div>오늘 12:48<b class="num">−3.50%</b></div><div>지난 금 12:48<b class="num">−5.87%</b></div></div>
+      <div class="c-say">금요일보다 2.4%p 덜 빠졌어요</div></div>
+    <div class="c-card"><b class="n">SK하이닉스</b><div class="c-now num dn">−3.95%</div>
+      <div class="c-two"><div>오늘 12:48<b class="num">−3.95%</b></div><div>지난 금 12:48<b class="num">−5.58%</b></div></div>
+      <div class="c-say">금요일보다 1.6%p 덜 빠졌어요</div></div>
+    <div class="c-card"><b class="n">현대차</b><div class="c-now num dn">−3.92%</div>
+      <div class="c-two"><div>오늘 12:48<b class="num">−4.31%</b></div><div>지난 금 12:48<b class="num">−3.93%</b></div></div>
+      <div class="c-say">금요일과 비슷해요</div></div>
+  </div>
+</div>
+</div>
+<script>
+var R=[["삼성전자","176,300",-3.50,-5.87,-3.71],["SK하이닉스","1,069,000",-3.95,-5.58,-3.95],["현대차","245,000",-4.31,-3.93,-3.92]];
+var lo=-7, hi=1, x=function(v){return ((v-lo)/(hi-lo)*100).toFixed(1)+'%'};
+var sg=function(v){return (v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)+'%'};
+document.getElementById('b-rows').innerHTML=R.map(function(r){
+  var t=r[2],y=r[3],d=t-y,a=Math.min(t,y),b=Math.max(t,y);
+  var w=Math.abs(d)<0.5?'비슷해요':(d>0?'덜 빠졌어요':'더 빠졌어요');
+  return '<div class="b-row"><div class="b-nm"><b>'+r[0]+'</b><small class="num">'+r[1]+' <span class="dn">'+sg(r[4])+'</span></small></div>'+
+    '<div class="trk"><span class="ax" style="left:'+x(0)+'"></span><span class="ln" style="left:'+x(a)+';width:calc('+x(b)+' - '+x(a)+')"></span>'+
+    '<span class="pt y" style="left:'+x(y)+'"></span><span class="pt t" style="left:'+x(t)+'"></span>'+
+    '<span class="tl t num" style="left:'+x(t)+';top:'+(t>y?'-2px':'26px')+'">'+sg(t)+'</span><span class="tl y num" style="left:'+x(y)+';top:'+(t>y?'26px':'-2px')+'">'+sg(y)+'</span></div>'+
+    '<div class="b-r"><b class="num">'+(d>0?'+':'')+d.toFixed(2)+'%p</b>'+w+'</div></div>';
+}).join('');
+document.getElementById('b-scale').innerHTML=[-6,-4,-2,0].map(function(v){return '<span style="left:'+x(v)+'">'+(v?v+'%':'0%')+'</span>'}).join('');
+</script>
+</body>
+</html>

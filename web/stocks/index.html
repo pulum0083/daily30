@@ -26,12 +26,12 @@
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
-<script src="/assets/stocks-home.js?v=50" defer></script>
+<script src="/assets/stocks-home.js?v=51" defer></script>
 <script src="/assets/ds-subnav.js?v=3" defer></script>
 <script src="/assets/vs-yesterday.js?v=33" defer></script>
 <script src="/assets/home-hero.js?v=28" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=72">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=73">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
 <link rel="stylesheet" href="/assets/vs-yesterday.css?v=23">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
@@ -100,7 +100,7 @@
       <div id="ue-cap" style="font-size:11px;color:var(--muted);margin-top:9px;">주간거래·프리장·정규장·애프터장은 실시간, 그 밖엔 직전 종가</div>
     </div>
 
-    <div id="us-linked-widget"><div class="usw-head" style="display:flex;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:2px 0;"><span id="usw-title" style="font-size:15px;font-weight:800;color:#0F172A;">📈 코스피 주도주</span><a class="help-q" href="/glossary/#leaders" data-tip-title="코스피 주도주" data-tip="세 종목을 한 줄씩 <b>어제와 비교</b>해 보여줘요.<br><br><b>지금 가격</b><br>· 장중(09:00~15:30) — 한국거래소 실시간 체결가<br>· 15:30~20:00 — 애프터장 실시간 체결가(오늘 종가 대비)<br>· 20:00 이후·휴장일 — 종가에 하이퍼리퀴드 24h 무기한선물의 야간 변동률을 실은 <b>추정가</b>(실제 체결가 아님)<br><br><b>비교 칸</b><br>· 장중 — 오늘과 어제의 같은 시각 등락(다 끝난 1분봉 기준이라 2분쯤 늦어요)<br>· 장 마감 뒤 — 그날 종가 등락과 전날 종가 등락<br><br>차이(%p)는 회색 막대로 보여줘요.">?</a><span class="usw-sub" id="ld-sub" style="margin-left:auto;font-size:11px;color:var(--muted);">어제 같은 시각과 비교</span></div><div class="ldl-list" id="ld-list"><div class="ldl-row ldl-hd"><span>종목 · 지금</span><span>오늘</span><span>어제</span><span>차이</span></div><div class="ldl-row"><div class="ldl-nm"><b>삼성전자</b><small class="num">—</small></div><div class="ldl-c t num">—</div><div class="ldl-c y num">—</div><div class="ldl-d"><em class="num">—</em></div></div><div class="ldl-row"><div class="ldl-nm"><b>SK하이닉스</b><small class="num">—</small></div><div class="ldl-c t num">—</div><div class="ldl-c y num">—</div><div class="ldl-d"><em class="num">—</em></div></div><div class="ldl-row"><div class="ldl-nm"><b>현대차</b><small class="num">—</small></div><div class="ldl-c t num">—</div><div class="ldl-c y num">—</div><div class="ldl-d"><em class="num">—</em></div></div></div><div id="why-moved"><div class="lw-h">📰 주도주 뉴스<span class="lw-note" id="lw-upd">세 종목 · 최신순</span></div><div class="lw-news" id="lw-news"></div></div></div>
+    <div id="us-linked-widget"><div class="usw-head" style="display:flex;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:2px 0;"><span id="usw-title" style="font-size:15px;font-weight:800;color:#0F172A;">📈 코스피 주도주</span><a class="help-q" href="/glossary/#leaders" data-tip-title="코스피 주도주" data-tip="세 종목을 한 줄씩 <b>어제와 비교</b>해 보여줘요.<br><br><b>큰 숫자</b><br>· 장중(09:00~15:30) — 지금 실시간 등락 · 실시간 표시<br>· 장 마감 뒤 — 그날 정규장 종가 등락 · 종가 표시<br><br><b>이름 아래 작은 줄</b><br>· 장중 — 지금 가격<br>· 16:00~20:00 — 애프터장 실시간 체결가(오늘 종가 대비) · 애프터 표시<br>· 20:00 이후·휴장일 — 종가에 하이퍼리퀴드 24h 무기한선물의 야간 변동률을 실은 추정가(실제 체결가 아님) · 추정 표시<br><br><b>비교 한마디</b><br>장중엔 어제 같은 시각(다 끝난 1분봉 기준이라 2분쯤 늦어요), 장 마감 뒤엔 전날 종가와 비교해 '덜 빠졌어요·더 올랐어요'처럼 적어요. 차이가 0.5%p 안이면 '비슷해요'예요.">?</a><span class="usw-sub" id="ld-sub" style="margin-left:auto;font-size:11px;color:var(--muted);">어제 같은 시각과 비교</span></div><div class="ldl-list" id="ld-list"><div class="ldl-row"><div class="ldl-nm"><b>삼성전자</b><small class="num">—</small></div><div class="ldl-r"><div class="ldl-now num">—</div></div></div><div class="ldl-row"><div class="ldl-nm"><b>SK하이닉스</b><small class="num">—</small></div><div class="ldl-r"><div class="ldl-now num">—</div></div></div><div class="ldl-row"><div class="ldl-nm"><b>현대차</b><small class="num">—</small></div><div class="ldl-r"><div class="ldl-now num">—</div></div></div></div><div id="why-moved"><div class="lw-h">📰 주도주 뉴스<span class="lw-note" id="lw-upd">세 종목 · 최신순</span></div><div class="lw-news" id="lw-news"></div></div></div>
 
     
     

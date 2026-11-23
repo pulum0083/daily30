@@ -419,7 +419,7 @@ test('주도주 — 장 마감 뒤 비교는 날짜 붙은 세 공식 종가로,
   assert.equal(closeCmp(null), null);
 });
 
-test('주도주 모바일(M1) — 애프터장엔 1줄 가격·애프터 표시, 2줄 그날 종가 등락 · 전날보다 차이 (11/3 실측)', async () => {
+test('주도주 A안 — 마감 뒤 큰 숫자는 그날 종가 등락, 애프터 체결가는 이름 아래 태그 (11/3 실측)', async () => {
   const prices = [
     { code: '005930', price: 219500, sessionDate: '20261103', prevSessionClose: 229000, prevSessionDate: '20261102', prev2SessionClose: 225000, after: { price: 221000 } },
   ];
@@ -430,12 +430,22 @@ test('주도주 모바일(M1) — 애프터장엔 1줄 가격·애프터 표시,
   await new Promise((r) => setImmediate(r));
   await new Promise((r) => setImmediate(r));
   const html = win.__els.get('ld-list').innerHTML;
-  const m = html.match(/<div class="ldl-m">.*?<\/div><\/div><\/div>/);
-  assert.ok(m, '모바일 줄(.ldl-m)이 없다');
-  assert.match(m[0], /221,000 <span class="up">\+0\.68%<\/span><span class="ldl-pill aft"/);
-  assert.match(m[0], /11\/3 종가 <b class="num dn">−4\.15%<\/b> · 전날보다/);
-  assert.match(m[0], /−5\.93%p/);
-  assert.match(html, /<div class="ldl-foot">차이 = 11\/3 종가 등락 − 11\/2 종가 등락이에요\.<\/div>/);
+  assert.match(html, /<span class="ldl-pill aft"[^>]*>애프터<\/span> 221,000 <span class="up">\+0\.68%<\/span>/);
+  assert.match(html, /<span class="ldl-pill cls">11\/3\(화\) 종가<\/span>−4\.15%/);
+  assert.match(html, /11\/2\(월\) 종가엔 <b class="num up">\+1\.78%<\/b> <span class="ldl-chip" title="차이 −5\.93%p">그때와 달리 내렸어요<\/span>/);
+  assert.ok(!/ldl-trk|ldl-hd/.test(html), '옛 표 머리·막대가 남았다');
+});
+
+test('주도주 비교 한마디 — 덜·더 빠졌어요 / 덜·더 올랐어요 / 그때와 달리 / ±0.5%p 비슷해요', () => {
+  const { cmpWord } = loadWindow({}).__leaders;
+  assert.equal(cmpWord(-3.5, -5.87), '덜 빠졌어요');
+  assert.equal(cmpWord(-5.0, -3.0), '더 빠졌어요');
+  assert.equal(cmpWord(3.0, 1.0), '더 올랐어요');
+  assert.equal(cmpWord(1.0, 3.0), '덜 올랐어요');
+  assert.equal(cmpWord(1.0, -1.0), '그때와 달리 올랐어요');
+  assert.equal(cmpWord(-1.0, 1.0), '그때와 달리 내렸어요');
+  assert.equal(cmpWord(-4.31, -3.93), '비슷해요');
+  assert.equal(cmpWord(null, 1), '');
 });
 
 test('주도주 뉴스 — 세 종목을 섞어 7개, 종목마다 최신 1건은 반드시 들어가고 같은 기사는 한 번만', () => {
