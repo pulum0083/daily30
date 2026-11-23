@@ -105,7 +105,7 @@
       (vs?vs.leaders:[]).forEach(function(l){ by[l.code]=l; });
       var rel=vs&&vs.prev?vs.prev.rel:'어제', tm=vs?vs.time:'';
       L={sub:vs?rel+'('+String(vs.prev.label||'').replace(/\(.\)$/,'')+') 같은 시각과 비교':'어제 같은 시각과 비교',
-         ref:vs?rel+' '+tm+'엔':'', tag:'<span class="ldl-pill live">실시간</span>',
+         ref:vs?rel+' '+tm+'엔':'', tag:'',   // 장중엔 태그를 달지 않는다 — 큰 숫자가 지금 값인 걸 안다(2026-11-23 사용자 결정)
          foot:vs?'큰 숫자는 지금 실시간 등락이에요. 한마디는 '+tm+' 확정 1분봉끼리 비교했어요(오늘 '+tm+' vs '+rel+' '+tm+').':''};
       CODES.forEach(function(c){ var l=by[c]; ST.cmp[c]=l&&l.t!=null&&l.y!=null&&l.diff!=null?{t:l.t,y:l.y,diff:l.diff}:null; });
     } else {
@@ -116,7 +116,7 @@
       // 15:31~15:59는 애프터장 전이라 지금 가격이 곧 종가다(서버도 16:00부터 after를 붙인다).
       var pre=ph==='after'&&afterPre(Date.now()), d=head?mdw(head.date):'', pd=head?mdw(head.prevDate):'';
       L={sub:head?d+' 종가 · '+pd+' 종가와 비교':'종가 비교',
-         ref:head?pd+' 종가엔':'', tag:head?'<span class="ldl-pill cls">'+d+' 종가</span>':'',
+         ref:head?pd+' 종가엔':'', tag:head&&pre?'<span class="ldl-pill cls">'+d+' 종가</span>':'',   // 15:31~15:59만 — 애프터·추정 시간엔 이름 아래 태그와 머리 줄이 이미 말한다
          foot:!head?'':ph==='after'
            ?(pre?'큰 숫자는 '+d+' 정규장 종가 등락이에요. 애프터장 체결가는 16:00부터 이름 아래에 보여요.'
                 :'큰 숫자는 '+d+' 정규장 종가 등락이에요. 이름 아래 애프터는 지금 애프터장 체결가(오늘 종가 대비)예요.')

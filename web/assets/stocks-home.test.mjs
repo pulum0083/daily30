@@ -431,7 +431,7 @@ test('주도주 A안 — 마감 뒤 큰 숫자는 그날 종가 등락, 애프�
   await new Promise((r) => setImmediate(r));
   const html = win.__els.get('ld-list').innerHTML;
   assert.match(html, /<span class="ldl-pill aft"[^>]*>애프터<\/span> 221,000 <span class="up">\+0\.68%<\/span>/);
-  assert.match(html, /<span class="ldl-pill cls">11\/3\(화\) 종가<\/span>−4\.15%/);
+  assert.match(html, /<div class="ldl-now num dn">−4\.15%<\/div>/);   // 애프터 시간엔 큰 숫자에 태그를 달지 않는다
   assert.match(html, /11\/2\(월\) 종가엔 <b class="num up">\+1\.78%<\/b> <span class="ldl-chip" title="차이 −5\.93%p">그때와 달리 내렸어요<\/span>/);
   assert.ok(!/ldl-trk|ldl-hd/.test(html), '옛 표 머리·막대가 남았다');
 });
