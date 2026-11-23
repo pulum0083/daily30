@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-11-23T12:31:32.278181+09:00",
+  "generated_at": "2026-11-23T13:01:21.778072+09:00",
   "date": "2026-11-23",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -4.15,
-      "surge": 0.7,
+      "changePct": -3.74,
+      "surge": 0.75,
       "events": [
         {
           "time": "09:29",
@@ -31,22 +31,41 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -4.4,
-      "surge": 0.65,
-      "events": []
+      "changePct": -3.95,
+      "surge": 0.71,
+      "events": [
+        {
+          "time": "09:43",
+          "headline": "SK하이닉스, 장 초반 다시 110만원 밑으로…미 반도체주 급락 여파",
+          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1NQXRYdENZZHBUUWVaODA5cG5KUUJBbmdpMlh2eklXTGp0dTFzUXphamtybmk5MmlNT18zbk9vM0xCRm5pVmNGTk04MmlqU1MzQXc?oc=5",
+          "source": "매일경제",
+          "why": "미국 반도체주 급락의 영향으로 SK하이닉스 주가가 장 초반 110만원 아래로 떨어졌다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "08:49",
+          "headline": "하나증권 \"삼성전자·SK하이닉스, 악재 선반영.. 하락 대비\"",
+          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPXzhoVWpaTkVrbGhJaXcwbk5HMllqSi1Zdlh5bUljRFpyWDV4a2R6Q3pGeGQtVTZMeERhT2JkWG5SVXZWTkxZZmtzVzBPNHlBclZzdWRZYnB1M002bno0MlBJRWVLbDA2MEs2SWlaajNndXBLd3dLNGh2UExqZHBNbTFwRzFIX1N0?oc=5",
+          "source": "글로벌이코노믹",
+          "why": "하나증권 \"삼성전자·SK하이닉스, 악재 선반영.. 하락 대비\"",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -4.51,
-      "surge": 0.36,
+      "changePct": -4.12,
+      "surge": 0.39,
       "events": [
         {
           "time": "10:22",
           "headline": "현대차 장중 3%대 하락 24만5000원에 거래 : 기업주식정보",
           "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE5FcGJYUkxCQ05jX1R3V3lINmJXMDFncUNzQXdsSG9VaWdULXV6OGdPb3d6SnhTNHRwS1A0QVZfQ0dsdnNaSC1JX05VMA?oc=5",
           "source": "재경일보",
-          "why": "현대차 주가가 장중 3%대 하락하여 24만5000원에 거래되었다.",
+          "why": "현대차 주가가 장중 3%대 하락하며 24만5000원에 거래되었다.",
           "tier": "why",
           "sentiment": "neg"
         },
