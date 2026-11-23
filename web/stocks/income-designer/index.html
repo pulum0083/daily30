@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>월배당 ETF 건전성 — 원금·분배금·계산기 | 더블샷(Double-Shot)</title>
+<title>월배당 ETF 건전성 — 가격·분배금·계산기 | 더블샷(Double-Shot)</title>
 <link rel="canonical" href="https://doubleshot.space/stocks/income-designer/">
-<meta name="description" content="국내·미국 월배당 ETF가 지금 원금을 지키고 있는지 봐요. 1년 동안 받은 분배금과 가격 변화, 기초 지수 대비 성과, 월별 분배 흐름을 실측으로 보여주고, 담은 ETF의 세후 월 분배금도 계산해요.">
+<meta name="description" content="국내·미국 월배당 ETF가 분배금을 주면서 1년 동안 가격을 지켰는지 봐요. 1년 동안 받은 분배금과 가격 변화, 기초 지수 대비 성과, 월별 분배 흐름을 실측으로 보여주고, 담은 ETF의 세후 월 분배금도 계산해요.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="월배당 ETF 건전성 — 원금·분배금·계산기 | Double-Shot">
-<meta property="og:description" content="월배당 ETF가 원금을 지키며 분배하는지, 받은 분배금과 깎인 가격을 함께 봐요.">
+<meta property="og:title" content="월배당 ETF 건전성 — 가격·분배금·계산기 | Double-Shot">
+<meta property="og:description" content="월배당 ETF가 분배하면서 가격을 지켰는지, 받은 분배금과 깎인 가격을 함께 봐요.">
 <meta property="og:url" content="https://doubleshot.space/stocks/income-designer/">
 <link rel="icon" type="image/svg+xml" href="/stocks/income-designer/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -758,7 +758,7 @@ body.has-incbar .wrap{padding-bottom:110px}
   <div id="income-board">
     <div class="bh">
       <div><h1>월배당 <span class="a">건전성</span> <button class="bq" onclick="openIncomeModal()" aria-label="건전성이 뭔가요?" title="건전성이 뭔가요?">?</button></h1>
-      <p>분배율이 높다고 좋은 ETF는 아니에요. 분배금 일부가 원금에서 나오면 가격이 깎여요. 월배당 ETF가 지금 원금을 지키고 있는지 1년 동안 받은 분배금과 가격 변화로 보고, 펼치면 기초 지수와 비교해요.</p></div>
+      <p>분배율이 높다고 좋은 ETF는 아니에요. 받은 분배금보다 가격이 더 깎이면 손에 남는 건 줄어요. 월배당 ETF가 1년 동안 받은 분배금과 가격 변화를 나란히 보고, 펼치면 기초 지수와 비교해요.</p></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;"><span class="asof" id="board-asof"></span><button class="calc-btn" onclick="showCalc()">내 월 인컴 계산기 →</button></div>
     </div>
     <div id="board-root"><div class="empty">ETF 데이터를 불러오는 중이에요.</div></div>
@@ -772,7 +772,7 @@ body.has-incbar .wrap{padding-bottom:110px}
       <h3>🪙 인컴 ETF, 이것만 알면 돼요</h3>
 
       <h4>분배율과 수익률은 달라요</h4>
-      <p>분배율이 15%여도, 그 돈이 내 원금에서 나왔다면 실제로 번 게 아니에요. 커버드콜 ETF 일부는 옵션 프리미엄 수익이 부족할 때 원금을 떼어 분배금으로 지급해요.</p>
+      <p>분배율이 15%여도, 같은 기간 가격이 그만큼 내렸다면 실제로 번 게 아니에요. 실제 수익은 받은 분배금과 가격 변화를 함께 봐야 알 수 있어요. 분배금이 어디서 나왔는지(배당·옵션 프리미엄·원금)는 운용사 공시로만 확인할 수 있고, 이 화면의 숫자로는 알 수 없어요.</p>
 
       <h4>Q. 건전성이 뭔가요?</h4>
       <p><b>건전성 = 1년 동안 가격이 얼마나 지켜졌나</b>예요. 분배금을 주고도 가격이 1년 전 이상이면 건전이에요. 아래 카드는 실제 데이터예요.</p>
@@ -807,7 +807,7 @@ body.has-incbar .wrap{padding-bottom:110px}
           </div>
           <div class="anno-item">
             <span class="anno-dot" style="background:#00ae1a;border-radius:9999px;"></span>
-            <div><b>건전 뱃지</b><br>가격이 1년 전 이상이에요. 주의는 분배율의 절반까지 내린 경우, 원금성은 그보다 더 내려 분배금에 원금이 섞인 구조예요.</div>
+            <div><b>건전 뱃지</b><br>가격이 1년 전 이상이에요. 주의는 1년 가격이 분배율의 절반까지 내린 경우, 1년 가격 하락은 그보다 더 내린 경우예요. 가격만 보는 판정이라 분배금 재원(원금이 섞였는지)은 알 수 없어요.</div>
           </div>
         </div>
       </div>
@@ -951,7 +951,7 @@ function annoFill(d){
 const UNIV = {};
 let USDKRW = 0;
 // 건전성 = 1년 가격 변화(d.p). 예전엔 총수익 − 분배율로 쟀는데 국내·미국 원천의 '1년 수익' 뜻이 달라 오판했다(2026-11-12).
-function incomeHealth(d){if(d.p==null)return['na','데이터 부족',null];const e=d.p;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+function incomeHealth(d){if(d.p==null)return['na','데이터 부족',null];const e=d.p;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','1년 가격 하락',e];}
 
 
 /* 화면: 건전성 보드 하나. 계산기는 #calc 모달, 옛 주소 #all도 보드로 온다(2026-11-12) */
@@ -975,7 +975,7 @@ function showCalc(){if(location.hash!=='#calc')history.pushState({p:'calc'},'',l
 function closeCalc(){if(history.state&&history.state.p==='calc')history.back();else{history.replaceState(null,'',location.pathname);route();}}
 window.addEventListener('popstate',route);
 
-/* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
+/* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·1년 가격 하락 경고·종합과세·갭 */
 const SIM_KEY='ds-income-holdings-v1';
 function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}simIsSample=false;markAdded();}
 function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
@@ -1226,8 +1226,8 @@ function simOut(){
   const cards=[];
   if(bad.length){
     cards.push(`<div class="rc open">
-      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
-      <div class="rc-body"><ul class="rc-bullets">${bad.map(b=>`<li><b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#2775ED">${b.e.toFixed(0)}%</b> 하락했어요.</li><li>분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.</li>`).join('')}</ul></div>
+      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">1년 가격 하락</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
+      <div class="rc-body"><ul class="rc-bullets">${bad.map(b=>`<li><b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#2775ED">${b.e.toFixed(0)}%</b> 하락했어요.</li><li>받은 분배금보다 가격 하락이 크면 분배율만큼 번 게 아니에요.</li>`).join('')}</ul></div>
     </div>`);
   }
   // ── 포트 구성 분석 (집중위험·커버드콜·국내해외·건전성 통합 1카드) ──
@@ -1239,7 +1239,7 @@ function simOut(){
     const ccPct=totVal>0?ccVal/totVal*100:0, ccHigh=ccPct>=60;
     const usPct=totVal>0?usVal/totVal*100:0, krPct=100-usPct;
     const avgY=totVal>0?wY/totVal:0;
-    const parts=[];if(cnt.ok)parts.push(`건전 ${cnt.ok}`);if(cnt.warn)parts.push(`주의 ${cnt.warn}`);if(cnt.bad)parts.push(`원금성 ${cnt.bad}`);if(cnt.na)parts.push(`판정불가 ${cnt.na}`);
+    const parts=[];if(cnt.ok)parts.push(`건전 ${cnt.ok}`);if(cnt.warn)parts.push(`주의 ${cnt.warn}`);if(cnt.bad)parts.push(`1년 가격 하락 ${cnt.bad}`);if(cnt.na)parts.push(`판정불가 ${cnt.na}`);
     const warn=conc||ccHigh;
     const rows=[
       `<div class="pa-row"><span class="pa-label">집중도</span><span class="pa-val">${top?`상위 <b class="rc-num">${ts.toFixed(0)}%</b> (${top.name})`:'—'}${conc?' <span class="pa-warn">⚠ 40% 초과</span>':''}</span></div>`,
@@ -1249,7 +1249,7 @@ function simOut(){
     ].join('');
     cards.push(`<div class="rc open"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${warn?'⚠️':'📊'}</span><span class="rct">포트 구성 분석</span><span class="rcb ${warn?'amber':'blue'}">${slices.length}종목</span><span class="rc-chev">▾</span></div><div class="rc-body"><div class="pa-grid">${rows}</div></div></div>`);
   }
-  // 원금성 종목을 같은 금액의 '건전' ETF와 나란히 놓는 비교 정보만 보인다(2026-10-28) —
+  // 1년 가격 하락 종목을 같은 금액의 '건전' ETF와 나란히 놓는 비교 정보만 보인다(2026-10-28) —
   // 예전엔 '갈아타기 제안' 카드에 특정 상품 추가·기존 종목 제거 버튼이 있어 매매 권유로 읽혔다.
   if(bad.length){
     const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
@@ -1296,7 +1296,7 @@ function toggleRc(head){head.closest('.rc').classList.toggle('open');}
 /* ===== 건전성 보드 (2026-11-12) — 숫자는 전부 income_etfs.json에서 온다. 여기서는 그리기만 한다 ===== */
 let BOARD=[];
 const BST={cat:'cc',sort:'h',h:'all'};
-const BHL={ok:'건전',warn:'주의',bad:'원금성'},BHR={ok:0,warn:1,bad:2};
+const BHL={ok:'건전',warn:'주의',bad:'1년 가격 하락'},BHR={ok:0,warn:1,bad:2};
 const bfmt=(v,d=1)=>{if(v==null)return '—';const r=+v.toFixed(d);return r===0?(0).toFixed(d)+'%':(r>0?'+':'')+r.toFixed(d)+'%'};
 const bcls=v=>v==null?'mu':v>0?'up':v<0?'dn':'';
 const besc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -1334,14 +1334,14 @@ function boardRender(){
       <div class="tot"><b class="${bcls(e.r)}">${bfmt(e.r)}</b><span>가격 ${bfmt(e.p,0)}</span></div>
       ${UNIV[e.code]?(on=>`<button type="button" class="badd${on?' on':''}" data-badd="${e.code}">${on?'✓ 담김':'+ 담기'}</button>`)(!simIsSample&&simHoldings.some(h=>h.code===e.code)):'<span></span>'}
       <span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div><div class="fd" id="bfd${i}"></div>`}).join('');
-  document.getElementById('board-root').innerHTML=`<div class="sum">${chip('all','전체',base.length)}${chip('ok','건전 · 원금 지킴',c.ok)}${chip('warn','주의 · 조금 깎임',c.warn)}${chip('bad','원금성 · 많이 깎임',c.bad)}</div>
+  document.getElementById('board-root').innerHTML=`<div class="sum">${chip('all','전체',base.length)}${chip('ok','건전 · 가격 유지',c.ok)}${chip('warn','주의 · 조금 내림',c.warn)}${chip('bad','1년 가격 하락 · 많이 내림',c.bad)}</div>
    <div class="flt"><div class="seg">${seg('cat','all','전체')}${seg('cat','cc','커버드콜')}${seg('cat','div','배당주')}${seg('cat','bond','채권·금리')}</div><span class="sp"></span><div class="seg sortseg">${seg('sort','h','건전성순')}${seg('sort','y','분배율순')}${seg('sort','t','총수익순')}</div><select class="sortsel" data-bsort aria-label="정렬">${[['h','건전성순'],['y','분배율순'],['t','총수익순']].map(([v,l])=>`<option value="${v}"${BST.sort===v?' selected':''}>${l}</option>`).join('')}</select></div>
    <div class="card"><div class="bk-h"><span class="bk-t"><span class="ic">📊</span>월배당 ETF</span><span class="bk-s">${L.length}개 · 1년 기준</span></div><div class="legend"><span><i style="background:var(--dist)"></i>받은 분배금</span><span><i style="background:var(--upb)"></i>가격 상승</span><span><i style="background:repeating-linear-gradient(135deg,var(--dnb) 0 3px,#9DBEF5 3px 6px)"></i>가격 하락(깎인 돈)</span><span><i style="background:var(--ink);width:3px"></i>1년 총수익</span></div>
    <div class="fhd"><span>ETF</span><span>분배율</span><span>건전성</span><span>받은 돈 vs 깎인 돈 (1년)</span><span>1년 총수익</span><span></span></div>${rows||'<div class="empty">해당하는 ETF가 없어요.</div>'}</div>
    ${na?`<p class="note">상장 1년 미만이라 판정을 보류한 ${na}개는 목록에서 뺐어요.</p>`:''}`;
 }
 function bVerdict(e){const out=[];
-  out.push(e.h==='ok'?'분배금을 주면서도 원금을 지켰어요.':e.h==='warn'?'분배금 일부가 원금에서 나왔어요.':'분배금 상당 부분이 원금에서 나왔어요.');
+  out.push(e.h==='ok'?'분배금을 주면서도 1년 전 가격을 지켰어요.':e.h==='warn'?'1년 동안 가격이 조금 내렸어요(분배율의 절반 이내).':'1년 동안 가격이 분배율의 절반보다 더 내렸어요.');
   if(e.p3m!=null&&e.p>=0&&e.p3m<=-5)out.push(`다만 최근 3개월은 <b class="dn">${bfmt(e.p3m)}</b>로 깎이는 중이에요.`);
   else if(e.p3m!=null&&e.p<0&&e.p3m>=3)out.push(`최근 3개월은 <b class="up">${bfmt(e.p3m)}</b>로 회복 중이에요.`);
   if(e.dtrend!=null&&e.dtrend<=-10)out.push(`최근 분배금은 1년 전보다 <b class="dn">${bfmt(e.dtrend)}</b> 줄었어요.`);

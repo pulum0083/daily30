@@ -57,7 +57,7 @@ def test_classify_health():
     assert m.classify_health(13.02, 1.85) == ("ok", 1.85)      # 가격이 올랐으면 분배율이 높아도 건전
     assert m.classify_health(10.0, 0.0) == ("ok", 0.0)         # 경계 — 그대로면 건전
     assert m.classify_health(10.0, -5.0) == ("warn", -5.0)     # 분배율의 절반까지 내림 → 주의
-    assert m.classify_health(10.0, -5.01) == ("bad", -5.01)    # 그보다 더 내림 → 원금성
+    assert m.classify_health(10.0, -5.01) == ("bad", -5.01)    # 그보다 더 내림 → 1년 가격 하락
     assert m.classify_health(None, 5.0) == (None, None)
     assert m.classify_health(10.0, None) == (None, None)
 
