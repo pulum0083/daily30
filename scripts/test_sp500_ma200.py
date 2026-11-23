@@ -89,7 +89,7 @@ def test_section_context_and_render(tmp_path, monkeypatch):
     assert "200일선 아래로" in html and "200일선 위로" in html and "새로" not in html
     assert html.index("🔥 과열") < html.index("200일선 위로") < html.index("200일선 아래로")   # 과열 → 위로 → 아래로
     assert "🔥 과열" in html and "200일선보다 40% 넘게 높아요" in html
-    assert "더 보기" not in html and html.count('class="spx-row"') == 11 and 'class="spx-col-h">금융<em>10</em>' in html   # 섹터별 표, 전부 보인다
+    assert "더 보기" not in html and html.count('class="spx-row"') == 11 + len(ctx["hot"]) and 'class="spx-hrow"' not in html and 'class="spx-col-h">금융<em>10</em>' in html   # 섹터별 표, 전부 보인다
     assert "평균의 2.8배" in html
     import re
     assert not re.search(r">-\d", html)                                    # 하락은 '−'(U+2212) — 상세 페이지와 같은 기호

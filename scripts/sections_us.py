@@ -173,19 +173,20 @@ def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
                  "from": _md(br[0][0]), "to": _md(br[-1][0])}
 
     hot = [r for r in d.get("hot") or [] if isinstance(r.get("gap"), (int, float))]
-    mx = max([r["gap"] for r in hot] + [1.0])
     asof = d["asof"]
     dp = round(d["above_pct"] - d["above_pct_prev"], 1) if isinstance(d.get("above_pct_prev"), (int, float)) else None
-    return {"spx": {
+    ctx = {"spx": {
         "asof_label": f"{_md(asof)}({_dow(asof)}) 종가 기준",
         "above_pct": d["above_pct"], "above": d.get("above"), "n": d.get("n"),
         "prev_pct": d.get("above_pct_prev"), "dp": dp, "spark": spark,
         "below": d.get("below") or [], "up": d.get("up") or [],
         # 위로·아래로는 상세 페이지와 같은 섹터별 표(2026-11-23 사용자 결정) — 같은 함수로 묶는다(§30)
         "up_sec": by_sector(d.get("up") or []), "below_sec": by_sector(d.get("below") or []),
-        "hot": [dict(r, w=f"{r['gap'] / mx * 100:.1f}", x=f"{1 + r['gap'] / 100:.1f}") for r in hot],
+        "hot": [dict(r, x=f"{1 + r['gap'] / 100:.1f}") for r in hot],
         "hot_pct": 40,
     }}
+    ctx["spx"]["hot_sec"] = by_sector(ctx["spx"]["hot"])
+    return ctx
 
 
 BREAKOUT_BACKTEST_PATH = CONFIG_DIR / "breakout_watch_backtest.json"

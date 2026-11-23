@@ -22,9 +22,8 @@
     {% if s.hot %}
     <div class="spx-blk spx-hot">
       <div class="spx-bh"><span class="spx-tag">🔥 과열</span>200일선보다 {{ s.hot_pct }}% 넘게 높아요 <em>{{ s.hot|length }}개</em></div>
-      {% for r in s.hot %}
-      <div class="spx-hrow"><b>{{ r.t }}</b><span class="nm">{{ r.n }}</span><span class="bar"><i style="width:{{ r.w }}%"></i></span><span class="g">{{ '%+.1f'|format(r.gap) }}%<small>평균의 {{ r.x }}배</small></span></div>
-      {% endfor %}
+      <div class="spx-cols">{% for g in s.hot_sec %}<div class="spx-col"><div class="spx-col-h">{{ g.k }}<em>{{ g.rows|length }}</em></div>
+        {% for r in g.rows %}<div class="spx-row" title="{{ r.n }}"><span><b>{{ r.t }}</b><small>평균의 {{ r.x }}배</small></span><i class="g">{{ '%+.1f'|format(r.gap) }}%</i></div>{% endfor %}</div>{% endfor %}</div>
     </div>
     {% endif %}
     {% for key, label, cls in [('up', '200일선 위로', 'up'), ('below', '200일선 아래로', 'dn')] %}{% set rows = s[key] %}{% if rows %}

@@ -1673,7 +1673,7 @@ a.ssig-r:hover .ssig-go{text-decoration:underline;}
 .spx-row>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .spx-row b{font-weight:800;margin-right:5px}.spx-row small{font-size:11.5px;color:var(--muted)}
 .spx-row>i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
-.spx-row>i.up{color:var(--up)}.spx-row>i.dn{color:var(--dn)}
+.spx-row>i.up{color:var(--up)}.spx-row>i.dn{color:var(--dn)}.spx-row>i.g{color:var(--gold)}
 @media(min-width:640px){.spx-cols{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .spx-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .spx-chip{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--hairline);border-radius:8px;padding:4px 8px;font-size:12px}
