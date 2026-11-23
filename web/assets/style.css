@@ -542,7 +542,7 @@ html.dark .fng-state.high{color:#F87171;}
 .fgd svg{display:block;width:100%;max-width:230px;height:auto;margin:6px auto 0;overflow:visible;}
 .fgd-track{stroke:var(--surface-inset);}
 .fgd-gap{stroke:var(--canvas);}
-.fgd-move{stroke:#9CA3AF;}
+.fgd-move{stroke:var(--ink);}
 .fgd-prev{fill:var(--canvas);stroke:#9CA3AF;}
 .fgd-now{fill:var(--ink);stroke:var(--canvas);}
 .fgd-tick{fill:var(--muted);font-size:10px;}

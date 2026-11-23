@@ -11,8 +11,7 @@
       {% for b in fng_dial.bands %}<path d="{{ b.d }}" fill="none" stroke="{{ b.color }}" stroke-opacity=".35" stroke-width="10"/>{% endfor %}
       {% for t in fng_dial.ticks %}<line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" class="fgd-gap" stroke-width="2"/>{% endfor %}
       {% if fng_dial.prev %}
-      <defs><marker id="fgd-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#9CA3AF"/></marker></defs>
-      <path d="{{ fng_dial.prev.move }}" fill="none" class="fgd-move" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#fgd-arrow)"/>
+      <path d="{{ fng_dial.prev.move }}" fill="none" class="fgd-move" stroke-width="4" stroke-linecap="round"/>
       <circle cx="{{ fng_dial.prev.x }}" cy="{{ fng_dial.prev.y }}" r="6" class="fgd-prev" stroke-width="2.5"/>
       <text x="{{ fng_dial.prev.lx }}" y="{{ fng_dial.prev.ly }}" text-anchor="{{ fng_dial.prev.anchor }}" class="fgd-tick">{{ fng_dial.prev.label }}</text>
       {% endif %}

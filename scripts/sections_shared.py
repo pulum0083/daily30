@@ -318,16 +318,6 @@ def _dial_arc(s0: float, s1: float, r: float = _DIAL_R) -> str:
     return f"M{a[0]:.1f} {a[1]:.1f} A{r} {r} 0 0 1 {b[0]:.1f} {b[1]:.1f}"
 
 
-def _dial_move(s0: float, s1: float, r: float = _DIAL_R - 15) -> str:
-    """어제(s0) → 오늘(s1) 화살표 호. 트랙 안쪽 반지름에 그려 점과 겹치지 않게 하고,
-    끝(오늘 쪽)을 조금 줄여 화살촉이 점에 닿지 않게 한다."""
-    trim = min(1.5, abs(s1 - s0) / 3)
-    e = s1 - trim if s1 > s0 else s1 + trim
-    a, b = _dial_pt(s0, r), _dial_pt(e, r)
-    sweep = 1 if s1 > s0 else 0
-    return f"M{a[0]:.1f} {a[1]:.1f} A{r} {r} 0 0 {sweep} {b[0]:.1f} {b[1]:.1f}"
-
-
 def build_fng_dial(market_data: dict, internal_type: str) -> dict:
     """공포·탐욕 지수 반원 다이얼. 데이터가 없거나 낡았으면 빈 dict → 섹션 생략(§0).
 
@@ -372,7 +362,7 @@ def build_fng_dial(market_data: dict, internal_type: str) -> dict:
             dial["delta"] = f"{'+' if d >= 0 else '−'}{abs(d):.1f}p"
             dial["prev"] = {
                 "x": f"{pp[0]:.1f}", "y": f"{pp[1]:.1f}",
-                "move": _dial_move(ps, s),
+                "move": _dial_arc(ps, s),
                 "lx": f"{lp[0]:.1f}", "ly": f"{lp[1] - 2:.1f}",
                 "anchor": "end" if lp[0] < _DIAL_CX else "start",
                 "label": f"어제 {prev:.1f}",
