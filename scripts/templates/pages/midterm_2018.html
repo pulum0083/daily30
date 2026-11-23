@@ -24,10 +24,10 @@
   </section>
 
   <section class="ltp-card">
-    <div class="mtp-h"><h2>연초 대비 흐름</h2><div class="mtp-seg" role="group" aria-label="기간">{% for r in mt.ranges %}<button type="button" data-r="{{ r.key }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ r.label }}</button>{% endfor %}</div></div>
+    <div class="mtp-h"><h2>연초 대비 흐름</h2><div class="mtp-seg" role="group" aria-label="기간">{% for r in mt.ranges %}<button type="button" data-r="{{ r.key }}" aria-pressed="{{ 'true' if r.key == 'mid' else 'false' }}">{{ r.label }}</button>{% endfor %}</div></div>
     <div class="ltp-leg"><span><i class="k18"></i>{{ mt.y0 }}년</span><span><i class="k19"></i>{{ mt.y0 + 1 }}년(그다음 해)</span><span><i class="k26"></i>{{ mt.y1 }}년</span><span><i class="z"></i>0% = 직전 해 말 종가</span></div>
     {% for r in mt.ranges %}
-    <div class="mtp-r" data-r="{{ r.key }}"{% if not loop.first %} hidden{% endif %}>
+    <div class="mtp-r" data-r="{{ r.key }}"{% if r.key != 'mid' %} hidden{% endif %}>
       <div class="mtp-plot">
         {% for t in r.ticks %}<span class="ax" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
         <div class="mtp-in" data-s="{{ r.s }}" data-e="{{ r.e }}">
