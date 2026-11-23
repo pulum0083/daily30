@@ -47,6 +47,16 @@
   .spp-chip{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--hairline);border-radius:8px;padding:4px 8px;font-size:12px;color:var(--ink)}
   .spp-chip b{font-weight:800}.spp-chip span{font-variant-numeric:tabular-nums}
   .spp-chip .g{color:var(--gold);font-weight:800}.spp-chip .x{color:var(--muted)}
+  .spp-lows{margin-top:18px;border-top:1px solid var(--hairline);padding-top:14px}
+  .spp-lows h3{font-size:14px;font-weight:800;margin:0 0 4px;color:var(--ink)}
+  .spp-low{padding:10px 0;border-bottom:1px solid var(--hairline)}
+  .spp-low:last-child{border-bottom:0;padding-bottom:0}
+  .spp-low-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+  .spp-low-h .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .spp-low-h b{font-size:13px;font-weight:800;color:var(--ink)}
+  .spp-low-h .t{font-size:14px;font-weight:700;color:var(--ink);flex-basis:100%}
+  .spp-low p{margin:4px 0 0;font-size:13px;line-height:1.65;color:var(--ink)}
+  .spp-low small{display:block;margin-top:4px;font-size:11.5px;color:var(--muted)}
   @media(max-width:560px){.spp-hist em{display:none}.spp-hb{grid-template-columns:70px 1fr 62px}}
 </style>
 {% endblock %}
@@ -86,6 +96,10 @@
       </div>
     </div>
     <div class="ltp-yrs">{% for y in c.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+    {% if c.lows %}<div class="spp-lows"><h3>저점에서 무슨 일이 있었나</h3>
+    {% for l in c.lows %}<div class="spp-low"><div class="spp-low-h"><span class="d">{{ l.d }}</span><b>{{ l.pct }}%</b><span class="t">{{ l.title }}</span></div>
+      <p>{{ l.text }}</p>{% if l.after %}<small>석 달(63거래일) 뒤 비율 {{ l.after }}%</small>{% endif %}</div>{% endfor %}
+    </div>{% endif %}
     <p class="ltp-fine">처음 기록을 채울 때 지금 구성 종목으로 과거를 계산했어요. 그사이 지수에서 빠진 종목은 계산에 들어 있지 않고, 새로 들어온 종목은 들어오기 전 기간도 세어져서 당시 실제 S&amp;P 500 기준 값과 조금 달라요.</p>
   </section>
 

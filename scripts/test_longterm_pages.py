@@ -59,6 +59,28 @@ def test_sp500_context_week_ago_and_compare():
     assert c["pos0"] == "50.00%" and len(c["bars"]) == 22
 
 
+def test_sp500_lows_get_notes_from_config(monkeypatch):
+    """그래프 저점(연도별 35% 밑) 중 설명이 있는 달만 목록에 오고, 석 달 뒤 비율은 기록에서 잰다(2026-11-23)."""
+    h = _sp_hist()
+    i = next(k for k, r in enumerate(h) if r[0].startswith("2026-02"))
+    h[i][1] = 12.0                                   # 2026-02 저점
+    monkeypatch.setattr(lp, "_sp_low_notes", lambda: {"2026-02": {"title": "제목", "text": "본문"}, "2025-12": {"title": "x", "text": "y"}})
+    ctx = lp.sp500_context(_sp_data(), h)
+    lows = ctx["spx"]["chart"]["lows"]
+    assert [l["d"] for l in lows] == [h[i][0]] and lows[0]["pct"] == "12.0" and lows[0]["title"] == "제목"
+    assert lows[0]["after"] == f"{h[i + 63][1]:.1f}"
+
+
+def test_sp500_low_notes_file_months_are_marked_lows():
+    """설정 파일의 달이 실제 기록에서 그래프에 찍히는 저점과 같아야 한다 — 어긋나면 설명이 조용히 빠진다."""
+    import json
+    rows = json.loads((lp.ROOT if hasattr(lp, "ROOT") else lp.SP_LOWS_PATH.parents[2]).joinpath("data", "sp500_breadth_history.json").read_text())["rows"]
+    lows = {min((r for r in rows if r[0][:4] == y), key=lambda r: r[1])[0][:7]
+            for y in {r[0][:4] for r in rows}}
+    lows = {m for m in lows if min(r[1] for r in rows if r[0][:7] == m) < lp.LOW_MARK}
+    assert set(lp._sp_low_notes()) <= lows
+
+
 def test_sp500_context_needs_same_day_row():
     assert lp.sp500_context(_sp_data("2026-11-09"), _sp_hist()) == {}
 

@@ -15,6 +15,7 @@ from pathlib import Path
 W, H = 1000, 300
 DOW = "월화수목금토일"
 EVENTS_PATH = Path(__file__).resolve().parent / "config" / "market_events.json"
+SP_LOWS_PATH = Path(__file__).resolve().parent / "config" / "sp500_breadth_lows.json"
 
 
 def market_events(market: str, months: list) -> list:
@@ -88,6 +89,15 @@ def _at_or_before(rows: list, d: str):
     return best
 
 
+def _sp_low_notes() -> dict:
+    """그래프 저점마다 무슨 일이 있었는지(scripts/config/sp500_breadth_lows.json, 월 키). 파일이 없으면 빈 dict — 목록만 빠진다."""
+    try:
+        raw = json.loads(SP_LOWS_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {k: v for k, v in raw.items() if not k.startswith("_") and isinstance(v, dict) and v.get("title") and v.get("text")}
+
+
 def sp500_context(data: dict, history: list) -> dict:
     """data/sp500_ma200.json(그날) + 누적 기록 → /stocks/sp500-200/ 컨텍스트. 기록이 1년치 미만이면 {}."""
     asof = str(data.get("asof") or "")
@@ -105,16 +115,23 @@ def sp500_context(data: dict, history: list) -> dict:
     n = len(rows)
     Y = lambda v: (100 - v) / 100 * H
     xs = [i * W / (n - 1) for i in range(n)]
-    marks = []
+    marks, lows = [], []
+    notes = _sp_low_notes()
     for y in sorted({r[0][:4] for r in rows}):
         r = min((r for r in rows if r[0][:4] == y), key=lambda r: r[1])
         if r[1] < LOW_MARK and r is not now:
-            marks.append({"left": _left(labels.index(r[0]), n), "top": f"{100 - r[1]:.2f}%",
+            i = labels.index(r[0])
+            marks.append({"left": _left(i, n), "top": f"{100 - r[1]:.2f}%",
                           "label": f"{r[0][:7]} {r[1]:.1f}%", "cls": "lo"})
+            note = notes.get(r[0][:7])
+            if note:
+                after = rows[i + 63] if i + 63 < n else None
+                lows.append({"d": r[0], "pct": f"{r[1]:.1f}", "title": note["title"], "text": note["text"],
+                             "after": f"{after[1]:.1f}" if after else None})
     marks.append({"left": "100%", "top": f"{100 - now[1]:.2f}%", "label": f"지금 {now[1]:.1f}%", "cls": "l lo now"})
     chart = {"w": W, "h": H, "line": " ".join(f"{x:.1f},{Y(v):.1f}" for x, v in zip(xs, pcts)),
              "y50": f"{Y(50):.1f}", "axes": [{"v": f"{v}%", "top": f"{100 - v:.2f}%"} for v in (0, 25, 50, 75, 100)],
-             "marks": marks, "years": _years_every(labels)}
+             "marks": marks, "years": _years_every(labels), "lows": lows}
 
     dist = data["dist"]
     bins = dist["bins"]
