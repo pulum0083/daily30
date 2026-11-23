@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-24": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-24/kospi/",
+        "headline": "젠슨 황 복귀 소식에 미국 반도체 센티먼트가 하루 만에 급반전했어요.",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-23": {
       "kospi": {
         "state": "ready",
@@ -883,8 +902,7 @@
         "headline": "7거래일 연속 외국인 매도, 코스피 6000선 사수 왜?",
         "title": "6,008.81",
         "price": "6,008.81",
-        "time": "",
-        "chg": -0.44
+        "time": ""
       },
       "us": {
         "state": "ready",
@@ -895,36 +913,6 @@
         "pill_text": "▲",
         "title": "상승 우위",
         "time": "21:16"
-      }
-    },
-    "2026-10-13": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-10-13/kospi/",
-        "headline": "어제 반도체 쇼크, 오늘은 되돌림이냐 연장이냐",
-        "hit": true,
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-13/close/",
-        "headline": "반도체 대형주 패닉셀, 코스피 6000선 붕괴",
-        "title": "6,035.35",
-        "price": "6,035.35",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-13/us/",
-        "headline": "중국산 메모리가 미국 반도체 밸류체인을 흔든다",
-        "hit": true,
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "21:17"
       }
     }
   }
