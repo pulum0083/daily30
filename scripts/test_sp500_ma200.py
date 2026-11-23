@@ -84,12 +84,12 @@ def test_section_context_and_render(tmp_path, monkeypatch):
     ctx = gh.build_sp500_ma200(a, "2026-11-09")["spx"]
     assert a["sp500_ma200"]["asof"] == "2026-11-06"                           # 스냅샷에 남는다
     assert ctx["asof_label"] == "11/6(금) 종가 기준" and ctx["dp"] == -2.6
-    assert ctx["hot"][0]["x"] == "2.8" and ctx["below_secs"] == "금융 10"
+    assert ctx["hot"][0]["x"] == "2.8" and [g["k"] for g in ctx["below_sec"]] == ["금융"] and len(ctx["below_sec"][0]["rows"]) == 10
     html = gh.make_env().get_template("sections/sp500_ma200.html").render(spx=ctx)
     assert "200일선 아래로" in html and "200일선 위로" in html and "새로" not in html
     assert html.index("🔥 과열") < html.index("200일선 위로") < html.index("200일선 아래로")   # 과열 → 위로 → 아래로
     assert "🔥 과열" in html and "200일선보다 40% 넘게 높아요" in html
-    assert "+2개 더 보기" in html and html.count('class="spx-chip"') == 11
+    assert "더 보기" not in html and html.count('class="spx-row"') == 11 and 'class="spx-col-h">금융<em>10</em>' in html   # 섹터별 표, 전부 보인다
     assert "평균의 2.8배" in html
     import re
     assert not re.search(r">-\d", html)                                    # 하락은 '−'(U+2212) — 상세 페이지와 같은 기호

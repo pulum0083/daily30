@@ -139,7 +139,6 @@ def _read_nasdaq_overheat(target_date: str):
     return read_dated_payload(DATA_DIR / "nasdaq_overheat.json", target_date)
 
 
-SP500_CHIPS = 8        # 아래로·위로 칩은 시가총액 순 8개까지, 나머지는 '더 보기'(2026-11-08 시안 A안)
 
 
 def read_sp500_ma200(analysis: dict, target_date: str = ""):
@@ -159,6 +158,7 @@ def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
     # 특별한 날에만 브리핑에 싣는다 — 텔레그램과 같은 판정(2026-11-09 사용자 결정). 데이터는 위에서 analysis에 남아
     # 스냅샷·상세 페이지(/stocks/sp500-200/)는 매일 그대로다. 전날 비율이 없으면 판단할 수 없어 뺀다.
     from sp500_ma200 import event_of
+    from longterm_pages import by_sector
     if not isinstance(d.get("above_pct_prev"), (int, float)) or not event_of(d["above_pct"], d["above_pct_prev"]):
         return {}
     br = [b for b in d.get("breadth") or [] if isinstance(b, list) and len(b) == 2 and isinstance(b[1], (int, float))]
@@ -172,12 +172,6 @@ def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
                  "y50": f"{Y(50):.2f}", "dot": f"{Y(br[-1][1]):.2f}",
                  "from": _md(br[0][0]), "to": _md(br[-1][0])}
 
-    def sectors(rows):
-        c = {}
-        for r in rows:
-            c[r.get("sec") or ""] = c.get(r.get("sec") or "", 0) + 1
-        return " · ".join(f"{k} {v}" for k, v in sorted(c.items(), key=lambda x: -x[1])[:4] if k)
-
     hot = [r for r in d.get("hot") or [] if isinstance(r.get("gap"), (int, float))]
     mx = max([r["gap"] for r in hot] + [1.0])
     asof = d["asof"]
@@ -186,8 +180,9 @@ def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
         "asof_label": f"{_md(asof)}({_dow(asof)}) 종가 기준",
         "above_pct": d["above_pct"], "above": d.get("above"), "n": d.get("n"),
         "prev_pct": d.get("above_pct_prev"), "dp": dp, "spark": spark,
-        "below": d.get("below") or [], "up": d.get("up") or [], "chips": SP500_CHIPS,
-        "below_secs": sectors(d.get("below") or []),
+        "below": d.get("below") or [], "up": d.get("up") or [],
+        # 위로·아래로는 상세 페이지와 같은 섹터별 표(2026-11-23 사용자 결정) — 같은 함수로 묶는다(§30)
+        "up_sec": by_sector(d.get("up") or []), "below_sec": by_sector(d.get("below") or []),
         "hot": [dict(r, w=f"{r['gap'] / mx * 100:.1f}", x=f"{1 + r['gap'] / 100:.1f}") for r in hot],
         "hot_pct": 40,
     }}
