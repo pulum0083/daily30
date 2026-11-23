@@ -11,7 +11,8 @@
       {% for b in fng_dial.bands %}<path d="{{ b.d }}" fill="none" stroke="{{ b.color }}" stroke-opacity=".35" stroke-width="10"/>{% endfor %}
       {% for t in fng_dial.ticks %}<line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" class="fgd-gap" stroke-width="2"/>{% endfor %}
       {% if fng_dial.prev %}
-      <path d="{{ fng_dial.prev.move }}" fill="none" class="fgd-move" stroke-width="4" stroke-linecap="round"/>
+      <defs><marker id="fgd-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#9CA3AF"/></marker></defs>
+      <path d="{{ fng_dial.prev.move }}" fill="none" class="fgd-move" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#fgd-arrow)"/>
       <circle cx="{{ fng_dial.prev.x }}" cy="{{ fng_dial.prev.y }}" r="6" class="fgd-prev" stroke-width="2.5"/>
       <text x="{{ fng_dial.prev.lx }}" y="{{ fng_dial.prev.ly }}" text-anchor="{{ fng_dial.prev.anchor }}" class="fgd-tick">{{ fng_dial.prev.label }}</text>
       {% endif %}
@@ -29,7 +30,7 @@
     <div class="mk-top"><span>{{ item.name }}{% if item.info_modal %}<button class="info-icon-btn" data-modal-open="{{ item.info_modal }}">?</button>{% endif %}</span><span class="mk-bd {{ item.badge_cls }}">{{ item.badge }}</span></div>
     <div class="mk-val"><strong>{{ item.val }}</strong>{% if item.chg %}<small>{{ item.chg }}</small>{% endif %}</div>
     {% if item.prev_pos is not none %}<div class="mk-pl"><span style="left:{{ item.prev_pos }}%" class="{% if item.prev_pos < 15 %}l{% elif item.prev_pos > 85 %}r{% endif %}">{{ item.prev_label }}</span></div>{% endif %}
-    <div class="mk-zw"><div class="mk-zone">{% for w, c in item.zone %}<i style="width:{{ w }}%;background:{{ c }}"></i>{% endfor %}</div>{% if item.prev_pos is not none %}<span class="mk-move" style="left:{{ [item.prev_pos, item.marker] | min }}%;width:{{ ((item.prev_pos - item.marker) | abs) | round(1) }}%"></span><span class="mk-prev" style="left:{{ item.prev_pos }}%" title="{{ item.prev_label }}"></span>{% endif %}<span class="mk-mk" style="left:{{ item.marker }}%"></span></div>
+    <div class="mk-zw"><div class="mk-zone">{% for w, c in item.zone %}<i style="width:{{ w }}%;background:{{ c }}"></i>{% endfor %}</div>{% if item.prev_pos is not none %}<span class="mk-move{% if item.marker < item.prev_pos %} rev{% endif %}" style="left:{{ [item.prev_pos, item.marker] | min }}%;width:{{ ((item.prev_pos - item.marker) | abs) | round(1) }}%"></span><span class="mk-prev" style="left:{{ item.prev_pos }}%" title="{{ item.prev_label }}"></span>{% endif %}<span class="mk-mk" style="left:{{ item.marker }}%"></span></div>
     <div class="mk-zl">{% for pos, t in item.ticks %}<span class="{% if pos == 0 %}l{% elif pos == 100 %}r{% endif %}" style="left:{{ pos }}%">{{ t }}</span>{% endfor %}</div>
     <p class="mk-mean">{{ item.mean | safe }}</p>
     {% if item.when %}<p class="mk-when">{{ item.when }}</p>{% endif %}

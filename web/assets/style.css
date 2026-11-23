@@ -542,7 +542,7 @@ html.dark .fng-state.high{color:#F87171;}
 .fgd svg{display:block;width:100%;max-width:230px;height:auto;margin:6px auto 0;overflow:visible;}
 .fgd-track{stroke:var(--surface-inset);}
 .fgd-gap{stroke:var(--canvas);}
-.fgd-move{stroke:var(--ink);}
+.fgd-move{stroke:#9CA3AF;}
 .fgd-prev{fill:var(--canvas);stroke:#9CA3AF;}
 .fgd-now{fill:var(--ink);stroke:var(--canvas);}
 .fgd-tick{fill:var(--muted);font-size:10px;}
@@ -572,7 +572,10 @@ html.dark .fgd-state.high{fill:#F87171;}
 .mk-zone{height:8px;border-radius:999px;display:flex;overflow:hidden;margin-top:9px;}
 .mk-zone i{display:block;height:100%;}
 .mk-mk{position:absolute;top:-3px;width:3px;height:14px;margin-left:-1.5px;background:var(--ink);border-radius:2px;}
-.mk-move{position:absolute;top:2.5px;height:3px;background:var(--ink);border-radius:2px;}
+/* 어제 → 오늘: 막대 가운데 옅은 점선 + 오늘 쪽 화살촉 */
+.mk-move{position:absolute;top:3.25px;height:0;border-top:1.5px dashed #6B7280;box-sizing:border-box;}
+.mk-move::after{content:'';position:absolute;top:-4.25px;right:2px;border-left:6px solid #6B7280;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;}
+.mk-move.rev::after{right:auto;left:2px;border-left:0;border-right:6px solid #6B7280;}
 .mk-prev{position:absolute;top:-1px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--canvas);border:2px solid #9CA3AF;box-sizing:border-box;}
 .mk-pl{position:relative;height:13px;font-size:10px;color:var(--muted);margin-top:8px;margin-bottom:-6px;}
 .mk-pl span{position:absolute;transform:translateX(-50%);white-space:nowrap;}
