@@ -43,10 +43,15 @@
   .spp-bk:first-of-type{margin-top:4px}
   .spp-bk em{font-style:normal;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px}
   .spp-bk em.d{color:var(--dn);background:var(--dn-bg)}.spp-bk em.u{color:var(--up);background:var(--up-bg)}.spp-bk em.h{color:var(--gold);background:var(--gold-bg)}
-  .spp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .spp-chip{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--hairline);border-radius:8px;padding:4px 8px;font-size:12px;color:var(--ink)}
-  .spp-chip b{font-weight:800}.spp-chip span{font-variant-numeric:tabular-nums}
-  .spp-chip .g{color:var(--gold);font-weight:800}.spp-chip .x{color:var(--muted)}
+  .spp-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px;margin-top:8px;align-items:start}
+  .spp-col-h{display:flex;align-items:baseline;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted);padding-bottom:4px;border-bottom:1px solid var(--hairline);margin-bottom:2px}
+  .spp-col-h em{font-style:normal;font-weight:600}
+  .spp-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:baseline;padding:5px 0;font-size:13px;color:var(--ink)}
+  .spp-row>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .spp-row b{font-weight:800;margin-right:5px}.spp-row small{font-size:11.5px;color:var(--muted)}
+  .spp-row>i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+  .spp-row>i.up{color:var(--up)}.spp-row>i.dn{color:var(--dn)}.spp-row>i.g{color:var(--gold)}
+  @media(min-width:640px){.spp-cols{grid-template-columns:repeat(3,minmax(0,1fr))}}
   .spp-lows{margin-top:18px;border-top:1px solid var(--hairline);padding-top:14px}
   .spp-lows h3{font-size:14px;font-weight:800;margin:0 0 4px;color:var(--ink)}
   .spp-low{padding:10px 0;border-bottom:1px solid var(--hairline)}
@@ -124,11 +129,14 @@
   <section class="ltp-card">
     <div class="ltp-h"><h2>{{ spx.asof_label }} 눈여겨볼 종목</h2><small>과열은 거리 순 · 위로·아래로는 시가총액 순</small></div>
     {% if spx.hot %}<div class="spp-bk"><em class="h">🔥 과열</em> 200일선보다 40% 넘게 높아요 {{ spx.hot|length }}개</div>
-    <div class="spp-chips">{% for r in spx.hot %}<span class="spp-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="g">{{ r.gap }}</span><span class="x">평균의 {{ r.x }}배</span></span>{% endfor %}</div>{% endif %}
+    <div class="spp-cols">{% for g in spx.hot_sec %}<div class="spp-col"><div class="spp-col-h">{{ g.k }}<em>{{ g.rows|length }}</em></div>
+      {% for r in g.rows %}<div class="spp-row" title="{{ r.n }}"><span><b>{{ r.t }}</b><small>평균의 {{ r.x }}배</small></span><i class="g">{{ r.gap }}</i></div>{% endfor %}</div>{% endfor %}</div>{% endif %}
     {% if spx.up %}<div class="spp-bk"><em class="u">위로</em> 200일선 위로 {{ spx.up|length }}개</div>
-    <div class="spp-chips">{% for r in spx.up %}<span class="spp-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="{{ r.cls }}">{{ r.chg }}%</span></span>{% endfor %}</div>{% endif %}
+    <div class="spp-cols">{% for g in spx.up_sec %}<div class="spp-col"><div class="spp-col-h">{{ g.k }}<em>{{ g.rows|length }}</em></div>
+      {% for r in g.rows %}<div class="spp-row" title="{{ r.n }}"><span><b>{{ r.t }}</b><small>{{ r.n }}</small></span><i class="{{ r.cls }}">{{ r.chg }}%</i></div>{% endfor %}</div>{% endfor %}</div>{% endif %}
     {% if spx.below %}<div class="spp-bk"><em class="d">아래로</em> 200일선 아래로 {{ spx.below|length }}개</div>
-    <div class="spp-chips">{% for r in spx.below %}<span class="spp-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="{{ r.cls }}">{{ r.chg }}%</span></span>{% endfor %}</div>{% endif %}
+    <div class="spp-cols">{% for g in spx.below_sec %}<div class="spp-col"><div class="spp-col-h">{{ g.k }}<em>{{ g.rows|length }}</em></div>
+      {% for r in g.rows %}<div class="spp-row" title="{{ r.n }}"><span><b>{{ r.t }}</b><small>{{ r.n }}</small></span><i class="{{ r.cls }}">{{ r.chg }}%</i></div>{% endfor %}</div>{% endfor %}</div>{% endif %}
     <p class="ltp-fine">'위로·아래로'는 전 거래일엔 반대편에 있다가 이날 종가로 200일선을 넘은 종목이에요. 숫자는 이날 등락이에요.</p>
   </section>
 

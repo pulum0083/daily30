@@ -81,6 +81,13 @@ def test_sp500_low_notes_file_months_are_marked_lows():
     assert set(lp._sp_low_notes()) <= lows
 
 
+def test_by_sector_groups_bigger_first_keeps_order():
+    rows = [{"t": "A", "sec": "기술"}, {"t": "B", "sec": "금융"}, {"t": "C", "sec": "기술"}, {"t": "D"}]
+    g = lp.by_sector(rows)
+    assert [x["k"] for x in g] == ["기술", "금융", "기타"]
+    assert [r["t"] for r in g[0]["rows"]] == ["A", "C"]
+
+
 def test_sp500_context_needs_same_day_row():
     assert lp.sp500_context(_sp_data("2026-11-09"), _sp_hist()) == {}
 

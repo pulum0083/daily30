@@ -98,6 +98,15 @@ def _sp_low_notes() -> dict:
     return {k: v for k, v in raw.items() if not k.startswith("_") and isinstance(v, dict) and v.get("title") and v.get("text")}
 
 
+def by_sector(items: list) -> list:
+    """종목 목록을 섹터별로 묶는다(2026-11-23 사용자 요청 — 이슈 점검 표처럼 섹터 머리 + 줄).
+    종목이 많은 섹터가 먼저, 같으면 목록에 먼저 나온 섹터가 먼저. 섹터 안 순서는 원래 목록 순서(시가총액·거리 순)를 지킨다."""
+    groups: dict = {}
+    for r in items:
+        groups.setdefault(r.get("sec") or "기타", []).append(r)
+    return [{"k": k, "rows": v} for k, v in sorted(groups.items(), key=lambda kv: -len(kv[1]))]
+
+
 def sp500_context(data: dict, history: list) -> dict:
     """data/sp500_ma200.json(그날) + 누적 기록 → /stocks/sp500-200/ 컨텍스트. 기록이 1년치 미만이면 {}."""
     asof = str(data.get("asof") or "")
@@ -166,7 +175,7 @@ def sp500_context(data: dict, history: list) -> dict:
     dsay = dsay.replace("500종목", f"{now[5]}종목")
     tot = now[5]
     above = round(now[1] / 100 * tot)
-    return {"spx": {
+    ctx = {"spx": {
         "asof": asof, "asof_label": _md_dow(asof), "pct": now[1], "above": data.get("above", above), "n": tot,
         "below_n": tot - data.get("above", above),
         "week": {"d": _md(wk[0]), "pct": wk[1]} if wk and wk is not now else None,
@@ -182,11 +191,14 @@ def sp500_context(data: dict, history: list) -> dict:
                   {"flex": 4, "c": "#E86464", "n": dist["mid"], "l": "20~40% 위"},
                   {"flex": 3, "c": "#F59E0B", "n": dist["hot"], "l": "🔥 과열(40%↑)"}],
         "cmp": cmp_rows, "dsay": dsay,
-        "hot": [{"t": r["t"], "n": r["n"], "gap": f"+{r['gap']}%", "x": f"{1 + r['gap'] / 100:.1f}"} for r in data.get("hot") or []],
-        "up": [{"t": r["t"], "n": r["n"], "chg": _signed(r["chg"], 2), "cls": "up" if r["chg"] > 0 else "dn"} for r in data.get("up") or []],
-        "below": [{"t": r["t"], "n": r["n"], "chg": _signed(r["chg"], 2), "cls": "up" if r["chg"] > 0 else "dn"} for r in data.get("below") or []],
+        "hot": [{"t": r["t"], "n": r["n"], "sec": r.get("sec"), "gap": f"+{r['gap']}%", "x": f"{1 + r['gap'] / 100:.1f}"} for r in data.get("hot") or []],
+        "up": [{"t": r["t"], "n": r["n"], "sec": r.get("sec"), "chg": _signed(r["chg"], 2), "cls": "up" if r["chg"] > 0 else "dn"} for r in data.get("up") or []],
+        "below": [{"t": r["t"], "n": r["n"], "sec": r.get("sec"), "chg": _signed(r["chg"], 2), "cls": "up" if r["chg"] > 0 else "dn"} for r in data.get("below") or []],
         "points": [[r[0], r[1]] for r in rows],
     }}
+    for k in ("hot", "up", "below"):
+        ctx["spx"][k + "_sec"] = by_sector(ctx["spx"][k])
+    return ctx
 
 
 # ─────────────────────────── 주간 장기 리포트 ───────────────────────────
