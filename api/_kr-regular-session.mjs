@@ -67,7 +67,23 @@ export function regularSessionFromBars(bars) {
 const ymd = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' })
   .format(d).replace(/-/g, '');
 
-export async function fetchClosedSession(code, now = new Date()) {
+// 그 날(day) 애프터장의 hm 이하 마지막 1분봉 체결가 — 주도주 목록이 애프터장 시간에 '지난 거래일 같은 시각'과 맞댄다(§79, 2026-11-23).
+// 애프터장은 그날 종가 봉 30분 뒤(평일 16:00)부터다. 없으면 null — 다른 시각 값으로 채우지 않는다(§0).
+export function afterBarAt(bars, day, hm) {
+  const from = hhmmAdd(sessionHours(day)[1], 30);
+  let best = null;
+  for (const b of Array.isArray(bars) ? bars : []) {
+    const t = b && typeof b.localDateTime === 'string' ? b.localDateTime : '';
+    if (t.slice(0, 8) !== day) continue;
+    const h = t.slice(8, 12);
+    if (h < from || h > hm) continue;
+    const v = toNum(b.currentPrice);
+    if (v != null && (!best || t > best.t)) best = { t, time: h, price: v };
+  }
+  return best ? { time: best.time, price: best.price } : null;
+}
+
+export async function fetchClosedSession(code, now = new Date(), opts = {}) {
   try {
     const start = ymd(new Date(now.getTime() - 7 * 86400000));   // 주말·연휴를 넘겨 직전 거래일까지
     const r = await fetch(
@@ -75,8 +91,12 @@ export async function fetchClosedSession(code, now = new Date()) {
       { headers: HDR, signal: AbortSignal.timeout(6000) },
     );
     if (!r.ok) return null;
-    const reg = regularSessionFromBars(await r.json());
+    const bars = await r.json();
+    const reg = regularSessionFromBars(bars);
     if (!reg) return null;
+    const k = new Date(now.getTime() + 9 * 3600000);
+    const hm = String(k.getUTCHours()).padStart(2, '0') + String(k.getUTCMinutes()).padStart(2, '0');
+    const prevAfter = opts.prevAfter && reg.prevDate ? afterBarAt(bars, reg.prevDate, hm) : null;
     // 등락은 비운다 — 새벽 넥스트레이드 프리마켓이 열리면 실시간의 '전일 종가'가 다음 날로 넘어가
     // 이 세션의 전일 종가와 어긋날 수 있다. 밤 화면은 등락을 쓰지 않는다.
     return {
@@ -87,6 +107,7 @@ export async function fetchClosedSession(code, now = new Date()) {
       prev2SessionClose: reg.prev2Close,                  // 그 전 세션 공식 종가 — 주도주 목록의 '전날 등락'(§79)
       prev2SessionDate: reg.prev2Date,
       open: reg.open, high: reg.high, low: reg.low, tradingValue: null,
+      ...(prevAfter ? { prevAfter } : {}),                // 직전 거래일 같은 시각 애프터장 체결가(애프터장 시간에만)
     };
   } catch (e) {
     return null;

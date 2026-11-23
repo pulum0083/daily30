@@ -58,6 +58,13 @@
     var t=r2((p.price/p.prevSessionClose-1)*100), y=r2((p.prevSessionClose/p.prev2SessionClose-1)*100);
     return {date:String(p.sessionDate), prevDate:String(p.prevSessionDate), t:t, y:y, diff:r2(t-y)};
   }
+  // 애프터장 같은 시각 비교 — 하나라도 없으면 null(종가끼리 비교로 돌아간다).
+  function afterCmp(p, a){
+    var pa=p&&p.prevAfter;
+    if(!(a>0)||!pa||!(pa.price>0)||!(p.prevSessionClose>0)||!(p.prev2SessionClose>0)||!p.sessionDate||!p.prevSessionDate) return null;
+    var t=r2((a/p.prevSessionClose-1)*100), y=r2((pa.price/p.prev2SessionClose-1)*100);
+    return {mode:'aft', time:String(pa.time||''), date:String(p.sessionDate), prevDate:String(p.prevSessionDate), t:t, y:y, diff:r2(t-y)};
+  }
   // 세 종목 뉴스 섞기 — 종목마다 가장 최신 1건을 먼저 넣고 나머지는 발행 시각 순(한 종목 뉴스로만 차지 않게).
   function mixNews(stocks, n){
     var pub=function(x){ return Date.parse(x.published)||0; };
@@ -75,7 +82,7 @@
     var hm=String(k.getUTCHours()).padStart(2,'0')+':'+String(k.getUTCMinutes()).padStart(2,'0');
     return k.toISOString().slice(0,10)===now.toISOString().slice(0,10)?hm:(k.getUTCMonth()+1)+'/'+k.getUTCDate()+' '+hm;
   }
-  window.__leaders={phase:phase, afterPre:afterPre, closeCmp:closeCmp, mixNews:mixNews, newsTime:newsTime, f2:f2};
+  window.__leaders={phase:phase, afterPre:afterPre, closeCmp:closeCmp, afterCmp:afterCmp, mixNews:mixNews, newsTime:newsTime, f2:f2};
 
   var ST={ph:null, now:{}, cmp:{}, labels:null, vs:null, closedAt:0};
 
@@ -110,11 +117,17 @@
       CODES.forEach(function(c){ var l=by[c]; ST.cmp[c]=l&&l.t!=null&&l.y!=null&&l.diff!=null?{t:l.t,y:l.y,diff:l.diff}:null; });
     } else {
       var head=null;
+      CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&x.mode==='aft'&&!head) head=x; });   // 애프터 같은 시각 비교가 하나라도 있으면 그쪽으로 맞춘다
       CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&!head) head=x; });
       // 세션 날짜가 다른 종목은 같은 칸에 놓지 않는다.
-      CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&head&&(x.date!==head.date||x.prevDate!==head.prevDate)) ST.cmp[c]=null; });
+      CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&head&&(x.date!==head.date||x.prevDate!==head.prevDate||x.mode!==head.mode)) ST.cmp[c]=null; });
       // 15:31~15:59는 애프터장 전이라 지금 가격이 곧 종가다(서버도 16:00부터 after를 붙인다).
       var pre=ph==='after'&&afterPre(Date.now()), d=head?mdw(head.date):'', pd=head?mdw(head.prevDate):'';
+      if(head&&head.mode==='aft'){
+        var hm=head.time.slice(0,2)+':'+head.time.slice(2,4);
+        return {sub:'애프터장 · '+pd+' 같은 시각과 비교', ref:pd+' '+hm+'엔', tag:'',
+          foot:'큰 숫자는 지금 애프터장 체결가의 '+pd+' 종가 대비 등락이에요. 비교는 '+pd+' '+hm+' 애프터장 체결가(그 전 거래일 종가 대비)예요.'};
+      }
       L={sub:head?d+' 종가 · '+pd+' 종가와 비교':'종가 비교',
          ref:head?pd+' 종가엔':'', tag:head&&pre?'<span class="ldl-pill cls">'+d+' 종가</span>':'',   // 15:31~15:59만 — 애프터·추정 시간엔 이름 아래 태그와 머리 줄이 이미 말한다
          foot:!head?'':ph==='after'
@@ -155,8 +168,12 @@
       var x=closeCmp(p); ST.cmp[p.code]=x;
       if(ST.ph!=='after') return;
       var a=p.after&&p.after.price>0?p.after.price:null;
+      // 애프터장 시간엔 장중처럼 '지난 거래일 같은 시각'과 맞댄다(2026-11-23 사용자 결정).
+      // 오늘 애프터 체결가 ÷ 전 거래일 종가 vs 그날 같은 시각 애프터 체결가 ÷ 그 전 거래일 종가.
+      var ax=afterCmp(p, a);
+      if(ax) ST.cmp[p.code]=ax;
       ST.now[p.code]=a!=null
-        ? {px:a, pc:r2((a/p.price-1)*100), pill:['aft','애프터','오늘 종가 대비']}
+        ? {px:a, pc:ax?null:r2((a/p.price-1)*100), pill:['aft','애프터','애프터장 체결가']}
         : {px:p.price, pc:x?x.t:null, pill:['cls','종가','오늘 정규장 종가']};
     });
   }

@@ -436,6 +436,25 @@ test('주도주 A안 — 마감 뒤 큰 숫자는 그날 종가 등락, 애프�
   assert.ok(!/ldl-trk|ldl-hd/.test(html), '옛 표 머리·막대가 남았다');
 });
 
+test('주도주 애프터장 — 지난 거래일 같은 시각 애프터 체결가와 맞댄다 (11/20 18:30 실측 형태)', async () => {
+  const prices = [
+    { code: '005930', price: 175600, sessionDate: '20261123', prevSessionClose: 182000, prevSessionDate: '20261120', prev2SessionClose: 193300,
+      after: { price: 176100 }, prevAfter: { time: '1830', price: 181000 } },
+  ];
+  const win = loadWindow({
+    now: kst('2026-11-23T18:30:00'),
+    hooks: { fetch: (u) => Promise.resolve({ ok: true, json: () => Promise.resolve(String(u).includes('stocks-live') ? { prices } : null) }) },
+  });
+  await new Promise((r) => setImmediate(r));
+  await new Promise((r) => setImmediate(r));
+  const html = win.__els.get('ld-list').innerHTML;
+  // 큰 숫자 = 176,100 ÷ 182,000(11/20 종가) − 1, 비교 = 181,000 ÷ 193,300(11/19 종가) − 1
+  assert.match(html, /<div class="ldl-now num dn">−3\.24%<\/div>/);
+  assert.match(html, /11\/20\(금\) 18:30엔 <b class="num dn">−6\.36%<\/b> <span class="ldl-chip"[^>]*>덜 빠졌어요<\/span>/);
+  assert.match(html, /<span class="ldl-pill aft"[^>]*>애프터<\/span> 176,100<\/small>/);   // 이름 아래엔 가격만 — % 두 개를 한 줄에 두지 않는다
+  assert.equal(win.__els.get('ld-sub').textContent, '애프터장 · 11/20(금) 같은 시각과 비교');
+});
+
 test('주도주 비교 한마디 — 덜·더 빠졌어요 / 덜·더 올랐어요 / 그때와 달리 / ±0.5%p 비슷해요', () => {
   const { cmpWord } = loadWindow({}).__leaders;
   assert.equal(cmpWord(-3.5, -5.87), '덜 빠졌어요');

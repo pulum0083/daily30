@@ -61,8 +61,9 @@ export function afterHoursOpen(now = new Date()) {
 // 장이 닫힌 뒤 응답 — 정규장 값(1분봉)에, 애프터장 시간이면 실시간 체결가를 after로 붙인다.
 // after는 그 세션이 오늘일 때만 붙인다(실시간 응답의 가격이 어느 세션 것인지 그때만 확실하다).
 export async function closedWithAfter(code, now = new Date()) {
-  const reg = await fetchClosedSession(code, now);
-  if (!reg || !afterHoursOpen(now)) return reg;
+  const open = afterHoursOpen(now);
+  const reg = await fetchClosedSession(code, now, { prevAfter: open });
+  if (!reg || !open) return reg;
   const today = new Date(now.getTime() + 9 * 3600000).toISOString().slice(0, 10).replace(/-/g, '');
   if (reg.sessionDate !== today) return reg;
   const rt = await fetchOne(code);

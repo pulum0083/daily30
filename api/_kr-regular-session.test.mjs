@@ -93,3 +93,12 @@ test('15:40 이후 봉만 있는 날은 종가가 없다 — 시간외 가격을
   ]);
   assert.equal(r.date, '20261111');
 });
+
+test('afterBarAt — 그날 애프터장(16:00~)에서 지금 시각 이하 마지막 봉, 없으면 null', async () => {
+  const { afterBarAt } = await import('./_kr-regular-session.mjs');
+  const b = (t, v) => ({ localDateTime: t + '00', currentPrice: v });
+  const bars = [b('202611201530', 183100), b('202611201559', 183100), b('202611201600', 183300), b('202611201829', 181200), b('202611201830', 181000), b('202611201831', 180900), b('202611231600', 176000)];
+  assert.deepEqual(afterBarAt(bars, '20261120', '1830'), { time: '1830', price: 181000 });
+  assert.equal(afterBarAt(bars, '20261120', '1559'), null);       // 15:59 종가 매매 봉은 애프터장이 아니다
+  assert.equal(afterBarAt(bars, '20261119', '1830'), null);
+});
