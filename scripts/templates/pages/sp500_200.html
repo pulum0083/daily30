@@ -52,16 +52,20 @@
   .spp-row>i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
   .spp-row>i.up{color:var(--up)}.spp-row>i.dn{color:var(--dn)}.spp-row>i.g{color:var(--gold)}
   @media(min-width:640px){.spp-cols{grid-template-columns:repeat(3,minmax(0,1fr))}}
-  .spp-lows{margin-top:18px;border-top:1px solid var(--hairline);padding-top:14px}
-  .spp-lows h3{font-size:14px;font-weight:800;margin:0 0 4px;color:var(--ink)}
-  .spp-low{padding:10px 0;border-bottom:1px solid var(--hairline)}
-  .spp-low:last-child{border-bottom:0;padding-bottom:0}
-  .spp-low-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
-  .spp-low-h .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .spp-low-h b{font-size:13px;font-weight:800;color:var(--ink)}
-  .spp-low-h .t{font-size:14px;font-weight:700;color:var(--ink);flex-basis:100%}
-  .spp-low p{margin:4px 0 0;font-size:13px;line-height:1.65;color:var(--ink)}
-  .spp-low small{display:block;margin-top:4px;font-size:11.5px;color:var(--muted)}
+  .ltp-in .spp-evx{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #CBD5E1;pointer-events:none}
+  .ltp-in .spp-evn{position:absolute;top:4px;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;font-size:9.5px;font-weight:800;line-height:16px;text-align:center;color:var(--canvas);background:var(--ink);pointer-events:none;transition:transform .12s}
+  .ltp-in .spp-evx.on{border-left:1.5px solid var(--ink)}.ltp-in .spp-evn.on{transform:translateX(-50%) scale(1.25);box-shadow:0 0 0 2px var(--canvas),0 0 0 3px var(--ink)}
+  .spp-lows{margin-top:14px;border-top:1px solid var(--hairline);padding-top:10px}
+  .spp-lows h3{font-size:12px;font-weight:800;margin:0 0 4px;color:var(--ink)}
+  .spp-low{padding:4px 6px;margin:0 -6px;border-radius:6px;transition:background .12s}
+  .spp-low.on{background:var(--surface-inset,#F1F5F9)}
+  .spp-low-h{display:flex;align-items:center;gap:6px;font-size:12.5px;line-height:1.5;margin:0;color:var(--ink);font-weight:700}
+  .spp-low-h .no{flex:none;width:16px;height:16px;border-radius:50%;font-size:9.5px;line-height:16px;text-align:center;color:var(--canvas);background:var(--ink)}
+  .spp-low-h span{min-width:0}
+  .spp-low-h em{margin-left:auto;font-style:normal;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+  .spp-low.on .spp-low-h em{color:var(--ink)}
+  .spp-low-t{margin:2px 0 4px 22px;font-size:12px;line-height:1.6;color:var(--muted)}
+  .spp-low-t small{font-size:11.5px;white-space:nowrap}
   @media(max-width:560px){.spp-hist em{display:none}.spp-hb{grid-template-columns:70px 1fr 62px}}
 </style>
 {% endblock %}
@@ -96,14 +100,14 @@
           <line x1="0" x2="{{ c.w }}" y1="{{ c.y50 }}" y2="{{ c.y50 }}" class="zero"/>
           <polyline points="{{ c.line }}" class="line"/>
         </svg>
-        {% for m in c.marks %}<i class="ltp-mk {{ 'now' if 'now' in m.cls }}" style="left:{{ m.left }};top:{{ m.top }}"></i><span class="ltp-ml {{ m.cls }}" style="left:{{ m.left }};top:{{ m.top }}">{{ m.label }}</span>{% endfor %}
+        {% for m in c.marks %}{% if m.n %}<i class="spp-evx" style="left:{{ m.left }}"></i><b class="spp-evn" style="left:{{ m.left }}">{{ m.n }}</b>{% endif %}<i class="ltp-mk {{ 'now' if 'now' in m.cls }}" style="left:{{ m.left }};top:{{ m.top }}"></i>{% if not m.n %}<span class="ltp-ml {{ m.cls }}" style="left:{{ m.left }};top:{{ m.top }}">{{ m.label }}</span>{% endif %}{% endfor %}
         <i class="ltp-cur" hidden></i><i class="ltp-pt" hidden></i><div class="ltp-tip" role="status" hidden></div>
       </div>
     </div>
     <div class="ltp-yrs">{% for y in c.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
     {% if c.lows %}<div class="spp-lows"><h3>저점에서 무슨 일이 있었나</h3>
-    {% for l in c.lows %}<div class="spp-low"><div class="spp-low-h"><span class="d">{{ l.d }}</span><b>{{ l.pct }}%</b><span class="t">{{ l.title }}</span></div>
-      <p>{{ l.text }}</p>{% if l.after %}<small>석 달(63거래일) 뒤 비율 {{ l.after }}%</small>{% endif %}</div>{% endfor %}
+    {% for l in c.lows %}<div class="spp-low" data-n="{{ l.n }}"><p class="spp-low-h"><b class="no">{{ l.n }}</b><span>{{ l.d }} {{ l.title }}</span><em>{{ l.pct }}%</em></p>
+      <p class="spp-low-t">{{ l.text }}{% if l.after %} <small>석 달(63거래일) 뒤 비율 {{ l.after }}%</small>{% endif %}</p></div>{% endfor %}
     </div>{% endif %}
     <p class="ltp-fine">처음 기록을 채울 때 지금 구성 종목으로 과거를 계산했어요. 그사이 지수에서 빠진 종목은 계산에 들어 있지 않고, 새로 들어온 종목은 들어오기 전 기간도 세어져서 당시 실제 S&amp;P 500 기준 값과 조금 달라요.</p>
   </section>
@@ -154,4 +158,26 @@
 {% endblock %}
 {% block scripts %}
 {% include "pages/_lt_chart_js.html" %}
+<script>
+// 저점 번호 짚기 — 지나가는 x에서 14px 안의 번호와 그 목록 줄을 함께 강조한다(중간선거 그래프와 같은 방식, 2026-11-23)
+(function () {
+  var box = document.querySelector('.ltp-in[data-kind="pct"]');
+  if (!box || !box.querySelector('.spp-evn')) return;
+  var card = box.closest('.ltp-card');
+  function mark(x) {
+    var r = box.getBoundingClientRect(), best = 15, hit = null;
+    [].forEach.call(box.querySelectorAll('.spp-evn'), function (n) {
+      var d = Math.abs(r.left + parseFloat(n.style.left) / 100 * r.width - x);
+      if (d < best) { best = d; hit = n; }
+    });
+    [].forEach.call(box.querySelectorAll('.spp-evn'), function (n) {
+      n.classList.toggle('on', n === hit); n.previousElementSibling.classList.toggle('on', n === hit);
+    });
+    [].forEach.call(card.querySelectorAll('.spp-low'), function (p) { p.classList.toggle('on', !!hit && p.dataset.n === hit.textContent.trim()); });
+  }
+  box.addEventListener('pointermove', function (e) { mark(e.clientX); });
+  box.addEventListener('pointerdown', function (e) { mark(e.clientX); });
+  box.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') mark(-1e9); });
+})();
+</script>
 {% endblock %}

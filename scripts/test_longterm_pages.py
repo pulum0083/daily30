@@ -68,6 +68,7 @@ def test_sp500_lows_get_notes_from_config(monkeypatch):
     ctx = lp.sp500_context(_sp_data(), h)
     lows = ctx["spx"]["chart"]["lows"]
     assert [l["d"] for l in lows] == [h[i][0]] and lows[0]["pct"] == "12.0" and lows[0]["title"] == "제목"
+    assert lows[0]["n"] == 1 and ctx["spx"]["chart"]["marks"][-2].get("n") == 1
     assert lows[0]["after"] == f"{h[i + 63][1]:.1f}"
 
 

@@ -130,13 +130,14 @@ def sp500_context(data: dict, history: list) -> dict:
         r = min((r for r in rows if r[0][:4] == y), key=lambda r: r[1])
         if r[1] < LOW_MARK and r is not now:
             i = labels.index(r[0])
-            marks.append({"left": _left(i, n), "top": f"{100 - r[1]:.2f}%",
-                          "label": f"{r[0][:7]} {r[1]:.1f}%", "cls": "lo"})
+            m = {"left": _left(i, n), "top": f"{100 - r[1]:.2f}%", "label": f"{r[0][:7]} {r[1]:.1f}%", "cls": "lo"}
             note = notes.get(r[0][:7])
-            if note:
+            if note:                                     # 설명이 있는 저점은 번호로 찍고 아래 목록과 짝짓는다(2026-11-23, 중간선거 그래프처럼)
+                m["n"] = len(lows) + 1
                 after = rows[i + 63] if i + 63 < n else None
-                lows.append({"d": r[0], "pct": f"{r[1]:.1f}", "title": note["title"], "text": note["text"],
+                lows.append({"n": m["n"], "d": r[0], "pct": f"{r[1]:.1f}", "title": note["title"], "text": note["text"],
                              "after": f"{after[1]:.1f}" if after else None})
+            marks.append(m)
     marks.append({"left": "100%", "top": f"{100 - now[1]:.2f}%", "label": f"지금 {now[1]:.1f}%", "cls": "l lo now"})
     chart = {"w": W, "h": H, "line": " ".join(f"{x:.1f},{Y(v):.1f}" for x, v in zip(xs, pcts)),
              "y50": f"{Y(50):.1f}", "axes": [{"v": f"{v}%", "top": f"{100 - v:.2f}%"} for v in (0, 25, 50, 75, 100)],
