@@ -11,8 +11,13 @@
         "time": "07:28"
       },
       "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
+        "state": "ready",
+        "url": "/briefings/2026-11-24/close/",
+        "headline": "어제 -3.31% 급락, 오늘은 대부분 종목이 웃었다 — 코스피 +6.32%",
+        "title": "5,006.03",
+        "price": "5,006.03",
+        "time": "",
+        "chg": 6.32
       },
       "us": {
         "state": "pending",
@@ -24,6 +29,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-23/kospi/",
         "headline": "미 지수선물이 여전히 급락 중이에요.",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -42,6 +48,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-23/us/",
         "headline": "반도체가 무너뜨린 하루, 엔비디아가 되돌린 하루",
+        "hit": true,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
