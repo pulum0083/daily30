@@ -93,7 +93,7 @@
     if(Math.abs(t-y)<0.5) return '비슷해요';
     if(t>=0&&y>=0) return t>y?'더 올랐어요':'덜 올랐어요';
     if(t<0&&y<0) return t>y?'덜 빠졌어요':'더 빠졌어요';
-    return t>=0?'그때와 달리 올랐어요':'그때와 달리 내렸어요';
+    return t>=0?'상승 전환':'하락 전환';
   }
   var DOW='일월화수목금토';
   function mdw(y8){ var s=String(y8||''); if(s.length!==8) return '';

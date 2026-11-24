@@ -432,7 +432,7 @@ test('주도주 A안 — 마감 뒤 큰 숫자는 그날 종가 등락, 애프�
   const html = win.__els.get('ld-list').innerHTML;
   assert.match(html, /<span class="ldl-pill aft"[^>]*>애프터<\/span> 221,000 <span class="up">\+0\.68%<\/span>/);
   assert.match(html, /<div class="ldl-now num dn">−4\.15%<\/div>/);   // 애프터 시간엔 큰 숫자에 태그를 달지 않는다
-  assert.match(html, /11\/2\(월\) 종가엔 <b class="num up">\+1\.78%<\/b> <span class="ldl-chip" title="차이 −5\.93%p">그때와 달리 내렸어요<\/span>/);
+  assert.match(html, /11\/2\(월\) 종가엔 <b class="num up">\+1\.78%<\/b> <span class="ldl-chip" title="차이 −5\.93%p">하락 전환<\/span>/);
   assert.ok(!/ldl-trk|ldl-hd/.test(html), '옛 표 머리·막대가 남았다');
 });
 
@@ -455,14 +455,14 @@ test('주도주 애프터장 — 지난 거래일 같은 시각 애프터 체결
   assert.equal(win.__els.get('ld-sub').textContent, '애프터장 · 11/20(금) 같은 시각과 비교');
 });
 
-test('주도주 비교 한마디 — 덜·더 빠졌어요 / 덜·더 올랐어요 / 그때와 달리 / ±0.5%p 비슷해요', () => {
+test('주도주 비교 한마디 — 덜·더 빠졌어요 / 덜·더 올랐어요 / 상승·하락 전환 / ±0.5%p 비슷해요', () => {
   const { cmpWord } = loadWindow({}).__leaders;
   assert.equal(cmpWord(-3.5, -5.87), '덜 빠졌어요');
   assert.equal(cmpWord(-5.0, -3.0), '더 빠졌어요');
   assert.equal(cmpWord(3.0, 1.0), '더 올랐어요');
   assert.equal(cmpWord(1.0, 3.0), '덜 올랐어요');
-  assert.equal(cmpWord(1.0, -1.0), '그때와 달리 올랐어요');
-  assert.equal(cmpWord(-1.0, 1.0), '그때와 달리 내렸어요');
+  assert.equal(cmpWord(1.0, -1.0), '상승 전환');
+  assert.equal(cmpWord(-1.0, 1.0), '하락 전환');
   assert.equal(cmpWord(-4.31, -3.93), '비슷해요');
   assert.equal(cmpWord(null, 1), '');
 });
