@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-11-25T11:31:19.966270+09:00",
+  "generated_at": "2026-11-25T12:01:32.719649+09:00",
   "date": "2026-11-25",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -8.98,
-      "surge": 0.52,
+      "changePct": -9.66,
+      "surge": 0.57,
       "events": [
         {
           "time": "10:05",
           "headline": "삼성전자 SK하이닉스 주가 장중 6%대 내려, 미국 증시 하락에 반도체주 약세",
           "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9mVUtiZlB2QUxLdmlkY0hNci1KRlExY0lWZF9UZ3FuZXNBUzFZSVBPTVVvLW5UX2xjMXJ5QW1FVlRiMkJicThEWEp4X3plRXdvT1U2SUFLUEktRlBGbUFIZVItenpSeWVjUkl1TlZHc3pzemc?oc=5",
           "source": "비즈니스포스트",
-          "why": "미국 증시 하락의 영향으로 삼성전자와 SK하이닉스 주가가 장중 6%대 하락하며 반도체주가 약세를 보였다.",
+          "why": "미국 증시 하락의 영향으로 삼성전자와 SK하이닉스 등 반도체주가 장중 6%대 하락세를 보였다.",
           "tier": "why",
           "sentiment": "neg"
         },
@@ -31,15 +31,15 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -8.38,
-      "surge": 0.36,
+      "changePct": -9.33,
+      "surge": 0.42,
       "events": [
         {
           "time": "10:05",
           "headline": "삼성전자 SK하이닉스 주가 장중 6%대 내려, 미국 증시 하락에 반도체주 약세",
           "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9mVUtiZlB2QUxLdmlkY0hNci1KRlExY0lWZF9UZ3FuZXNBUzFZSVBPTVVvLW5UX2xjMXJ5QW1FVlRiMkJicThEWEp4X3plRXdvT1U2SUFLUEktRlBGbUFIZVItenpSeWVjUkl1TlZHc3pzemc?oc=5",
           "source": "비즈니스포스트",
-          "why": "미국 증시 하락의 영향으로 SK하이닉스를 포함한 반도체주가 장중 6%대 하락세를 보였다.",
+          "why": "미국 증시 하락의 영향으로 삼성전자와 SK하이닉스 주가가 장중 6%대 하락하며 반도체주 전반의 약세를 보였다.",
           "tier": "why",
           "sentiment": "neg"
         },
@@ -57,9 +57,28 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -2.91,
-      "surge": 0.34,
-      "events": []
+      "changePct": -3.09,
+      "surge": 0.38,
+      "events": [
+        {
+          "time": "10:38",
+          "headline": "'75만원→24만7500원' 현대차, 반년 만에 주가 3분의 1토막",
+          "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5BZWMzb2w0Wk1kcTA0eFcxdmd5Nmw0UkRKNHZRbl9QWlQ0ejlkS2tBQkhhVk9qUUZKcUFMak1OTFg3T2wzamxqSzFkZ2RBWDBWNkpnbmpGaGFDLVVoV3dxdmhxaXJONE5CMzRsbtIBcEFVX3lxTE5YYXFhblR2WTZoTlRsMzhiRmtEV3lhUDFRS0swWlZMV0hWeENGT0dTMWl0bUFicVRTeGdNY0VZTlRfdUEyRzR0TXQ5SVlsY3puWHJ0cG9uS3lZR3FqdHhmWl9SZURGWGtROS1aUVByV08?oc=5",
+          "source": "내외뉴스통신",
+          "why": "현대차 주가가 반년 만에 3분의 1 수준으로 급락했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "10:21",
+          "headline": "현대차, 27만 2000원 기록하며 하락세 : 기업주식정보",
+          "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE9yeDg0VjRuNEVOTmZyajVnN1dBTGN0czRST1dZYzBCMC1vdDZraTJFNmJ6eng2M3lVVUczNTUwejdELUl6OWhHSUlyUQ?oc=5",
+          "source": "재경일보",
+          "why": "현대차, 27만 2000원 기록하며 하락세 : 기업주식정보",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     }
   ]
 }
