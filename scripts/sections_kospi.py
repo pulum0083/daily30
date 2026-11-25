@@ -200,7 +200,9 @@ def build_prior_signals(analysis: dict, market_data: dict, target_date: str) -> 
         except Exception as e:
             print(f"[generate_html] 예측 근거 신호 계산 실패: {e}")
             return {}
-        saved = {k: sig.get(k) for k, _ in _PRIOR_SIG_NAMES if isinstance(sig.get(k), (int, float))}
+        stale = set(sig.get("stale_keys") or ())   # 미국만 쉰 다음 날 점수에서 뺀 신호는 근거로 보이지 않는다
+        saved = {k: sig.get(k) for k, _ in _PRIOR_SIG_NAMES
+                 if k not in stale and isinstance(sig.get(k), (int, float))}
         if not saved:
             return {}
         analysis["prior_signals"] = saved      # 스냅샷에 함께 저장된다

@@ -129,6 +129,20 @@ def check_us_open(check_date: date) -> bool:
     return check_date not in all_holidays
 
 
+# 미국 조기 마감일(뉴욕 시각 시·분) — 여기 없는 날은 16:00 마감(2026-11-25).
+# 추수감사절 다음 날·크리스마스 이브 등 13:00에 끝나는 날. 해마다 NYSE 공지를 보고 더한다.
+US_EARLY_CLOSE = {
+    date(2026, 11, 27): (13, 0),
+    date(2026, 12, 24): (13, 0),
+}
+
+
+def us_close_minutes(d: date) -> int:
+    """그날 미국 정규장 마감 시각(뉴욕, 자정부터 분)."""
+    h, m = US_EARLY_CLOSE.get(d, (16, 0))
+    return h * 60 + m
+
+
 def was_kospi_only_closed_previous_session(today: date) -> bool:
     """직전 KOSPI 거래일과 오늘 사이에 다른 시장(미국·아시아)이 1번 이상 추가로 거래됐는지 판정.
 

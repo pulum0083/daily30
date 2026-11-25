@@ -359,3 +359,24 @@ def test_clamp_up_pct_keeps_within_ten_points_of_prior():
     assert ls.clamp_up_pct(5, 8) == 5 and ls.clamp_up_pct(1, 20) == 10
     assert ls.clamp_up_pct(99, 95) == 99      # 99를 넘지 않는다
     assert ls.clamp_up_pct(60, None) == 60    # 근거가 없으면 손대지 않는다
+
+
+def test_us_only_holiday_drops_stale_cash_signals():
+    """미국만 쉰 다음 날(추수감사절·노동절 다음 날) — 직전 미국장 신호는 점수에서 빼고 나스닥 선물만 남긴다(2026-11-25)."""
+    base = _latest(sox=4.0, nasdaq=1.5, nq=-0.5, ewy=3.0, vix=-8.0)
+    normal = ls.compute_prior(base)
+    stale = ls.compute_prior({**base, "us_signals_stale": True})
+    assert normal["score"] > 5
+    assert stale["score"] == round(0.3 * -0.5, 3)          # 나스닥 선물만
+    assert stale["strength"] != "strong"
+    assert "ewy_resid" in stale["signals"]["stale_keys"]
+    assert "미국만 쉰 다음 날" in ls.format_prior_for_prompt(stale)
+
+
+def test_us_signals_stale_dates():
+    from datetime import date
+    import session_label as sl
+    assert sl.us_signals_stale(date(2026, 11, 27))       # 추수감사절 다음 날
+    assert sl.us_signals_stale(date(2026, 9, 8))         # 노동절 다음 날
+    assert not sl.us_signals_stale(date(2026, 11, 30))   # 보통 월요일
+    assert not sl.us_signals_stale(date(2026, 11, 26))   # 목요일 아침 — 수요일 미국장은 새 정보

@@ -438,6 +438,13 @@ def fetch_kospi_data() -> dict:
         print(f"[fetch_data] post-holiday check error: {e}", file=sys.stderr)
         post_holiday_catchup = False
     print(f"[fetch_data]   post_holiday_catchup={post_holiday_catchup}")
+    try:   # 미국만 쉰 다음 날 — 미국 정규장 신호가 이미 코스피에 반영됐다(leading_signal이 점수에서 뺀다)
+        from session_label import us_signals_stale
+        us_signals_stale_flag = us_signals_stale(datetime.now(KST).date())
+    except Exception as e:
+        print(f"[fetch_data] us-signals-stale check error: {e}", file=sys.stderr)
+        us_signals_stale_flag = False
+    print(f"[fetch_data]   us_signals_stale={us_signals_stale_flag}")
 
     data = {
         "generated_at": datetime.now(KST).isoformat(),
@@ -499,6 +506,7 @@ def fetch_kospi_data() -> dict:
         },
         # True면 어제 한국만 휴장 + 미국 개장 — EWY보다 asia_regional이 더 정확한 선행 지표
         "post_holiday_catchup": post_holiday_catchup,
+        "us_signals_stale": us_signals_stale_flag,
         # 섹터 로테이션 — 대표 종목·ETF 전일 종가·등락률 (할루시네이션 방지용 실제 데이터)
         "sector_stocks": sector_stocks,
     }

@@ -227,7 +227,7 @@ def fill_session_close(yf, raw, session: date):
     """그날 일봉 종가가 비어 있으면 그날 5분봉의 마지막 종가로 채운다(2026-11-10).
     야후는 미국 장이 끝나고 몇 시간 동안 개별 종목의 그날 일봉 종가를 비워 둔다 — 11/10 07:25 KST(뉴욕 11/9 17:25)에
     11/9 일봉 종가가 503종목 모두 비어 있었고, 같은 때 5분봉 마지막 값은 장 마감 가격과 같았다(AAPL 350.69).
-    정규장 마지막 봉(15:55)까지 와 있을 때만 채운다 — 장이 끝나기 전이면 그대로 둔다."""
+    정규장 마지막 봉(15:55, 조기 마감일은 12:55)까지 와 있을 때만 채운다 — 장이 끝나기 전이면 그대로 둔다."""
     import pandas as pd
     ts = pd.Timestamp(session)
     have = int(raw.loc[ts].notna().sum()) if ts in raw.index else 0
@@ -245,7 +245,8 @@ def fill_session_close(yf, raw, session: date):
     idx = intr.index.tz_convert(ET) if intr.index.tz is not None else intr.index
     day = intr[[d.date() == session for d in idx]]
     day_idx = [d for d in idx if d.date() == session]
-    if not len(day) or max(d.hour * 60 + d.minute for d in day_idx) < 15 * 60 + 55:
+    from holiday_check import us_close_minutes   # 조기 마감일(11/27 등 13:00)은 마지막 봉이 12:55다
+    if not len(day) or max(d.hour * 60 + d.minute for d in day_idx) < us_close_minutes(session) - 5:
         print(f"[sp500_ma200] {session} 5분봉이 장 마감까지 오지 않음 — 그날 종가를 채우지 않는다", file=sys.stderr)
         return raw
     last = day.ffill().iloc[-1]

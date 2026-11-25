@@ -181,3 +181,24 @@ def test_fill_session_close_skips_when_daily_complete():
         def download(self, *a, **kw):
             raise AssertionError("받지 않아야 한다")
     assert sp.fill_session_close(YF(), raw, date(2026, 11, 9)) is raw
+
+
+def test_fill_session_close_early_close_day():
+    """조기 마감일(2026-11-27, 13:00 ET)은 12:55 봉이 마지막이어도 채운다(2026-11-25)."""
+    import numpy as np
+    tickers = [f"T{i}" for i in range(500)]
+    raw = pd.DataFrame({t: [2.0, np.nan] for t in tickers}, index=pd.to_datetime(["2026-11-25", "2026-11-27"]))
+    bars = pd.date_range("2026-11-27 09:30", "2026-11-27 12:55", freq="5min", tz="America/New_York")
+
+    class YF:
+        def download(self, tickers, **kw):
+            return {"Close": pd.DataFrame({t: [100.0 + i for i in range(len(bars))] for t in tickers}, index=bars)}
+    out = sp.fill_session_close(YF(), raw, date(2026, 11, 27))
+    assert out.loc[pd.Timestamp("2026-11-27")].notna().sum() == 500
+    # 평일은 여전히 15:55 봉이 필요하다
+    raw2 = pd.DataFrame({t: [2.0, np.nan] for t in ["A", "B"]}, index=pd.to_datetime(["2026-11-06", "2026-11-09"]))
+
+    class YF2:
+        def download(self, tickers, **kw):
+            return {"Close": _intraday(tickers, last_bar="12:55")}
+    assert sp.fill_session_close(YF2(), raw2, date(2026, 11, 9)).loc[pd.Timestamp("2026-11-09")].isna().all()

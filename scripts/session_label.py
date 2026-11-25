@@ -70,6 +70,17 @@ def us_session_to_score(d: _date) -> _date | None:
     return us
 
 
+def us_signals_stale(d: _date) -> bool:
+    """d(코스피 브리핑 날짜) 아침의 미국 정규장 신호가 이미 코스피에 반영된 값인가(2026-11-25).
+
+    미국만 쉰 다음 날(추수감사절 다음 날·노동절 다음 날)엔 직전 미국장이 직전 코스피 세션보다 오래됐다.
+    그 미국장 등락(SOX·나스닥·EWY 등)은 그 사이 코스피 세션이 이미 반영했으므로 새 정보가 아니다.
+    판정은 us_session_to_score()가 None을 내는 조건과 같다.
+    """
+    us, ko = prev_us_session(d), prev_kospi_session(d)
+    return us is not None and ko is not None and us < ko
+
+
 def _label_for(d: _date, prev: _date | None, same_night: str) -> str:
     if prev is None:
         return "직전 미국장"

@@ -27,6 +27,9 @@ P_MID_UP, P_MID_DN = 0.65, 0.40         # mid — 실제 위로 열림 72.8% / 2
 # 레짐 전환(하락장) 시 DN_BAND 재점검 필요.
 UP_BAND =  0.3    # score >  UP_BAND → 상승
 DN_BAND = -1.2    # score <  DN_BAND → 하락, 그 사이는 중립
+# 미국만 쉰 다음 날 점수에서 빼는 신호(2026-11-25) — 직전 미국장 정규장·시간외 값이라 그 사이 코스피 세션이 이미 반영했다.
+# 나스닥 선물(nq)만 남긴다 — 휴장일에도 거래돼 마지막까지 새 정보를 담는다. 계기: 9/8(노동절 다음 날) 묵은 신호로 상승 74% → 빗나감.
+STALE_ON_US_HOLIDAY = ("sox", "nasdaq", "ewy", "vix", "ai_ah")
 VIX_CONTRA = 10.0    # 방향과 반대인 VIX 급변동(%) → strong 강등
 
 
@@ -74,6 +77,7 @@ def extract_signals(latest: dict) -> dict:
         # 아래 둘은 가중 합산에 직접 쓰지 않고 EWY 잔차 계산에만 쓴다
         "kospi":  from_mdj("kospi"),               # 직전 코스피 세션 등락률
         "post_holiday": bool(latest.get("post_holiday_catchup")),
+        "us_stale": bool(latest.get("us_signals_stale")),
         # 실시간 미 지수선물 — 아직 score에 넣지 않는다(가중치 미피팅). 프롬프트 참고용.
         "es":     from_fut("sp500_fut"),
         "ym":     from_fut("dow_fut"),
@@ -125,6 +129,8 @@ def _strength(sig: dict, direction: str, p_up: float) -> str:
     middle = (direction == "상승" and p_up >= P_MID_UP) or (direction == "하락" and p_up <= P_MID_DN)
     if not extreme:
         return "mid" if middle else "weak"
+    if sig.get("stale_keys"):
+        return "mid"          # SOX·EWY가 빠진 날은 strong 자격(두 신호 같은 방향)을 따질 수 없다
     sox, resid, vix = sig.get("sox"), sig.get("ewy_resid"), sig.get("vix")
     agree = sox is not None and resid is not None and sox != 0 and resid != 0 and (sox > 0) == (resid > 0)
     vix_contra = vix is not None and (
@@ -145,7 +151,11 @@ def compute_prior(latest: dict) -> dict:
     sig["ewy_resid"] = ewy_residual(sig)
     score = 0.0
     used = False
+    stale = STALE_ON_US_HOLIDAY if sig.get("us_stale") else ()
+    sig["stale_keys"] = list(stale) + (["ewy_resid"] if stale else [])
     for key, w in SIGNAL_WEIGHTS.items():
+        if key in stale:
+            continue
         v = sig["ewy_resid"] if key == "ewy" else sig.get(key)
         if v is not None:
             score += w * v
@@ -189,6 +199,11 @@ def format_prior_for_prompt(prior: dict) -> str:
         "- 이 값들은 직전 미국장 종가로, 전일 한국 마감 **이후** 정보를 반영한다. 단 'AI 반도체 시간외'는 미국 장 마감 뒤"
         " 지금까지(엔비디아·마이크론·브로드컴·TSMC·AMD 평균) 움직임이라 장 마감 뒤 실적 반응이 여기 들어 있다 — score에 반영돼 있다.",
     ]
+    if sig.get("stale_keys"):
+        lines.append(
+            "- **미국만 쉰 다음 날이다.** 위 SOX·나스닥·EWY·VIX·AI 반도체 시간외는 직전 미국장 값이라 그 뒤 열린 코스피"
+            " 세션이 이미 반영했다 — score에서 뺐고 나스닥 선물만 남겼다. 본문에서도 이 값들을 '간밤 새로 들어온 신호'로 쓰지 않는다."
+        )
     live = [(n, sig.get(k)) for n, k in (("S&P선물", "es"), ("NQ선물", "nq"), ("다우선물", "ym"))
             if sig.get(k) is not None]
     if live:
