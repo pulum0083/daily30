@@ -1,26 +1,45 @@
 {
-  "generated_at": "2026-11-25T15:01:19.957905+09:00",
+  "generated_at": "2026-11-25T15:31:20.713316+09:00",
   "date": "2026-11-25",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -9.69,
-      "surge": 0.92,
-      "events": []
+      "changePct": -9.87,
+      "surge": 1.11,
+      "events": [
+        {
+          "time": "14:51",
+          "headline": "삼성전자, 장중 10% 가까이 폭락…시가총액 1000조원 붕괴",
+          "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE1zWVhFYUs1eWJXbjlpMVc0RzliVVMxcXEySU1LUGJHX2NQZERiWHJTOUVObHBnOTVwRmtQRE5BZlBFaVNyODZ2dTdmZWQ1amotcDFEX0d5VmtwTjRtcldUaTF0WWdhZw?oc=5",
+          "source": "싱글리스트",
+          "why": "삼성전자 주가가 장중 10% 가까이 폭락하며 시가총액 1000조원을 붕괴했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "13:48",
+          "headline": "삼성전자 주가, 오늘 약 9% 급락한 이유는?",
+          "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBLRkFxOXk3Wkw3M1pPQ1l4Y1pJM0dReHIwMmQ2V05DRC1EeUtiYmMydEJMdWhONDlaU2VLeGVpRmg2ME9rcHVNV3F3bGJHSWFWaEVDd0x2TGpSUmRLNjhBSjZCbnliUDZOeS1udklMUzFsRC10aktz?oc=5",
+          "source": "Investing.com 한국어",
+          "why": "삼성전자 주가, 오늘 약 9% 급락한 이유는?",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -10.62,
-      "surge": 0.77,
+      "changePct": -11.05,
+      "surge": 0.95,
       "events": [
         {
           "time": "10:05",
           "headline": "삼성전자 SK하이닉스 주가 장중 6%대 내려, 미국 증시 하락에 반도체주 약세",
           "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9mVUtiZlB2QUxLdmlkY0hNci1KRlExY0lWZF9UZ3FuZXNBUzFZSVBPTVVvLW5UX2xjMXJ5QW1FVlRiMkJicThEWEp4X3plRXdvT1U2SUFLUEktRlBGbUFIZVItenpSeWVjUkl1TlZHc3pzemc?oc=5",
           "source": "비즈니스포스트",
-          "why": "미국 증시 하락의 영향으로 삼성전자와 SK하이닉스 주가가 장중 6%대 하락하며 반도체주가 약세를 보였다.",
+          "why": "미국 증시 하락의 영향으로 SK하이닉스를 포함한 반도체주가 장중 6%대 하락하며 약세를 보였다.",
           "tier": "why",
           "sentiment": "neg"
         },
@@ -38,26 +57,26 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -1.64,
-      "surge": 0.65,
+      "changePct": -2.0,
+      "surge": 0.78,
       "events": [
         {
-          "time": "14:30",
-          "headline": "현대차, '공급 회복에 신차 사이클이 더해진다 ' 목표가 370,000원 - SK증권",
-          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1vRDVVX0REZzhqalpUOEFTenVEVlVzMF9fRVlMNllWbnNhVmcwb0Q0dEZyMHc4VDY0eXBSS3k5WnVHZUV4SlQ5QjUwNUpYOEVDLXM5djUwOUdaLUJB?oc=5",
-          "source": "뉴스핌",
-          "why": "SK증권은 현대차의 공급 회복과 신차 사이클을 근거로 목표가를 370,000원으로 제시했습니다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
+          "time": "11:19",
+          "headline": "과매수 부담에 매수세가 제한되며 현대차 주가 하락",
+          "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPVUJtS1IxeUJsNmRkN3JjUkV5ZFFTbTZsY19OVHdiZnNmcUREbHkyOGx6Qkhfa21LUjlfX1lDcXJobHBUWmJmZ19kaUg2OHBKV1pPQmU5b29EUk9Pc1FkQ2N3elJsMnY3S3Z4UUUzcmgzR05LMENQRTA1Qlp5UGtkb09NUXltZ0pMV043d2QzVkV4ZmQ2?oc=5",
+          "source": "Traders Union",
+          "why": "과매수 부담에 매수세가 제한되며 현대차 주가 하락",
+          "tier": "why",
+          "sentiment": "neg"
         },
         {
-          "time": "10:38",
-          "headline": "'75만원→24만7500원' 현대차, 반년 만에 주가 3분의 1토막",
-          "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5BZWMzb2w0Wk1kcTA0eFcxdmd5Nmw0UkRKNHZRbl9QWlQ0ejlkS2tBQkhhVk9qUUZKcUFMak1OTFg3T2wzamxqSzFkZ2RBWDBWNkpnbmpGaGFDLVVoV3dxdmhxaXJONE5CMzRsbtIBcEFVX3lxTE5YYXFhblR2WTZoTlRsMzhiRmtEV3lhUDFRS0swWlZMV0hWeENGT0dTMWl0bUFicVRTeGdNY0VZTlRfdUEyRzR0TXQ5SVlsY3puWHJ0cG9uS3lZR3FqdHhmWl9SZURGWGtROS1aUVByV08?oc=5",
-          "source": "내외뉴스통신",
-          "why": "'75만원→24만7500원' 현대차, 반년 만에 주가 3분의 1토막 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
+          "time": "10:21",
+          "headline": "현대차, 27만 2000원 기록하며 하락세 : 기업주식정보",
+          "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE9yeDg0VjRuNEVOTmZyajVnN1dBTGN0czRST1dZYzBCMC1vdDZraTJFNmJ6eng2M3lVVUczNTUwejdELUl6OWhHSUlyUQ?oc=5",
+          "source": "재경일보",
+          "why": "현대차, 27만 2000원 기록하며 하락세 : 기업주식정보",
+          "tier": "why",
+          "sentiment": "neg"
         }
       ]
     }
