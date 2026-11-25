@@ -1,0 +1,397 @@
+{
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 41,
+    "down_pct": 59,
+    "confidence": 60,
+    "basis": "open"
+  },
+  "reason_title": "AI 투매는 진정, 그런데 선물은 왜 또 밀릴까",
+  "todays_view": {
+    "view_title": "다우는 반등, 나스닥은 또 밀렸다 — 반도체는 여전히 눈치보는 중",
+    "dek": "간밤 미국 증시는 다우만 웃고 나스닥·S&P500은 또 빠졌어요. 반도체 섹터가 진정 국면에 들어갔다지만, <b>NQ선물</b>이 다시 밀리면서 안심하긴 이른 분위기예요.",
+    "recap": [
+      {
+        "text": "코스피 반도체 대형주들이 또 한 번 크게 흔들렸어요. <b>삼성전자</b>·<b>SK하이닉스</b> 모두 두 자릿수 급락을 겪었어요.",
+        "codes": [
+          "005930",
+          "000660"
+        ]
+      },
+      {
+        "text": "외국인이 코스피에서 큰 규모로 팔아치웠어요. 순매도 <b>1조 8,993억원</b>에 달했어요.",
+        "codes": []
+      },
+      {
+        "text": "2차전지·전력설비 쪽도 동반 약세였어요. <b>삼성SDI</b>가 하루 새 크게 밀렸어요.",
+        "codes": [
+          "006400"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "watch",
+        "text": "간밤 美 반도체주 낙폭이 줄었는지, 오늘 삼성전자·SK하이닉스가 반등 시도를 하는지가 1순위 관전 포인트예요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인 순매도가 오늘도 이어지는지, 아니면 저가 매수로 돌아서는지 지켜보세요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "VIX가 다시 내려오는지, 아니면 20대 후반에서 더 오르는지가 위험회피 심리의 척도예요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>간밤 미국 빅테크 실적 후 반응이 또 엇갈렸어요.</b> 메타는 <b>+3.40%</b>로 웃었지만, 아마존 <b>-3.12%</b>·알파벳 <b>-2.13%</b>·MS <b>-1.25%</b>는 AI 투자 부담에 눌렸고, 엔비디아 <b>-3.91%</b>·마이크론 <b>-4.53%</b>·오라클 <b>-5.13%</b>까지 AI 칩 쪽 매물이 더 집중됐어요. 메모리 수요 기대가 다시 흔들리는 모습이에요.",
+      "codes": []
+    },
+    {
+      "text": "<b>미 지수선물이 가장 신선한 신호예요.</b> S&P선물 <b>-0.42%</b>, 나스닥선물 <b>-1.05%</b>로 어젯밤 종가보다 더 밀려 있어서, 간밤 '낙폭 만회' 분위기가 오늘 아침엔 다시 꺾인 흐름이에요.",
+      "codes": []
+    },
+    {
+      "text": "<b>외국인 수급이 여전히 싸늘해요.</b> 전일 외국인이 <b>1조 8,993억원</b> 순매도했고 EWY도 추가로 빠지면서, 반도체 섹터 수급 신뢰가 아직 회복되지 못했어요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-26T07:29:05.594343+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-26T07:27:07.792686+09:00",
+    "briefing_date": "2026-11-26",
+    "us_session_date": "2026-11-25",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "HPE, 실적 냈는데 마진 걱정에 주가 고꾸라져요",
+        "sides": [
+          {
+            "side": "down",
+            "label": "서버·엔터프라이즈 하드웨어",
+            "marks": [
+              {
+                "ticker": "HPE",
+                "name": "HPE",
+                "pct": 1.57
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "서버·엔터프라이즈 하드웨어는 <b>올랐어요</b>"
+      },
+      {
+        "title": "오픈AI·메타, AMD 주식을 거의 공짜로 받을 수 있다는 소식",
+        "sides": [
+          {
+            "side": "up",
+            "label": "AI 칩 공급망 다변화 수혜 기대",
+            "marks": [
+              {
+                "ticker": "META",
+                "name": "META",
+                "pct": 3.4
+              }
+            ],
+            "proxy": null
+          },
+          {
+            "side": "down",
+            "label": "AMD 기존 주주",
+            "marks": [
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -1.75
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI 칩 공급망 다변화 수혜 기대는 <b>올랐어요</b>"
+      },
+      {
+        "title": "직전 정규장 반도체 섹터 급락, VIX는 공포 구간 진입",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체·대형 기술주",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -3.91
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -1.75
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -4.53
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -3.89
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -5.68
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": 0.41
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체·대형 기술주는 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "AI 둔화론 재부상, 오픈AI 내부에서도 '조율' 언급",
+        "sides": [
+          {
+            "side": "down",
+            "label": "AI 테마 전반",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -3.91
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": -0.07
+              },
+              {
+                "ticker": "GOOGL",
+                "name": "GOOGL",
+                "pct": -2.13
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI 테마 전반은 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "간밤 코어 PCE·GDP 동시 발표",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": -0.25
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>내렸어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-26",
+    "generated_at": "2026-11-26T07:27:08.684949+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": []
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-25",
+    "direction": "하락 우위",
+    "ok": true,
+    "open_pct": -3.94
+  },
+  "prior_signals": {
+    "sox": -0.65,
+    "nasdaq": -0.63,
+    "nq": -1.05,
+    "ewy_resid": 4.768,
+    "vix": 7.3217,
+    "ai_ah": -0.234
+  },
+  "prev_supply": {
+    "date": "20261125",
+    "individual": 14232,
+    "institution": -7,
+    "foreign": -18993
+  },
+  "us_session_map": {
+    "session": "2026-11-25",
+    "indices": [
+      {
+        "ticker": "^GSPC",
+        "name": "S&P500",
+        "pct": -0.25
+      },
+      {
+        "ticker": "^IXIC",
+        "name": "나스닥",
+        "pct": -0.62
+      },
+      {
+        "ticker": "^DJI",
+        "name": "다우",
+        "pct": 0.33
+      },
+      {
+        "ticker": "^SOX",
+        "name": "반도체",
+        "pct": -0.65
+      }
+    ],
+    "ai": [
+      {
+        "ticker": "NVDA",
+        "name": "엔비디아",
+        "pct": -3.91
+      },
+      {
+        "ticker": "AMD",
+        "name": "AMD",
+        "pct": -1.75
+      },
+      {
+        "ticker": "AVGO",
+        "name": "브로드컴",
+        "pct": -0.07
+      },
+      {
+        "ticker": "MU",
+        "name": "마이크론",
+        "pct": -4.53
+      },
+      {
+        "ticker": "TSM",
+        "name": "TSMC",
+        "pct": -1.96
+      },
+      {
+        "ticker": "ORCL",
+        "name": "오라클",
+        "pct": -5.13
+      }
+    ],
+    "bigtech": [
+      {
+        "ticker": "AAPL",
+        "name": "애플",
+        "pct": 0.43
+      },
+      {
+        "ticker": "MSFT",
+        "name": "MS",
+        "pct": -1.25
+      },
+      {
+        "ticker": "AMZN",
+        "name": "아마존",
+        "pct": -3.12
+      },
+      {
+        "ticker": "META",
+        "name": "메타",
+        "pct": 3.4
+      },
+      {
+        "ticker": "GOOGL",
+        "name": "알파벳",
+        "pct": -2.13
+      },
+      {
+        "ticker": "TSLA",
+        "name": "테슬라",
+        "pct": -1.18
+      }
+    ],
+    "sectors": [
+      {
+        "ticker": "XLK",
+        "name": "기술",
+        "pct": -0.83
+      },
+      {
+        "ticker": "XLC",
+        "name": "커뮤니케이션",
+        "pct": 0.89
+      },
+      {
+        "ticker": "XLY",
+        "name": "경기소비재",
+        "pct": -0.2
+      },
+      {
+        "ticker": "XLP",
+        "name": "필수소비재",
+        "pct": 0.46
+      },
+      {
+        "ticker": "XLE",
+        "name": "에너지",
+        "pct": 0.74
+      },
+      {
+        "ticker": "XLF",
+        "name": "금융",
+        "pct": 0.71
+      },
+      {
+        "ticker": "XLV",
+        "name": "헬스케어",
+        "pct": -0.56
+      },
+      {
+        "ticker": "XLI",
+        "name": "산업재",
+        "pct": 0.83
+      },
+      {
+        "ticker": "XLB",
+        "name": "소재",
+        "pct": 2.07
+      },
+      {
+        "ticker": "XLRE",
+        "name": "부동산",
+        "pct": 0.92
+      },
+      {
+        "ticker": "XLU",
+        "name": "유틸리티",
+        "pct": 0.48
+      },
+      {
+        "ticker": "CIBR",
+        "name": "보안",
+        "pct": 0.5
+      },
+      {
+        "ticker": "IGV",
+        "name": "소프트웨어",
+        "pct": -0.35
+      }
+    ]
+  }
+}

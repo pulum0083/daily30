@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-26": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-26/kospi/",
+        "headline": "다우는 반등, 나스닥은 또 밀렸다 — 반도체는 여전히 눈치보는 중",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-25": {
       "kospi": {
         "state": "ready",
@@ -883,8 +902,7 @@
         "headline": "8거래일 만에 반등, 코스피 2% 넘게 뛴 이유는?",
         "title": "5,668.05",
         "price": "5,668.05",
-        "time": "",
-        "chg": 2.05
+        "time": ""
       },
       "us": {
         "state": "ready",
@@ -894,36 +912,6 @@
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
-        "time": "21:17"
-      }
-    },
-    "2026-10-15": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-10-15/kospi/",
-        "headline": "CPI 쇼크 하루 만에 반도체 랠리 브레이크",
-        "hit": true,
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-15/close/",
-        "headline": "코스피 7.57% 급락, 오늘 증시를 흔든 5가지 신호",
-        "title": "5,554.22",
-        "price": "5,554.22",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-15/us/",
-        "headline": "AI 랠리의 청구서가 도착했다 — 반도체 급락과 은행 실적 쇼크가 겹쳤다",
-        "hit": false,
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
         "time": "21:17"
       }
     }
