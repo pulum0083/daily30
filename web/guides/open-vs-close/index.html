@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코스피 시초가는 맞히는데 종가는 왜 어려울까 — 747거래일로 나눠 본 하루 | 더블샷(Double-Shot)</title>
+<meta name="description" content="코스피의 하루를 밤사이 건너뛴 몫(시초가 갭)과 장중 움직임으로 나눠, 같은 예측이 시초가는 맞히고 종가는 자주 놓치는 이유를 747거래일 기록으로 정리했어요.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="더블샷(Double-Shot)">
+<meta property="og:title" content="코스피 시초가는 맞히는데 종가는 왜 어려울까 — 747거래일로 나눠 본 하루">
+<meta property="og:description" content="코스피의 하루를 밤사이 건너뛴 몫(시초가 갭)과 장중 움직임으로 나눠, 같은 예측이 시초가는 맞히고 종가는 자주 놓치는 이유를 747거래일 기록으로 정리했어요.">
+<meta property="og:url" content="https://doubleshot.space/guides/open-vs-close/">
+<meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
+<link rel="canonical" href="https://doubleshot.space/guides/open-vs-close/">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=20260704">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"코스피 시초가는 맞히는데 종가는 왜 어려울까 — 747거래일로 나눠 본 하루","description":"코스피의 하루를 밤사이 건너뛴 몫(시초가 갭)과 장중 움직임으로 나눠, 같은 예측이 시초가는 맞히고 종가는 자주 놓치는 이유를 747거래일 기록으로 정리했어요.","datePublished":"2026-11-26T12:00:00+09:00","dateModified":"2026-11-26T12:00:00+09:00","inLanguage":"ko-KR","mainEntityOfPage":"https://doubleshot.space/guides/open-vs-close/","author":{"@type":"Organization","name":"더블샷","alternateName":"Double-Shot","url":"https://doubleshot.space/about/"},"publisher":{"@type":"Organization","name":"더블샷","alternateName":"Double-Shot","logo":{"@type":"ImageObject","url":"https://doubleshot.space/icons/icon-512.png"}}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"해설 글","item":"https://doubleshot.space/guides/"},{"@type":"ListItem","position":3,"name":"코스피 시초가는 맞히는데 종가는 왜 어려울까"}]}</script>
+<style>
+.legal-wrap{max-width:760px;margin:0 auto;padding:34px 20px 90px;}
+.legal-crumb{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.legal-crumb a{color:var(--muted);text-decoration:none;}
+.legal-crumb a:hover{color:var(--primary);}
+.legal-h1{font-size:25px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:7px;}
+.legal-meta{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+.legal-lead{font-size:14px;color:#3A3F47;line-height:1.75;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--hairline);}
+.gloss-toc{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:30px;}
+.gloss-toc a{font-size:12.5px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:6px 12px;text-decoration:none;}
+.gloss-toc a:hover{opacity:.8;}
+.legal-sec{margin-bottom:30px;scroll-margin-top:20px;}
+.legal-sec h2{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:11px;}
+.legal-sec p{font-size:14px;color:#3A3F47;line-height:1.78;margin-bottom:9px;}
+.legal-sec ul{padding-left:19px;margin:8px 0 10px;}
+.legal-sec li{font-size:14px;color:#3A3F47;line-height:1.72;margin-bottom:6px;}
+.legal-sec a{color:var(--primary);text-decoration:none;}
+.legal-sec a:hover{text-decoration:underline;}
+.legal-sec b{color:var(--ink);font-weight:700;}
+.legal-sec .note{font-size:12.5px;color:var(--muted);margin-top:10px;}
+html.dark .legal-lead,html.dark .legal-sec p,html.dark .legal-sec li{color:#C4C8CE;}
+.legal-foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--hairline);}
+.legal-foot__links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-bottom:12px;}
+.legal-foot__links a{font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;}
+.legal-foot__links a:hover{color:var(--primary);}
+.legal-foot__base{font-size:11.5px;color:var(--muted);line-height:1.7;}
+.g-tbl{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:13.5px;}
+.g-tbl th,.g-tbl td{padding:9px 10px;border-bottom:1px solid var(--hairline);text-align:left;}
+.g-tbl th{font-size:12px;font-weight:700;color:var(--muted);background:var(--surface-inset,#F4F6F8);}
+.g-tbl th:not(:first-child){text-align:right;}
+.g-tbl td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.g-tbl b{color:var(--ink);}
+.g-bars{margin:12px 0 6px;display:grid;gap:14px;}
+.g-bar-h{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.g-bar-r{display:grid;grid-template-columns:82px 1fr 52px;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:4px;}
+.g-bar-t{height:12px;background:var(--surface-inset,#F1F3F5);border-radius:6px;overflow:hidden;}
+.g-bar-f{height:100%;border-radius:6px;background:#2775ED;}
+.g-bar-f.base{background:#B5BCC7;}
+.g-bar-r .v{text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.g-src{font-size:12.5px;color:var(--muted);line-height:1.7;background:var(--surface-inset,#F4F6F8);border-radius:10px;padding:12px 14px;margin-top:8px;}
+.g-src li{font-size:12.5px;color:var(--muted);}
+.g-note{margin:18px 0 6px;padding:14px 16px;border-left:3px solid #2775ED;background:var(--surface-inset,#F4F6F8);border-radius:0 10px 10px 0;}
+.g-note-h{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 6px;}
+.g-note p{margin:0;font-size:14.5px;line-height:1.75;color:var(--ink);}
+html.dark .g-tbl td{color:#C4C8CE;}
+.g-tbl th.n{text-align:right;}
+.g-tbl th:not(.n){text-align:left !important;}
+.g-tbl td:first-child{white-space:nowrap;}
+@media(max-width:420px){.g-tbl th,.g-tbl td{padding:8px 6px;}}
+.g-fig{margin:14px 0 6px;}
+.g-fig svg{width:100%;height:auto;display:block;}
+.g-fig figcaption{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:6px;}
+.g-ax{fill:var(--muted);font-size:12px;font-family:inherit;}
+.g-lb{fill:var(--ink);font-size:12.5px;font-weight:700;font-family:inherit;}
+.g-grid{stroke:var(--hairline);stroke-width:1;}
+.g-line{fill:none;stroke:#2775ED;stroke-width:2;stroke-linejoin:round;}
+.g-ink{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;}
+.legal-sec ul.g-guide-list{padding:0;}
+.g-guide-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:12px;}
+.g-guide-list li{padding:16px 18px;border:1px solid var(--hairline);border-radius:12px;}
+.g-guide-list a{font-size:16px;font-weight:700;color:var(--ink);text-decoration:none;}
+.g-guide-list a:hover{color:#2775ED;}
+.g-guide-list p{margin:6px 0 0;font-size:13.5px;color:var(--muted);line-height:1.65;}
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="5.5 5.5 21 21" fill="none"><path d="M8.5 16.5L16 9.5l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 24L16 17l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="location.href='/stocks/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
+<div class="legal-wrap">
+  <div class="legal-crumb"><a href="/stocks/">더블샷</a> › <a href="/guides/">해설 글</a> › 코스피 시초가는 맞히는데 종가는 왜 어려울까</div>
+  <h1 class="legal-h1">코스피 시초가는 맞히는데 종가는 왜 어려울까</h1>
+  <div class="legal-meta">747거래일로 나눠 본 하루 · 2026년 11월 26일 · 숫자는 11월 26일 종가까지</div>
+  <p class="legal-lead">더블샷은 2026년 10월에 코스피 예측 대상을 '오늘 종가'에서 '오늘 시초가'로 바꿨어요. 같은 예측을 두 기준으로 채점해 보니 시초가로는 열에 일곱 번 넘게 맞았는데, 종가로는 그보다 한참 낮았기 때문이에요. 그 차이가 어디서 생기는지, 코스피의 하루를 '밤사이 건너뛴 몫(시초가 갭)'과 '장중에 움직인 몫'으로 나눠 747거래일 기록으로 살펴봤어요.</p>
+  <section class="legal-sec">
+    <h2>1. 하루 등락은 두 조각으로 나뉘어요</h2>
+    <p>코스피의 하루 등락(전날 종가 → 오늘 종가)은 두 조각을 더한 거예요.</p>
+    <ul><li><b>시초가 갭</b> — 전날 종가 → 오늘 시가. 한국 장이 닫힌 밤사이 미국 시장과 뉴스가 반영된 몫이에요.</li><li><b>장중 움직임</b> — 오늘 시가 → 오늘 종가. 장이 열린 6시간 반 동안 국내 투자자들이 만든 몫이에요.</li></ul>
+    <p>2023년 11월부터 747거래일 동안 두 조각의 평균 크기는 비슷했어요. 시초가 갭은 평균 0.97%, 장중 움직임은 평균 1.03%였어요. 2026년만 보면 시장이 크게 출렁이며 갭 1.79%, 장중 1.89%로 둘 다 커졌지만, 둘의 크기가 비슷하다는 점은 그대로였어요.</p>
+    <p>크기가 비슷하다는 게 핵심이에요. 시초가 갭을 완벽하게 맞혀도, 그만큼 큰 장중 움직임이 그 위에 한 번 더 더해져요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>2. 장중 움직임은 아침 방향과 상관없었어요</h2>
+    <p>시초가가 위로 열린 날, 장중에도 계속 올랐을까요? 747일 중 장중 움직임이 시초가 갭과 반대 방향이었던 날이 48.3%였어요. 거의 정확히 반반이에요. 아침에 위로 열렸다고 장중에 더 오를 가능성이 높아지지도, 낮아지지도 않았다는 뜻이에요.</p>
+    <p>밤사이 미국 시장이 알려 주는 정보는 아침 첫 가격에 대부분 들어가요. 그 뒤 장중 방향은 국내 수급, 오후에 나오는 뉴스, 아시아 시장 흐름 같은 다른 것들이 정해요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>3. 시초가 방향을 알아도 종가는 네 번에 한 번 바뀌어요</h2>
+    <p>시초가 갭의 방향을 미리 완벽하게 안다고 해 봐요. 그 방향이 그대로 종가 방향이 되는 날은 747일 중 75.8%였어요. 나머지 네 번에 한 번은 장중 움직임이 갭보다 커서 종가 방향이 뒤집혔어요.</p>
+    <p>갭이 클수록 덜 뒤집혔어요.</p>
+    <table class="g-tbl"><thead><tr><th>시초가 갭 크기</th><th class="n">날 수</th><th class="n">종가가 갭과 같은 방향</th><th class="n">종가가 뒤집힌 날</th></tr></thead><tbody><tr><td>0.5% 미만</td><td class="n">317일</td><td class="n">63.7%</td><td class="n">115일</td></tr><tr><td>0.5~1%</td><td class="n">205일</td><td class="n">81.0%</td><td class="n">39일</td></tr><tr><td>1~2%</td><td class="n">121일</td><td class="n">84.3%</td><td class="n">19일</td></tr><tr><td>2% 이상</td><td class="n">104일</td><td class="n">92.3%</td><td class="n">8일</td></tr></tbody></table>
+    <figure class="g-fig"><svg viewBox="0 0 420 220" role="img" aria-label="시초가 갭 크기별 종가가 같은 방향으로 끝난 비율"><line class="g-grid" x1="36" x2="412" y1="186.0" y2="186.0"/><text class="g-ax" x="30" y="190.0" text-anchor="end">0%</text><line class="g-grid" x1="36" x2="412" y1="145.0" y2="145.0"/><text class="g-ax" x="30" y="149.0" text-anchor="end">25%</text><line class="g-grid" x1="36" x2="412" y1="104.0" y2="104.0"/><text class="g-ax" x="30" y="108.0" text-anchor="end">50%</text><line class="g-grid" x1="36" x2="412" y1="63.0" y2="63.0"/><text class="g-ax" x="30" y="67.0" text-anchor="end">75%</text><line class="g-grid" x1="36" x2="412" y1="22.0" y2="22.0"/><text class="g-ax" x="30" y="26.0" text-anchor="end">100%</text><rect x="61.0" y="81.5" width="44.0" height="104.5" rx="2" fill="#2775ED"/><text class="g-lb" x="83.0" y="76.5" text-anchor="middle">64</text><text class="g-ax" x="83.0" y="206" text-anchor="middle">0.5% 미만</text><rect x="155.0" y="53.2" width="44.0" height="132.8" rx="2" fill="#2775ED"/><text class="g-lb" x="177.0" y="48.2" text-anchor="middle">81</text><text class="g-ax" x="177.0" y="206" text-anchor="middle">0.5~1%</text><rect x="249.0" y="47.8" width="44.0" height="138.2" rx="2" fill="#2775ED"/><text class="g-lb" x="271.0" y="42.8" text-anchor="middle">84</text><text class="g-ax" x="271.0" y="206" text-anchor="middle">1~2%</text><rect x="343.0" y="34.6" width="44.0" height="151.4" rx="2" fill="#2775ED"/><text class="g-lb" x="365.0" y="29.6" text-anchor="middle">92</text><text class="g-ax" x="365.0" y="206" text-anchor="middle">2% 이상</text><line x1="36" x2="412" y1="104.0" y2="104.0" stroke="#E03131" stroke-width="1.2" stroke-dasharray="4 3"/><text class="g-ax" x="40" y="99.0" style="fill:#E03131">50%</text></svg><figcaption>시초가 갭(전날 종가 → 시가) 크기별로 그날 종가도 같은 방향으로 끝난 비율(%). 빨간 점선은 동전 던지기(50%). 코스피 747거래일, 2023년 11월~2026년 11월 26일.</figcaption></figure>
+    <p>갭이 0.5%도 안 되는 날은 열 번 중 네 번 가까이 종가가 반대로 끝났어요. 이런 날은 아침 방향이 그날 결과에 거의 영향을 주지 못해요. 반대로 2% 넘게 건너뛰어 연 날은 장중에 웬만큼 되돌려도 방향이 바뀌지 않았어요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>4. 그래서 같은 예측도 기준에 따라 성적이 달라요</h2>
+    <p>더블샷은 2026년 4월부터 10월까지 '오늘 코스피 방향'을 예측하고 종가로 채점했어요. 이 116일 기록을 시초가·종가·장중 세 기준으로 다시 채점해 봤어요.</p>
+    <table class="g-tbl"><thead><tr><th>같은 예측을 채점한 기준</th><th class="n">맞힌 비율</th></tr></thead><tbody><tr><td>시초가 방향(전날 종가 → 시가)</td><td class="n">74.1%</td></tr><tr><td>종가 방향(전날 종가 → 종가)</td><td class="n">65.5%</td></tr><tr><td>장중 방향(시가 → 종가)</td><td class="n">45.7%</td></tr></tbody></table>
+    <p>예측은 하나인데 결과가 세 가지로 갈렸어요. 밤사이 정보로 만든 예측은 시초가를 잘 맞혔고, 장중 방향은 동전 던지기보다도 못했어요. 종가는 그 둘이 섞인 결과라 중간에 걸렸어요.</p>
+    <p>간단한 계산으로도 같은 그림이 나와요. 시초가를 72.8% 맞히는 예측이 있고, 시초가 방향이 종가까지 이어질 확률이 75.8%라면, 종가까지 맞힐 확률은 대략 0.728 × 0.758 + 0.272 × 0.242 ≈ 62%예요. 시초가를 틀렸는데 장중에 뒤집혀 종가가 맞는 경우까지 더한 값이에요. 실제 116일 종가 성적(65.5%)도 이 근처였어요. 시초가를 아무리 잘 맞혀도 종가 성적은 그보다 10%p 넘게 낮아질 수밖에 없다는 뜻이에요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>5. 예측 대상을 바꾼 이유</h2>
+    <p>종가로 채점하던 시절 누적 적중률은 63.6%였어요. 같은 기간 '매일 오른다'고만 찍었을 때가 59.5%라 차이가 4%p밖에 나지 않았어요. 예측이 쓸모없었다기보다, 예측이 설명할 수 있는 부분(시초가)과 설명할 수 없는 부분(장중)을 한데 섞어 채점하고 있었던 거예요.</p>
+    <p>그래서 2026년 10월 13일부터는 예측 대상을 시초가로 바꿨어요. 대신 몇 가지를 지켜요.</p>
+    <ul><li><b>예전 기록은 다시 채점하지 않아요.</b> 그때 예측은 종가를 맞히겠다고 내놓은 것이라, 새 기준으로 고쳐 매기지 않고 성적표에서 따로 보여 줘요.</li><li><b>브리핑에서 종가를 단정하지 않아요.</b> '오늘 상승 마감'처럼 종가를 말하는 문장은 쓰지 않고, 장중은 예측이 아니라 지켜볼 점으로만 적어요.</li><li><b>기준선과 함께 보여 줘요.</b> 시초가 기준에서도 '매일 위로 열린다'고 찍었을 때(59.6%)를 늘 옆에 둬요.</li></ul>
+  </section>
+  <section class="legal-sec">
+    <h2>6. 이 분석이 말하지 못하는 것</h2>
+    <ul><li><b>장중 움직임을 맞힐 방법이 없다는 뜻은 아니에요.</b> 밤사이 미국 숫자로는 안 됐다는 뜻이에요. 장중 수급이나 오전 흐름을 보면 다를 수 있지만, 아침 7시 25분에 나가는 브리핑은 그 정보를 쓸 수 없어요.</li><li><b>지수 기준이에요.</b> 개별 종목은 갭과 장중 움직임의 비율이 다를 수 있어요.</li><li><b>3년 기록이에요.</b> 시장이 조용했던 해와 크게 출렁인 해가 섞여 있어요.</li></ul>
+  </section>
+  <section class="legal-sec">
+    <h2>7. 더블샷에서 확인하는 법</h2>
+    <p><a href="/accuracy/">예측 성적표</a>는 시초가 기준 기록과 예전 종가 기준 기록을 나눠 보여 줘요. 시초가를 설명하는 밤사이 신호는 <a href="/guides/kospi-open-us-signals/">코스피 시초가 해설</a>에, 적중률을 기준선과 함께 읽는 법은 <a href="/guides/accuracy-baseline/">첫 번째 해설 글</a>에 정리했어요.</p>
+    <div class="g-note"><p class="g-note-h">운영자 한마디</p><p>"예측이 계속 틀린다"는 말을 듣고 처음엔 신호를 더 넣을 생각부터 했어요. 그런데 같은 예측을 시가·종가·장중으로 나눠 채점해 보니, 예측은 맞히라고 만든 것(시초가)을 이미 잘 맞히고 있었어요. 틀린 건 예측이 아니라 채점 기준이었어요. 기준을 바꾸는 건 성적을 좋게 보이려는 것처럼 보일 수 있어서, 예전 기록을 지우지 않고 따로 남겨 두는 걸 조건으로 정했어요.</p></div>
+    <ul class="g-src"><li>시초가 갭 = 오늘 시가 ÷ 전날 종가 − 1, 장중 = 오늘 종가 ÷ 오늘 시가 − 1. 네이버 증권 코스피 지수 일봉, 2023년 11월 2일~2026년 11월 26일, 747거래일.</li><li>'종가가 갭과 같은 방향'은 갭과 하루 등락(전날 종가 → 종가)의 부호가 같은 날의 비율이에요.</li><li>세 기준 채점은 2026년 4월 7일~10월 12일 브리핑 예측 116일이에요.</li><li>과거 결과는 앞으로를 보장하지 않아요. 정보 제공용이며 투자 권유가 아니에요. <a href="/legal/disclaimer/">면책 고지</a></li></ul>
+  </section>
+
+  <div class="legal-foot"><div class="legal-foot__links"><a href="/about/">서비스 소개</a><a href="/accuracy/">예측 성적표</a><a href="/methodology/">방법론</a><a href="/guides/">해설 글</a><a href="/glossary/">용어 설명</a><a href="/legal/disclaimer/">면책 고지</a><a href="/legal/privacy/">개인정보처리방침</a><a href="/legal/terms/">이용약관</a><a href="mailto:pulum0083@gmail.com">문의</a></div><div class="legal-foot__base">더블샷(Double-Shot)은 개인이 운영하는 투자 정보 서비스입니다. 본 서비스가 제공하는 정보는 투자 자문·권유가 아니며, 투자 판단과 그 결과에 대한 책임은 이용자 본인에게 있습니다.<br>문의: <a href="mailto:pulum0083@gmail.com" style="color:var(--muted)">pulum0083@gmail.com</a> · © 2026 더블샷(Double-Shot)</div></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S&amp;P 500 &#x27;200일선 위 종목 비율&#x27; 읽는 법 — 지수와 종목이 엇갈릴 때 | 더블샷(Double-Shot)</title>
+<meta name="description" content="S&amp;P500 종목 가운데 200일선 위에 있는 비율로 시장의 폭을 읽는 법을 2020년 8월부터 1,573거래일 기록과 그 뒤 지수 움직임으로 정리했어요.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="더블샷(Double-Shot)">
+<meta property="og:title" content="S&amp;P 500 &#x27;200일선 위 종목 비율&#x27; 읽는 법 — 지수와 종목이 엇갈릴 때">
+<meta property="og:description" content="S&amp;P500 종목 가운데 200일선 위에 있는 비율로 시장의 폭을 읽는 법을 2020년 8월부터 1,573거래일 기록과 그 뒤 지수 움직임으로 정리했어요.">
+<meta property="og:url" content="https://doubleshot.space/guides/sp500-breadth/">
+<meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
+<link rel="canonical" href="https://doubleshot.space/guides/sp500-breadth/">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=20260704">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"S&P 500 '200일선 위 종목 비율' 읽는 법 — 지수와 종목이 엇갈릴 때","description":"S&P500 종목 가운데 200일선 위에 있는 비율로 시장의 폭을 읽는 법을 2020년 8월부터 1,573거래일 기록과 그 뒤 지수 움직임으로 정리했어요.","datePublished":"2026-11-26T12:00:00+09:00","dateModified":"2026-11-26T12:00:00+09:00","inLanguage":"ko-KR","mainEntityOfPage":"https://doubleshot.space/guides/sp500-breadth/","author":{"@type":"Organization","name":"더블샷","alternateName":"Double-Shot","url":"https://doubleshot.space/about/"},"publisher":{"@type":"Organization","name":"더블샷","alternateName":"Double-Shot","logo":{"@type":"ImageObject","url":"https://doubleshot.space/icons/icon-512.png"}}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"해설 글","item":"https://doubleshot.space/guides/"},{"@type":"ListItem","position":3,"name":"S&P 500 '200일선 위 종목 비율' 읽는 법"}]}</script>
+<style>
+.legal-wrap{max-width:760px;margin:0 auto;padding:34px 20px 90px;}
+.legal-crumb{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.legal-crumb a{color:var(--muted);text-decoration:none;}
+.legal-crumb a:hover{color:var(--primary);}
+.legal-h1{font-size:25px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:7px;}
+.legal-meta{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+.legal-lead{font-size:14px;color:#3A3F47;line-height:1.75;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--hairline);}
+.gloss-toc{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:30px;}
+.gloss-toc a{font-size:12.5px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:6px 12px;text-decoration:none;}
+.gloss-toc a:hover{opacity:.8;}
+.legal-sec{margin-bottom:30px;scroll-margin-top:20px;}
+.legal-sec h2{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:11px;}
+.legal-sec p{font-size:14px;color:#3A3F47;line-height:1.78;margin-bottom:9px;}
+.legal-sec ul{padding-left:19px;margin:8px 0 10px;}
+.legal-sec li{font-size:14px;color:#3A3F47;line-height:1.72;margin-bottom:6px;}
+.legal-sec a{color:var(--primary);text-decoration:none;}
+.legal-sec a:hover{text-decoration:underline;}
+.legal-sec b{color:var(--ink);font-weight:700;}
+.legal-sec .note{font-size:12.5px;color:var(--muted);margin-top:10px;}
+html.dark .legal-lead,html.dark .legal-sec p,html.dark .legal-sec li{color:#C4C8CE;}
+.legal-foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--hairline);}
+.legal-foot__links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-bottom:12px;}
+.legal-foot__links a{font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;}
+.legal-foot__links a:hover{color:var(--primary);}
+.legal-foot__base{font-size:11.5px;color:var(--muted);line-height:1.7;}
+.g-tbl{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:13.5px;}
+.g-tbl th,.g-tbl td{padding:9px 10px;border-bottom:1px solid var(--hairline);text-align:left;}
+.g-tbl th{font-size:12px;font-weight:700;color:var(--muted);background:var(--surface-inset,#F4F6F8);}
+.g-tbl th:not(:first-child){text-align:right;}
+.g-tbl td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.g-tbl b{color:var(--ink);}
+.g-bars{margin:12px 0 6px;display:grid;gap:14px;}
+.g-bar-h{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.g-bar-r{display:grid;grid-template-columns:82px 1fr 52px;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:4px;}
+.g-bar-t{height:12px;background:var(--surface-inset,#F1F3F5);border-radius:6px;overflow:hidden;}
+.g-bar-f{height:100%;border-radius:6px;background:#2775ED;}
+.g-bar-f.base{background:#B5BCC7;}
+.g-bar-r .v{text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.g-src{font-size:12.5px;color:var(--muted);line-height:1.7;background:var(--surface-inset,#F4F6F8);border-radius:10px;padding:12px 14px;margin-top:8px;}
+.g-src li{font-size:12.5px;color:var(--muted);}
+.g-note{margin:18px 0 6px;padding:14px 16px;border-left:3px solid #2775ED;background:var(--surface-inset,#F4F6F8);border-radius:0 10px 10px 0;}
+.g-note-h{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 6px;}
+.g-note p{margin:0;font-size:14.5px;line-height:1.75;color:var(--ink);}
+html.dark .g-tbl td{color:#C4C8CE;}
+.g-tbl th.n{text-align:right;}
+.g-tbl th:not(.n){text-align:left !important;}
+.g-tbl td:first-child{white-space:nowrap;}
+@media(max-width:420px){.g-tbl th,.g-tbl td{padding:8px 6px;}}
+.g-fig{margin:14px 0 6px;}
+.g-fig svg{width:100%;height:auto;display:block;}
+.g-fig figcaption{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:6px;}
+.g-ax{fill:var(--muted);font-size:12px;font-family:inherit;}
+.g-lb{fill:var(--ink);font-size:12.5px;font-weight:700;font-family:inherit;}
+.g-grid{stroke:var(--hairline);stroke-width:1;}
+.g-line{fill:none;stroke:#2775ED;stroke-width:2;stroke-linejoin:round;}
+.g-ink{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;}
+.legal-sec ul.g-guide-list{padding:0;}
+.g-guide-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:12px;}
+.g-guide-list li{padding:16px 18px;border:1px solid var(--hairline);border-radius:12px;}
+.g-guide-list a{font-size:16px;font-weight:700;color:var(--ink);text-decoration:none;}
+.g-guide-list a:hover{color:#2775ED;}
+.g-guide-list p{margin:6px 0 0;font-size:13.5px;color:var(--muted);line-height:1.65;}
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="5.5 5.5 21 21" fill="none"><path d="M8.5 16.5L16 9.5l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 24L16 17l7.5 7" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="location.href='/stocks/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
+<div class="legal-wrap">
+  <div class="legal-crumb"><a href="/stocks/">더블샷</a> › <a href="/guides/">해설 글</a> › S&amp;P 500 &#x27;200일선 위 종목 비율&#x27; 읽는 법</div>
+  <h1 class="legal-h1">S&amp;P 500 &#x27;200일선 위 종목 비율&#x27; 읽는 법</h1>
+  <div class="legal-meta">지수와 종목이 엇갈릴 때 · 2026년 11월 26일 · 숫자는 11월 25일 종가까지</div>
+  <p class="legal-lead">S&amp;P500 지수가 사상 최고 근처에 있으면 미국 주식 전체가 잘 나가는 것처럼 보여요. 그런데 지수는 시가총액이 큰 종목일수록 무게가 커서, 대형주 몇 개만 올라도 지수는 오를 수 있어요. 그래서 시장이 실제로 얼마나 넓게 오르고 있는지 따로 재는 숫자가 있어요. 그중 가장 많이 쓰이는 게 '200일 이동평균선 위에 있는 종목 비율'이에요. 이 글은 더블샷이 매일 계산하는 이 비율을 2020년 8월부터 1,573거래일 기록으로 읽는 법을 정리했어요.</p>
+  <section class="legal-sec">
+    <h2>1. 무엇을 세나</h2>
+    <p>S&amp;P500 구성 종목 500개 각각에 대해, 오늘 종가가 최근 200거래일 종가 평균(200일선)보다 위에 있는지를 봐요. 위에 있는 종목 수 ÷ 계산한 종목 수가 이 비율이에요.</p>
+    <p>200일선은 대략 지난 10개월의 평균 가격이라, 그 위에 있다는 건 긴 흐름이 아직 위쪽이라는 뜻으로 많이 읽혀요. 비율이 80%면 대부분의 종목이 긴 상승 흐름 안에 있고, 20%면 대부분이 긴 하락 흐름에 들어가 있다는 뜻이에요. 지수 한 숫자로는 보이지 않는 '시장의 폭'을 보여 줘요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>2. 보통은 어느 정도인가</h2>
+    <p>2020년 8월부터 이 비율의 중앙값은 66.1%였어요. 열 날 중 한 날은 40.5%보다 낮았고, 열 날 중 한 날은 87.6%보다 높았어요. 가장 낮았던 날은 2022년 6월 17일 12.0%였어요. 그해는 금리가 빠르게 오르며 대부분의 종목이 함께 빠진 해였어요.</p>
+    <figure class="g-fig"><svg viewBox="0 0 420 210" role="img" aria-label="S&amp;P500 200일선 위 종목 비율 흐름"><line class="g-grid" x1="36" x2="412" y1="184.0" y2="184.0"/><text class="g-ax" x="30" y="188.0" text-anchor="end">0%</text><line class="g-grid" x1="36" x2="412" y1="140.5" y2="140.5"/><text class="g-ax" x="30" y="144.5" text-anchor="end">25%</text><line class="g-grid" x1="36" x2="412" y1="97.0" y2="97.0"/><text class="g-ax" x="30" y="101.0" text-anchor="end">50%</text><line class="g-grid" x1="36" x2="412" y1="53.5" y2="53.5"/><text class="g-ax" x="30" y="57.5" text-anchor="end">75%</text><line class="g-grid" x1="36" x2="412" y1="10.0" y2="10.0"/><text class="g-ax" x="30" y="14.0" text-anchor="end">100%</text><text class="g-ax" x="58.2" y="202" text-anchor="middle">2021</text><text class="g-ax" x="118.5" y="202" text-anchor="middle">2022</text><text class="g-ax" x="178.1" y="202" text-anchor="middle">2023</text><text class="g-ax" x="238.4" y="202" text-anchor="middle">2024</text><text class="g-ax" x="298.6" y="202" text-anchor="middle">2025</text><text class="g-ax" x="358.2" y="202" text-anchor="middle">2026</text><polyline class="g-line" points="36.0,68.3 36.7,67.6 37.4,65.9 38.2,64.8 38.9,72.6 39.6,65.5 40.3,68.6 41.0,82.4 41.7,70.6 42.5,67.2 43.2,60.5 43.9,47.1 44.6,51.1 45.3,54.0 46.0,49.0 46.8,63.6 47.5,73.0 48.2,52.1 48.9,35.9 49.6,35.9 50.4,24.8 51.1,28.4 51.8,23.7 52.5,21.5 53.2,21.8 53.9,23.4 54.7,25.1 55.4,22.2 56.1,26.5 56.8,25.5 57.5,22.5 58.2,22.9 59.0,25.1 59.7,26.5 60.4,23.2 61.1,23.9 61.8,29.7 62.5,27.2 63.3,26.2 64.0,26.5 64.7,30.0 65.4,29.7 66.1,33.3 66.9,37.7 67.6,49.1 68.3,38.4 69.0,34.4 69.7,31.6 70.4,30.9 71.2,30.0 71.9,25.5 72.6,20.1 73.3,20.4 74.0,19.7 74.7,17.5 75.5,16.1 76.2,17.8 76.9,18.2 77.6,21.5 78.3,23.6 79.1,32.6 79.8,28.6 80.5,25.5 81.2,25.5 81.9,24.8 82.6,28.3 83.4,26.5 84.1,21.1 84.8,26.2 85.5,26.2 86.2,25.8 86.9,23.9 87.7,22.9 88.4,23.9 89.1,26.5 89.8,30.0 90.5,30.0 91.3,29.3 92.0,29.0 92.7,30.4 93.4,35.4 94.1,33.3 94.8,36.8 95.6,48.3 96.3,37.8 97.0,36.1 97.7,39.1 98.4,42.5 99.1,51.2 99.9,48.6 100.6,61.5 101.3,50.0 102.0,58.9 102.7,61.7 103.5,59.2 104.2,64.6 104.9,51.4 105.6,48.5 106.3,46.0 107.0,53.2 107.8,47.4 108.5,48.5 109.2,45.3 109.9,47.1 110.6,50.4 111.3,52.8 112.1,64.1 112.8,84.6 113.5,63.1 114.2,58.4 114.9,61.2 115.6,66.2 116.4,63.8 117.1,51.9 117.8,50.5 118.5,54.9 119.2,58.7 120.0,57.3 120.7,78.7 121.4,86.6 122.1,110.6 122.8,84.5 123.5,93.0 124.3,77.3 125.0,104.0 125.7,101.3 126.4,117.7 127.1,101.3 127.8,102.2 128.6,121.7 129.3,118.4 130.0,104.7 130.7,94.7 131.4,91.4 132.2,75.6 132.9,90.0 133.6,96.8 134.3,101.7 135.0,100.3 135.7,93.0 136.5,106.0 137.2,104.7 137.9,117.4 138.6,123.4 139.3,133.0 140.0,127.1 140.8,136.3 141.5,131.3 142.2,118.6 142.9,120.7 143.6,118.2 144.4,139.8 145.1,152.9 145.8,154.6 146.5,144.3 147.2,145.7 147.9,148.3 148.7,146.2 149.4,151.1 150.1,154.2 150.8,145.0 151.5,142.9 152.2,120.0 153.0,117.5 153.7,115.8 154.4,106.6 155.1,90.6 155.8,101.2 156.5,112.5 157.3,121.7 158.0,128.8 158.7,121.4 159.4,107.6 160.1,128.8 160.9,134.4 161.6,155.3 162.3,154.6 163.0,153.9 163.7,145.4 164.4,153.2 165.2,155.6 165.9,147.3 166.6,138.1 167.3,124.3 168.0,114.4 168.7,116.3 169.5,113.7 170.2,89.0 170.9,90.9 171.6,78.0 172.3,79.9 173.1,67.6 173.8,82.0 174.5,83.1 175.2,73.9 175.9,97.9 176.6,93.7 177.4,95.4 178.1,93.0 178.8,82.4 179.5,70.0 180.2,67.9 180.9,73.2 181.7,69.0 182.4,66.9 183.1,44.3 183.8,53.8 184.5,58.7 185.3,53.3 186.0,69.0 186.7,77.3 187.4,83.1 188.1,70.7 188.8,94.0 189.6,100.0 190.3,110.9 191.0,105.0 191.7,100.0 192.4,84.1 193.1,79.3 193.9,78.0 194.6,69.7 195.3,71.1 196.0,76.6 196.7,96.1 197.5,82.0 198.2,98.6 198.9,93.3 199.6,93.3 200.3,95.8 201.0,90.0 201.8,104.7 202.5,105.0 203.2,84.8 203.9,75.9 204.6,71.4 205.3,62.9 206.1,73.5 206.8,69.7 207.5,62.5 208.2,65.3 208.9,54.5 209.6,54.9 210.4,49.8 211.1,45.7 211.8,49.8 212.5,52.3 213.2,64.3 214.0,61.9 214.7,64.3 215.4,79.9 216.1,85.9 216.8,83.8 217.5,72.8 218.3,79.9 219.0,84.5 219.7,82.7 220.4,80.6 221.1,94.7 221.8,104.3 222.6,102.4 223.3,108.0 224.0,102.6 224.7,102.9 225.4,98.7 226.2,118.4 226.9,124.8 227.6,126.2 228.3,104.5 229.0,103.6 229.7,102.2 230.5,84.0 231.2,80.5 231.9,73.0 232.6,70.9 233.3,58.9 234.0,63.6 234.8,57.5 235.5,48.8 236.2,51.6 236.9,42.7 237.6,40.6 238.4,44.1 239.1,43.4 239.8,45.1 240.5,53.0 241.2,53.0 241.9,49.8 242.7,52.6 243.4,57.5 244.1,54.0 244.8,58.9 245.5,54.4 246.2,47.1 247.0,48.8 247.7,46.4 248.4,44.8 249.1,37.1 249.8,42.0 250.5,39.2 251.3,39.9 252.0,33.7 252.7,36.1 253.4,41.3 254.1,45.1 254.9,56.5 255.6,58.2 256.3,45.5 257.0,48.5 257.7,54.7 258.4,46.7 259.2,42.7 259.9,40.3 260.6,37.5 261.3,41.3 262.0,54.0 262.7,52.3 263.5,53.3 264.2,56.1 264.9,56.5 265.6,56.1 266.3,51.6 267.1,57.2 267.8,61.2 268.5,62.5 269.2,53.7 269.9,40.6 270.6,47.8 271.4,51.8 272.1,45.5 272.8,48.6 273.5,67.2 274.2,60.6 274.9,60.3 275.7,47.9 276.4,48.6 277.1,44.8 277.8,42.0 278.5,56.1 279.3,57.5 280.0,50.7 280.7,48.3 281.4,45.8 282.1,43.1 282.8,45.5 283.6,45.5 284.3,47.2 285.0,40.3 285.7,42.0 286.4,47.2 287.1,53.7 287.9,54.4 288.6,55.8 289.3,50.0 290.0,54.0 290.7,59.9 291.5,57.9 292.2,46.5 292.9,47.2 293.6,49.7 294.3,52.5 295.0,60.6 295.8,67.6 296.5,78.2 297.2,75.4 297.9,79.6 298.6,81.5 299.3,88.5 300.1,77.2 300.8,68.3 301.5,70.0 302.2,70.4 302.9,71.4 303.6,72.8 304.4,72.5 305.1,73.9 305.8,70.7 306.5,74.2 307.2,76.5 308.0,87.6 308.7,101.9 309.4,120.1 310.1,105.7 310.8,107.4 311.5,97.3 312.3,106.0 313.0,120.1 313.7,151.8 314.4,133.4 315.1,133.0 315.8,131.3 316.6,121.5 317.3,118.2 318.0,107.1 318.7,104.3 319.4,88.3 320.2,78.2 320.9,93.5 321.6,88.6 322.3,91.1 323.0,91.1 323.7,88.6 324.5,86.2 325.2,93.2 325.9,87.6 326.6,83.1 327.3,71.1 328.0,72.1 328.8,65.9 329.5,78.9 330.2,71.8 330.9,60.3 331.6,65.9 332.4,76.5 333.1,78.2 333.8,76.8 334.5,64.5 335.2,72.1 335.9,67.6 336.7,62.4 337.4,62.4 338.1,63.1 338.8,68.3 339.5,64.8 340.2,70.0 341.0,68.3 341.7,72.1 342.4,64.8 343.1,62.7 343.8,65.5 344.5,74.2 345.3,77.5 346.0,65.5 346.7,66.9 347.4,82.7 348.1,83.4 348.9,87.6 349.6,76.5 350.3,78.6 351.0,86.6 351.7,83.1 352.4,73.5 353.2,73.5 353.9,76.3 354.6,70.0 355.3,72.8 356.0,74.6 356.7,71.4 357.5,70.4 358.2,72.5 358.9,67.2 359.6,65.5 360.3,61.0 361.1,61.7 361.8,63.4 362.5,64.5 363.2,63.4 363.9,63.1 364.6,67.6 365.4,64.5 366.1,68.6 366.8,65.5 367.5,72.5 368.2,82.6 368.9,88.5 369.7,92.3 370.4,97.9 371.1,97.5 371.8,106.2 372.5,97.2 373.3,96.1 374.0,89.2 374.7,84.6 375.4,77.0 376.1,80.8 376.8,82.9 377.6,81.9 378.3,82.2 379.0,86.7 379.7,86.4 380.4,87.8 381.1,79.4 381.9,78.7 382.6,85.3 383.3,79.8 384.0,79.8 384.7,74.2 385.5,76.6 386.2,72.8 386.9,73.5 387.6,65.9 388.3,70.7 389.0,65.2 389.8,60.3 390.5,69.0 391.2,67.6 391.9,61.7 392.6,60.6 393.3,58.5 394.1,57.2 394.8,53.2 395.5,52.5 396.2,53.5 396.9,59.8 397.6,69.0 398.4,66.5 399.1,82.9 399.8,84.6 400.5,92.0 401.2,97.5 402.0,100.7 402.7,107.3 403.4,96.8 404.1,97.2 404.8,95.1 405.5,94.0 406.3,79.8 407.0,76.6 407.7,76.6 408.4,63.1 409.1,67.6 409.8,70.4 410.6,82.6 411.3,99.3 412.0,82.2" style="stroke-width:1.4"/><line x1="36" x2="412" y1="97.0" y2="97.0" stroke="#E03131" stroke-width="1.2" stroke-dasharray="4 3"/><circle cx="412.0" cy="82.2" r="3.2" fill="var(--ink)"/></svg><figcaption>S&amp;P500 종목 가운데 200일선 위에 있는 비율(%, 사흘마다 한 점). 빨간 점선은 50%, 검은 점은 11월 25일 58.5%. 지금 구성 종목으로 계산했어요.</figcaption></figure>
+    <p>2026년 11월 25일 비율은 58.5%로, 보통보다 조금 낮은 수준이에요. 같은 날 S&amp;P500은 1년 최고치보다 8.1% 아래에 있었어요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>3. 비율이 낮을 때와 높을 때, 그 뒤 S&amp;P500은</h2>
+    <p>비율 구간별로 그날 이후 S&amp;P500이 어떻게 움직였는지 봤어요. 기준은 3개월(63거래일) 뒤와 12개월(252거래일) 뒤 지수 등락이에요.</p>
+    <table class="g-tbl"><thead><tr><th>그날 비율</th><th class="n">날 수</th><th class="n">3개월 뒤 오른 비율</th><th class="n">3개월 뒤 중앙값</th><th class="n">12개월 뒤 오른 비율</th><th class="n">12개월 뒤 중앙값</th></tr></thead><tbody><tr><td>25% 미만</td><td class="n">54일</td><td class="n">59%</td><td class="n">+2.7%</td><td class="n">100%</td><td class="n">+16.3%</td></tr><tr><td>25~40%</td><td class="n">98일</td><td class="n">61%</td><td class="n">+3.5%</td><td class="n">88%</td><td class="n">+11.4%</td></tr><tr><td>40~60%</td><td class="n">403일</td><td class="n">75%</td><td class="n">+5.5%</td><td class="n">80%</td><td class="n">+22.0%</td></tr><tr><td>60~75%</td><td class="n">551일</td><td class="n">69%</td><td class="n">+3.2%</td><td class="n">88%</td><td class="n">+18.4%</td></tr><tr><td>75% 이상</td><td class="n">467일</td><td class="n">86%</td><td class="n">+5.3%</td><td class="n">70%</td><td class="n">+12.7%</td></tr></tbody></table>
+    <p>두 가지가 보여요.</p>
+    <ul><li><b>아주 낮을 때는 바닥 근처였던 경우가 많았어요.</b> 25% 미만이던 54일은 12개월 뒤 모두 올라 있었어요. 다만 이 54일은 사실상 두 번의 사건이에요. 2022년 6~10월(51일)과 2025년 4월(3일)이에요. 두 번 모두 바닥 근처였다는 것이지, 다음에도 그렇다는 보장은 아니에요. 3개월 뒤로 보면 59%만 올라 있어, 바닥을 지나는 데 시간이 걸렸어요.</li><li><b>아주 높을 때는 단기 흐름이 좋았어요.</b> 75% 이상이던 날은 3개월 뒤 86%가 올라 있었어요. 넓게 오르는 시장은 한동안 그 흐름을 이어 갔다는 뜻이에요. 대신 12개월 뒤로 보면 70%로 가장 낮았어요.</li></ul>
+    <p>비율 하나로 사고팔 시점을 정할 수 있다는 뜻은 아니에요. 같은 구간 안에서도 결과가 크게 갈렸어요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>4. 지수는 최고치 근처인데 종목 절반이 빠져 있을 때</h2>
+    <p>이 비율이 가장 많이 언급되는 건 지수와 엇갈릴 때예요. 지수는 최고치 근처인데 200일선 위 종목이 절반도 안 된다면, 소수 대형주가 지수를 끌어올리고 있다는 뜻이에요.</p>
+    <p>1,573일 중 S&amp;P500이 1년 최고치에서 2% 안쪽에 있던 날은 841일이었어요. 그중 비율이 50% 아래였던 날은 12일뿐이었어요. 11일이 2026년 9월 23일~10월 9일에 몰려 있었고, 그때 비율은 42~50%였어요. 지수가 최고치를 다시 넘보던 때에 종목 절반 이상은 긴 하락 흐름 안에 있었던 셈이에요. 그 뒤 11월 25일 S&amp;P500은 최고치보다 8.1% 아래로 내려와 있었어요.</p>
+    <p>이런 엇갈림은 드물어서 표본이 거의 없어요. 다음에도 지수가 빠진다는 근거로 쓰기엔 기록이 너무 적어요. 다만 "지수가 최고치니까 시장 전체가 좋다"는 생각을 한 번 더 확인하게 해 주는 숫자예요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>5. 50%를 넘나드는 날</h2>
+    <p>더블샷은 이 비율이 50%를 넘거나 내려온 날, 또는 하루에 5%p 넘게 움직인 날에만 미국 브리핑에 이 숫자를 따로 실어요. 2020년 8월부터 50%를 넘나든 건 48번이었어요. 평소에는 상세 페이지에서 매일 확인할 수 있게 두고, 브리핑에는 의미 있는 변화가 있는 날만 올려요.</p>
+  </section>
+  <section class="legal-sec">
+    <h2>6. 이 숫자가 말하지 못하는 것</h2>
+    <ul><li><b>지금 구성 종목으로 계산한 과거예요.</b> 2020년에 S&amp;P500에 있었지만 지금은 빠진 종목은 들어 있지 않아요. 과거 비율이 실제보다 조금 높게 나왔을 수 있어요(생존 편향).</li><li><b>6년 기록이에요.</b> 아주 낮은 구간은 사실상 두 번뿐이에요.</li><li><b>어느 종목이 빠졌는지는 안 보여 줘요.</b> 비율은 같아도 빠진 종목이 대형주인지 소형주인지에 따라 의미가 달라요. 상세 페이지의 섹터별 비율을 함께 보는 게 좋아요.</li></ul>
+  </section>
+  <section class="legal-sec">
+    <h2>7. 더블샷에서 확인하는 법</h2>
+    <p><a href="/stocks/sp500-200/">S&amp;P 500 200일선 페이지</a>에서 매일 갱신되는 비율과 섹터별 비율, 200일선 위·아래로 넘어간 종목을 볼 수 있어요. 미국 지수가 5년 평균에서 얼마나 떨어져 있는지는 <a href="/stocks/nasdaq-check/">나스닥 체크</a>와 <a href="/guides/nasdaq-5y-average/">나스닥 5년 평균 해설</a>에 정리했어요.</p>
+    <div class="g-note"><p class="g-note-h">운영자 한마디</p><p>이 비율을 처음 브리핑에 넣은 날은 매일 텔레그램에도 실었어요. 그런데 매일 비슷한 숫자를 받아 보는 건 정보가 아니라 소음이더라고요. 하루 만에 '50%를 넘나들거나 하루에 5%p 넘게 움직인 날'에만 싣기로 바꿨어요. 이 기준이면 한 달에 한두 번 나가요. 숫자를 자주 보여 주는 것보다 달라진 날을 알려 주는 게 이 지표에 맞는 쓰임이라고 생각해요.</p></div>
+    <ul class="g-src"><li>200일선 = 분할·배당을 반영한 종가의 최근 200거래일 평균이에요. 비율 = 오늘 종가가 200일선보다 높은 종목 수 ÷ 200일선을 계산한 종목 수(약 480~500개).</li><li>구성 종목은 위키피디아 S&amp;P 500 목록(지금 기준), 가격은 야후 파이낸스예요. 2020년 8월 24일~2026년 11월 25일, 1,573거래일.</li><li>이후 등락은 S&amp;P500(^GSPC) 종가 기준, 3개월 = 63거래일, 12개월 = 252거래일 뒤예요. 결과가 아직 나오지 않은 최근 날은 뺐어요.</li><li>과거 결과는 앞으로를 보장하지 않아요. 정보 제공용이며 투자 권유가 아니에요. <a href="/legal/disclaimer/">면책 고지</a></li></ul>
+  </section>
+
+  <div class="legal-foot"><div class="legal-foot__links"><a href="/about/">서비스 소개</a><a href="/accuracy/">예측 성적표</a><a href="/methodology/">방법론</a><a href="/guides/">해설 글</a><a href="/glossary/">용어 설명</a><a href="/legal/disclaimer/">면책 고지</a><a href="/legal/privacy/">개인정보처리방침</a><a href="/legal/terms/">이용약관</a><a href="mailto:pulum0083@gmail.com">문의</a></div><div class="legal-foot__base">더블샷(Double-Shot)은 개인이 운영하는 투자 정보 서비스입니다. 본 서비스가 제공하는 정보는 투자 자문·권유가 아니며, 투자 판단과 그 결과에 대한 책임은 이용자 본인에게 있습니다.<br>문의: <a href="mailto:pulum0083@gmail.com" style="color:var(--muted)">pulum0083@gmail.com</a> · © 2026 더블샷(Double-Shot)</div></div>
+</div>
+</body>
+</html>

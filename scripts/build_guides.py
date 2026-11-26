@@ -63,6 +63,22 @@ GUIDES = [
      "h1": "월배당 ETF, 분배율이 높으면 좋은 걸까", "sub": "76개 ETF의 1년 가격 변화 · 2026년 11월 26일 · 국내 11월 24일·미국 11월 25일 종가",
      "desc": "분배율과 1년 가격 변화를 나란히 보면 월배당 ETF의 실제 수익이 보여요. 국내 60개·미국 16개 월배당 ETF 기록으로 분배율 구간별·종류별 차이를 정리했어요.",
      "draft": "draft-07-income-yield.md", "date": "2026-11-26T12:00:00+09:00"},
+    {"slug": "open-vs-close", "title": "코스피 시초가는 맞히는데 종가는 왜 어려울까 — 747거래일로 나눠 본 하루",
+     "h1": "코스피 시초가는 맞히는데 종가는 왜 어려울까", "sub": "747거래일로 나눠 본 하루 · 2026년 11월 26일 · 숫자는 11월 26일 종가까지",
+     "desc": "코스피의 하루를 밤사이 건너뛴 몫(시초가 갭)과 장중 움직임으로 나눠, 같은 예측이 시초가는 맞히고 종가는 자주 놓치는 이유를 747거래일 기록으로 정리했어요.",
+     "draft": "draft-08-open-vs-close.md", "date": "2026-11-26T12:00:00+09:00"},
+    {"slug": "sp500-breadth", "title": "S&P 500 '200일선 위 종목 비율' 읽는 법 — 지수와 종목이 엇갈릴 때",
+     "h1": "S&P 500 '200일선 위 종목 비율' 읽는 법", "sub": "지수와 종목이 엇갈릴 때 · 2026년 11월 26일 · 숫자는 11월 25일 종가까지",
+     "desc": "S&P500 종목 가운데 200일선 위에 있는 비율로 시장의 폭을 읽는 법을 2020년 8월부터 1,573거래일 기록과 그 뒤 지수 움직임으로 정리했어요.",
+     "draft": "draft-09-sp500-breadth.md", "date": "2026-11-26T12:00:00+09:00"},
+    {"slug": "investor-flow-timing", "title": "외국인 순매수 숫자, 언제 것을 봐야 할까 — 15시 30분·15시 40분·저녁 숫자가 다른 이유",
+     "h1": "외국인 순매수 숫자, 언제 것을 봐야 할까", "sub": "15시 30분·15시 40분·저녁 숫자가 다른 이유 · 2026년 11월 26일 · 45거래일 기록",
+     "desc": "같은 날 외국인·기관 순매수가 언제 보느냐에 따라 다른 이유를 1분 단위 기록 45거래일로 정리했어요. 종가 단일가 10분이 저녁 4시간보다 숫자를 더 크게 바꿨어요.",
+     "draft": "draft-10-investor-flow-timing.md", "date": "2026-11-26T12:00:00+09:00"},
+    {"slug": "ewy-double-count", "title": "EWY로 한국 증시의 밤을 읽을 때 빠지기 쉬운 함정 — 이미 끝난 하락을 두 번 세는 문제",
+     "h1": "EWY로 한국 증시의 밤을 읽을 때 빠지기 쉬운 함정", "sub": "이미 끝난 하락을 두 번 세는 문제 · 2026년 11월 26일 · 숫자는 11월 25일까지",
+     "desc": "EWY 등락에는 그날 코스피가 이미 움직인 몫이 들어 있어요. 그 몫을 빼면 다음 날 시초가를 더 잘 설명했다는 것을 723일 기록으로 정리했어요.",
+     "draft": "draft-11-ewy-double-count.md", "date": "2026-11-26T12:00:00+09:00"},
 ]
 
 
@@ -302,6 +318,78 @@ def chart_income():
                  '분배율 구간마다 1년 전보다 가격이 내린 ETF의 비율(%). 국내 60개·미국 16개 월배당 ETF, 국내 2026년 11월 24일·미국 11월 25일 종가.')
 
 
+def chart_gap_close():
+    d = json.load(open(DATA / "kospi_gap_intraday_20261126.json"))
+    bk = ((0, .5, "0.5% 미만"), (.5, 1, "0.5~1%"), (1, 2, "1~2%"), (2, 99, "2% 이상"))
+    rows = []
+    for lo, hi, lab in bk:
+        g = [x for x in d if lo <= abs(x["gap"]) < hi and x["total"] != 0]
+        rows.append((lab, 100 * sum((x["gap"] > 0) == (x["total"] > 0) for x in g) / len(g), "#2775ED"))
+    return _bars(rows, "시초가 갭 크기별 종가가 같은 방향으로 끝난 비율",
+                 f'시초가 갭(전날 종가 → 시가) 크기별로 그날 종가도 같은 방향으로 끝난 비율(%). 빨간 점선은 동전 던지기(50%). 코스피 {len(d)}거래일, 2023년 11월~2026년 11월 26일.',
+                 base=50, base_lab="50%")
+
+
+def chart_breadth():
+    d = json.load(open(DATA / "sp500_breadth_20261126.json"))
+    rows = d["rows"][::3] + ([d["rows"][-1]] if (len(d["rows"]) - 1) % 3 else [])
+    W, H, L, R, T, B = 420, 210, 36, 8, 10, 26
+    n = len(rows)
+    x = lambda i: L + (W - L - R) * i / (n - 1)
+    y = lambda v: T + (H - T - B) * (100 - v) / 100
+    out = []
+    for v in (0, 25, 50, 75, 100):
+        out.append(f'<line class="g-grid" x1="{L}" x2="{W-R}" y1="{y(v):.1f}" y2="{y(v):.1f}"/><text class="g-ax" x="{L-6}" y="{y(v)+4:.1f}" text-anchor="end">{v}%</text>')
+    yrs = {}
+    for i, r in enumerate(rows):
+        yrs.setdefault(r[0][:4], i)
+    for yv, i in yrs.items():
+        if i > 3:
+            out.append(f'<text class="g-ax" x="{x(i):.1f}" y="{H-8}" text-anchor="middle">{yv}</text>')
+    pts = " ".join(f"{x(i):.1f},{y(r[1]):.1f}" for i, r in enumerate(rows))
+    out.append(f'<polyline class="g-line" points="{pts}" style="stroke-width:1.4"/>')
+    out.append(f'<line x1="{L}" x2="{W-R}" y1="{y(50):.1f}" y2="{y(50):.1f}" stroke="#E03131" stroke-width="1.2" stroke-dasharray="4 3"/>')
+    last = rows[-1]
+    out.append(f'<circle cx="{x(n-1):.1f}" cy="{y(last[1]):.1f}" r="3.2" fill="var(--ink)"/>')
+    svg = f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="S&amp;P500 200일선 위 종목 비율 흐름">{"".join(out)}</svg>'
+    return ('    <figure class="g-fig">' + svg +
+            f'<figcaption>S&amp;P500 종목 가운데 200일선 위에 있는 비율(%, 사흘마다 한 점). 빨간 점선은 50%, 검은 점은 {last[0][5:7].lstrip("0")}월 {last[0][8:].lstrip("0")}일 {last[1]:.1f}%. 지금 구성 종목으로 계산했어요.</figcaption></figure>')
+
+
+def chart_flow_day():
+    rows = json.load(open(DATA / "investor_time_20260929.json"))["rows"]
+    W, H, L, R, T, B = 420, 230, 50, 10, 24, 28
+    tm = lambda t: int(t[:2]) * 60 + int(t[3:])
+    t0, t1 = tm("09:00"), tm("20:05")
+    lo = min(min(r["외국인"], r["기관"]) for r in rows); hi = max(max(r["외국인"], r["기관"]) for r in rows)
+    lo, hi = -32000, 4000
+    x = lambda t: L + (W - L - R) * (tm(t) - t0) / (t1 - t0)
+    y = lambda v: T + (H - T - B) * (hi - v) / (hi - lo)
+    out = []
+    for v in (0, -10000, -20000, -30000):
+        out.append(f'<line class="g-grid" x1="{L}" x2="{W-R}" y1="{y(v):.1f}" y2="{y(v):.1f}"/><text class="g-ax" x="{L-6}" y="{y(v)+4:.1f}" text-anchor="end">{v//10000 if v else 0}조</text>')
+    for t in ("09:00", "12:00", "15:30", "18:00", "20:00"):
+        out.append(f'<text class="g-ax" x="{x(t):.1f}" y="{H-8}" text-anchor="middle">{t}</text>')
+    out.append(f'<rect x="{x("15:30"):.1f}" y="{T}" width="{x("20:00")-x("15:30"):.1f}" height="{H-T-B}" fill="var(--hairline)" opacity=".45"/>')
+    for k, c in (("외국인", "#2775ED"), ("기관", "#E86464")):
+        pts = " ".join(f"{x(r['t']):.1f},{y(r[k]):.1f}" for r in rows)
+        out.append(f'<polyline points="{pts}" fill="none" stroke="{c}" stroke-width="1.8" stroke-linejoin="round"/>')
+    out.append(f'<rect x="{L}" y="4" width="10" height="10" rx="2" fill="#2775ED"/><text class="g-ax" x="{L+14}" y="13">외국인</text>'
+               f'<rect x="{L+64}" y="4" width="10" height="10" rx="2" fill="#E86464"/><text class="g-ax" x="{L+78}" y="13">기관</text>'
+               f'<text class="g-ax" x="{x("17:45"):.1f}" y="13" text-anchor="middle">정규장 뒤</text>')
+    svg = f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="2026년 9월 29일 외국인·기관 누적 순매수 흐름">{"".join(out)}</svg>'
+    return ('    <figure class="g-fig">' + svg +
+            '<figcaption>2026년 9월 29일 코스피 외국인·기관 누적 순매수(억 원, 1분 단위). 15시 30분에 종가 단일가가 체결되며 외국인 선이 한 번에 내려가고 기관 선은 0 위로 올라가요. 회색은 정규장이 끝난 뒤예요.</figcaption></figure>')
+
+
+def chart_ewy():
+    rows = [("전체 · 그대로", 65.0, "#B5BCC7"), ("전체 · 잔차", 71.4, "#2775ED"),
+            ("큰 날 · 그대로", 66.7, "#B5BCC7"), ("큰 날 · 잔차", 71.0, "#2775ED")]
+    return _bars(rows, "EWY 그대로와 코스피 반영분을 뺀 잔차의 다음 날 시초가 방향 적중률",
+                 '다음 날 코스피 시초가 방향을 맞힌 비율(%). \'큰 날\'은 그날 코스피가 3% 넘게 움직인 93일이에요. 빨간 점선은 동전 던지기(50%). 2023년 11월~2026년 11월 723일.',
+                 base=50, base_lab="50%")
+
+
 def page(slug, title, desc, crumb_title, h1, sub, body, article=True, date=DATE_ISO):
     url = f"{SITE}/guides/{slug}/" if slug else f"{SITE}/guides/"
     lds = []
@@ -336,7 +424,8 @@ def page(slug, title, desc, crumb_title, h1, sub, body, article=True, date=DATE_
 
 charts = {"aftermarket-close": [chart_close()], "nasdaq-5y-average": [chart_nasdaq()],
           "kospi-open-us-signals": [chart_open_years(), chart_open_signals()],
-          "monthly-ma5-test": [chart_ma5()], "sp-futures-close": [chart_sp_bands()], "income-etf-yield": [chart_income()]}
+          "monthly-ma5-test": [chart_ma5()], "sp-futures-close": [chart_sp_bands()], "income-etf-yield": [chart_income()],
+          "open-vs-close": [chart_gap_close()], "sp500-breadth": [chart_breadth()], "investor-flow-timing": [chart_flow_day()], "ewy-double-count": [chart_ewy()]}
 for gd in GUIDES[1:]:
     md = (DRAFTS / gd["draft"]).read_text()
     body = md_body(md, charts[gd["slug"]])
