@@ -51,6 +51,18 @@ GUIDES = [
      "h1": "코스피 시초가는 왜 밤사이 미국장을 따라갈까", "sub": "727거래일로 확인한 신호 · 2026년 11월 17일 · 숫자는 11월 17일 시초가까지",
      "desc": "밤사이 미국 반도체·나스닥·EWY·VIX·환율 가운데 무엇이 다음 날 코스피 시초가를 잘 설명했는지 2023년 11월부터 727거래일 기록으로 정리했어요.",
      "draft": "draft-04-kospi-open-us-signals.md", "date": "2026-11-17T12:00:00+09:00"},
+    {"slug": "monthly-ma5-test", "title": "월봉 5개월선 위에 3개월 안착하면 오를까 — 코스피200 15년 검증",
+     "h1": "월봉 5개월선 위에 3개월 안착하면 오를까", "sub": "코스피200 15년 검증 · 2026년 11월 26일 · 백테스트는 2026년 10월 25일 계산",
+     "desc": "'월봉이 5개월 이동평균선 위에 3개월 안착하면 오른다'는 말을 코스피200 종목 2011~2025년 기록으로 확인했어요. 아무 달에나 산 것과 거의 같았어요.",
+     "draft": "draft-05-monthly-ma5.md", "date": "2026-11-26T12:00:00+09:00"},
+    {"slug": "sp-futures-close", "title": "밤 9시 S&P 선물로 그날 미국장 방향을 얼마나 맞힐까 — 593거래일 기록",
+     "h1": "밤 9시 S&P 선물로 그날 미국장 방향을 얼마나 맞힐까", "sub": "593거래일 기록 · 2026년 11월 26일 · 구간표는 2026년 11월 3일 계산",
+     "desc": "한국 시간 밤 9시의 S&P500 선물 변화로 그날 미국장이 오르며 끝날지를 얼마나 맞힐 수 있는지 2024년 6월부터 593거래일 기록으로 정리했어요.",
+     "draft": "draft-06-sp-futures-close.md", "date": "2026-11-26T12:00:00+09:00"},
+    {"slug": "income-etf-yield", "title": "월배당 ETF, 분배율이 높으면 좋은 걸까 — 76개 ETF의 1년 가격 변화",
+     "h1": "월배당 ETF, 분배율이 높으면 좋은 걸까", "sub": "76개 ETF의 1년 가격 변화 · 2026년 11월 26일 · 국내 11월 24일·미국 11월 25일 종가",
+     "desc": "분배율과 1년 가격 변화를 나란히 보면 월배당 ETF의 실제 수익이 보여요. 국내 60개·미국 16개 월배당 ETF 기록으로 분배율 구간별·종류별 차이를 정리했어요.",
+     "draft": "draft-07-income-yield.md", "date": "2026-11-26T12:00:00+09:00"},
 ]
 
 
@@ -227,6 +239,69 @@ def chart_open_signals():
             '<figcaption>숫자 하나만으로 다음 날 시초가 방향을 맞힌 비율(%). 빨간 점선은 매일 \'위로\'만 찍었을 때(59.6%), 회색 점선은 동전 던지기(50%)예요. 회색 막대 둘(EWY 그대로·원/달러)은 더블샷이 쓰지 않는 형태예요.</figcaption></figure>')
 
 
+def _bars(rows, aria, cap, ymax=100, base=None, base_lab=None):
+    """세로 막대 하나씩 — rows = [(아래 글자, 값, 색)]. base가 있으면 빨간 점선."""
+    W, H, L, R, T, B = 420, 220, 36, 8, 22, 34
+    y = lambda v: T + (H - T - B) * (ymax - v) / ymax
+    out = []
+    for v in range(0, ymax + 1, 25):
+        out.append(f'<line class="g-grid" x1="{L}" x2="{W-R}" y1="{y(v):.1f}" y2="{y(v):.1f}"/><text class="g-ax" x="{L-6}" y="{y(v)+4:.1f}" text-anchor="end">{v}%</text>')
+    gw = (W - L - R) / len(rows); bw = min(gw * 0.56, 44)
+    for i, (lab, v, fill) in enumerate(rows):
+        cx = L + gw * (i + 0.5)
+        out.append(f'<rect x="{cx-bw/2:.1f}" y="{y(v):.1f}" width="{bw:.1f}" height="{y(0)-y(v):.1f}" rx="2" fill="{fill}"/>'
+                   f'<text class="g-lb" x="{cx:.1f}" y="{y(v)-5:.1f}" text-anchor="middle">{v:.0f}</text>'
+                   f'<text class="g-ax" x="{cx:.1f}" y="{H-14}" text-anchor="middle">{html.escape(lab)}</text>')
+    if base is not None:
+        out.append(f'<line x1="{L}" x2="{W-R}" y1="{y(base):.1f}" y2="{y(base):.1f}" stroke="#E03131" stroke-width="1.2" stroke-dasharray="4 3"/>'
+                   f'<text class="g-ax" x="{L+4}" y="{y(base)-5:.1f}" style="fill:#E03131">{html.escape(base_lab)}</text>')
+    svg = f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="{html.escape(aria)}">{"".join(out)}</svg>'
+    return '    <figure class="g-fig">' + svg + f'<figcaption>{cap}</figcaption></figure>'
+
+
+def chart_ma5():
+    d = json.load(open(DATA / "monthly_ma5_20261126.json"))["kr"]["horizons"]
+    W, H, L, R, T, B = 420, 220, 36, 8, 22, 28
+    y = lambda v: T + (H - T - B) * (60 - v) / 60
+    out = []
+    for v in (0, 20, 40, 60):
+        out.append(f'<line class="g-grid" x1="{L}" x2="{W-R}" y1="{y(v):.1f}" y2="{y(v):.1f}"/><text class="g-ax" x="{L-6}" y="{y(v)+4:.1f}" text-anchor="end">{v}%</text>')
+    hs = ("3", "6", "12"); gw = (W - L - R) / 3; bw = gw * 0.3
+    for i, h in enumerate(hs):
+        cx = L + gw * (i + 0.5)
+        for v, dx, fill, cls in ((d[h]["base"]["win_pct"], -bw * 0.55, "#B5BCC7", "g-ax"), (d[h]["signal"]["win_pct"], bw * 0.55, "#2775ED", "g-lb")):
+            X = cx + dx - bw / 2
+            out.append(f'<rect x="{X:.1f}" y="{y(v):.1f}" width="{bw:.1f}" height="{y(0)-y(v):.1f}" rx="2" fill="{fill}"/>'
+                       f'<text class="{cls}" x="{X+bw/2:.1f}" y="{y(v)-5:.1f}" text-anchor="middle">{v:.1f}</text>')
+        out.append(f'<text class="g-ax" x="{cx:.1f}" y="{H-9}" text-anchor="middle">{h}개월 뒤</text>')
+    leg = (f'<rect x="{L}" y="4" width="10" height="10" rx="2" fill="#B5BCC7"/><text class="g-ax" x="{L+14}" y="13">아무 달에나 샀을 때</text>'
+           f'<rect x="{L+140}" y="4" width="10" height="10" rx="2" fill="#2775ED"/><text class="g-ax" x="{L+154}" y="13">조건을 채운 뒤</text>')
+    svg = f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="월봉 5개월선 안착 조건 뒤 오른 비율과 아무 달에나 샀을 때 비교">{"".join(out)}{leg}</svg>'
+    return ('    <figure class="g-fig">' + svg +
+            '<figcaption>산 뒤 3·6·12개월이 지나 가격이 올라 있던 비율(%). 코스피200 현재 구성 종목, 신호 2011년 1월~2025년 8월.</figcaption></figure>')
+
+
+def chart_sp_bands():
+    d = json.load(open(DATA / "us_close_prior_20261126.json"))
+    labs = ("−0.5↓", "−0.5~−0.2", "−0.2~0", "0~+0.2", "+0.2~+0.5", "+0.5↑")
+    base = sum(b["days"] * b["up_pct"] for b in d["bands"]) / sum(b["days"] for b in d["bands"])
+    rows = [(l, b["up_pct"], "#2775ED" if b["up_pct"] >= 50 else "#5D97F1") for l, b in zip(labs, d["bands"])]
+    return _bars(rows, "밤 9시 S&P500 선물 변화 구간별 그날 상승 마감 비율",
+                 f'밤 9시 15분 선물 변화(%) 구간별로 그날 S&P500이 오르며 끝난 비율(%). 빨간 점선은 아무 날이나 골랐을 때({base:.1f}%). 2024년 6월~2026년 11월 {d["days"]}거래일.',
+                 base=base, base_lab=f"아무 날 {base:.1f}%")
+
+
+def chart_income():
+    d = json.load(open(DATA / "income_etfs_20261126.json"))["etfs"]
+    bk = ((0, 5, "5% 미만"), (5, 10, "5~10%"), (10, 15, "10~15%"), (15, 25, "15~25%"), (25, 1000, "25% 이상"))
+    rows = []
+    for lo, hi, lab in bk:
+        g = [e for e in d if lo <= e["yield_ttm"] < hi]
+        rows.append((lab, 100 * sum(e["price_1y"] < 0 for e in g) / len(g), "#5D97F1" if lo >= 10 else "#B5BCC7"))
+    return _bars(rows, "분배율 구간별 1년 가격이 내린 월배당 ETF 비율",
+                 '분배율 구간마다 1년 전보다 가격이 내린 ETF의 비율(%). 국내 60개·미국 16개 월배당 ETF, 국내 2026년 11월 24일·미국 11월 25일 종가.')
+
+
 def page(slug, title, desc, crumb_title, h1, sub, body, article=True, date=DATE_ISO):
     url = f"{SITE}/guides/{slug}/" if slug else f"{SITE}/guides/"
     lds = []
@@ -260,7 +335,8 @@ def page(slug, title, desc, crumb_title, h1, sub, body, article=True, date=DATE_
 
 
 charts = {"aftermarket-close": [chart_close()], "nasdaq-5y-average": [chart_nasdaq()],
-          "kospi-open-us-signals": [chart_open_years(), chart_open_signals()]}
+          "kospi-open-us-signals": [chart_open_years(), chart_open_signals()],
+          "monthly-ma5-test": [chart_ma5()], "sp-futures-close": [chart_sp_bands()], "income-etf-yield": [chart_income()]}
 for gd in GUIDES[1:]:
     md = (DRAFTS / gd["draft"]).read_text()
     body = md_body(md, charts[gd["slug"]])
@@ -272,5 +348,5 @@ for gd in GUIDES[1:]:
 lis = "".join(f'<li><a href="/guides/{g["slug"]}/">{html.escape(g["title"])}</a><p>{html.escape(g["desc"])}</p></li>' for g in reversed(GUIDES))
 idx_body = ('  <p class="legal-lead">더블샷이 매일 쌓는 예측 채점 기록과 직접 돌린 백테스트, 데이터를 다루다 알게 된 사실을 정리한 글이에요. 숫자는 글마다 기준일을 적었고, 지금 값은 각 지표 페이지에서 확인할 수 있어요.</p>\n'
             f'  <section class="legal-sec">\n    <ul class="g-guide-list">{lis}</ul>\n  </section>')
-(ROOT / "web/guides/index.html").write_text(page("", "해설 글 — 시장 지표와 예측 기록 읽는 법", "더블샷이 매일 채점한 예측 기록과 직접 돌린 백테스트로 시장 지표를 읽는 법을 정리한 해설 글 모음이에요.", "", "해설 글", "2026년 11월 17일 갱신", idx_body, article=False))
+(ROOT / "web/guides/index.html").write_text(page("", "해설 글 — 시장 지표와 예측 기록 읽는 법", "더블샷이 매일 채점한 예측 기록과 직접 돌린 백테스트로 시장 지표를 읽는 법을 정리한 해설 글 모음이에요.", "", "해설 글", "2026년 11월 26일 갱신", idx_body, article=False))
 print("wrote index")

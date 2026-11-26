@@ -2954,7 +2954,7 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - 새 글을 올리면 `write_sitemap_xml()` 고정 목록에 주소를 넣고, 관련 페이지에서 링크한다.
 - 첫 글 `/guides/accuracy-baseline/` — 적중률을 기준선과 나란히 읽는 법. 예측 성적표 상단 안내문에서 링크한다. 초안은 `draft-01-accuracy.md`, "운영자 한마디" 칸은 운영자가 쓰면 넣는다.
 - 2·3번 글부터는 `scripts/build_guides.py`가 초안 md(`docs/plans/2026-11-13-adsense-articles/draft-*.md`)를 페이지로 바꾼다. 머리·스타일·메뉴·푸터는 1번 글 HTML에서 가져오고, 그래프는 SVG로 그려 넣는다(2번은 같은 폴더 `data/`의 11/13 삼성전자 1분봉, 3번은 `scripts/fixtures/nasdaq_monthly_20261023.json`). 초안의 "운영자 한마디" 인용(`> `)은 싣지 않는다. 새 글은 스크립트의 `GUIDES`에 한 줄 추가한다.
-  · 글 목록: `/guides/`(같은 스크립트가 쓴다). 2번 `/guides/aftermarket-close/`(애프터마켓 이후 종가의 뜻), 3번 `/guides/nasdaq-5y-average/`(나스닥 5년 평균 대비 거리 — 나스닥 체크 페이지 '어떻게 계산하나요'에서 링크), 4번 `/guides/kospi-open-us-signals/`(코스피 시초가와 밤사이 미국 신호 — 2026-11-17 `fit_open_gap_prior.py`로 다시 잰 727거래일, 그래프 원천 `data/kospi_open_gap_20261117.json`, 방법론 페이지 원/달러 문단에서 링크). 글마다 발행일은 `GUIDES`의 `date`(없으면 11/16).
+  · 글 목록: `/guides/`(같은 스크립트가 쓴다). 2번 `/guides/aftermarket-close/`(애프터마켓 이후 종가의 뜻), 3번 `/guides/nasdaq-5y-average/`(나스닥 5년 평균 대비 거리 — 나스닥 체크 페이지 '어떻게 계산하나요'에서 링크), 4번 `/guides/kospi-open-us-signals/`(코스피 시초가와 밤사이 미국 신호 — 2026-11-17 `fit_open_gap_prior.py`로 다시 잰 727거래일, 그래프 원천 `data/kospi_open_gap_20261117.json`, 방법론 페이지 원/달러 문단에서 링크). 글마다 발행일은 `GUIDES`의 `date`(없으면 11/16). 2026-11-26에 5~7번을 더했다 — `/guides/monthly-ma5-test/`(월봉 5개월선 속설 15년 검증), `/guides/sp-futures-close/`(밤 9시 S&P 선물과 그날 종가), `/guides/income-etf-yield/`(월배당 분배율과 1년 가격 변화). 그래프 원천은 같은 폴더 `data/*_20261126.json` 사본이다(원본 설정 파일이 바뀌어도 글은 그대로다).
   · 공통 푸터(`base.html`)·종목 홈 푸터에 '해설 글' 링크가 있다.
 
 
