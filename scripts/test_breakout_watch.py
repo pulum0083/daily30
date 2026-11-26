@@ -140,7 +140,7 @@ def test_render_1105_replay():
     b = ctx["bw"]
     assert (b["n_wait"], len(b["today"]), len(b["track"]), b["n_done"], b["n_live"]) == (2, 1, 10, 5, 5)
     html = gh.make_env().get_template("sections/breakout_watch.html").render(**ctx)
-    assert "에스티 로더" in html and "기준선 $113.53보다 5.2% 아래로 끝" in html
+    assert "에스티 로더" in html and "기준선보다 5.2% 아래" in html
     assert "아무 날에나 산 경우(+0.16R)" in html and "추천" not in html
 
 
@@ -174,10 +174,10 @@ def test_render_closed_below_entry_1124():
     assert b["summary"] == ("오늘 6종목이 장중에 최근 고점을 넘었고, 그중 리제네론·펜테어만 종가까지 그 위를 지켰어요. "
                             "앞서 돌파한 종목 중 2개는 아직 이어지고(+6.2%·+5.1%), 3개는 끝났어요(평균 −6.4%).")
     html = gh.make_env().get_template("sections/breakout_watch.html").render(**ctx)
-    assert "기준선 $980.55 위 · 손절선까지 6.5%" in html                       # REGN 종가 987.09
-    assert "기준선 $31.07보다 3.6% 아래로 끝" in html                           # GEN 29.95
-    assert "기준선 $39.46 바로 아래로 끝" in html                               # TSCO 39.45
-    assert html.count('class="bw2-t half"') == 4
+    assert "REGN · 기준선 $980.55 위" in html and "손절까지<br>6.5%" in html     # REGN 종가 987.09
+    assert "장중만 · 기준선보다 3.6% 아래" in html                              # GEN 29.95
+    assert "장중만 · 기준선 바로 아래" in html                                   # TSCO 39.45
+    assert html.count('<tr class="weak">') == 4 + 3                              # 장중만 4 + 끝난 결과 3
 
 
 def test_summary_sentences():

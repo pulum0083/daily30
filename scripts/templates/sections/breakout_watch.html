@@ -1,9 +1,9 @@
 {# 돌파 관찰 목록 — 쿨라매기 조건 종목의 10일 최고가 돌파와 그 뒤 터틀 규칙 결과(결정론, SERVICE_RULES §88).
-   맨 위 요약(숫자 세 칸 + 두 문장) → 오늘 돌파 → 기다리는 중 → 그 뒤 결과. 종목은 2열 타일(2026-11-26 사용자 결정 B8+B6,
-   시안 docs/prototypes/2026-11-26-breakout-watch-list-variants-2.html). 과거 성적은 맨 아래 '근거와 면책 고지'에 접어 둔다. 텔레그램에는 넣지 않는다. #}
+   요약 두 문장 → 표 한 장(오늘 돌파 · 기다리는 중 · 그 뒤 결과를 묶음 줄로 나눈다). 프리마켓 띠와 같은 흰 테두리 상자
+   (2026-11-26 사용자 결정 P2). 과거 성적은 맨 아래 '근거와 면책 고지'에 접어 둔다. 텔레그램에는 넣지 않는다. #}
 {% set b = bw %}
 {% macro meter(m) -%}
-<div class="bw2-m" aria-hidden="true"><i style="width:{{ m.fill }}%" class="{{ 'over' if m.over else '' }}"></i><span style="left:{{ m.mark }}%"></span></div>
+<span class="bw2-m" aria-hidden="true"><i style="width:{{ m.fill }}%" class="{{ 'over' if m.over else '' }}"></i><s style="left:{{ m.mark }}%"></s></span>
 {%- endmacro %}
 {% macro sg(v) %}{{ ('%+.1f'|format(v))|replace('-', '−') if v|round(1) != 0 else '0.0' }}%{% endmacro %}
 {% macro cls(v) %}{{ 'up' if v|round(1) > 0 else 'dn' if v|round(1) < 0 else '' }}{% endmacro %}
@@ -13,60 +13,49 @@
   <details class="bw2-how"><summary>이 목록 읽는 법</summary>
     <ol>
       <li><b>기다리는 중</b> — 최근 한두 달 크게 오른 뒤, 2주쯤 좁은 범위에서 쉬고 있는 종목이에요. 추세를 따라가는 투자자들이 '다시 오를 준비'로 보는 모양이에요.</li>
-      <li><b>돌파</b> — 그 종목이 최근 10일 최고가(<b>기준선</b>)를 넘은 날이에요. 장중에 넘었어도 종가가 다시 기준선 아래면 <b>장중에만 넘음</b>(회색 칸)으로 따로 표시해요. 넘은 힘이 약했다는 뜻이에요.</li>
+      <li><b>돌파</b> — 그 종목이 최근 10일 최고가(<b>기준선</b>)를 넘은 날이에요. 장중에 넘었어도 종가가 다시 기준선 아래면 <b>장중에만 넘음</b>(흐린 줄)으로 따로 표시해요. 넘은 힘이 약했다는 뜻이에요.</li>
       <li><b>그 뒤 결과</b> — 돌파한 가격에서 얼마나 움직였는지 기록해요. 규칙상 <b>손절선</b>(돌파 가격에서 하루 평균 움직임의 두 배 아래)을 깨면 끝, 아니면 진행 중이에요.</li>
     </ol>
-    <p>타일의 막대는 손절선(왼쪽 끝)과 기준선(점선) 사이에서 지금 가격이 어디쯤인지예요. 점선을 넘어 진하게 찼으면 기준선 위, 옅은 회색으로 못 미쳤으면 아래예요. 사라는 신호가 아니라, 이 규칙을 그대로 따랐다면 어떻게 됐는지 빠짐없이 남기는 기록이에요.</p>
+    <p>표의 막대는 손절선(왼쪽 끝)과 기준선(점선) 사이에서 지금 가격이 어디쯤인지예요. 점선을 넘어 진하게 찼으면 기준선 위, 옅은 회색으로 못 미쳤으면 아래예요. 사라는 신호가 아니라, 이 규칙을 그대로 따랐다면 어떻게 됐는지 빠짐없이 남기는 기록이에요.</p>
   </details>
-  <div class="bw2-sum">
-    <div><b>{{ b.today|length }}</b><span>오늘 고점을 넘은 종목</span></div>
-    <div><b>{{ b.n_held }}</b><span>종가까지 지킨 종목</span></div>
-    <div><b>{{ b.n_live }}</b><span>돌파 뒤 아직 진행 중</span></div>
-  </div>
   <p class="bw2-say">{{ b.summary }}</p>
-
-  {% if b.today %}
-  <div class="bw2-gh">오늘 돌파<span>종가도 넘음 {{ b.n_held }} · 장중만 {{ b.today|length - b.n_held }}</span></div>
-  <div class="bw2-tiles">
+  <div class="bw2-box"><table class="bw2-tbl">
+    <tbody>
+    {% if b.today %}
+    <tr class="g"><td colspan="4"><span class="ic-tag fact">오늘 돌파</span><span class="pm-asof">종가도 넘음 {{ b.n_held }} · 장중만 {{ b.today|length - b.n_held }}</span></td></tr>
     {% for r in b.today %}
-    <div class="bw2-t{{ ' half' if r.below is not none else '' }}">
-      <div class="n">{{ r.name }}<small>{{ r.t }} · {{ '장중에만 넘음' if r.below is not none else '종가도 넘음' }}</small></div>
-      <div class="v {{ cls(r.chg) }}">{{ sg(r.chg) }}</div>
-      {{ meter(r.meter) }}
-      <div class="f">{% if r.below is not none %}{% if r.below >= 0.1 %}기준선 ${{ '%.2f'|format(r.line) }}보다 {{ '%.1f'|format(r.below) }}% 아래로 끝{% else %}기준선 ${{ '%.2f'|format(r.line) }} 바로 아래로 끝{% endif %}{% else %}기준선 ${{ '%.2f'|format(r.line) }} 위 · 손절선까지 {{ '%.1f'|format(r.to_stop) }}%{% endif %}</div>
-    </div>
+    <tr class="{{ 'weak' if r.below is not none else '' }}">
+      <td><b>{{ r.name }}</b><small>{{ r.t }} · {% if r.below is none %}기준선 ${{ '%.2f'|format(r.line) }} 위{% elif r.below >= 0.1 %}장중만 · 기준선보다 {{ '%.1f'|format(r.below) }}% 아래{% else %}장중만 · 기준선 바로 아래{% endif %}</small></td>
+      <td class="{{ cls(r.chg) }}">{{ sg(r.chg) }}</td>
+      <td>{{ meter(r.meter) }}</td>
+      <td class="mu">손절까지<br>{{ '%.1f'|format(r.to_stop) }}%</td>
+    </tr>
     {% endfor %}
-  </div>
-  {% endif %}
-
-  {% if b.wait %}
-  <div class="bw2-gh">기다리는 중<span>시가총액 큰 순</span></div>
-  <div class="bw2-tiles">
+    {% endif %}
+    {% if b.wait %}
+    <tr class="g"><td colspan="4"><span class="ic-tag fact">기다리는 중</span><span class="pm-asof">고점까지 남은 % · 넘으면 손절선{% if b.wait_more %} · 이 밖에 {{ b.wait_more }}종목{% endif %}</span></td></tr>
     {% for r in b.wait %}
-    <div class="bw2-t wait">
-      <div class="n">{{ r.name }}<small>{{ r.t }} · 기다리는 중</small></div>
-      <div class="v mu">{{ '%.1f'|format(r.to_pivot) }}%</div>
-      {{ meter(r.meter) }}
-      <div class="f">고점 ${{ '%.2f'|format(r.pivot) }}까지 · 넘으면 손절선 ${{ '%.2f'|format(r.stop) }}</div>
-    </div>
+    <tr>
+      <td><b>{{ r.name }}</b><small>{{ r.t }} · 고점 ${{ '%.2f'|format(r.pivot) }}</small></td>
+      <td class="mu">{{ '%.1f'|format(r.to_pivot) }}%<br><small>남음</small></td>
+      <td>{{ meter(r.meter) }}</td>
+      <td class="mu">넘으면 손절<br>${{ '%.2f'|format(r.stop) }}</td>
+    </tr>
     {% endfor %}
-  </div>
-  {% if b.wait_more %}<p class="bw-more">이 밖에 {{ b.wait_more }}종목이 더 조건을 채웠어요.</p>{% endif %}
-  {% endif %}
-
-  {% if b.track %}
-  <div class="bw2-gh">그 뒤 결과<span>진행 {{ b.n_live }} · 끝 {{ b.n_done }}</span></div>
-  <div class="bw2-tiles">
+    {% endif %}
+    {% if b.track %}
+    <tr class="g"><td colspan="4"><span class="ic-tag fact">그 뒤 결과</span><span class="pm-asof">돌파한 가격 대비 · 진행 {{ b.n_live }} · 끝 {{ b.n_done }}</span></td></tr>
     {% for r in b.track %}
-    <div class="bw2-t{{ ' end' if r.state != 'live' else '' }}">
-      <div class="n">{{ r.name }}<small>{{ r.t }} · {{ r.from_md }} 돌파</small></div>
-      <div class="v {{ cls(r.pct) }}">{{ sg(r.pct) }}</div>
-      <div class="f">{{ r.label }}</div>
-    </div>
+    <tr class="{{ '' if r.state == 'live' else 'weak' }}">
+      <td><b>{{ r.name }}</b><small>{{ r.t }} · {{ r.from_md }} 돌파</small></td>
+      <td class="{{ cls(r.pct) }}">{{ sg(r.pct) }}</td>
+      <td colspan="2" class="mu">{{ r.label }}</td>
+    </tr>
     {% endfor %}
-  </div>
-  <p class="bw-note">막대는 손절선(왼쪽 끝)에서 기준선(점선)까지 지금 가격의 위치예요. 결과 % = 돌파한 가격에서 끝난 가격(진행 중은 오늘 종가)까지.</p>
-  {% endif %}
+    {% endif %}
+    </tbody>
+  </table></div>
+  <p class="bw-note">막대 = 손절선(왼쪽 끝)에서 기준선(점선)까지 지금 가격의 위치. 결과 % = 돌파한 가격에서 끝난 가격(진행 중은 오늘 종가)까지.</p>
 
   <details class="bw-fine"><summary>근거와 면책 고지</summary><div class="bw-honest"><b>이 규칙의 과거 성적</b> — {{ b.bt.start_year }}년부터 {{ b.bt.universe }}에서 돌파 때 샀다면, 2025년 한 해를 빼면 한 번 평균 {{ '%+.2f'|format(b.bt.avg_r_ex2025) }}R로 아무 날에나 산 경우({{ '%+.2f'|format(b.bt.random_r_ex2025) }}R)와 거의 같았어요. 이긴 비율은 {{ b.bt.win_pct }}%예요. 종목을 고르는 힘이 확인된 목록이 아니에요.</div><p>1·3·6달 상승률 중 하나가 S&amp;P 500 상위 2%, 6달 저점에서 30% 넘게 오름, 종가가 10일·20일 평균선 위, 최근 10거래일 폭이 그 전 20거래일 폭의 60%보다 좁고 저점이 높아짐, 하루 평균 움직임 3% 이상(크리스티안 쿨라매기의 고르기 조건). 넘을 선은 최근 10일 최고가, 손절선은 산 가격에서 하루 평균 움직임의 두 배 아래, 추세 끝은 20일 최저가를 깰 때예요(리처드 데니스의 터틀 규칙). 같은 종목은 10거래일 안에 다시 돌파로 세지 않아요. R은 손익을 손절할 때 잃는 돈으로 나눈 값이에요. 지금 S&amp;P 500에 남은 종목으로 시험해 실제보다 좋게 나왔을 수 있어요. 매수 권유가 아니에요.</p></details>
 </div>
