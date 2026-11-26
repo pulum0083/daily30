@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-27": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-27/kospi/",
+        "headline": "미국 반도체 공급망 뉴스가 오늘 반도체 섹터의 최대 변수예요.",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-26": {
       "kospi": {
         "state": "ready",
@@ -878,44 +897,13 @@
         "headline": "장중 급락 딛고 V자 반등 — 2차전지가 살렸어요",
         "title": "5,768.01",
         "price": "5,768.01",
-        "time": "",
-        "chg": 1.76
+        "time": ""
       },
       "us": {
         "state": "ready",
         "url": "/briefings/2026-10-19/us/",
         "headline": "반도체 장비주는 숨 고르고 돌아섰는데, 지수는 '회수 능력' 의심에 발목 잡혔다",
         "hit": true,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:17"
-      }
-    },
-    "2026-10-16": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-10-16/kospi/",
-        "headline": "어제의 충격은 지나간 뉴스, 오늘은 선물이 말해주는 쪽으로",
-        "hit": true,
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-16/close/",
-        "headline": "8거래일 만에 반등, 코스피 2% 넘게 뛴 이유는?",
-        "title": "5,668.05",
-        "price": "5,668.05",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-16/us/",
-        "headline": "금리는 식는데 반도체는 식는다 — 채권시장과 AI칩 시장이 다른 얘기를 하고 있다",
-        "hit": false,
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",

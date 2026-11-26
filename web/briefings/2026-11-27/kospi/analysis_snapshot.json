@@ -1,0 +1,241 @@
+{
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 61,
+    "down_pct": 39,
+    "confidence": 58,
+    "basis": "open"
+  },
+  "reason_title": "선물은 오르는데 반도체는 흔들려요 — 애매한 날",
+  "todays_view": {
+    "view_title": "미국 반도체 공급망 뉴스가 오늘 반도체 섹터의 최대 변수예요.",
+    "dek": "미국은 추수감사절로 쉬었지만 지수선물은 <b>+0.5%</b>대로 올라섰어요. 다만 메모리 공급망 뉴스가 반도체 심리를 계속 흔들고 있어서 방향이 선명하진 않아요.",
+    "recap": [
+      {
+        "text": "한국은행이 기준금리를 <b>3.00%→3.25%</b>로 올렸어요. 시장 예상에 부합한 결정이라 충격은 크지 않았지만 긴축 경계감은 남았어요.",
+        "codes": []
+      },
+      {
+        "text": "11월 1~20일 수출이 전년 대비 <b>101.5%</b> 급증했는데, 반도체 수출만 <b>294.4%</b> 늘며 전체를 끌어올렸어요.",
+        "codes": []
+      },
+      {
+        "text": "SK하이닉스는 전 거래일 <b>+2.23%</b> 오르며 반도체 수출 호조를 반영했지만, 삼성전자는 <b>+0.35%</b>에 그쳤어요.",
+        "codes": [
+          "000660",
+          "005930"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "watch",
+        "text": "마이크론 급락 여진이 SK하이닉스·삼성전자로 옮겨붙을지가 오늘 반도체 섹터의 1순위 관전 포인트예요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "지수선물 강세가 개장까지 유지되는지, 아니면 반도체 불안에 되돌려지는지 지켜보세요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인이 어제 순매도로 돌아섰는데 오늘도 이어질지 확인하세요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>미국 반도체 공급망 뉴스가 오늘 반도체 섹터의 최대 변수예요.</b> 마이크론이 이틀 새 큰 폭으로 밀렸고 엔비디아의 동남아 AI 서버 출하 중단 소식까지 겹치며 국내 메모리주에 경계감을 키우고 있어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>VIX 급락은 위험선호 회복 신호예요.</b> VIX가 전일 대비 <b>-5.27%</b> 내리며 25.5~28선에서 안정을 찾는 모습이라, 전일 급등 당시의 공포감은 다소 누그러졌어요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-27T07:29:23.975176+09:00",
+  "monthly_ma5": {
+    "date": "2026-11-27",
+    "generated_at": "2026-11-27T07:27:14.988348+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": []
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-26",
+    "direction": "하락 우위",
+    "ok": false,
+    "open_pct": 1.01
+  },
+  "prior_signals": {
+    "nq": 0.46
+  },
+  "prev_supply": {
+    "date": "20261126",
+    "individual": -10439,
+    "institution": 7509,
+    "foreign": -1136
+  },
+  "us_session_map": {
+    "session": "2026-11-25",
+    "indices": [
+      {
+        "ticker": "^GSPC",
+        "name": "S&P500",
+        "pct": -0.25
+      },
+      {
+        "ticker": "^IXIC",
+        "name": "나스닥",
+        "pct": -0.62
+      },
+      {
+        "ticker": "^DJI",
+        "name": "다우",
+        "pct": 0.33
+      },
+      {
+        "ticker": "^SOX",
+        "name": "반도체",
+        "pct": -0.65
+      }
+    ],
+    "ai": [
+      {
+        "ticker": "NVDA",
+        "name": "엔비디아",
+        "pct": -3.91
+      },
+      {
+        "ticker": "AMD",
+        "name": "AMD",
+        "pct": -1.75
+      },
+      {
+        "ticker": "AVGO",
+        "name": "브로드컴",
+        "pct": -0.07
+      },
+      {
+        "ticker": "MU",
+        "name": "마이크론",
+        "pct": -4.53
+      },
+      {
+        "ticker": "TSM",
+        "name": "TSMC",
+        "pct": -1.96
+      },
+      {
+        "ticker": "ORCL",
+        "name": "오라클",
+        "pct": -5.13
+      }
+    ],
+    "bigtech": [
+      {
+        "ticker": "AAPL",
+        "name": "애플",
+        "pct": 0.43
+      },
+      {
+        "ticker": "MSFT",
+        "name": "MS",
+        "pct": -1.25
+      },
+      {
+        "ticker": "AMZN",
+        "name": "아마존",
+        "pct": -3.12
+      },
+      {
+        "ticker": "META",
+        "name": "메타",
+        "pct": 3.4
+      },
+      {
+        "ticker": "GOOGL",
+        "name": "알파벳",
+        "pct": -2.13
+      },
+      {
+        "ticker": "TSLA",
+        "name": "테슬라",
+        "pct": -1.18
+      }
+    ],
+    "sectors": [
+      {
+        "ticker": "XLK",
+        "name": "기술",
+        "pct": -0.83
+      },
+      {
+        "ticker": "XLC",
+        "name": "커뮤니케이션",
+        "pct": 0.89
+      },
+      {
+        "ticker": "XLY",
+        "name": "경기소비재",
+        "pct": -0.2
+      },
+      {
+        "ticker": "XLP",
+        "name": "필수소비재",
+        "pct": 0.46
+      },
+      {
+        "ticker": "XLE",
+        "name": "에너지",
+        "pct": 0.74
+      },
+      {
+        "ticker": "XLF",
+        "name": "금융",
+        "pct": 0.71
+      },
+      {
+        "ticker": "XLV",
+        "name": "헬스케어",
+        "pct": -0.56
+      },
+      {
+        "ticker": "XLI",
+        "name": "산업재",
+        "pct": 0.83
+      },
+      {
+        "ticker": "XLB",
+        "name": "소재",
+        "pct": 2.07
+      },
+      {
+        "ticker": "XLRE",
+        "name": "부동산",
+        "pct": 0.92
+      },
+      {
+        "ticker": "XLU",
+        "name": "유틸리티",
+        "pct": 0.48
+      },
+      {
+        "ticker": "CIBR",
+        "name": "보안",
+        "pct": 0.5
+      },
+      {
+        "ticker": "IGV",
+        "name": "소프트웨어",
+        "pct": -0.35
+      }
+    ]
+  }
+}
