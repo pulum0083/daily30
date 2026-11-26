@@ -1,19 +1,38 @@
 {
-  "generated_at": "2026-11-26T12:01:17.801673+09:00",
+  "generated_at": "2026-11-26T12:31:34.004551+09:00",
   "date": "2026-11-26",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 1.0,
-      "surge": 0.44,
-      "events": []
+      "changePct": 1.41,
+      "surge": 0.46,
+      "events": [
+        {
+          "time": "10:23",
+          "headline": "삼성전자, 외국인/기관 동시 순매수… 주가 +2.61%",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5aWTczTTlsc2RJSl9hcDBoSjNvc0tQeEJXMG8xSmpaZVhaTTdWYnFOZ0NiNWc3M0g4X1VkaG9Fa3Y4U2lRQTRMY3Q3SGtsektmNDA4b0dRWWpTMmJS?oc=5",
+          "source": "뉴스핌",
+          "why": "외국인과 기관의 동시 순매수로 삼성전자 주가가 2.61% 상승했다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        },
+        {
+          "time": "11:07",
+          "headline": "\"삼성전자 망할 것 같아요?\"…주가 반토막에도 \"찬스\"라는 존리",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5UN1VWMEZnNjhhcEczbEduM25qU2FKOFNuWEhTdDdzYVBkTktvcDJDNjlOTW1PSFdIbFRwcXg3Y3g3THRJMl9zRWNucFduaHZvYVNHVk85Q1J1Y3NfbjB2TA?oc=5",
+          "source": "아시아경제",
+          "why": "\"삼성전자 망할 것 같아요?\"…주가 반토막에도 \"찬스\"라는 존리 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 2.62,
-      "surge": 0.55,
+      "changePct": 3.2,
+      "surge": 0.58,
       "events": [
         {
           "time": "09:11",
@@ -38,17 +57,17 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -3.9,
-      "surge": 0.39,
+      "changePct": -3.34,
+      "surge": 0.41,
       "events": [
         {
-          "time": "10:08",
-          "headline": "현대차그룹, 모비스·트랜시스·엔지니어링 수장 교체…SDV·제조혁신 '전진 배치'",
-          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBKNnZ1VFUzeER3N2lvS0VmZng5cmJlNVNsMGVLU1ZxNUJHenQtWEQ1QzNQRTJjZW9JdGx3TDg3UTVNNDhNNDhIOFNIVm5mMVZHbnJ5MjRmTnRsaFZX?oc=5",
-          "source": "뉴스핌",
-          "why": "현대차그룹이 모비스, 트랜시스, 엔지니어링의 수장을 교체하며 SDV와 제조 혁신을 위한 인사를 단행했다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
+          "time": "11:06",
+          "headline": "현대차그룹, 실적·주가 부진 속 완성차 수장 유임…모비스 등 부품 계열사 연쇄 교체",
+          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBOMnhpSmJnWVZmTjE1ckEycXZYekk2enNlOXFMNndkUnpWRTBBRndUaDVwaEZzUXBDMWVoNGk3bTZ1cXV3VVJ4VlpsRGlkdGNCMVV5VXdMUDdYUUZQQVFiWVNXelpzSjVBbms1c2NQNEo?oc=5",
+          "source": "리더스팩트",
+          "why": "현대차그룹이 실적 및 주가 부진 속에서 완성차 부문 최고 경영진은 유임시키고 모비스 등 부품 계열사 사령탑을 교체했다.",
+          "tier": "why",
+          "sentiment": "neg"
         },
         {
           "time": "08:59",
