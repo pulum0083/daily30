@@ -40,15 +40,16 @@ def test_breakout_outside_window_is_ignored():
     assert out == []
 
 
-def test_same_stock_not_counted_again_within_10_days():
-    n = 40
-    h = np.full(n, 100.0)
-    h[11], h[16], h[30] = 106, 106, 106
-    q = [i in (10, 15, 29) for i in range(n)]
-    pv = [105.0 if i < 13 else 110.0 if i < 20 else 105.0 for i in range(n)]
-    pv[15] = 105.0
-    out = bw.find_breakouts(frame({"A": q}), frame({"A": h}), frame({"A": pv}), 0, n - 1)
-    assert [i for _, i, _ in out] == [11, 30]   # 16은 11과 5일 차이 — 뺀다
+def test_condition_void_if_close_drops_below_ma10_before_breakout():
+    """백테스트와 같다 — 넘기 전에 종가가 10일선 아래로 내려가면 그 조건은 무효(2026-11-26)."""
+    n = 30
+    h = np.full(n, 100.0); h[19] = 106.0
+    kq = frame({"A": [i == 15 for i in range(n)]})
+    pv = frame({"A": [105.0] * n})
+    c = np.full(n, 100.0); s10 = np.full(n, 99.0)
+    assert bw.find_breakouts(kq, frame({"A": h}), pv, 0, n - 1, frame({"A": c}), frame({"A": s10})) == [("A", 19, 15)]
+    c[17] = 98.0                        # 17일 종가가 10일선(99) 아래 — 무효
+    assert bw.find_breakouts(kq, frame({"A": h}), pv, 0, n - 1, frame({"A": c}), frame({"A": s10})) == []
 
 
 def _fake(monkeypatch, O, H, L, C, kq, pv10, N, lo20):
@@ -186,3 +187,23 @@ def test_summary_sentences():
     assert _bw_summary([t(2, 1)], []).endswith("모두 종가까지 그 위를 지켰어요.")
     assert "지킨 종목은 없었어요" in _bw_summary([t(1, 2)], [])
     assert _bw_summary([], [{"state": "live", "pct": 3.0}]).endswith("1개가 아직 이어지고 있어요(+3.0%).")
+
+
+def test_no_new_breakout_while_previous_is_live(monkeypatch):
+    """앞 돌파가 진행 중이면 같은 종목의 새 돌파를 세지 않는다 — 2026-11-24 젠 디지털이 두 칸에 함께 나왔다(2026-11-26)."""
+    n = 60
+    C = frame({"A": [106.0] * n}); O, H, L = C.copy() - 2, C.copy(), C.copy() - 1   # 저가 105 > 손절선 103 — 앞 돌파가 이어진다
+    H.iloc[40, 0] = 106; H.iloc[59, 0] = 112
+    kq = frame({"A": [i in (38, 57) for i in range(n)]})
+    pv = frame({"A": [105.0 if i < 50 else 110.0 for i in range(n)]})
+    _fake(monkeypatch, O, H, L, C, kq, pv, frame({"A": [1.0] * n}), frame({"A": [50.0] * n}))
+    r = bw.compute(O, H, L, C, DAYS[n - 1].date())
+    assert r["today"] == [] and [x["from"] for x in r["track"]] == [DAYS[39].date().isoformat()]
+
+
+def test_gap_up_day_judged_by_pivot_not_entry():
+    """시가가 기준선 위에서 열린 날 — 종가가 산 가격(시가)보다 낮아도 기준선 위면 '장중에만 넘음'이 아니다(2026-11-26)."""
+    d = {"asof": "2026-11-24", "today": [{"t": "A", "name": "에이", "close": 103.0, "chg": 1.0, "pivot": 100.0,
+                                         "entry": 105.0, "stop": 95.0}], "wait": [], "track": []}
+    b = gh.build_breakout_watch({"breakout_watch": d})["bw"]
+    assert b["today"][0]["below"] is None and b["n_held"] == 1

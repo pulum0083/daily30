@@ -216,7 +216,7 @@ def _bw_short(name: str) -> str:
 
 def _bw_summary(today: list, track: list) -> str:
     """맨 위 요약 두 문장 — 숫자에서 규칙으로만 만든다(LLM 없음)."""
-    held = [r for r in today if r["close"] >= r["entry"]]
+    held = [r for r in today if r["close"] >= (r.get("pivot") or r["entry"])]
     if not today:
         s1 = "오늘 최근 고점을 넘은 종목은 없어요."
     elif len(held) == len(today):
@@ -261,10 +261,14 @@ def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
         return {}
     today, wait, track = ([dict(r, cap_label=_cap_label(r.get("cap"))) for r in x] for x in (today, wait, track))
     # 장중에 기준선을 넘었다가 그 아래로 끝난 날(2026-11-26) — "넘었어요"라고 쓰면 종가와 어긋난다.
-    tcards = [dict(r, to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
-                   below=round((1 - r["close"] / r["entry"]) * 100, 1) if r["close"] < r["entry"] else None,
-                   meter=_bw_meter(r["stop"], r["entry"], r["close"]))
+    # 기준선 = 넘은 10일 최고가(pivot). 시가가 그 위에서 열린 날은 산 가격(entry)이 더 높다 — '장중에만 넘음'은 기준선으로 판정한다.
+    piv = lambda r: r.get("pivot") or r["entry"]
+    tcards = [dict(r, line=piv(r), to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
+                   below=round((1 - r["close"] / piv(r)) * 100, 1) if r["close"] < piv(r) else None,
+                   meter=_bw_meter(r["stop"], piv(r), r["close"]))
               for r in today]
+    # 종가까지 지킨 종목을 먼저 — 장중에만 넘은 종목이 눈에 먼저 띄지 않게(2026-11-26 사용자 지적)
+    tcards = [r for r in tcards if r["below"] is None] + [r for r in tcards if r["below"] is not None]
     wcards = [dict(r, meter=_bw_meter(r["stop"], r["pivot"], r["close"])) for r in wait]
     lab = {"live": "{}거래일째 진행", "stop": "손절로 끝 · {}거래일", "exit": "추세 끝 · {}거래일"}
     rows = [dict(r, label=lab.get(r["state"], "{}").format(r["days"]), from_md=_md(r["from"])) for r in track]
@@ -275,7 +279,7 @@ def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
         "asof_label": f"{_md(asof)}({_dow(asof)}) 종가 기준",
         "today": tcards, "wait": wcards, "wait_more": d.get("wait_more") or 0, "track": rows,
         "n_wait": len(wcards) + (d.get("wait_more") or 0), "n_done": len(done),
-        "n_held": sum(1 for r in today if r["close"] >= r["entry"]),
+        "n_held": sum(1 for r in tcards if r["below"] is None),
         "n_live": len(track) - len(done), "bt": bt,
         "summary": _bw_summary(today, track),
     }}

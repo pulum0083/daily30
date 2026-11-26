@@ -13,7 +13,7 @@
   <details class="bw2-how"><summary>이 목록 읽는 법</summary>
     <ol>
       <li><b>기다리는 중</b> — 최근 한두 달 크게 오른 뒤, 2주쯤 좁은 범위에서 쉬고 있는 종목이에요. 추세를 따라가는 투자자들이 '다시 오를 준비'로 보는 모양이에요.</li>
-      <li><b>돌파</b> — 그 종목이 최근 10일 최고가(<b>기준선</b>)를 넘은 날이에요. 장중에 넘었어도 종가가 다시 기준선 아래면 <b>장중에만 넘음</b>(노란 칸)으로 따로 표시해요. 넘은 힘이 약했다는 뜻이에요.</li>
+      <li><b>돌파</b> — 그 종목이 최근 10일 최고가(<b>기준선</b>)를 넘은 날이에요. 장중에 넘었어도 종가가 다시 기준선 아래면 <b>장중에만 넘음</b>(회색 칸)으로 따로 표시해요. 넘은 힘이 약했다는 뜻이에요.</li>
       <li><b>그 뒤 결과</b> — 돌파한 가격에서 얼마나 움직였는지 기록해요. 규칙상 <b>손절선</b>(돌파 가격에서 하루 평균 움직임의 두 배 아래)을 깨면 끝, 아니면 진행 중이에요.</li>
     </ol>
     <p>타일의 막대는 손절선(왼쪽 끝)과 기준선(빨간 점선) 사이에서 지금 가격이 어디쯤인지예요. 점선을 넘어 빨갛게 찼으면 기준선 위, 파랗게 못 미쳤으면 아래예요. 사라는 신호가 아니라, 이 규칙을 그대로 따랐다면 어떻게 됐는지 빠짐없이 남기는 기록이에요.</p>
@@ -33,7 +33,7 @@
       <div class="n">{{ r.name }}<small>{{ r.t }} · {{ '장중에만 넘음' if r.below is not none else '종가도 넘음' }}</small></div>
       <div class="v {{ cls(r.chg) }}">{{ sg(r.chg) }}</div>
       {{ meter(r.meter) }}
-      <div class="f">{% if r.below is not none %}{% if r.below >= 0.1 %}기준선 ${{ '%.2f'|format(r.entry) }}보다 {{ '%.1f'|format(r.below) }}% 아래로 끝{% else %}기준선 ${{ '%.2f'|format(r.entry) }} 바로 아래로 끝{% endif %}{% else %}기준선 ${{ '%.2f'|format(r.entry) }} 위 · 손절선까지 {{ '%.1f'|format(r.to_stop) }}%{% endif %}</div>
+      <div class="f">{% if r.below is not none %}{% if r.below >= 0.1 %}기준선 ${{ '%.2f'|format(r.line) }}보다 {{ '%.1f'|format(r.below) }}% 아래로 끝{% else %}기준선 ${{ '%.2f'|format(r.line) }} 바로 아래로 끝{% endif %}{% else %}기준선 ${{ '%.2f'|format(r.line) }} 위 · 손절선까지 {{ '%.1f'|format(r.to_stop) }}%{% endif %}</div>
     </div>
     {% endfor %}
   </div>

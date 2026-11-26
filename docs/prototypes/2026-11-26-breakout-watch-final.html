@@ -1,0 +1,174 @@
+<!doctype html>
+<!-- 미국 브리핑 '돌파 관찰 목록' 최종 시안(B8 요약 + B6 타일 + 읽는 법) — 실제 템플릿을 11/24 종가 데이터로 렌더 -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>돌파 관찰 목록 최종 시안</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>:root {
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
+  --gold:#B7791F;--gold-bg:#FEF3C7;--ok:#12A150;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --s2:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+  --gnb-bg:#16181A;--gnb-h:52px;
+}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;font-size:15px;line-height:1.55;word-break:keep-all}
+.open-section__title{font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px}
+.open-section__title::before{content:'';width:3px;height:15px;background:var(--primary);border-radius:2px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.bw-section{margin-top:22px}
+.bw-asof{font-size:11px;font-weight:500;color:var(--muted);margin-left:6px}
+.bw-intro{font-size:13.5px;color:var(--muted);line-height:1.65;margin:6px 0 12px}
+.bw-more{font-size:12px;color:var(--muted);margin:2px 0 0}
+.bw-note{font-size:11.5px;color:var(--muted);margin:6px 0 0}
+.bw-honest{margin-top:8px;background:var(--gold-bg);border-radius:var(--r-md);padding:10px 12px;font-size:12.5px;color:var(--gold);line-height:1.6}
+.bw-honest b{color:var(--gold)}
+.bw-fine{margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px;font-size:12.5px;color:var(--muted)}.bw-fine summary{cursor:pointer;font-weight:600}.bw-fine p{line-height:1.7;margin:6px 0 0}
+.bw2-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 0}
+.bw2-sum div{background:var(--surface-inset);border-radius:var(--r-md);padding:10px 11px}
+.bw2-sum b{display:block;font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.bw2-sum span{font-size:12px;color:var(--muted);line-height:1.4;display:block}
+.bw2-how{margin:0 0 12px;background:var(--surface-soft);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--ink)}
+.bw2-how summary{cursor:pointer;font-weight:700;color:var(--primary)}
+.bw2-how ol{margin:8px 0 0;padding-left:18px;display:grid;gap:6px;line-height:1.6}
+.bw2-how p{margin:8px 0 0;line-height:1.6;color:var(--muted)}
+.bw2-say{font-size:14px;line-height:1.7;color:var(--ink);margin:10px 0 2px}
+.bw2-gh{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;font-weight:800;color:var(--ink);margin:18px 0 8px}
+.bw2-gh span{font-size:12px;font-weight:500;color:var(--muted)}
+.bw2-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bw2-t{border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--canvas);padding:10px 11px;min-width:0}
+.bw2-t.half{background:var(--surface-soft)}
+.bw2-t.half .v{opacity:.7}
+.bw2-t.wait{border-style:dashed}
+.bw2-t.end{background:var(--surface-soft)}
+.bw2-t .n{font-size:13px;font-weight:700;line-height:1.3;color:var(--ink)}
+.bw2-t .n small{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:1px}
+.bw2-t .v{font-size:19px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.bw2-t .v.up{color:var(--up)}.bw2-t .v.dn{color:var(--dn)}.bw2-t .v.mu{color:var(--muted)}
+.bw2-t .f{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:5px}
+.bw2-m{position:relative;height:6px;background:var(--surface-inset);border-radius:3px;margin-top:8px}
+.bw2-m i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#5D97F1}
+.bw2-m i.over{background:#E86464}
+.bw2-m span{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--up)}
+</style></head><body><main style="max-width:640px;margin:0 auto;padding:16px">
+
+
+
+
+<div class="open-section bw-section">
+  <div class="open-section__title">🔭 돌파 관찰 목록 <span class="bw-asof">S&amp;P 500 · 11/24(화) 종가 기준</span></div>
+  <p class="bw-intro">크게 오른 뒤 쉬던 종목이 최근 고점을 넘는지, 넘은 뒤 어떻게 됐는지 지켜봐요.</p>
+  <details class="bw2-how" open><summary>이 목록 읽는 법</summary>
+    <ol>
+      <li><b>기다리는 중</b> — 최근 한두 달 크게 오른 뒤, 2주쯤 좁은 범위에서 쉬고 있는 종목이에요. 추세를 따라가는 투자자들이 '다시 오를 준비'로 보는 모양이에요.</li>
+      <li><b>돌파</b> — 그 종목이 최근 10일 최고가(<b>기준선</b>)를 넘은 날이에요. 장중에 넘었어도 종가가 다시 기준선 아래면 <b>장중에만 넘음</b>(회색 칸)으로 따로 표시해요. 넘은 힘이 약했다는 뜻이에요.</li>
+      <li><b>그 뒤 결과</b> — 돌파한 가격에서 얼마나 움직였는지 기록해요. 규칙상 <b>손절선</b>(돌파 가격에서 하루 평균 움직임의 두 배 아래)을 깨면 끝, 아니면 진행 중이에요.</li>
+    </ol>
+    <p>타일의 막대는 손절선(왼쪽 끝)과 기준선(빨간 점선) 사이에서 지금 가격이 어디쯤인지예요. 점선을 넘어 빨갛게 찼으면 기준선 위, 파랗게 못 미쳤으면 아래예요. 사라는 신호가 아니라, 이 규칙을 그대로 따랐다면 어떻게 됐는지 빠짐없이 남기는 기록이에요.</p>
+  </details>
+  <div class="bw2-sum">
+    <div><b>4</b><span>오늘 고점을 넘은 종목</span></div>
+    <div><b>2</b><span>종가까지 지킨 종목</span></div>
+    <div><b>2</b><span>돌파 뒤 아직 진행 중</span></div>
+  </div>
+  <p class="bw2-say">오늘 4종목이 장중에 최근 고점을 넘었고, 그중 리제네론·펜테어만 종가까지 그 위를 지켰어요. 앞서 돌파한 종목 중 2개는 아직 이어지고(+6.2%·+5.1%), 3개는 끝났어요(평균 −6.4%).</p>
+
+  
+  <div class="bw2-gh">오늘 돌파<span>종가도 넘음 2 · 장중만 2</span></div>
+  <div class="bw2-tiles">
+    
+    <div class="bw2-t">
+      <div class="n">리제네론 파마슈티컬스<small>REGN · 종가도 넘음</small></div>
+      <div class="v up">+4.8%</div>
+      <div class="bw2-m" aria-hidden="true"><i style="width:96.8%" class="over"></i><span style="left:87.0%"></span></div>
+      <div class="f">기준선 $980.55 위 · 손절선까지 6.5%</div>
+    </div>
+    
+    <div class="bw2-t">
+      <div class="n">펜테어<small>PNR · 종가도 넘음</small></div>
+      <div class="v up">+1.9%</div>
+      <div class="bw2-m" aria-hidden="true"><i style="width:100.0%" class="over"></i><span style="left:87.0%"></span></div>
+      <div class="f">기준선 $70.60 위 · 손절선까지 6.6%</div>
+    </div>
+    
+    <div class="bw2-t half">
+      <div class="n">치폴레 멕시칸 그릴<small>CMG · 장중에만 넘음</small></div>
+      <div class="v up">+2.2%</div>
+      <div class="bw2-m" aria-hidden="true"><i style="width:85.5%" class=""></i><span style="left:87.0%"></span></div>
+      <div class="f">기준선 $37.09보다 0.1% 아래로 끝</div>
+    </div>
+    
+    <div class="bw2-t half">
+      <div class="n">트랙터 서플라이<small>TSCO · 장중에만 넘음</small></div>
+      <div class="v up">+5.0%</div>
+      <div class="bw2-m" aria-hidden="true"><i style="width:86.6%" class=""></i><span style="left:87.0%"></span></div>
+      <div class="f">기준선 $39.46 바로 아래로 끝</div>
+    </div>
+    
+  </div>
+  
+
+  
+  <div class="bw2-gh">기다리는 중<span>시가총액 큰 순</span></div>
+  <div class="bw2-tiles">
+    
+    <div class="bw2-t wait">
+      <div class="n">아이덱스 래보라토리스<small>IDXX · 기다리는 중</small></div>
+      <div class="v mu">0.2%</div>
+      <div class="bw2-m" aria-hidden="true"><i style="width:84.4%" class=""></i><span style="left:87.0%"></span></div>
+      <div class="f">고점 $713.38까지 · 넘으면 손절선 $669.35</div>
+    </div>
+    
+    <div class="bw2-t wait">
+      <div class="n">차터 커뮤니케이션<small>CHTR · 기다리는 중</small></div>
+      <div class="v mu">5.0%</div>
+      <div class="bw2-m" aria-hidden="true"><i style="width:42.5%" class=""></i><span style="left:87.0%"></span></div>
+      <div class="f">고점 $142.60까지 · 넘으면 손절선 $129.44</div>
+    </div>
+    
+  </div>
+  
+  
+
+  
+  <div class="bw2-gh">그 뒤 결과<span>진행 2 · 끝 3</span></div>
+  <div class="bw2-tiles">
+    
+    <div class="bw2-t">
+      <div class="n">메틀러 톨레도 인터내셔널<small>MTD · 10/14 돌파</small></div>
+      <div class="v up">+6.2%</div>
+      <div class="f">29거래일째 진행</div>
+    </div>
+    
+    <div class="bw2-t">
+      <div class="n">젠 디지털<small>GEN · 10/30 돌파</small></div>
+      <div class="v up">+5.1%</div>
+      <div class="f">17거래일째 진행</div>
+    </div>
+    
+    <div class="bw2-t end">
+      <div class="n">액센추어<small>ACN · 10/30 돌파</small></div>
+      <div class="v dn">−7.6%</div>
+      <div class="f">손절로 끝 · 12거래일</div>
+    </div>
+    
+    <div class="bw2-t end">
+      <div class="n">에퀴팩스<small>EFX · 11/4 돌파</small></div>
+      <div class="v dn">−6.6%</div>
+      <div class="f">손절로 끝 · 9거래일</div>
+    </div>
+    
+    <div class="bw2-t end">
+      <div class="n">해즈브로<small>HAS · 11/11 돌파</small></div>
+      <div class="v dn">−5.0%</div>
+      <div class="f">손절로 끝 · 6거래일</div>
+    </div>
+    
+  </div>
+  <p class="bw-note">막대는 손절선(왼쪽 끝)에서 기준선(빨간 점선)까지 지금 가격의 위치예요. 결과 % = 돌파한 가격에서 끝난 가격(진행 중은 오늘 종가)까지.</p>
+  
+
+  <details class="bw-fine"><summary>근거와 면책 고지</summary><div class="bw-honest"><b>이 규칙의 과거 성적</b> — 2016년부터 S&P 500 현재 구성 종목에서 돌파 때 샀다면, 2025년 한 해를 빼면 한 번 평균 +0.22R로 아무 날에나 산 경우(+0.16R)와 거의 같았어요. 이긴 비율은 31%예요. 종목을 고르는 힘이 확인된 목록이 아니에요.</div><p>1·3·6달 상승률 중 하나가 S&amp;P 500 상위 2%, 6달 저점에서 30% 넘게 오름, 종가가 10일·20일 평균선 위, 최근 10거래일 폭이 그 전 20거래일 폭의 60%보다 좁고 저점이 높아짐, 하루 평균 움직임 3% 이상(크리스티안 쿨라매기의 고르기 조건). 넘을 선은 최근 10일 최고가, 손절선은 산 가격에서 하루 평균 움직임의 두 배 아래, 추세 끝은 20일 최저가를 깰 때예요(리처드 데니스의 터틀 규칙). 같은 종목은 10거래일 안에 다시 돌파로 세지 않아요. R은 손익을 손절할 때 잃는 돈으로 나눈 값이에요. 지금 S&amp;P 500에 남은 종목으로 시험해 실제보다 좋게 나왔을 수 있어요. 매수 권유가 아니에요.</p></details>
+</div></main></body></html>

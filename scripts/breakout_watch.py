@@ -8,7 +8,8 @@
   최근 10일 폭 < 그 전 20일 폭의 60% · 최근 10일 저점 > 그 전 20일 저점 · 10일 최고가에서 8% 안 ·
   하루 평균 움직임(ADR20) 3% 이상.
 돌파: 조건을 채운 날(k)로부터 5거래일 안에 그날의 10일 최고가(기준선)를 처음 넘은 날. 산 가격 = max(기준선, 그날 시가).
-  같은 종목은 10거래일 안에 다시 돌파로 세지 않는다.
+  넘기 전에 종가가 10일선 아래로 내려가면 그 조건은 무효다. 같은 종목은 앞 돌파가 끝나기 전엔 새 돌파로 세지 않는다
+  (2026-11-26 — 백테스트 hy_bt.py와 맞췄다. 그 전엔 이 둘이 없어 젠 디지털이 '진행 중'과 '오늘 돌파'에 함께 나왔다).
 결과(터틀): 손절선 = 산 가격 − 2N(N = 20일 평균 실제 움직임, 전날 값), 추세 끝 = 20일 최저가 이탈(산 다음 날부터).
   돌파한 날 저가가 손절선 아래면 그날 손절로 본다(백테스트와 같은 불리한 가정).
 
@@ -34,7 +35,6 @@ MIN_VALID = 450
 ADR_MIN = 0.03
 LOOKBACK = 60        # 이 거래일 안에 돌파한 종목만 추적한다
 WINDOW = 5           # 조건을 채운 날로부터 며칠 안의 돌파만 센다
-DEDUP = 10           # 같은 종목은 이 거래일 안에 다시 돌파로 세지 않는다
 SHOW_ENDED = 5       # 끝난 종목은 끝난 지 이 거래일까지만 결과 칸에 남긴다
 MAX_WAIT = 6
 MAX_TRACK = 10
@@ -59,22 +59,26 @@ def indicators(O, H, L, C):
     N = tr.ewm(alpha=1 / 20, adjust=False).mean()
     lo20 = L.rolling(20).min().shift(1)
     kq = top & run & above & tight & hl & near & C.notna() & (adr >= ADR_MIN)
-    return {"kq": kq, "pv10": pv10, "N": N, "lo20": lo20, "rk": rk, "ret": {"1달": r1, "3달": r3, "6달": r6}}
+    return {"kq": kq, "pv10": pv10, "N": N, "lo20": lo20, "s10": s10, "rk": rk, "ret": {"1달": r1, "3달": r3, "6달": r6}}
 
 
-def find_breakouts(kq, H, pv10, start: int, end: int) -> list:
-    """start~end 거래일 사이 돌파 [(종목, 돌파일 i, 조건일 k)] — 기준선을 처음 넘은 날, 10거래일 안 중복은 뺀다."""
+def find_breakouts(kq, H, pv10, start: int, end: int, C=None, s10=None) -> list:
+    """start~end 거래일 사이 돌파 후보 [(종목, 돌파일 i, 조건일 k)] — 기준선을 처음 넘은 날.
+    C·s10을 주면 넘기 전(k+1~i-1)에 종가가 10일선 아래로 내려간 조건은 무효로 본다(백테스트와 같다).
+    같은 종목이 앞 돌파 중에 또 넘는 건 compute()가 거른다."""
     out = []
     for t in kq.columns:
         q, h, p = kq[t].to_numpy(), H[t].to_numpy(), pv10[t].to_numpy()
-        last = None
+        c = C[t].to_numpy() if C is not None and s10 is not None else None
+        m = s10[t].to_numpy() if c is not None else None
         for i in range(start, end + 1):
             for k in range(max(i - WINDOW, 0), i):
-                if q[k] and h[i] > p[k] and not (h[k + 1:i] > p[k]).any():
-                    if last is None or i - last > DEDUP:
-                        out.append((t, i, k))
-                        last = i
-                    break
+                if not (q[k] and h[i] > p[k]) or (h[k + 1:i] > p[k]).any():
+                    continue
+                if c is not None and (c[k + 1:i] < m[k + 1:i]).any():
+                    continue
+                out.append((t, i, k))
+                break
     return out
 
 
@@ -103,7 +107,10 @@ def compute(O, H, L, C, session: date) -> dict | None:
     I = len(C) - 1
     days = [d.date().isoformat() for d in C.index]
     today, track, live = [], [], set()
-    for t, i, k in find_breakouts(kq, H, pv10, I - LOOKBACK, I):
+    free_from = {}       # 종목별로 새 돌파를 셀 수 있는 첫 조건일 — 앞 돌파가 끝난 다음 날부터(진행 중이면 없음)
+    for t, i, k in sorted(find_breakouts(kq, H, pv10, max(I - 2 * LOOKBACK, 0), I, C, ind.get("s10")), key=lambda x: (x[0], x[1])):
+        if t in live or k < free_from.get(t, -1):
+            continue
         piv, n = float(pv10[t].iloc[k]), float(N[t].iloc[i - 1])
         ent = max(piv, float(O[t].iloc[i]))
         stop = ent - 2 * n
@@ -116,15 +123,20 @@ def compute(O, H, L, C, session: date) -> dict | None:
             if j > i and lo < float(lo20[t].iloc[j]):
                 state, ex_i, ex = "exit", j, min(float(O[t].iloc[j]), float(lo20[t].iloc[j]))
                 break
+        if ex_i is not None:
+            free_from[t] = ex_i + 1
         if i == I and state == "live":
             c = float(C[t].iloc[I])
             today.append({"t": t, "close": round(c, 2), "chg": round((c / float(C[t].iloc[I - 1]) - 1) * 100, 2),
+                          "pivot": round(piv, 2), "open": round(float(O[t].iloc[I]), 2),
                           "entry": round(ent, 2), "stop": round(stop, 2), "why": why(ind, H, L, C, t, k)})
             live.add(t)
             continue
         if state == "live":
             live.add(t)
         elif I - ex_i > SHOW_ENDED:
+            continue
+        if i < I - LOOKBACK:     # 앞쪽은 겹침을 가리려고만 훑었다 — 결과 칸엔 최근 LOOKBACK 거래일 돌파만
             continue
         cur = ex if ex is not None else float(C[t].iloc[I])
         track.append({"t": t, "from": days[i], "state": state, "days": (ex_i if ex_i is not None else I) - i,

@@ -1770,7 +1770,8 @@ a.ssig-r:hover .ssig-go{text-decoration:underline;}
 .bw2-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(min-width:620px){.bw2-tiles{grid-template-columns:repeat(3,1fr)}}
 .bw2-t{border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--canvas);padding:10px 11px;min-width:0}
-.bw2-t.half{background:var(--gold-bg);border-color:transparent}
+.bw2-t.half{background:var(--surface-soft)}
+.bw2-t.half .v{opacity:.7}
 .bw2-t.wait{border-style:dashed}
 .bw2-t.end{background:var(--surface-soft)}
 .bw2-t .n{font-size:13px;font-weight:700;line-height:1.3;color:var(--ink)}
