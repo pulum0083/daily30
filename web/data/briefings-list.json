@@ -11,8 +11,13 @@
         "time": "07:29"
       },
       "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
+        "state": "ready",
+        "url": "/briefings/2026-11-26/close/",
+        "headline": "4806 찍고 금리인상 맞은 코스피, 그래도 플러스로 버텼다",
+        "title": "4,711.21",
+        "price": "4,711.21",
+        "time": "",
+        "chg": 0.29
       },
       "us": {
         "state": "pending",
@@ -24,6 +29,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-25/kospi/",
         "headline": "외국인 자금의 신선한 신호가 하락 쪽을 가리켜요.",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
@@ -42,6 +48,7 @@
         "state": "ready",
         "url": "/briefings/2026-11-25/us/",
         "headline": "반도체가 쓸려나가는데 AMD는 공짜로 나눠준다?",
+        "hit": true,
         "pill_cls": "dn",
         "pill_text": "▼",
         "title": "하락 우위",
