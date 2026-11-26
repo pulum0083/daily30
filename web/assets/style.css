@@ -1756,8 +1756,9 @@ a.ssig-r:hover .ssig-go{text-decoration:underline;}
 .bw-honest b{color:var(--gold)}
 .bw-fine{margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px;font-size:12.5px;color:var(--muted)}.bw-fine summary{cursor:pointer;font-weight:600}.bw-fine p{line-height:1.7;margin:6px 0 0}
 /* 돌파 관찰 목록 — 요약 + 2열 타일(2026-11-26). 위 .bw-step·.bw-card·.bw-line은 이전 발행본이 쓰므로 남긴다(§33). */
-.bw2-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 0}
-.bw2-sum div{background:var(--surface-inset);border-radius:var(--r-md);padding:10px 11px}
+.bw2-sum{display:grid;grid-template-columns:repeat(3,1fr);margin:4px 0 0;border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--canvas)}
+.bw2-sum div{padding:11px 14px}
+.bw2-sum div+div{border-left:1px solid var(--hairline)}
 .bw2-sum b{display:block;font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
 .bw2-sum span{font-size:12px;color:var(--muted);line-height:1.4;display:block}
 .bw2-how{margin:0 0 12px;background:var(--surface-soft);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--ink)}

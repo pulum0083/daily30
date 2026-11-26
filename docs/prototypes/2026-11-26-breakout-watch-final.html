@@ -26,16 +26,17 @@ body{margin:0;background:var(--canvas);color:var(--ink);font-family:"Pretendard 
 .bw-honest{margin-top:8px;background:var(--gold-bg);border-radius:var(--r-md);padding:10px 12px;font-size:12.5px;color:var(--gold);line-height:1.6}
 .bw-honest b{color:var(--gold)}
 .bw-fine{margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px;font-size:12.5px;color:var(--muted)}.bw-fine summary{cursor:pointer;font-weight:600}.bw-fine p{line-height:1.7;margin:6px 0 0}
-.bw2-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 0}
-.bw2-sum div{background:var(--surface-inset);border-radius:var(--r-md);padding:10px 11px}
+.bw2-sum{display:grid;grid-template-columns:repeat(3,1fr);margin:4px 0 0;border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--canvas)}
+.bw2-sum div{padding:11px 14px}
+.bw2-sum div+div{border-left:1px solid var(--hairline)}
 .bw2-sum b{display:block;font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
 .bw2-sum span{font-size:12px;color:var(--muted);line-height:1.4;display:block}
 .bw2-how{margin:0 0 12px;background:var(--surface-soft);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--ink)}
-.bw2-how summary{cursor:pointer;font-weight:700;color:var(--primary)}
+.bw2-how summary{cursor:pointer;font-weight:600;color:var(--muted)}
 .bw2-how ol{margin:8px 0 0;padding-left:18px;display:grid;gap:6px;line-height:1.6}
 .bw2-how p{margin:8px 0 0;line-height:1.6;color:var(--muted)}
-.bw2-say{font-size:14px;line-height:1.7;color:var(--ink);margin:10px 0 2px}
-.bw2-gh{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;font-weight:800;color:var(--ink);margin:18px 0 8px}
+.bw2-say{font-size:13.5px;line-height:1.7;color:var(--ink);margin:10px 0 2px}
+.bw2-gh{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:700;color:var(--ink);margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--hairline)}
 .bw2-gh span{font-size:12px;font-weight:500;color:var(--muted)}
 .bw2-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .bw2-t{border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--canvas);padding:10px 11px;min-width:0}
@@ -49,9 +50,9 @@ body{margin:0;background:var(--canvas);color:var(--ink);font-family:"Pretendard 
 .bw2-t .v.up{color:var(--up)}.bw2-t .v.dn{color:var(--dn)}.bw2-t .v.mu{color:var(--muted)}
 .bw2-t .f{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:5px}
 .bw2-m{position:relative;height:6px;background:var(--surface-inset);border-radius:3px;margin-top:8px}
-.bw2-m i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#5D97F1}
-.bw2-m i.over{background:#E86464}
-.bw2-m span{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--up)}
+.bw2-m i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#B5BCC7}
+.bw2-m i.over{background:var(--ink);opacity:.72}
+.bw2-m span{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--ink)}
 </style></head><body><main style="max-width:640px;margin:0 auto;padding:16px">
 
 
