@@ -162,3 +162,13 @@ def test_order_by_cap_sorts_all_lists_and_trims():
 
 def test_cap_label():
     assert gh._cap_label(3.92e12) == "$3.9조" and gh._cap_label(8.5e10) == "$850억" and gh._cap_label(None) == ""
+
+
+def test_render_closed_below_entry_1124():
+    """2026-11-24 — 장중에 기준선을 넘었다가 그 아래로 끝난 종목을 '넘었어요'라고 쓰지 않는다(2026-11-26)."""
+    snap = json.loads((Path(__file__).resolve().parents[1] / "web/briefings/2026-11-25/us/analysis_snapshot.json").read_text())
+    ctx = gh.build_breakout_watch({"breakout_watch": snap["breakout_watch"]})
+    html = gh.make_env().get_template("sections/breakout_watch.html").render(**ctx)
+    assert "기준선 <b>$980.55</b>을 넘었어요." in html                      # REGN 종가 987.09 — 위에서 끝남
+    assert "장중에 기준선 <b>$31.07</b>을 넘었다가 그 아래로 끝났어요(기준선보다 <b>3.6%</b> 아래)" in html   # GEN 29.95
+    assert "장중에 기준선 <b>$39.46</b>을 넘었다가 기준선 바로 아래로 끝났어요." in html               # TSCO 39.45

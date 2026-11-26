@@ -236,7 +236,9 @@ def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
     if not (today or wait or track):
         return {}
     today, wait, track = ([dict(r, cap_label=_cap_label(r.get("cap"))) for r in x] for x in (today, wait, track))
+    # 장중에 기준선을 넘었다가 그 아래로 끝난 날(2026-11-26) — "넘었어요"라고 쓰면 종가와 어긋난다.
     tcards = [dict(r, to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
+                   below=round((1 - r["close"] / r["entry"]) * 100, 1) if r["close"] < r["entry"] else None,
                    line=_bw_line([("stop", r["stop"], "손절선", "b"), ("now", r["close"], "지금", "t"),
                                   ("in", r["entry"], "돌파한 가격", "b")]))
               for r in today]

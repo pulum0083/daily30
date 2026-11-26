@@ -35,7 +35,7 @@
   {% for r in b.today %}
   <div class="bw-card">
     <div class="ch"><b>{{ r.name }}</b><span class="tk">{{ r.t }}{% if r.cap_label %} · 시총 {{ r.cap_label }}{% endif %}</span><span class="px">종가 ${{ '%.2f'|format(r.close) }} <span class="{{ 'dn' if r.chg < 0 else 'up' }}">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span></div>
-    <p class="say">기준선 <b>${{ '%.2f'|format(r.entry) }}</b>을 넘었어요. 규칙상 <b>${{ '%.2f'|format(r.stop) }}</b> 아래로 내려가면 손절이에요. 지금 종가에서 손절선까지 <b>{{ '%.1f'|format(r.to_stop) }}%</b> 남았어요.</p>
+    <p class="say">{% if r.below is not none %}장중에 기준선 <b>${{ '%.2f'|format(r.entry) }}</b>을 넘었다가 {% if r.below >= 0.1 %}그 아래로 끝났어요(기준선보다 <b>{{ '%.1f'|format(r.below) }}%</b> 아래){% else %}기준선 바로 아래로 끝났어요{% endif %}.{% else %}기준선 <b>${{ '%.2f'|format(r.entry) }}</b>을 넘었어요.{% endif %} 규칙상 <b>${{ '%.2f'|format(r.stop) }}</b> 아래로 내려가면 손절이에요. 지금 종가에서 손절선까지 <b>{{ '%.1f'|format(r.to_stop) }}%</b> 남았어요.</p>
     {{ priceline(r.line) }}{{ reasons(r.why) }}
   </div>
   {% else %}<div class="bw-empty">오늘 새로 넘은 종목은 없어요.</div>{% endfor %}
