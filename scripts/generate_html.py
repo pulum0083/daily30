@@ -60,7 +60,7 @@ from sections_kospi import (  # noqa: F401
 from sections_us import (  # noqa: F401
     _PM_FUTURES, _PM_STOCKS, _pct_of, build_premarket_strip, save_us_index_position, NASDAQ_BACKTEST_PATH,
     _NQ_BADGE, build_struct_signal, build_nasdaq_check, _read_nasdaq_overheat, read_sp500_ma200,
-    build_sp500_ma200, BREAKOUT_BACKTEST_PATH, read_breakout_watch, _cap_label, _bw_line, build_breakout_watch,
+    build_sp500_ma200, BREAKOUT_BACKTEST_PATH, read_breakout_watch, _cap_label, build_breakout_watch,
     build_issues, build_us_tone,
 )
 from standalone_pages import (  # noqa: F401

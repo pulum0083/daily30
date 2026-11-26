@@ -1,0 +1,186 @@
+<!doctype html>
+<!-- 미국 브리핑 '돌파 관찰 목록' 다른 표현 시안 3개 — 2026-11-25 발행본(11/24 종가) 실제 데이터 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>돌파 관찰 목록 시안</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{--ink:#13151A;--muted:#6B7280;--hair:#E5E7EB;--soft:#F4F5F7;--card:#fff;--bg:#F7F8FA;--up:#E03131;--dn:#2775ED;--upb:#E86464;--dnb:#5D97F1;--ok:#12B886;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#ECEEF2;--muted:#9AA1AD;--hair:#2A2F38;--soft:#1C2027;--card:#15181E;--bg:#0E1014;}}
+:root[data-theme="dark"]{--ink:#ECEEF2;--muted:#9AA1AD;--hair:#2A2F38;--soft:#1C2027;--card:#15181E;--bg:#0E1014;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;font-size:15px;line-height:1.55}
+.wrap{max-width:660px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}
+.lead{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+.tabs button{border:1px solid var(--hair);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.v{display:none}.v.on{display:block}
+.note{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--muted);margin:0 0 16px;line-height:1.65}
+.note b{color:var(--ink)}
+.sec{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:18px 16px}
+.st{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin:0}
+.st::before{content:'';width:3px;height:15px;background:var(--dn);border-radius:2px}
+.st small{font-weight:500;font-size:12px;color:var(--muted)}
+.intro{font-size:13.5px;color:var(--muted);margin:6px 0 14px}
+.up{color:var(--up)}.dn{color:var(--dn)}.mu{color:var(--muted)}
+.disc{margin-top:14px;font-size:12.5px;color:var(--muted)}
+.disc summary{cursor:pointer;font-weight:600}
+.tk{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ── A. 세 칸 보드 ── */
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.col h3{font-size:13px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+.col h3 em{font-style:normal;font-size:12px;color:var(--muted);font-weight:500}
+.col .k{display:flex;flex-direction:column;gap:8px}
+.mini{border:1px solid var(--hair);border-radius:10px;padding:10px 10px 9px;background:var(--card)}
+.mini .n{font-weight:700;font-size:13.5px;line-height:1.3}
+.mini .s{font-size:12px;color:var(--muted);margin-top:2px}
+.mini .big{font-size:17px;font-weight:800;margin-top:4px}
+.mini .bar{height:5px;background:var(--soft);border-radius:3px;margin-top:7px;position:relative;overflow:hidden}
+.mini .bar i{position:absolute;top:0;bottom:0;left:0;background:var(--dnb);border-radius:3px}
+.mini.wait{border-style:dashed}
+.mini.end{opacity:.75}
+@media(max-width:560px){.board{grid-template-columns:1fr}.col .k{flex-direction:row;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory}.mini{min-width:150px;scroll-snap-align:start}}
+
+/* ── B. 한 줄 목록 ── */
+.list{border-top:1px solid var(--hair)}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 2px;border-bottom:1px solid var(--hair);align-items:center}
+.row .nm{font-weight:700;font-size:14.5px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.chip{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.chip.w{background:var(--soft);color:var(--muted)}
+.chip.b{background:#E7F0FF;color:#1C5FCB}
+.chip.l{background:#FFF1E6;color:#C2410C}
+.chip.x{background:var(--soft);color:var(--muted)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip.b{background:#16294A;color:#8DB6FF}:root:not([data-theme="light"]) .chip.l{background:#3A2414;color:#F7A66B}}
+.row .val{text-align:right;font-weight:800;font-size:15px}
+.row .sub{grid-column:1/-1;font-size:12.5px;color:var(--muted)}
+.track{grid-column:1/-1;position:relative;height:16px;margin-top:2px}
+.track .ln{position:absolute;top:7px;left:0;right:0;height:2px;background:var(--soft)}
+.track .rg{position:absolute;top:6px;height:4px;background:#D6E4FB;border-radius:2px}
+.track .p{position:absolute;top:3px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%)}
+.track .stop{background:var(--dnb)}
+.track .piv{border:2px solid var(--up);background:var(--card)}
+.track .now{background:var(--ink)}
+.grp{font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 0;letter-spacing:.02em}
+
+/* ── C. 기준선 거리 차트 ── */
+.axis{position:relative;margin:8px 0 0}
+.lane{display:grid;grid-template-columns:116px 1fr 56px;align-items:center;gap:8px;height:42px}
+.lane .nm{font-size:13px;font-weight:700;line-height:1.25;overflow:hidden}
+.lane .nm small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.lane .plot{position:relative;height:100%}
+.lane .val{text-align:right;font-size:13px;font-weight:800}
+.plot .zero{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--up)}
+.plot .stp{position:absolute;top:50%;height:2px;background:var(--dnb);transform:translateY(-50%);border-radius:2px;opacity:.55}
+.plot .stp::before{content:'';position:absolute;left:-3px;top:-4px;width:2px;height:10px;background:var(--dnb)}
+.plot .dot{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--ink);transform:translate(-50%,-50%)}
+.plot .dot.w{background:var(--card);border:2px solid var(--ink)}
+.ticks{display:grid;grid-template-columns:116px 1fr 56px;gap:8px;font-size:11px;color:var(--muted)}
+.ticks .t{position:relative;height:16px}
+.ticks .t span{position:absolute;transform:translateX(-50%)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:10px 0 2px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ink);margin-right:4px;vertical-align:-1px}
+.legend i.w{background:var(--card);border:2px solid var(--ink)}
+.legend i.z{width:2px;height:12px;border-radius:0;background:none;border-left:2px dashed var(--up)}
+.legend i.s{width:14px;height:2px;border-radius:0;background:var(--dnb);vertical-align:3px}
+.res{display:grid;grid-template-columns:116px 1fr 56px;gap:8px;align-items:center;height:30px}
+.res .bar{position:relative;height:12px}
+.res .bar .mid{position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--hair)}
+.res .bar b{position:absolute;top:0;bottom:0;border-radius:2px}
+.res .nm{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .nm small{font-size:11px;color:var(--muted);font-weight:500;margin-left:4px}
+.res .v2{text-align:right;font-size:13px;font-weight:800}
+.h4{font-size:13px;font-weight:800;margin:18px 0 6px;display:flex;gap:6px;align-items:baseline}
+.h4 small{font-weight:500;color:var(--muted);font-size:12px}
+@media(max-width:560px){.lane,.ticks,.res{grid-template-columns:108px 1fr 50px}.lane .nm,.res .nm{font-size:12.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>돌파 관찰 목록 · 다른 표현 3개</h1>
+  <p class="lead">2026-11-25 미국 브리핑(11/24 종가) 실제 값으로 그렸어요. 지금 화면은 종목마다 큰 카드 + 가격 선이라 7종목이 화면 4~5개 높이를 차지해요.</p>
+  <div class="tabs">
+    <button data-v="a" class="on">A. 세 칸 보드</button>
+    <button data-v="b">B. 한 줄 목록</button>
+    <button data-v="c">C. 기준선 거리 차트</button>
+  </div>
+
+  <div class="v on" id="v-a">
+    <p class="note"><b>A. 세 칸 보드</b> — 단계 동그라미(1·6·5)를 없애고 그 자리를 세 칸 자체로 바꿔요. 숫자는 칸 머리에, 종목은 작은 카드로. 종목마다 숫자 하나만 크게(기다림 = 남은 %, 돌파 = 오늘 등락, 결과 = 돌파 뒤 %). 폰에서는 칸마다 가로로 넘겨 봐요. 자세한 손절선·이유는 카드를 누르면 펼쳐지게.</p>
+    <div class="sec"><p class="st">🔭 돌파 관찰 목록 <small>S&amp;P 500 · 11/24(화) 종가</small></p>
+      <p class="intro">크게 오른 뒤 쉬던 종목이 최근 고점을 넘는지, 넘은 뒤 어떻게 됐는지 지켜봐요.</p>
+      <div class="board" id="board"></div>
+      <details class="disc"><summary>근거와 면책 고지</summary><p>2016년부터 S&amp;P 500에서 이 규칙은 2025년을 빼면 아무 날에나 산 것과 거의 같았어요(+0.22R vs +0.16R, 이긴 비율 31%). 추천 목록이 아니에요.</p></details>
+    </div>
+  </div>
+
+  <div class="v" id="v-b">
+    <p class="note"><b>B. 한 줄 목록</b> — 세 단계를 하나의 목록으로 합치고 상태 칩으로 구분해요. 한 줄 = 이름 · 상태 · 핵심 숫자 하나, 그 아래 손절선 → 기준선 → 지금을 얇은 선 하나로. 문장 설명을 빼서 종목당 높이가 지금의 1/3쯤이에요.</p>
+    <div class="sec"><p class="st">🔭 돌파 관찰 목록 <small>S&amp;P 500 · 11/24(화) 종가</small></p>
+      <p class="intro">크게 오른 뒤 쉬던 종목이 최근 고점을 넘는지, 넘은 뒤 어떻게 됐는지 지켜봐요.</p>
+      <div id="list"></div>
+      <p class="disc">선: <span style="color:var(--dnb)">●</span> 손절선 · <span style="color:var(--up)">○</span> 기준선(돌파 가격) · ● 지금</p>
+      <details class="disc"><summary>근거와 면책 고지</summary><p>2016년부터 S&amp;P 500에서 이 규칙은 2025년을 빼면 아무 날에나 산 것과 거의 같았어요(+0.22R vs +0.16R, 이긴 비율 31%). 추천 목록이 아니에요.</p></details>
+    </div>
+  </div>
+
+  <div class="v" id="v-c">
+    <p class="note"><b>C. 기준선 거리 차트</b> — 종목마다 따로 그리던 가격 선을 <b>하나의 축</b>에 모아요. 가운데 빨간 점선이 각 종목의 기준선(돌파 가격)이고, 점이 그 선에서 몇 % 위·아래에 있는지 보여요. 파란 선은 손절선까지의 거리. 한눈에 "누가 막 넘었고 누가 아직 멀었나"가 보여요. 결과는 아래에 돌파 뒤 등락 막대로.</p>
+    <div class="sec"><p class="st">🔭 돌파 관찰 목록 <small>S&amp;P 500 · 11/24(화) 종가</small></p>
+      <p class="intro">크게 오른 뒤 쉬던 종목이 최근 고점을 넘는지, 넘은 뒤 어떻게 됐는지 지켜봐요.</p>
+      <div class="legend"><span><i class="z"></i>기준선(돌파 가격)</span><span><i></i>오늘 돌파</span><span><i class="w"></i>기다리는 중</span><span><i class="s"></i>손절선까지</span></div>
+      <div class="axis" id="axis"></div>
+      <div class="h4">그 뒤 결과 <small>돌파 가격 대비 · 진행 2 · 끝 3</small></div>
+      <div id="res"></div>
+      <details class="disc"><summary>근거와 면책 고지</summary><p>2016년부터 S&amp;P 500에서 이 규칙은 2025년을 빼면 아무 날에나 산 것과 거의 같았어요(+0.22R vs +0.16R, 이긴 비율 31%). 추천 목록이 아니에요.</p></details>
+    </div>
+  </div>
+</div>
+<script>
+const D={"today":[{"t":"REGN","close":987.09,"chg":4.76,"entry":980.55,"stop":922.5,"cap":102.1,"name":"리제네론 파마슈티컬스"},{"t":"IDXX","close":712.08,"chg":3.65,"entry":713.11,"stop":670.22,"cap":56.1,"name":"아이덱스 래보라토리스"},{"t":"CMG","close":37.05,"chg":2.21,"entry":37.09,"stop":34.68,"cap":46.9,"name":"치폴레 멕시칸 그릴"},{"t":"TSCO","close":39.45,"chg":5.0,"entry":39.46,"stop":36.79,"cap":20.5,"name":"트랙터 서플라이"},{"t":"GEN","close":29.95,"chg":-0.3,"entry":31.07,"stop":28.95,"cap":17.8,"name":"젠 디지털"},{"t":"PNR","close":71.27,"chg":1.9,"entry":70.67,"stop":66.66,"cap":11.4,"name":"펜테어"}],
+"wait":[{"t":"CHTR","close":135.87,"pivot":142.6,"stop":129.44,"to_pivot":5.0,"cap":15.6,"name":"차터 커뮤니케이션"}],
+"track":[{"t":"ACN","from":"2026-10-30","state":"stop","days":12,"pct":-7.6,"name":"액센추어"},{"t":"MTD","from":"2026-10-14","state":"live","days":29,"pct":6.2,"name":"메틀러 톨레도 인터내셔널"},{"t":"EFX","from":"2026-11-04","state":"stop","days":9,"pct":-6.6,"name":"에퀴팩스"},{"t":"GEN","from":"2026-10-30","state":"live","days":17,"pct":5.1,"name":"젠 디지털"},{"t":"HAS","from":"2026-11-11","state":"stop","days":6,"pct":-5.0,"name":"해즈브로"}]};
+const sg=v=>{v=Math.round(v*10)/10;return (v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)+'%'};
+const cl=v=>{v=Math.round(v*10)/10;return v>0?'up':v<0?'dn':'mu'};
+const md=s=>+s.slice(5,7)+'/'+ +s.slice(8);
+const live=D.track.filter(x=>x.state==='live'), done=D.track.filter(x=>x.state!=='live');
+
+/* A */
+(function(){
+  const c=(t,e,items)=>`<div class="col"><h3>${t}<em>${e}</em></h3><div class="k">${items}</div></div>`;
+  const w=D.wait.map(x=>`<div class="mini wait"><div class="n">${x.name}</div><div class="s">${x.t} · 넘을 선 $${x.pivot}</div><div class="big">${x.to_pivot.toFixed(1)}% <span class="tk">남음</span></div><div class="bar"><i style="width:${100-x.to_pivot*10}%"></i></div></div>`).join('');
+  const t=D.today.map(x=>`<div class="mini"><div class="n">${x.name}</div><div class="s">${x.t} · 손절 $${x.stop}</div><div class="big ${cl(x.chg)}">${sg(x.chg)}</div></div>`).join('');
+  const r=[...live,...done].map(x=>`<div class="mini ${x.state!=='live'?'end':''}"><div class="n">${x.name}</div><div class="s">${x.t} · ${md(x.from)} 돌파 · ${x.state==='live'?x.days+'일째 진행':'손절로 끝'}</div><div class="big ${cl(x.pct)}">${sg(x.pct)}</div></div>`).join('');
+  document.getElementById('board').innerHTML=c('기다리는 중',D.wait.length+'종목',w)+c('오늘 돌파',D.today.length+'종목',t)+c('그 뒤 결과','진행 '+live.length+' · 끝 '+done.length,r);
+})();
+
+/* B */
+(function(){
+  const tr=(stop,piv,now)=>{const lo=Math.min(stop,now)*0.995,hi=Math.max(piv,now)*1.005,p=v=>((v-lo)/(hi-lo)*100).toFixed(1);
+    return `<div class="track"><div class="ln"></div><div class="rg" style="left:${p(stop)}%;width:${(p(Math.max(piv,now))-p(stop)).toFixed(1)}%"></div><i class="p stop" style="left:${p(stop)}%"></i><i class="p piv" style="left:${p(piv)}%"></i><i class="p now" style="left:${p(now)}%"></i></div>`};
+  let h='<div class="grp">기다리는 중</div><div class="list">'+D.wait.map(x=>`<div class="row"><div class="nm">${x.name}<span class="tk">${x.t}</span><span class="chip w">고점까지 ${x.to_pivot.toFixed(1)}%</span></div><div class="val">$${x.close}</div>${tr(x.stop,x.pivot,x.close)}</div>`).join('')+'</div>';
+  h+='<div class="grp">오늘 돌파</div><div class="list">'+D.today.map(x=>{const room=(x.close/x.stop-1)*100;return `<div class="row"><div class="nm">${x.name}<span class="tk">${x.t}</span><span class="chip b">손절까지 ${room.toFixed(1)}%</span></div><div class="val ${cl(x.chg)}">${sg(x.chg)}</div>${tr(x.stop,x.entry,x.close)}</div>`}).join('')+'</div>';
+  h+='<div class="grp">그 뒤 결과</div><div class="list">'+[...live,...done].map(x=>`<div class="row"><div class="nm">${x.name}<span class="tk">${x.t}</span><span class="chip ${x.state==='live'?'l':'x'}">${x.state==='live'?x.days+'일째 진행':'손절로 끝'}</span></div><div class="val ${cl(x.pct)}">${sg(x.pct)}</div><div class="sub">${md(x.from)} 돌파 · 돌파 가격 대비</div></div>`).join('')+'</div>';
+  document.getElementById('list').innerHTML=h;
+})();
+
+/* C */
+(function(){
+  const MIN=-10,MAX=5,X=v=>((Math.max(MIN,Math.min(MAX,v))-MIN)/(MAX-MIN)*100).toFixed(1);
+  const items=[...D.today.map(x=>({n:x.name,t:x.t,d:(x.close/x.entry-1)*100,s:(x.stop/x.entry-1)*100,w:false})),
+               ...D.wait.map(x=>({n:x.name,t:x.t,d:(x.close/x.pivot-1)*100,s:(x.stop/x.pivot-1)*100,w:true}))].sort((a,b)=>b.d-a.d);
+  let h=items.map(i=>`<div class="lane"><div class="nm">${i.n}<small>${i.t}${i.w?' · 기다리는 중':''}</small></div><div class="plot"><div class="zero" style="left:${X(0)}%"></div><div class="stp" style="left:${X(i.s)}%;width:${(X(i.d)-X(i.s)).toFixed(1)}%"></div><i class="dot ${i.w?'w':''}" style="left:${X(i.d)}%"></i></div><div class="val ${cl(i.d)}">${sg(i.d)}</div></div>`).join('');
+  h+=`<div class="ticks"><div></div><div class="t">${[-10,-5,0,5].map(v=>`<span style="left:${X(v)}%">${v>0?'+':''}${v}%</span>`).join('')}</div><div></div></div>`;
+  document.getElementById('axis').innerHTML=h;
+  const M=10;
+  document.getElementById('res').innerHTML=[...live,...done].map(x=>{const w=Math.min(Math.abs(x.pct),M)/M*50;return `<div class="res"><div class="nm">${x.name}<small>${x.state==='live'?x.days+'일째':'끝'}</small></div><div class="bar"><div class="mid"></div><b style="${x.pct>=0?'left:50%':'right:50%'};width:${w}%;background:${x.pct>=0?'var(--upb)':'var(--dnb)'};opacity:${x.state==='live'?1:.55}"></b></div><div class="v2 ${cl(x.pct)}">${sg(x.pct)}</div></div>`}).join('');
+})();
+
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));});
+</script>
+</body>
+</html>

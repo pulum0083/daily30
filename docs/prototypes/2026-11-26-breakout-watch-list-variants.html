@@ -1,0 +1,161 @@
+<!doctype html>
+<!-- 미국 브리핑 '돌파 관찰 목록' 한 줄 목록(B안) 계열 변형 시안 — 2026-11-25 발행본(11/24 종가) 실제 데이터 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>돌파 관찰 한 줄 목록 시안</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{--ink:#13151A;--muted:#6B7280;--hair:#E5E7EB;--soft:#F4F5F7;--card:#fff;--bg:#F7F8FA;--up:#E03131;--dn:#2775ED;--upb:#E86464;--dnb:#5D97F1;--ora:#C2410C;--orab:#FFF1E6;--blub:#E7F0FF;--blu:#1C5FCB}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#ECEEF2;--muted:#9AA1AD;--hair:#2A2F38;--soft:#1C2027;--card:#15181E;--bg:#0E1014;--orab:#3A2414;--ora:#F7A66B;--blub:#16294A;--blu:#8DB6FF}}
+:root[data-theme="dark"]{--ink:#ECEEF2;--muted:#9AA1AD;--hair:#2A2F38;--soft:#1C2027;--card:#15181E;--bg:#0E1014;--orab:#3A2414;--ora:#F7A66B;--blub:#16294A;--blu:#8DB6FF}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;font-size:15px;line-height:1.55}
+.wrap{max-width:660px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}
+.lead{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+.tabs button{border:1px solid var(--hair);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.v{display:none}.v.on{display:block}
+.note{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.65}
+.note b{color:var(--ink)}
+.sec{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:18px 16px}
+.st{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin:0}
+.st::before{content:'';width:3px;height:15px;background:var(--dn);border-radius:2px}
+.st small{font-weight:500;font-size:12px;color:var(--muted)}
+.intro{font-size:13.5px;color:var(--muted);margin:6px 0 8px}
+.up{color:var(--up)}.dn{color:var(--dn)}.mu{color:var(--muted)}
+.tk{font-size:12px;color:var(--muted);font-weight:500}
+.chip{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap;display:inline-block}
+.c-w{background:var(--soft);color:var(--muted)}.c-b{background:var(--blub);color:var(--blu)}.c-l{background:var(--orab);color:var(--ora)}.c-x{background:var(--soft);color:var(--muted)}
+.grp{font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 0;display:flex;justify-content:space-between}
+.grp span{font-weight:500}
+.disc{margin-top:14px;font-size:12.5px;color:var(--muted)}
+
+/* B0 — 지난번 B */
+.r0{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 2px;border-bottom:1px solid var(--hair);align-items:center}
+.r0 .nm{font-weight:700;font-size:14.5px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.r0 .val{text-align:right;font-weight:800}
+.tr{grid-column:1/-1;position:relative;height:16px}
+.tr .ln{position:absolute;top:7px;left:0;right:0;height:2px;background:var(--soft)}
+.tr .p{position:absolute;top:3px;width:10px;height:10px;border-radius:50%;transform:translateX(-50%)}
+.tr .s{background:var(--dnb)}.tr .q{border:2px solid var(--up);background:var(--card)}.tr .n{background:var(--ink)}
+
+/* B1 — 표 */
+table.t{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+.t th{white-space:nowrap;font-size:11.5px;color:var(--muted);font-weight:600;text-align:right;padding:6px 4px;border-bottom:1px solid var(--hair)}
+.t th:first-child,.t td:first-child{text-align:left}
+.t td{padding:10px 4px;border-bottom:1px solid var(--hair);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.t td:first-child{white-space:normal}
+.t td b{font-weight:700}
+.t .gr td{font-size:12px;font-weight:700;color:var(--muted);background:var(--soft);padding:6px 6px}
+@media(max-width:480px){.t .hide{display:none}}
+
+/* B2 — 손절선~기준선 진행 막대 */
+.r2{padding:11px 0 12px;border-bottom:1px solid var(--hair)}
+.r2 .top{display:flex;align-items:baseline;gap:6px}
+.r2 .top b{font-size:14.5px}
+.r2 .top .val{margin-left:auto;font-weight:800}
+.r2 .meter{position:relative;height:8px;background:var(--soft);border-radius:4px;margin:8px 0 4px}
+.r2 .meter i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.r2 .meter .piv{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--up)}
+.r2 .ends{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}
+
+/* B3 — 큰 숫자 + 한 문장 */
+.r3{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--hair);align-items:start}
+.r3 .nm{font-size:14.5px;font-weight:700}
+.r3 .say{grid-column:1;font-size:13px;color:var(--muted);line-height:1.5}
+.r3 .big{grid-row:1/3;grid-column:2;text-align:right;font-size:19px;font-weight:800;line-height:1.1}
+.r3 .big small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:3px}
+
+/* B4 — 접는 묶음 */
+details.g{border:1px solid var(--hair);border-radius:10px;margin-top:10px;overflow:hidden}
+details.g>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+details.g>summary::-webkit-details-marker{display:none}
+details.g>summary .cnt{font-size:12px;color:var(--muted);font-weight:500}
+details.g>summary .sm{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--muted)}
+details.g>summary::after{content:'›';font-size:18px;color:var(--muted);transition:transform .15s}
+details.g[open]>summary::after{transform:rotate(90deg)}
+.r4{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--hair);font-size:13.5px}
+.r4 b{font-weight:700}
+.r4 .val{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>돌파 관찰 목록 · 한 줄 목록 변형</h1>
+  <p class="lead">2026-11-25 미국 브리핑(11/24 종가) 실제 값. 종가가 기준선 아래로 끝난 '장중 돌파'는 따로 표시했어요.</p>
+  <div class="tabs">
+    <button data-v="0" class="on">B. 지난번 안</button>
+    <button data-v="1">B1. 표</button>
+    <button data-v="2">B2. 손절~기준선 막대</button>
+    <button data-v="3">B3. 숫자 + 한 문장</button>
+    <button data-v="4">B4. 접는 묶음</button>
+  </div>
+
+  <div class="v on" id="v0"><p class="note"><b>B. 지난번 안</b> — 비교용. 상태 칩 + 숫자 하나 + 손절선·기준선·지금을 얇은 선 하나로.</p><div class="sec" id="b0"></div></div>
+  <div class="v" id="v1"><p class="note"><b>B1. 표</b> — 증권사 앱 관심 종목처럼 열을 맞춘 표. 한 줄에 종목·종가·기준선 대비·손절까지가 다 보여서 종목끼리 비교가 가장 쉬워요. 폰에서는 '손절까지' 열을 숨겨요. 그림은 없어요.</p><div class="sec" id="b1"></div></div>
+  <div class="v" id="v2"><p class="note"><b>B2. 손절~기준선 막대</b> — 종목마다 '손절선(왼쪽 끝)에서 기준선(빨간 점선)까지 지금 어디쯤인가'를 채움 막대 하나로 보여요. 점선을 넘어 채워졌으면 기준선 위, 못 미치면 아래예요. 가격 세 개를 읽지 않아도 위험한 정도가 보여요.</p><div class="sec" id="b2"></div></div>
+  <div class="v" id="v3"><p class="note"><b>B3. 숫자 + 한 문장</b> — 주도주 목록(종목 홈)과 같은 모양. 오른쪽에 큰 숫자 하나, 왼쪽 아래에 그 숫자의 뜻을 한 문장으로. 장중에만 넘은 종목도 문장으로 바로 드러나요.</p><div class="sec" id="b3"></div></div>
+  <div class="v" id="v4"><p class="note"><b>B4. 접는 묶음</b> — 세 묶음을 한 줄 요약으로 접어 두고 눌러서 펼쳐요. 요약 줄만으로 '오늘 6개 넘음 · 4개는 장중만'이 보여요. 브리핑 페이지가 가장 짧아져요. 기본은 '오늘 돌파'만 펼침.</p><div class="sec" id="b4"></div></div>
+</div>
+<script>
+const D={"today":[{"t":"REGN","close":987.09,"chg":4.76,"entry":980.55,"stop":922.5,"name":"리제네론 파마슈티컬스"},{"t":"IDXX","close":712.08,"chg":3.65,"entry":713.11,"stop":670.22,"name":"아이덱스 래보라토리스"},{"t":"CMG","close":37.05,"chg":2.21,"entry":37.09,"stop":34.68,"name":"치폴레 멕시칸 그릴"},{"t":"TSCO","close":39.45,"chg":5.0,"entry":39.46,"stop":36.79,"name":"트랙터 서플라이"},{"t":"GEN","close":29.95,"chg":-0.3,"entry":31.07,"stop":28.95,"name":"젠 디지털"},{"t":"PNR","close":71.27,"chg":1.9,"entry":70.67,"stop":66.66,"name":"펜테어"}],
+"wait":[{"t":"CHTR","close":135.87,"pivot":142.6,"stop":129.44,"to_pivot":5.0,"name":"차터 커뮤니케이션"}],
+"track":[{"t":"MTD","from":"2026-10-14","state":"live","days":29,"pct":6.2,"name":"메틀러 톨레도 인터내셔널"},{"t":"GEN","from":"2026-10-30","state":"live","days":17,"pct":5.1,"name":"젠 디지털"},{"t":"ACN","from":"2026-10-30","state":"stop","days":12,"pct":-7.6,"name":"액센추어"},{"t":"EFX","from":"2026-11-04","state":"stop","days":9,"pct":-6.6,"name":"에퀴팩스"},{"t":"HAS","from":"2026-11-11","state":"stop","days":6,"pct":-5.0,"name":"해즈브로"}]};
+const r1=v=>Math.round(v*10)/10;
+const sg=v=>{v=r1(v);return (v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)+'%'};
+const cl=v=>{v=r1(v);return v>0?'up':v<0?'dn':'mu'};
+const md=s=>+s.slice(5,7)+'/'+ +s.slice(8);
+const vsE=x=>(x.close/x.entry-1)*100, toS=x=>(x.close/x.stop-1)*100;
+const head='<p class="st">🔭 돌파 관찰 목록 <small>S&amp;P 500 · 11/24(화) 종가</small></p><p class="intro">크게 오른 뒤 쉬던 종목이 최근 고점을 넘는지, 넘은 뒤 어떻게 됐는지 지켜봐요.</p>';
+const foot='<p class="disc">추천 목록이 아니에요. 2016년부터 이 규칙은 2025년을 빼면 아무 날에나 산 것과 거의 같았어요. ▸ 근거와 면책 고지</p>';
+const isBelow=x=>x.close<x.entry;
+const tchip=x=>isBelow(x)?`<span class="chip c-w">장중에만 넘음</span>`:`<span class="chip c-b">종가도 넘음</span>`;
+const nLive=D.track.filter(x=>x.state==='live').length, nEnd=D.track.length-nLive, nBelow=D.today.filter(isBelow).length;
+
+/* B0 */
+(()=>{const tr=(s,q,n)=>{const lo=Math.min(s,n)*0.995,hi=Math.max(q,n)*1.005,p=v=>((v-lo)/(hi-lo)*100).toFixed(1);return `<div class="tr"><div class="ln"></div><i class="p s" style="left:${p(s)}%"></i><i class="p q" style="left:${p(q)}%"></i><i class="p n" style="left:${p(n)}%"></i></div>`};
+let h=head+'<div class="grp">기다리는 중</div>'+D.wait.map(x=>`<div class="r0"><div class="nm">${x.name}<span class="tk">${x.t}</span><span class="chip c-w">고점까지 ${x.to_pivot.toFixed(1)}%</span></div><div class="val">$${x.close}</div>${tr(x.stop,x.pivot,x.close)}</div>`).join('');
+h+='<div class="grp">오늘 돌파</div>'+D.today.map(x=>`<div class="r0"><div class="nm">${x.name}<span class="tk">${x.t}</span>${tchip(x)}</div><div class="val ${cl(x.chg)}">${sg(x.chg)}</div>${tr(x.stop,x.entry,x.close)}</div>`).join('');
+h+='<div class="grp">그 뒤 결과</div>'+D.track.map(x=>`<div class="r0"><div class="nm">${x.name}<span class="tk">${x.t}</span><span class="chip ${x.state==='live'?'c-l':'c-x'}">${x.state==='live'?x.days+'일째 진행':'손절로 끝'}</span></div><div class="val ${cl(x.pct)}">${sg(x.pct)}</div></div>`).join('');
+document.getElementById('b0').innerHTML=h+foot})();
+
+/* B1 */
+(()=>{let h=head+`<table class="t"><thead><tr><th>종목</th><th>종가</th><th>기준선 대비</th><th class="hide">손절까지</th></tr></thead><tbody>`;
+h+=`<tr class="gr"><td colspan="4">기다리는 중 · ${D.wait.length}</td></tr>`+D.wait.map(x=>`<tr><td><b>${x.name}</b> <span class="tk">${x.t}</span></td><td>$${x.close}</td><td class="dn">−${x.to_pivot.toFixed(1)}%</td><td class="hide">${toS(x).toFixed(1)}%</td></tr>`).join('');
+h+=`<tr class="gr"><td colspan="4">오늘 돌파 · ${D.today.length} (종가도 넘음 ${D.today.length-nBelow})</td></tr>`+D.today.map(x=>`<tr><td><b>${x.name}</b> <span class="tk">${x.t}</span>${isBelow(x)?' <span class="chip c-w">장중만</span>':''}</td><td>$${x.close}<br><span class="tk ${cl(x.chg)}">${sg(x.chg)}</span></td><td class="${cl(vsE(x))}">${sg(vsE(x))}</td><td class="hide">${toS(x).toFixed(1)}%</td></tr>`).join('');
+h+=`<tr class="gr"><td colspan="4">그 뒤 결과 · 진행 ${nLive} · 끝 ${nEnd}</td></tr>`+D.track.map(x=>`<tr><td><b>${x.name}</b> <span class="tk">${x.t}</span></td><td class="tk">${md(x.from)} 돌파</td><td class="${cl(x.pct)}"><b>${sg(x.pct)}</b></td><td class="hide tk">${x.state==='live'?x.days+'일째':'손절'}</td></tr>`).join('');
+h+='</tbody></table><p class="disc">기준선 대비 = 종가가 돌파 가격보다 몇 % 위·아래인지. 결과는 돌파 가격에서 지금(끝난 건 끝난 가격)까지.</p>';
+document.getElementById('b1').innerHTML=h+foot})();
+
+/* B2 */
+(()=>{const row=(nm,t,chip,val,vc,s,q,n,lab)=>{const span=q-s, f=Math.max(0,Math.min(1.15,(n-s)/span)), pq=100/1.15;
+  return `<div class="r2"><div class="top"><b>${nm}</b><span class="tk">${t}</span>${chip}<span class="val ${vc}">${val}</span></div>
+  <div class="meter"><i style="width:${(f*pq).toFixed(1)}%;background:${n>=q?'var(--upb)':'var(--dnb)'}"></i><span class="piv" style="left:${pq.toFixed(1)}%"></span></div>
+  <div class="ends"><span>손절선 $${s}</span><span>${lab}</span><span>기준선 $${q}</span></div></div>`};
+let h=head+'<div class="grp">기다리는 중</div>'+D.wait.map(x=>row(x.name,x.t,'',`고점까지 ${x.to_pivot.toFixed(1)}%`,'mu',x.stop,x.pivot,x.close,`지금 $${x.close}`)).join('');
+h+=`<div class="grp">오늘 돌파<span>종가도 넘음 ${D.today.length-nBelow} · 장중만 ${nBelow}</span></div>`+D.today.map(x=>row(x.name,x.t,isBelow(x)?'<span class="chip c-w">장중만</span>':'',sg(x.chg),cl(x.chg),x.stop,x.entry,x.close,`지금 $${x.close}`)).join('');
+h+=`<div class="grp">그 뒤 결과<span>진행 ${nLive} · 끝 ${nEnd}</span></div>`+D.track.map(x=>`<div class="r2"><div class="top"><b>${x.name}</b><span class="tk">${x.t} · ${md(x.from)} 돌파</span><span class="chip ${x.state==='live'?'c-l':'c-x'}">${x.state==='live'?x.days+'일째':'손절로 끝'}</span><span class="val ${cl(x.pct)}">${sg(x.pct)}</span></div></div>`).join('');
+document.getElementById('b2').innerHTML=h+foot})();
+
+/* B3 */
+(()=>{let h=head+'<div class="grp">기다리는 중</div>'+D.wait.map(x=>`<div class="r3"><div class="nm">${x.name} <span class="tk">${x.t}</span></div><div class="say">$${x.pivot}을 넘으면 돌파예요. 넘으면 손절선은 $${x.stop}.</div><div class="big mu">${x.to_pivot.toFixed(1)}%<small>고점까지</small></div></div>`).join('');
+h+='<div class="grp">오늘 돌파</div>'+D.today.map(x=>{const b=isBelow(x),v=vsE(x);return `<div class="r3"><div class="nm">${x.name} <span class="tk">${x.t}</span></div><div class="say">${b?(r1(-v)>=0.1?`장중에 $${x.entry}을 넘었다가 ${(-v).toFixed(1)}% 아래로 끝났어요.`:`장중에 $${x.entry}을 넘었다가 바로 아래로 끝났어요.`):`$${x.entry}을 넘었어요. 손절선 $${x.stop}까지 ${toS(x).toFixed(1)}%.`}</div><div class="big ${cl(x.chg)}">${sg(x.chg)}<small>오늘</small></div></div>`}).join('');
+h+='<div class="grp">그 뒤 결과</div>'+D.track.map(x=>`<div class="r3"><div class="nm">${x.name} <span class="tk">${x.t}</span></div><div class="say">${md(x.from)}에 돌파 · ${x.state==='live'?x.days+'거래일째 이어지는 중':x.days+'거래일 만에 손절로 끝'}</div><div class="big ${cl(x.pct)}">${sg(x.pct)}<small>돌파 뒤</small></div></div>`).join('');
+document.getElementById('b3').innerHTML=h+foot})();
+
+/* B4 */
+(()=>{const g=(open,title,cnt,sm,rows)=>`<details class="g" ${open?'open':''}><summary>${title}<span class="cnt">${cnt}</span><span class="sm">${sm}</span></summary>${rows}</details>`;
+let h=head;
+h+=g(false,'기다리는 중',D.wait.length+'종목','가장 가까운 고점까지 '+Math.min(...D.wait.map(x=>x.to_pivot)).toFixed(1)+'%',D.wait.map(x=>`<div class="r4"><b>${x.name}</b><span class="tk">${x.t}</span><span class="val mu">고점까지 ${x.to_pivot.toFixed(1)}%</span></div>`).join(''));
+h+=g(true,'오늘 돌파',D.today.length+'종목',`종가도 넘음 ${D.today.length-nBelow} · 장중만 ${nBelow}`,D.today.map(x=>`<div class="r4"><b>${x.name}</b><span class="tk">${x.t}</span>${isBelow(x)?'<span class="chip c-w">장중만</span>':''}<span class="val ${cl(x.chg)}">${sg(x.chg)}</span></div>`).join(''));
+h+=g(false,'그 뒤 결과',D.track.length+'종목',`진행 ${nLive} · 끝 ${nEnd}`,D.track.map(x=>`<div class="r4"><b>${x.name}</b><span class="chip ${x.state==='live'?'c-l':'c-x'}">${x.state==='live'?x.days+'일째':'손절'}</span><span class="val ${cl(x.pct)}">${sg(x.pct)}</span></div>`).join(''));
+document.getElementById('b4').innerHTML=h+foot})();
+
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.id==='v'+b.dataset.v));});
+</script>
+</body>
+</html>

@@ -204,25 +204,49 @@ def _cap_label(v) -> str:
     return f"${v / 1e12:.1f}조" if v >= 1e12 else f"${v / 1e8:,.0f}억"
 
 
-def _bw_line(pts: list) -> dict:
-    """가격 선 — 점 위치(%)·이름표 정렬·손절선~지금 구간. pts = [(키, 값, 이름표, 위/아래)]."""
-    vs = [v for _, v, _, _ in pts]
-    lo, hi = min(vs), max(vs)
-    X = lambda v: 8 + (v - lo) / (hi - lo) * 84 if hi > lo else 50
-    out = []
-    for k, v, lab, pos in pts:
-        x = X(v)
-        out.append({"k": k, "v": v, "lab": lab, "pos": pos, "x": f"{x:.1f}",
-                    "al": "l" if x < 15 else "r" if x > 85 else ""})
-    xs = {p["k"]: float(p["x"]) for p in out}
-    a, b = sorted((xs["stop"], xs["now"]))
-    return {"pts": out, "zone_l": f"{a:.1f}", "zone_w": f"{b - a:.1f}"}
+def _bw_meter(stop: float, line: float, now: float) -> dict:
+    """타일의 손절선~기준선 막대 — 손절선을 0, 기준선을 100/1.15 지점에 두고 지금 가격까지 채운다(2026-11-26)."""
+    f = max(0.0, min(1.15, (now - stop) / (line - stop))) if line > stop else 0.0
+    return {"fill": f"{f / 1.15 * 100:.1f}", "mark": f"{100 / 1.15:.1f}", "over": now >= line}
+
+
+def _bw_short(name: str) -> str:
+    return (name or "").split(" ")[0]
+
+
+def _bw_summary(today: list, track: list) -> str:
+    """맨 위 요약 두 문장 — 숫자에서 규칙으로만 만든다(LLM 없음)."""
+    held = [r for r in today if r["close"] >= r["entry"]]
+    if not today:
+        s1 = "오늘 최근 고점을 넘은 종목은 없어요."
+    elif len(held) == len(today):
+        s1 = f"오늘 {len(today)}종목이 최근 고점을 넘었고, 모두 종가까지 그 위를 지켰어요."
+    elif not held:
+        s1 = f"오늘 {len(today)}종목이 장중에 최근 고점을 넘었지만, 종가까지 그 위를 지킨 종목은 없었어요."
+    else:
+        who = "·".join(_bw_short(r["name"]) for r in held) if len(held) <= 3 else f"{len(held)}종목"
+        s1 = f"오늘 {len(today)}종목이 장중에 최근 고점을 넘었고, 그중 {who}만 종가까지 그 위를 지켰어요."
+    live = [r for r in track if r["state"] == "live"]
+    done = [r for r in track if r["state"] != "live"]
+    sg = lambda v: (f"+{v:.1f}" if v > 0 else f"{v:.1f}".replace("-", "−")) + "%"
+    ups = "·".join(sg(r["pct"]) for r in live[:3])
+    avg = sg(sum(r["pct"] for r in done) / len(done)) if done else ""
+    if live and done:
+        s2 = f" 앞서 돌파한 종목 중 {len(live)}개는 아직 이어지고({ups}), {len(done)}개는 끝났어요(평균 {avg})."
+    elif live:
+        s2 = f" 앞서 돌파한 종목 중 {len(live)}개가 아직 이어지고 있어요({ups})."
+    elif done:
+        s2 = f" 앞서 돌파한 종목 {len(done)}개는 끝났어요(평균 {avg})."
+    else:
+        s2 = ""
+    return s1 + s2
 
 
 def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
     """미국 브리핑 '돌파 관찰 목록' 섹션(2026-11-16 사용자 결정, 시안 2026-11-16-breakout-watch-clear.html, §88).
 
-    1 기다리는 종목 → 2 오늘 돌파한 종목 → 3 돌파한 뒤 결과. 숫자는 breakout_watch.py가 만든 그대로 — 새 숫자를 만들지 않는다.
+    맨 위 요약(숫자 세 칸 + 두 문장) → 오늘 돌파 → 기다리는 중 → 그 뒤 결과, 종목은 2열 타일(2026-11-26 사용자 결정,
+    시안 docs/prototypes/2026-11-26-breakout-watch-list-variants-2.html B8+B6). 숫자는 breakout_watch.py가 만든 그대로 — 새 숫자를 만들지 않는다.
     과거 성적 파일이 없으면 섹션째 뺀다(성적 없이 종목만 보이면 '사라'로 읽힌다). 세 묶음이 모두 비어도 뺀다.
     """
     d = read_breakout_watch(analysis, target_date)
@@ -239,22 +263,21 @@ def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
     # 장중에 기준선을 넘었다가 그 아래로 끝난 날(2026-11-26) — "넘었어요"라고 쓰면 종가와 어긋난다.
     tcards = [dict(r, to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
                    below=round((1 - r["close"] / r["entry"]) * 100, 1) if r["close"] < r["entry"] else None,
-                   line=_bw_line([("stop", r["stop"], "손절선", "b"), ("now", r["close"], "지금", "t"),
-                                  ("in", r["entry"], "돌파한 가격", "b")]))
+                   meter=_bw_meter(r["stop"], r["entry"], r["close"]))
               for r in today]
-    wcards = [dict(r, line=_bw_line([("stop", r["stop"], "넘으면 손절선", "b"), ("now", r["close"], "지금", "t"),
-                                     ("in", r["pivot"], "넘을 선", "b")]))
-              for r in wait]
-    lab = {"live": "진행 중 · {}거래일째", "stop": "손절로 끝 · {}거래일", "exit": "추세 끝(20일 최저가) · {}거래일"}
+    wcards = [dict(r, meter=_bw_meter(r["stop"], r["pivot"], r["close"])) for r in wait]
+    lab = {"live": "{}거래일째 진행", "stop": "손절로 끝 · {}거래일", "exit": "추세 끝 · {}거래일"}
     rows = [dict(r, label=lab.get(r["state"], "{}").format(r["days"]), from_md=_md(r["from"])) for r in track]
+    rows = [r for r in rows if r["state"] == "live"] + [r for r in rows if r["state"] != "live"]
     done = [r for r in track if r["state"] != "live"]
     asof = d["asof"]
     return {"bw": {
         "asof_label": f"{_md(asof)}({_dow(asof)}) 종가 기준",
         "today": tcards, "wait": wcards, "wait_more": d.get("wait_more") or 0, "track": rows,
         "n_wait": len(wcards) + (d.get("wait_more") or 0), "n_done": len(done),
-        "win": sum(1 for r in done if r["pct"] > 0), "lose": sum(1 for r in done if r["pct"] <= 0),
+        "n_held": sum(1 for r in today if r["close"] >= r["entry"]),
         "n_live": len(track) - len(done), "bt": bt,
+        "summary": _bw_summary(today, track),
     }}
 
 

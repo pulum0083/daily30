@@ -137,9 +137,9 @@ def test_render_1105_replay():
     a = {"breakout_watch": json.loads(FIX.read_text())}
     ctx = gh.build_breakout_watch(a)
     b = ctx["bw"]
-    assert (b["n_wait"], len(b["today"]), len(b["track"]), b["win"], b["lose"], b["n_live"]) == (2, 1, 10, 2, 3, 5)
+    assert (b["n_wait"], len(b["today"]), len(b["track"]), b["n_done"], b["n_live"]) == (2, 1, 10, 5, 5)
     html = gh.make_env().get_template("sections/breakout_watch.html").render(**ctx)
-    assert "에스티 로더" in html and "$113.53" in html and "손절선까지 <b>1.8%</b>" in html
+    assert "에스티 로더" in html and "기준선 $113.53보다 5.2% 아래로 끝" in html
     assert "아무 날에나 산 경우(+0.16R)" in html and "추천" not in html
 
 
@@ -165,10 +165,24 @@ def test_cap_label():
 
 
 def test_render_closed_below_entry_1124():
-    """2026-11-24 — 장중에 기준선을 넘었다가 그 아래로 끝난 종목을 '넘었어요'라고 쓰지 않는다(2026-11-26)."""
+    """2026-11-24 — 장중에 기준선을 넘었다가 그 아래로 끝난 종목을 '넘었어요'로 쓰지 않고, 요약도 그 수를 센다(2026-11-26)."""
     snap = json.loads((Path(__file__).resolve().parents[1] / "web/briefings/2026-11-25/us/analysis_snapshot.json").read_text())
     ctx = gh.build_breakout_watch({"breakout_watch": snap["breakout_watch"]})
+    b = ctx["bw"]
+    assert (len(b["today"]), b["n_held"], b["n_live"], b["n_done"]) == (6, 2, 2, 3)
+    assert b["summary"] == ("오늘 6종목이 장중에 최근 고점을 넘었고, 그중 리제네론·펜테어만 종가까지 그 위를 지켰어요. "
+                            "앞서 돌파한 종목 중 2개는 아직 이어지고(+6.2%·+5.1%), 3개는 끝났어요(평균 −6.4%).")
     html = gh.make_env().get_template("sections/breakout_watch.html").render(**ctx)
-    assert "기준선 <b>$980.55</b>을 넘었어요." in html                      # REGN 종가 987.09 — 위에서 끝남
-    assert "장중에 기준선 <b>$31.07</b>을 넘었다가 그 아래로 끝났어요(기준선보다 <b>3.6%</b> 아래)" in html   # GEN 29.95
-    assert "장중에 기준선 <b>$39.46</b>을 넘었다가 기준선 바로 아래로 끝났어요." in html               # TSCO 39.45
+    assert "기준선 $980.55 위 · 손절선까지 6.5%" in html                       # REGN 종가 987.09
+    assert "기준선 $31.07보다 3.6% 아래로 끝" in html                           # GEN 29.95
+    assert "기준선 $39.46 바로 아래로 끝" in html                               # TSCO 39.45
+    assert html.count('class="bw2-t half"') == 4
+
+
+def test_summary_sentences():
+    from sections_us import _bw_summary
+    t = lambda c, e, n="가 나": {"name": n, "close": c, "entry": e}
+    assert _bw_summary([], []) == "오늘 최근 고점을 넘은 종목은 없어요."
+    assert _bw_summary([t(2, 1)], []).endswith("모두 종가까지 그 위를 지켰어요.")
+    assert "지킨 종목은 없었어요" in _bw_summary([t(1, 2)], [])
+    assert _bw_summary([], [{"state": "live", "pct": 3.0}]).endswith("1개가 아직 이어지고 있어요(+3.0%).")
