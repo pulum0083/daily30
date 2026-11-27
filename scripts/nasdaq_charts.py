@@ -42,15 +42,20 @@ _NQP_W, _NQP_H = 1000, 300        # 상세 페이지 그래프 SVG 좌표 — �
 _NQP_LOG_TICKS = (500, 1000, 2000, 5000, 10000, 20000, 50000)
 
 
-_NQP_RANGES = (("all", "전체", None), ("10y", "최근 10년", 120), ("5y", "최근 5년", 60))   # 기간 버튼(2026-11-12 사용자 결정)
+_NQP_RANGES = (("all", "전체", None), ("10y", "최근 10년", 120), ("5y", "최근 5년", 60),
+               ("1y", "최근 1년", 13))   # 기간 버튼(2026-11-12 사용자 결정, 1년은 2026-11-27 추가 — 13개월 = 1년 전 같은 달부터)
 
 
 _NQP_SUB_LOG_TICKS = (2000, 3000, 5000, 7000, 10000, 15000, 20000, 30000, 50000)   # 짧은 기간은 눈금을 촘촘히
 
 
 def _nqp_years(hist: list, every: int = 5) -> list:
-    """every년마다 연도 눈금(1월 위치)."""
+    """every년마다 연도 눈금(1월 위치). every=0(최근 1년)이면 분기마다 월 눈금 — 1월은 연도를 붙인다."""
     n = len(hist)
+    if every == 0:
+        return [{"y": (f"{h['m'][2:4]}년 1월" if h["m"].endswith("-01") else f"{int(h['m'][5:7])}월"),
+                 "left": f"{i / (n - 1) * 100:.2f}%"}
+                for i, h in enumerate(hist) if int(h["m"][5:7]) in (1, 4, 7, 10)]
     return [{"y": h["m"][:4], "left": f"{i / (n - 1) * 100:.2f}%"}
             for i, h in enumerate(hist) if h["m"].endswith("-01") and int(h["m"][:4]) % every == 0]
 
@@ -109,14 +114,14 @@ def _nqp_level_chart(hist: list, full: bool = True, every: int = 5) -> dict:
 
 
 def _nqp_ranges(hist: list, caution: float, warn: float, lp) -> list:
-    """기간 버튼별 그래프 — 전체·최근 10년·최근 5년(2026-11-12 사용자 결정). 서버가 셋 다 그려 두고
+    """기간 버튼별 그래프 — 전체·최근 10년·최근 5년·최근 1년(2026-11-12·11-27 사용자 결정). 서버가 셋 다 그려 두고
     버튼은 보이는 것만 바꾼다. off = 그 기간 첫 달의 전체 시계열 위치(짚기 말풍선이 같은 값을 쓴다)."""
     out = []
     for key, label, k in _NQP_RANGES:
         if k and len(hist) <= k:
             continue
         h = hist[-k:] if k else hist
-        every = 5 if not k else (2 if k > 60 else 1)
+        every = 5 if not k else (2 if k > 60 else 1 if k > 24 else 0)
         out.append({"key": key, "label": label, "off": len(hist) - len(h), "n": len(h),
                     "span": f"{int(h[0]['m'][:4])}년 {int(h[0]['m'][5:7])}월",
                     "gap": _nqp_gap_chart(h, caution, warn, full=not k, every=every),

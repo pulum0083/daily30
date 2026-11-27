@@ -173,7 +173,7 @@
   </div>
 
   <section class="nqp-card is-ok">
-    <div class="nqp-h"><h2>월별 이격률</h2><div class="nqp-seg" role="group" aria-label="기간"><button type="button" data-r="all" aria-pressed="true">전체</button><button type="button" data-r="10y" aria-pressed="false">최근 10년</button><button type="button" data-r="5y" aria-pressed="false">최근 5년</button></div></div>
+    <div class="nqp-h"><h2>월별 이격률</h2><div class="nqp-seg" role="group" aria-label="기간"><button type="button" data-r="all" aria-pressed="true">전체</button><button type="button" data-r="10y" aria-pressed="false">최근 10년</button><button type="button" data-r="5y" aria-pressed="false">최근 5년</button><button type="button" data-r="1y" aria-pressed="false">최근 1년</button></div></div>
     <div class="nqp-leg"><span><i></i>월봉 고점 ÷ 60개월선 − 1</span><span><i class="zc"></i>주의 60~70%</span><span><i class="zw"></i>경고 70% 이상</span></div>
     
     <div class="nqp-r" data-r="all">
@@ -251,10 +251,35 @@
     <div class="nqp-evlist"><span>1 금리 인상 시작(2022.3)</span></div>
     </div>
     
+    <div class="nqp-r" data-r="1y" hidden>
+    <div class="nqp-span">2025년 11월 ~ 2026년 11월</div>
+    <div class="nqp-plot">
+      <span class="nqp-ax" style="top:100.00%">0%</span><span class="nqp-ax" style="top:75.00%">20%</span><span class="nqp-ax" style="top:50.00%">40%</span><span class="nqp-ax" style="top:25.00%">60%</span><span class="nqp-ax" style="top:0.00%">80%</span>
+      <div class="nqp-in" data-kind="gap" data-lo="0.0" data-hi="80.0" data-off="430" data-n="13">
+        <svg viewBox="0 0 1000 300" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점의 60개월선 대비 이격률, 2025년 11월부터 월별">
+          <rect x="0" y="0.0" width="1000" height="37.5" class="z-warn"/>
+          <rect x="0" y="37.5" width="1000" height="37.5" class="z-caution"/>
+          <line x1="0" x2="1000" y1="300.0" y2="300.0" class="zero"/>
+          <line x1="0" x2="1000" y1="37.5" y2="37.5" class="th th-warn"/>
+          <line x1="0" x2="1000" y1="75.0" y2="75.0" class="th th-caution"/>
+          <polygon points="0,300.0 0.0,89.8 83.3,102.9 166.7,102.4 250.0,115.1 333.3,138.4 416.7,97.4 500.0,55.8 583.3,60.9 666.7,87.0 750.0,81.0 833.3,79.2 916.7,75.5 1000.0,116.0 1000,300.0" class="area"/>
+          <polyline points="0.0,89.8 83.3,102.9 166.7,102.4 250.0,115.1 333.3,138.4 416.7,97.4 500.0,55.8 583.3,60.9 666.7,87.0 750.0,81.0 833.3,79.2 916.7,75.5 1000.0,116.0" class="line"/>
+        </svg>
+        <span class="nqp-th caution" style="top:25.00%">60 주의</span><span class="nqp-th warn" style="top:12.50%">70 경고</span>
+        
+        <span class="nqp-peak" style="left:50.00%;top:18.60%">최고 2026년 5월 +65%</span>
+        <i class="nqp-dot" style="left:100%;top:38.67%"></i>
+        <i class="nqp-cur" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
+      </div>
+    </div>
+    <div class="nqp-yrs"><span style="left:16.67%">26년 1월</span><span style="left:41.67%">4월</span><span style="left:66.67%">7월</span><span style="left:91.67%">10월</span></div>
+    
+    </div>
+    
   </section>
 
   <section class="nqp-card">
-    <div class="nqp-h"><h2>나스닥 월봉 고점과 60개월선</h2><div class="nqp-seg" role="group" aria-label="기간"><button type="button" data-r="all" aria-pressed="true">전체</button><button type="button" data-r="10y" aria-pressed="false">최근 10년</button><button type="button" data-r="5y" aria-pressed="false">최근 5년</button></div></div>
+    <div class="nqp-h"><h2>나스닥 월봉 고점과 60개월선</h2><div class="nqp-seg" role="group" aria-label="기간"><button type="button" data-r="all" aria-pressed="true">전체</button><button type="button" data-r="10y" aria-pressed="false">최근 10년</button><button type="button" data-r="5y" aria-pressed="false">최근 5년</button><button type="button" data-r="1y" aria-pressed="false">최근 1년</button></div></div>
     <div class="nqp-leg"><span><i></i>월봉 고점</span><span><i class="ma"></i>60개월 이동평균(월말 종가)</span></div>
     
     <div class="nqp-r" data-r="all">
@@ -306,6 +331,23 @@
     </div>
     <div class="nqp-yrs"><span style="left:1.69%">2022</span><span style="left:22.03%">2023</span><span style="left:42.37%">2024</span><span style="left:62.71%">2025</span><span style="left:83.05%">2026</span></div>
     <div class="nqp-evlist"><span>1 금리 인상 시작(2022.3)</span></div>
+    </div>
+    
+    <div class="nqp-r" data-r="1y" hidden>
+    <div class="nqp-span">로그 눈금 · 2025년 11월 ~ 2026년 11월</div>
+    <div class="nqp-plot">
+      <span class="nqp-ax" style="top:84.01%">15,000</span><span class="nqp-ax" style="top:50.79%">20,000</span><span class="nqp-ax" style="top:3.97%">30,000</span>
+      <div class="nqp-in" data-kind="lvl" data-lo="4.115931" data-hi="4.492054" data-off="430" data-n="13">
+        <svg viewBox="0 0 1000 300" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점과 60개월 이동평균, 2025년 11월부터 로그 눈금">
+          <polyline points="0.0,243.7 83.3,239.8 166.7,236.0 250.0,232.5 333.3,229.5 416.7,225.6 500.0,220.9 583.3,216.8 666.7,213.1 750.0,209.3 833.3,205.1 916.7,201.8 1000.0,199.1" class="ma"/>
+          <polyline points="0.0,89.5 83.3,93.5 166.7,89.4 250.0,93.7 333.3,105.4 416.7,76.0 500.0,47.2 583.3,46.0 666.7,57.3 750.0,50.0 833.3,44.7 916.7,39.3 1000.0,60.8" class="line"/>
+        </svg>
+        
+        <i class="nqp-cur" hidden></i><i class="nqp-pt ma" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
+      </div>
+    </div>
+    <div class="nqp-yrs"><span style="left:16.67%">26년 1월</span><span style="left:41.67%">4월</span><span style="left:66.67%">7월</span><span style="left:91.67%">10월</span></div>
+    
     </div>
     
   </section>
