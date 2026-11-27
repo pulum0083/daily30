@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-11-27T14:01:22.143379+09:00",
+  "generated_at": "2026-11-27T14:31:20.093778+09:00",
   "date": "2026-11-27",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 3.85,
-      "surge": 0.55,
+      "changePct": 4.55,
+      "surge": 0.6,
       "events": [
         {
           "time": "09:43",
           "headline": "삼성전자, 오늘 역대 최대 30조원 배당… 개미들에 5조원, 이재용 4500억",
           "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQMG5OQ2o0YkxVZ3BMal84VVpCQkVRYnVmSTBaMFl1bThJUjZmS1dwS3BYMzBfRGwweElScHdwakdJalE0ZElVdnVOV2Y1SWlKSnZiTmw0SHlGcThhcEFNQjFQWjFqN3VoX01ZRjBqY21iakNBVFlEQUpYQUV6T0hRc1kxQQ?oc=5",
           "source": "조선일보",
-          "why": "삼성전자가 역대 최대 규모인 30조 원의 배당을 결정했으며, 개인 투자자들에게는 5조 원, 이재용 회장에게는 4500억 원이 지급될 예정이다.",
+          "why": "삼성전자가 역대 최대 규모인 30조원의 배당을 실시하며 개인 투자자들에게 5조원, 이재용 회장에게 4500억원이 지급된다.",
           "tier": "why",
           "sentiment": "pos"
         },
@@ -31,15 +31,34 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 3.99,
-      "surge": 0.59,
-      "events": []
+      "changePct": 4.56,
+      "surge": 0.63,
+      "events": [
+        {
+          "time": "11:19",
+          "headline": "SK하이닉스 목표가 105만~400만원?···갈라진 증권가에 투자자 '혼란'",
+          "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBteS1zTUhaOUhmS0hUTUxBMFJ1SXhXRWt2ZVR2RVBhT0pUMXR2czJkMUNIUS1qemotWlgzT0FZUXJGRkNnOWNNTVlUYlkyZmdQcVNLdVZtQ3ozRmpoY1NIT0hidkZpU253bFE?oc=5",
+          "source": "뉴스웨이",
+          "why": "SK하이닉스의 목표 주가를 두고 증권가에서 105만원에서 400만원까지 다양한 전망이 나오면서 투자자들의 혼란이 가중되고 있다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        },
+        {
+          "time": "09:46",
+          "headline": "5월에 하닉 팔고 이촌아파트 산 95년생 ‘촉’",
+          "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE1weGg0a2Vjb09MNW9YdHFPVE0zekQtQk53VXRCc2dNY2p6bU9Wa3FkU2xOYmRVUm9wRkVrM0loUExNd01WLXVvWjNGS2dzMGVS?oc=5",
+          "source": "문화일보",
+          "why": "5월에 하닉 팔고 이촌아파트 산 95년생 ‘촉’ (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 3.47,
-      "surge": 0.56,
+      "changePct": 4.05,
+      "surge": 0.63,
       "events": [
         {
           "time": "11:20",
