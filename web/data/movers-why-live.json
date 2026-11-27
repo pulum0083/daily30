@@ -1,44 +1,82 @@
 {
-  "generated_at": "2026-11-27T10:01:14.903575+09:00",
+  "generated_at": "2026-11-27T10:31:21.374617+09:00",
   "date": "2026-11-27",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 0.0,
-      "surge": 0.14,
-      "events": []
+      "changePct": 1.63,
+      "surge": 0.21,
+      "events": [
+        {
+          "time": "09:43",
+          "headline": "삼성전자, 오늘 역대 최대 30조원 배당… 개미들에 5조원, 이재용 4500억",
+          "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQMG5OQ2o0YkxVZ3BMal84VVpCQkVRYnVmSTBaMFl1bThJUjZmS1dwS3BYMzBfRGwweElScHdwakdJalE0ZElVdnVOV2Y1SWlKSnZiTmw0SHlGcThhcEFNQjFQWjFqN3VoX01ZRjBqY21iakNBVFlEQUpYQUV6T0hRc1kxQQ?oc=5",
+          "source": "조선일보",
+          "why": "삼성전자가 역대 최대 규모인 30조원의 배당을 지급하며, 개인 투자자들에게는 5조원, 이재용 회장에게는 4500억원이 돌아간다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        },
+        {
+          "time": "07:30",
+          "headline": "\"머스크도 줄 섰다\"는데…삼성전자 주가는 왜 '지지부진'할까",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9tT01zLUNaajJEVGFoTVJfcW9kSVcwaUpnY3dUcXpxeHJfU1hZQjU4V19Nd0RrZ3NnMDdQaXc5UEJhOWpnQTZhWmJ3RkY1R2NXT2FGbkRKdDN3Unh4THlUZNIBeEFVX3lxTE1ja2tsRldpcW5yYVYyWHUtVmNZek45VXN1UlNEelVLbzIzRl9GZGxVZ3RzZGxmekhWQzExV0tqSW0xYkhhU0QxRFNiN0JWUXZuaE1HZjM4eGlCRmh5MFlrUHoxUkh1Wk1UX0RZeGVZdmhSUE0yX2QzUg?oc=5",
+          "source": "뉴시스",
+          "why": "\"머스크도 줄 섰다\"는데…삼성전자 주가는 왜 '지지부진'할까 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -1.04,
-      "surge": 0.16,
-      "events": []
+      "changePct": 1.71,
+      "surge": 0.25,
+      "events": [
+        {
+          "time": "03:50",
+          "headline": "“삼성전자·SK하이닉스만의 문제 아니었다”…美마이크론 이틀 새 15% 폭락, 반도체 무슨 일?",
+          "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9sZmVycFMwR3hWa3hNalF4VHJLa3I2X2dvVUF4U2ZOdkJGVUpGRXphN2FDZ0tEeUdHR2gwdU5fNnNrV3c0RXk0ZElEZFh5VGx4MzJXOVE5ZmJ1akFEWjZwb3AtdnhfdUkyT2hKaA?oc=5",
+          "source": "데일리25",
+          "why": "미국 마이크론의 이틀 새 15% 폭락은 삼성전자와 SK하이닉스만의 문제가 아닌 반도체 업계 전반의 위기를 시사한다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:35",
+          "headline": "SK하이닉스 배당락 주의보…다음달 29일 배당 지급",
+          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE5lSEg2M2xPakhZT1VUdnFzUmdyX1RqOEZNeF9KTHUzMlc4VlhNVmxYX1VBSmY4VW81THJURjRtSEU1RXZmcG9CbnlwVlRXZ0ZVbWfSAVNBVV95cUxQLXY3dUE0M0ZJQWs4UmJYMDVCTFd5TFpuWTVidUttdjZweDdGMmFxWkg4WEE4Rlg1eHZFMUxKVjZiRlF0ZFdDVHJJQVBPS3A5OGxPUQ?oc=5",
+          "source": "서울경제",
+          "why": "SK하이닉스 배당락 주의보…다음달 29일 배당 지급 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 2.12,
-      "surge": 0.21,
+      "changePct": 2.32,
+      "surge": 0.26,
       "events": [
         {
           "time": "09:14",
           "headline": "'홍의락 사장'의 리더십···한국가스공사 연결영업익 급증에 현대차증권, 목표주가 올려",
           "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBxTnZ3eC1fS1hOM2JvUkRKMUphTUJKX3dnUVY5WXlORVVTQld2Z1pOQVhjMmtrSHpmSGhSbV83OUNTWGlCT1p1Zk9OTVpua2FMVG9ERmFnYmxhaGhCZGNVa3VrQV9FRVk?oc=5",
           "source": "팍스경제TV",
-          "why": "현대차증권은 한국가스공사의 연결영업이익 급증에 따라 목표주가를 상향 조정했다.",
+          "why": "한국가스공사의 연결영업이익 급증에 따라 현대차증권이 목표주가를 상향 조정했다.",
           "tier": "why",
           "sentiment": "pos"
         },
         {
-          "time": "08:14",
-          "headline": "현대차證 “반도체 기판주, 최악 반영한 주가⋯AI 수요·공급 부족은 여전”",
-          "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE9Odk14VmVsenNBd1ZFdkVhTTU5aGpqTF9Dc3Njb015QzlRUjdsT0VUNVF6ZGhLVnJBLWpzcjFyVkR2Z08tNlpLRGx0dG1aMDdmUnRpMg?oc=5",
-          "source": "이투데이",
-          "why": "현대차證 “반도체 기판주, 최악 반영한 주가⋯AI 수요·공급 부족은 여전” (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
+          "time": "10:21",
+          "headline": "현대차 2.12% 상승세, 자기주식 처분 결과 보고 : 기업주식정보",
+          "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE96NUdtcGpkaEpzamFtZmhoQmxNQXVJSzdhN2llYWQ3YTV5VTVkWV9YaEFuWV94c3Z5cnVmVWVOREJnWTNMajNDSk9Faw?oc=5",
+          "source": "재경일보",
+          "why": "현대차 2.12% 상승세, 자기주식 처분 결과 보고 : 기업주식정보",
+          "tier": "why",
+          "sentiment": "pos"
         }
       ]
     }
