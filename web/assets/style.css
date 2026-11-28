@@ -1771,11 +1771,11 @@ a.ssig-r:hover .ssig-go{text-decoration:underline;}
 .bw2-tbl td:nth-child(3){width:30%}
 .bw2-tbl td:nth-child(4){font-size:11.5px;line-height:1.45;text-align:right;white-space:nowrap;padding-right:0}
 .bw2-tbl .up{color:var(--up)}.bw2-tbl .dn{color:var(--dn)}.bw2-tbl .mu{color:var(--muted)}
-/* 묶음 줄은 프리마켓 띠의 머리(.pm-h)와 같은 태그 + 회색 설명, 묶음 사이는 점선 */
-.bw2-tbl tr.g td{padding:4px 0 8px;border-top:0}
-.bw2-tbl tr.g td .ic-tag{margin-right:8px}
+/* 묶음 줄 = 진한 태그 + 회색 설명, 묶음 사이는 굵은 실선(2026-11-28 사용자 요청 — 점선은 종목 사이 줄과 구분이 안 됐다) */
+.bw2-tbl tr.g td{padding:4px 0 10px;border-top:0}
+.bw2-tbl tr.g td .ic-tag{margin-right:8px;font-size:12px;padding:3px 10px;background:var(--ink);color:var(--canvas)}
 .bw2-tbl tr.g + tr td{border-top:0;padding-top:6px}
-.bw2-tbl tr:not(:first-child).g td{padding-top:18px;border-top:1px dashed var(--hairline)}
+.bw2-tbl tr:not(:first-child).g td{padding-top:22px;border-top:2px solid var(--ink)}
 .bw2-tbl tr.weak td b,.bw2-tbl tr.weak td:nth-child(2){opacity:.6}
 /* 막대는 '기준선 위·아래'라 오르내림 색(빨강·파랑)을 쓰지 않는다 — 같은 줄의 등락 숫자와 뜻이 겹친다(§49와 같은 원칙).
    기준선 위 = 초록(--ok), 아직 아래 = 호박색(#F5A524). */
