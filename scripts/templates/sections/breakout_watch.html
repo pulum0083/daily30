@@ -22,11 +22,11 @@
   <div class="bw2-box"><table class="bw2-tbl">
     <tbody>
     {% if b.today %}
-    <tr class="g"><td colspan="4"><span class="ic-tag fact">오늘 돌파</span><span class="pm-asof">종가도 넘음 {{ b.n_held }} · 장중만 {{ b.today|length - b.n_held }}</span></td></tr>
+    <tr class="g"><td colspan="4"><span class="ic-tag fact">오늘 돌파</span><span class="pm-asof">돌파한 가격 대비 · 종가도 넘음 {{ b.n_held }} · 장중만 {{ b.today|length - b.n_held }}</span></td></tr>
     {% for r in b.today %}
     <tr class="{{ 'weak' if r.below is not none else '' }}">
       <td><b>{{ r.name }}</b><small>{{ r.t }} · {% if r.below is none %}기준선 ${{ '%.2f'|format(r.line) }} 위{% elif r.below >= 0.1 %}장중만 · 기준선보다 {{ '%.1f'|format(r.below) }}% 아래{% else %}장중만 · 기준선 바로 아래{% endif %}</small></td>
-      <td class="{{ cls(r.chg) }}">{{ sg(r.chg) }}</td>
+      <td class="{{ cls(r.gain) }}">{{ sg(r.gain) }}</td>
       <td>{{ meter(r.meter) }}</td>
       <td class="mu">손절까지<br>{{ '%.1f'|format(r.to_stop) }}%</td>
     </tr>
@@ -55,7 +55,7 @@
     {% endif %}
     </tbody>
   </table></div>
-  <p class="bw-note">막대 = 손절선(왼쪽 끝)에서 기준선(점선)까지 지금 가격의 위치. 결과 % = 돌파한 가격에서 끝난 가격(진행 중은 오늘 종가)까지.</p>
+  <p class="bw-note">막대 = 손절선(왼쪽 끝)에서 기준선(점선)까지 지금 가격의 위치. 오늘 돌파·그 뒤 결과의 % = 돌파한 가격에서 오늘 종가(끝난 종목은 끝난 가격)까지.</p>
 
   <details class="bw-fine"><summary>근거와 면책 고지</summary><div class="bw-honest"><b>이 규칙의 과거 성적</b> — {{ b.bt.start_year }}년부터 {{ b.bt.universe }}에서 돌파 때 샀다면, 2025년 한 해를 빼면 한 번 평균 {{ '%+.2f'|format(b.bt.avg_r_ex2025) }}R로 아무 날에나 산 경우({{ '%+.2f'|format(b.bt.random_r_ex2025) }}R)와 거의 같았어요. 이긴 비율은 {{ b.bt.win_pct }}%예요. 종목을 고르는 힘이 확인된 목록이 아니에요.</div><p>1·3·6달 상승률 중 하나가 S&amp;P 500 상위 2%, 6달 저점에서 30% 넘게 오름, 종가가 10일·20일 평균선 위, 최근 10거래일 폭이 그 전 20거래일 폭의 60%보다 좁고 저점이 높아짐, 하루 평균 움직임 3% 이상(크리스티안 쿨라매기의 고르기 조건). 넘을 선은 최근 10일 최고가, 손절선은 산 가격에서 하루 평균 움직임의 두 배 아래, 추세 끝은 20일 최저가를 깰 때예요(리처드 데니스의 터틀 규칙). 같은 종목은 10거래일 안에 다시 돌파로 세지 않아요. R은 손익을 손절할 때 잃는 돈으로 나눈 값이에요. 지금 S&amp;P 500에 남은 종목으로 시험해 실제보다 좋게 나왔을 수 있어요. 매수 권유가 아니에요.</p></details>
 </div>

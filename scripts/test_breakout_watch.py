@@ -172,7 +172,7 @@ def test_render_closed_below_entry_1124():
     b = ctx["bw"]
     assert (len(b["today"]), b["n_held"], b["n_live"], b["n_done"]) == (6, 2, 2, 3)
     assert b["summary"] == ("오늘 6종목이 장중에 최근 고점을 넘었고, 그중 리제네론·펜테어만 종가까지 그 위를 지켰어요. "
-                            "앞서 돌파한 종목 중 2개는 아직 이어지고(+6.2%·+5.1%), 3개는 끝났어요(평균 −6.4%).")
+                            "앞서 돌파한 종목 중 2개는 아직 이어지고(평균 +5.7%), 3개는 끝났어요(평균 −6.4%).")
     html = gh.make_env().get_template("sections/breakout_watch.html").render(**ctx)
     assert "REGN · 기준선 $980.55 위" in html and "손절까지<br>6.5%" in html     # REGN 종가 987.09
     assert "장중만 · 기준선보다 3.6% 아래" in html                              # GEN 29.95
@@ -187,6 +187,9 @@ def test_summary_sentences():
     assert _bw_summary([t(2, 1)], []).endswith("모두 종가까지 그 위를 지켰어요.")
     assert "지킨 종목은 없었어요" in _bw_summary([t(1, 2)], [])
     assert _bw_summary([], [{"state": "live", "pct": 3.0}]).endswith("1개가 아직 이어지고 있어요(+3.0%).")
+    # 진행 중이 여럿이면 앞 몇 개만 나열하지 않고 평균 하나로(2026-11-28 — 5개 중 3개만 보였다)
+    live = [{"state": "live", "pct": v} for v in (0.1, 0.8, 2.3, 5.9, 3.2)]
+    assert _bw_summary([], live).endswith("5개가 아직 이어지고 있어요(평균 +2.5%).")
 
 
 def test_no_new_breakout_while_previous_is_live(monkeypatch):
@@ -207,3 +210,50 @@ def test_gap_up_day_judged_by_pivot_not_entry():
                                          "entry": 105.0, "stop": 95.0}], "wait": [], "track": []}
     b = gh.build_breakout_watch({"breakout_watch": d})["bw"]
     assert b["today"][0]["below"] is None and b["n_held"] == 1
+
+
+def test_today_percent_is_vs_breakout_price():
+    """오늘 돌파의 %도 그 뒤 결과처럼 돌파한 가격 대비다 — 11/25 차터는 하루 +8.4%지만 돌파 가격 대비 +3.3%(2026-11-28)."""
+    d = {"asof": "2026-11-25", "today": [{"t": "CHTR", "name": "차터", "close": 147.27, "chg": 8.39, "pivot": 142.6,
+                                         "entry": 142.6, "stop": 129.44}], "wait": [], "track": []}
+    ctx = gh.build_breakout_watch({"breakout_watch": d})
+    assert ctx["bw"]["today"][0]["gain"] == 3.3
+    html = gh.make_env().get_template("sections/breakout_watch.html").render(**ctx)
+    assert "+3.3%" in html and "+8.4%" not in html and "돌파한 가격 대비 · 종가도 넘음 1" in html
+
+
+def test_wait_includes_earlier_condition_not_yet_broken(monkeypatch):
+    """조건이 며칠 전에만 맞았어도 아직 돌파·무효가 아니면 '기다리는 중'에 넣는다 — 그 조건으로 내일 돌파할 수 있다(2026-11-28)."""
+    n = 60
+    C, O, H, L = _series(n, [104.0] * n)
+    kq = frame({"A": [i == 57 for i in range(n)]})                 # 사흘 전에만 조건
+    pv = frame({"A": [105.0 if i == 57 else 108.0 for i in range(n)]})
+    _fake(monkeypatch, O, H, L, C, kq, pv, frame({"A": [2.0] * n}), frame({"A": [50.0] * n}))
+    r = bw.compute(O, H, L, C, DAYS[n - 1].date())
+    assert [x["t"] for x in r["wait"]] == ["A"]
+    w = r["wait"][0]
+    assert w["pivot"] == 105.0 and w["stop"] == 101.0 and w["since"] == DAYS[57].date().isoformat()
+
+
+def test_wait_drops_earlier_condition_after_close_below_ma10():
+    """넘기 전에 종가가 10일선 아래로 내려가면 그 조건은 무효 — 기다리는 중에서도 뺀다."""
+    n = 30
+    kq = frame({"A": [i == 26 for i in range(n)]})
+    H = frame({"A": [100.0] * n}); pv = frame({"A": [105.0] * n})
+    c = np.full(n, 100.0); c[28] = 98.0
+    args = (kq, H, frame({"A": c}), pv, frame({"A": [99.0] * n}), n - 1, set(), {})
+    assert bw.pending(*args) == {}
+    c[28] = 100.0
+    assert bw.pending(kq, H, frame({"A": c}), pv, frame({"A": [99.0] * n}), n - 1, set(), {}) == {"A": 26}
+
+
+def test_wait_lists_every_later_breakout_on_the_eve(monkeypatch):
+    """돌파한 종목은 모두 그 전날 '기다리는 중' 후보였다 — pending과 find_breakouts가 같은 조건일을 본다."""
+    rng = np.random.default_rng(1)
+    n, cols = 80, [f"T{j}" for j in range(30)]
+    kq = pd.DataFrame(rng.random((n, len(cols))) < 0.08, index=DAYS[:n], columns=cols)
+    H = pd.DataFrame(100 + rng.random((n, len(cols))) * 8, index=DAYS[:n], columns=cols)
+    pv = H.rolling(10, min_periods=1).max()
+    C = H - 1; s10 = C.rolling(10, min_periods=1).mean() - 0.5
+    for t, i, k in bw.find_breakouts(kq, H, pv, 10, n - 1, C, s10):
+        assert t in bw.pending(kq, H, C, pv, s10, i - 1, set(), {}), (t, i, k)

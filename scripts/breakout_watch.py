@@ -82,6 +82,25 @@ def find_breakouts(kq, H, pv10, start: int, end: int, C=None, s10=None) -> list:
     return out
 
 
+def pending(kq, H, C, pv10, s10, I: int, live: set, free_from: dict) -> dict:
+    """다음 거래일(I+1)에 돌파로 셀 수 있는 종목 {종목: 조건일 k} — find_breakouts가 I+1에서 보는 조건일 그대로다.
+    k는 I−WINDOW+1~I, 그 뒤 I까지 기준선(그날 10일 최고가)을 넘지 않았고 종가가 10일선 아래로 내려가지 않았어야 한다.
+    조건일이 여럿이면 기준선이 가장 낮은 날(그 선을 넘는 순간 돌파로 센다). 2026-11-28 — 그 전엔 오늘 조건만 봐서
+    며칠 전 조건으로 돌파한 종목이 전날 '기다리는 중'에 없었다(지난 200거래일 돌파 후보 326건 중 23건)."""
+    out = {}
+    for t in kq.columns:
+        if t in live:
+            continue
+        q, h, p, c = kq[t].to_numpy(), H[t].to_numpy(), pv10[t].to_numpy(), C[t].to_numpy()
+        m = s10[t].to_numpy() if s10 is not None else None
+        ks = [k for k in range(max(I - WINDOW + 1, 0), I + 1)
+              if q[k] and k >= free_from.get(t, -1) and not (h[k + 1:I + 1] > p[k]).any()
+              and (m is None or not (c[k + 1:I + 1] < m[k + 1:I + 1]).any())]
+        if ks:
+            out[t] = min(ks, key=lambda k: p[k])
+    return out
+
+
 def why(ind, H, L, C, t: str, k: int) -> dict:
     """고른 이유 — 가장 센 기간 상승률·상위 %, 최근 10일 폭과 그 전 20일 폭."""
     import math
@@ -142,12 +161,10 @@ def compute(O, H, L, C, session: date) -> dict | None:
         track.append({"t": t, "from": days[i], "state": state, "days": (ex_i if ex_i is not None else I) - i,
                       "pct": round((cur / ent - 1) * 100, 1)})
     wait = []
-    for t in kq.columns:
-        if not kq[t].iloc[I] or t in live:
-            continue
-        c, piv, n = float(C[t].iloc[I]), float(pv10[t].iloc[I]), float(N[t].iloc[I])
+    for t, k in pending(kq, H, C, pv10, ind.get("s10"), I, live, free_from).items():
+        c, piv, n = float(C[t].iloc[I]), float(pv10[t].iloc[k]), float(N[t].iloc[I])
         wait.append({"t": t, "close": round(c, 2), "pivot": round(piv, 2), "stop": round(piv - 2 * n, 2),
-                     "to_pivot": round((piv / c - 1) * 100, 1), "why": why(ind, H, L, C, t, I)})
+                     "to_pivot": round((piv / c - 1) * 100, 1), "since": days[k], "why": why(ind, H, L, C, t, k)})
     wait.sort(key=lambda r: r["to_pivot"])
     track.sort(key=lambda r: r["from"], reverse=True)
     return {"asof": days[I], "n": int(C.iloc[-1].notna().sum()), "today": today, "wait": wait, "track": track}

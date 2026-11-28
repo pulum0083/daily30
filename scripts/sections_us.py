@@ -229,14 +229,15 @@ def _bw_summary(today: list, track: list) -> str:
     live = [r for r in track if r["state"] == "live"]
     done = [r for r in track if r["state"] != "live"]
     sg = lambda v: (f"+{v:.1f}" if v > 0 else f"{v:.1f}".replace("-", "−")) + "%"
-    ups = "·".join(sg(r["pct"]) for r in live[:3])
-    avg = sg(sum(r["pct"] for r in done) / len(done)) if done else ""
+    # 진행 중도 평균으로 — 예전엔 앞 3개만 나열해 "5개는 이어지고(+0.1%·+0.8%·+2.3%)"처럼 나머지가 빠졌다(2026-11-28)
+    mean = lambda xs: ("평균 " if len(xs) > 1 else "") + sg(sum(r["pct"] for r in xs) / len(xs)) if xs else ""
+    ups, avg = mean(live), mean(done)
     if live and done:
-        s2 = f" 앞서 돌파한 종목 중 {len(live)}개는 아직 이어지고({ups}), {len(done)}개는 끝났어요(평균 {avg})."
+        s2 = f" 앞서 돌파한 종목 중 {len(live)}개는 아직 이어지고({ups}), {len(done)}개는 끝났어요({avg})."
     elif live:
         s2 = f" 앞서 돌파한 종목 중 {len(live)}개가 아직 이어지고 있어요({ups})."
     elif done:
-        s2 = f" 앞서 돌파한 종목 {len(done)}개는 끝났어요(평균 {avg})."
+        s2 = f" 앞서 돌파한 종목 {len(done)}개는 끝났어요({avg})."
     else:
         s2 = ""
     return s1 + s2
@@ -263,7 +264,8 @@ def build_breakout_watch(analysis: dict, target_date: str = "") -> dict:
     # 장중에 기준선을 넘었다가 그 아래로 끝난 날(2026-11-26) — "넘었어요"라고 쓰면 종가와 어긋난다.
     # 기준선 = 넘은 10일 최고가(pivot). 시가가 그 위에서 열린 날은 산 가격(entry)이 더 높다 — '장중에만 넘음'은 기준선으로 판정한다.
     piv = lambda r: r.get("pivot") or r["entry"]
-    tcards = [dict(r, line=piv(r), to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
+    # 표의 %는 세 묶음 모두 '돌파한 가격(산 가격) 대비'로 — 예전엔 오늘 돌파만 하루 등락이었다(2026-11-28)
+    tcards = [dict(r, line=piv(r), gain=round((r["close"] / r["entry"] - 1) * 100, 1), to_stop=round(abs(r["stop"] / r["close"] - 1) * 100, 1),
                    below=round((1 - r["close"] / piv(r)) * 100, 1) if r["close"] < piv(r) else None,
                    meter=_bw_meter(r["stop"], piv(r), r["close"]))
               for r in today]
